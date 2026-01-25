@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 109884  -->
+  <question type="stack">
+    <name>
+      <text>000.MCQ-20260125-rb</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[<p><br></p>
+<p>{@qtext@}</p>
+<p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2025073100</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 2026-01-05 use ky_linear_algebra.txt */
+/* 2025-08-17 Bug fix, add Cmsg, change code for correct patterns */
+/* -cb と -rb は解答変数の型(checkbox or radio button) と 問題文の「1つ」か「すべて」の違い */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+/* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
+__lc:2; /* lang code */
+_lang:["en", "ja"][__lc];
+nocorrectS:["No correct options above.", "選択肢に正解はない"][__lc];
+noidS:["I have no idea", "わからない"][__lc];
+powerdisp:true;
+_rp(L):=random_permutation(L);
+tex2(m):=sconcat("\\(",tex1(m),"\\)");
+texP1(a,u):=sconcat("\\(",tex1(a),"+p",tex1(u),"\\quad (p\\in{\\mathbb R})\\)");
+texP2(a,u,v):=sconcat("\\(",tex1(a),"+p",tex1(u),"+q",tex1(v),"\\quad (p,q\\in{\\mathbb R})\\)");
+/* First choose the type of answer ans1 radio button(or dd) or check box */
+/*************************** CUSTOMIZATION ***************************/
+
+/**************************** PARAMETERS *****************************/
+fbp:true; /* display feedback? true(defalut) or false */
+ssc:1; /* subscore 1:yes(default), 0:no ? */
+noidea:true;/* include option "I have no idea" ? 「わからない」オプション */
+nocorrect:true; /* include option "there are no correct opts" ?  */
+/* "there are no correct opts" is correct? */
+nocorrecttrue:nocorrect and rand([true,false]);
+oN:rand(10)+10;/* total number of options */
+cN:rand(oN)+1;/* number of correct options(case of radio button: OK) */
+if nocorrecttrue then cN:0;
+wN:oN-cN;
+CmsgL:makelist(sconcat("正答パターン",k,"のdefault メッセージ"), k, 1, 100);
+WmsgL:makelist(sconcat("誤答パターン",k,"のdefault メッセージ"), k, 1, 100);
+/************************* END OF PARAMETERS *************************/
+/**************** QUESTION VARIABLES for MAIN CONTENT ****************/
+/* ここから問題の設定用変数 */
+
+/******************** 問題文/question text ***************************/
+/* 問題変数では、radio button か check box か判別できないので選択 */
+qtext:"次の選択肢から正しいものを";
+/* qtext:sconcat(qtext,"<b>すべて</b>選べ."); */
+/* qtext:sconcat(qtext,"<b>1つ</b>選べ."); */
+qtext:sconcat(qtext,"<b>1つ</b>選べ. 正解が2つ以上ある場合も1つ選べばよい.");
+
+/************************ Patterns ********************/
+/* 変数名 CLbase,WLbaseは固定/do not change name of vars 'CLbase' 'WLbase' */
+CL1a:_rp(["正解パターン1-1"]);
+CmsgL[1]:"正答パターン1を選択しています. そのような考え方もありますね!";
+CL2a:_rp(["正解パターン2-1"]);
+CmsgL[2]:"正答パターン2を選択しています. そのような考え方もありますね!";
+CL3a:_rp(["正解パターン3-1","正解パターン3-2"]);
+CmsgL[3]:"正答パターン3のメッセージ!";
+CL4a:_rp(["正解パターン4-1","正解パターン4-2"]);
+CmsgL[4]:"正答パターン4のメッセージ!";
+CLbase:[CL1a,CL2a,CL3a,CL4a]; /* 正答パターン(最大100) */
+WL1a:_rp(["誤答パターン1-1"]);
+WmsgL[1]:"Feedback message for wrong pattern 1";
+WL2a:_rp(["誤答パターン2-1"]);
+WmsgL[2]:"Feedback message for wrong pattern 2";
+WL3a:_rp(["誤答パターン3-1","誤答パターン3-2"]);
+WmsgL[3]:"Feedback message for wrong pattern 3";
+WL4a:_rp(["誤答パターン4-1","誤答パターン4-2"]);
+WmsgL[4]:"Feedback message for wrong pattern 4";
+WL5a:_rp(["誤答パターン5-1","誤答パターン5-2","誤答パターン5-3"]);
+WmsgL[5]:"Feedback message for wrong pattern 5";
+WL6a:_rp(["誤答パターン6-1","誤答パターン6-2","誤答パターン6-3"]);
+WmsgL[6]:"Feedback message for wrong pattern 6";
+WLbase:[WL1a,WL2a,WL3a,WL4a,WL5a,WL6a]; /* 誤答パターン(最大100) */
+/* 各パターンからは1つ以上選択される. 何個ずつ選ぶかは自動で行う(mkPattern関数). */
+/************************ Messages ********************/
+/* Messages (変数名 CmsgL, WmsgL 以外は自由/do not change name of vars 'CmsgL' & 'WmsgL') */
+/* 正答パターンと誤答パターンのフィードバックメッセージ. html を想定(textでも可). */
+/**************** END OF QUESTION VARIABLES for MAIN CONTENT ******************/
+
+/**************************** END of CUSTOMIZATION ****************************/
+/******************************************************************************/
+/******************************* DO NOT EDIT BELOW ****************************/
+_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
+_max_patterns:99; /* 最大パターン数(正答・誤答共通) */
+_cw_delimiter:_max_opts*(_max_patterns+1); /* 選択肢リストのIDの正答・誤答境界値 */
+/* number of patterns of correct/incorrect(wrong) options(auto-gen) */
+CLlen:map(length,CLbase);
+WLlen:map(length,WLbase);
+cN:min(cN,length(flatten(CLbase)));
+wN:min(wN,length(flatten(WLbase)));
+/* number of patterns of correct/incorrect(wrong) options(auto-gen) /
+/ on: オプションの数, bsL: パターンのリスト(l:パターン数) /
+/ on がpattern数以上のときは, 各パターンから1つ以上選ぶ /
+/ on がpattern数ないときは, pattern のうちon個から1つずつ選ぶ */
+mkPattern(on,bsL):=block([l:length(bsL),k,ptL:map(length,bsL),pt],if on=0 then return([]) 
+else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1,if ptL[k]>1 then ptL[k]:ptL[k]-1) 
+else (ptL:makelist(0,l),while apply("+",ptL)<on do (k:rand(l)+1,if ptL[k]=0 then ptL[k]:1)),return(ptL));
+cNL:mkPattern(cN,CLbase);
+wNL:mkPattern(wN,WLbase);
+CLL:makelist(makelist(CLbase[k][j],j,1,min(cNL[k],length(CLbase[k]))),k,1,length(cNL));
+WLL:makelist(makelist(WLbase[k][j],j,1,min(wNL[k],length(WLbase[k]))),k,1,length(wNL));
+/* "no correct options above" */
+_nocorrect_flag:_max_patterns+1;
+_noc_id:_nocorrect_flag*_cw_delimiter;
+_noidea_flag:_max_patterns*10+1;
+_noi_id:_noidea_flag*_cw_delimiter;
+NCL:if nocorrecttrue then [[1,true,nocorrectS]] else [[_noc_id,false,nocorrectS]];
+/* "I have no idea" */
+NOI:[[_noi_id,false,noidS]];
+ListCL0:apply(append,makelist(makelist([_max_opts*k+j,true,CLL[k][j]],j,1,length(CLL[k])),k,1,length(CLL)));
+ListWL0:apply(append,makelist(makelist([_cw_delimiter*k+j,false,WLL[k][j]],j,1,length(WLL[k])),k,1,length(WLL)));
+ListCL1:_rp(ListCL0);
+ListWL1:_rp(ListWL0);
+taC:_rp(makelist(ListWL1[k],k,1,wN));
+taW:_rp(append(makelist(ListCL1[k],k,1,cN),makelist(ListWL1[k],k,1,wN)));
+ta1:taW;
+if nocorrect then if nocorrecttrue then ta1:append(taC,NCL) else ta1:append(taW,NCL);
+if noidea then ta1:append(ta1,NOI);
+Cans1:mcq_correct(ta1);]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="html">
+      <text>{@map(first,ta1)@}:{@ta1@},</text>
+    </questionnote>
+    <questiondescription format="html">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span> 
+<span lang="ja" class="multilang">よくできました。正解です！</span>
+<span lang="en" class="multilang">Well done! Spot on!</span>]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
+<span lang="ja" class="multilang">部分的に正解です。</span>
+<span lang="en" class="multilang">Partially correct!</span>]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
+<span lang="ja" class="multilang">間違いです。</span>
+<span lang="en" class="multilang">Incorrect!</span>]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>radio</type>
+      <tans>ta1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[/* ja:ラジオボタンの場合は, ans1 は数値， チェックボックスのときは, リスト */
+/* en:radio button case: ans1 is numerical , checkbox case: ans1 is list */
+if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1,Cans1);
+if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
+ans1WL:makelist(floor(ans1L[k]/_cw_delimiter),k,1,length(ans1L));
+ans1CL:makelist(if ans1L[k]<_cw_delimiter then floor(ans1L[k]/_max_opts) else -1,k,1,length(ans1L));
+countL(L,t):=block([k,rt:0],for k:1 thru length(L) do if L[k]=t then rt:rt+1,return(rt));
+cAN:countL(ans1WL,0);
+wAN:apply("+",makelist(countL(ans1WL,k),k,1,_max_patterns));
+flgCL:makelist(member(k,ans1CL),k,1,length(CLbase));
+flgWL:makelist(member(k,ans1WL),k,1,length(WLbase));
+flgWnc:member(_nocorrect_flag,ans1WL);
+flgC0:member(0,ans1CL);
+flgNOID:member(_noidea_flag,ans1WL);
+msg:"";
+/* customize appropriate message for each incorrect(wrong) pattern */
+for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg,CmsgL[k],"<br>");
+for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg,WmsgL[k],"<br>");
+if flgC0 then msg:sconcat(msg,"選択肢に正解はありません. 他を選択していなければ正解です.<br>");
+if flgWnc then msg:sconcat(msg,"正解の選択肢はあります!<br>");
+sc:cAN/(cN+wAN)*ssc;
+/* 選択肢に正解がある(nocorrecttrue:false)のに, 正解がないを選択した場合(flg9) は, 常に 0 点 */
+if (not nocorrecttrue) and flgWnc then sc:0;
+/* 選択肢に正解がない時, 正解がないを選択しなかった場合は, cAN=0 なので自動的に 0点 */
+/* 選択肢に正解がない時, 他の誤答選択肢を選択した場合は 0点 */
+if nocorrecttrue and apply("or", flgWL) then sc:0;
+if not fbp then msg:"";]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgNOID</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- 解答分析で PRT1-2T は, わからないを選択したことを検出 -->
+「わからない」を検出 (Detect "no idea options") \(\to\) score :0 and do not check the answer.]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
+<p>{@msg@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>sc</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- general error / 一般の誤り -->
+<p>{@msg@}</p>
+<p>得点は{@sc@}です.</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>1045987030</deployedseed>
+    <deployedseed>1212428269</deployedseed>
+    <deployedseed>1949770966</deployedseed>
+    <deployedseed>1031630393</deployedseed>
+    <deployedseed>1262098762</deployedseed>
+    <deployedseed>909149238</deployedseed>
+    <deployedseed>264317917</deployedseed>
+    <deployedseed>2000644524</deployedseed>
+    <deployedseed>1058605155</deployedseed>
+    <deployedseed>601939212</deployedseed>
+    <deployedseed>1195429055</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>mcq_correct(ta1)[1]</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-2-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>
