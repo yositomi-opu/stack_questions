@@ -32,7 +32,7 @@ ListWL1:_rp(ListWL0);
 taC:_rp(makelist(ListWL1[k], k, 1, wN));
 taW:_rp(append(makelist(ListCL1[k], k, 1, cN),makelist(ListWL1[k], k, 1, wN)));
 ta1:taW;
-if __mcq_no_correctopt and __mcq_nocorrecttrue then ta1:append(taC, NCL) else ta1:append(taW, NCL);
+if __mcq_nocorrectopt and __mcq_nocorrecttrue then ta1:append(taC, NCL) else ta1:append(taW, NCL);
 if __mcq_noidea then ta1:append(ta1, NOI);
 Cans1:mcq_correct(ta1);
 if __mcq_qtext_auto then qtext:sconcat(qtext,
