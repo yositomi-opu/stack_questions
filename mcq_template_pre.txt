@@ -4,7 +4,7 @@
 /* 2025-08-17 Bug fix, add Cmsg, change code for correct patterns */
 /* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
 if __mcq_subsc then ssc:1 else ssc:0;
-if __mcq_nocorrectopt then cN:0;
+if __mcq_nocorrectopt and __mcq_nocorrecttrue then cN:0;
 wN:oN-cN;
 __lc:2; /* lang code */
 _lang:["en", "ja"][__lc];
