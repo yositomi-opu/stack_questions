@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 109885  -->
+<!-- question: 109908  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-20260125-cb</text>
+      <text>000.MCQ-cb-2026-01-27</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p><br></p>
@@ -21,123 +21,63 @@
       <text>2025073100</text>
     </stackversion>
     <questionvariables>
-      <text><![CDATA[/* 2026-01-05 use ky_linear_algebra.txt */
-/* 2025-08-17 Bug fix, add Cmsg, change code for correct patterns */
-/* -cb と -rb は解答変数の型(checkbox or radio button) と 問題文の「1つ」か「すべて」の違い */
-stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
-/* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
-__lc:2; /* lang code */
-_lang:["en", "ja"][__lc];
-nocorrectS:["No correct options above.", "選択肢に正解はない"][__lc];
-noidS:["I have no idea", "わからない"][__lc];
-powerdisp:true;
-_rp(L):=random_permutation(L);
-tex2(m):=sconcat("\\(",tex1(m),"\\)");
-texP1(a,u):=sconcat("\\(",tex1(a),"+p",tex1(u),"\\quad (p\\in{\\mathbb R})\\)");
-texP2(a,u,v):=sconcat("\\(",tex1(a),"+p",tex1(u),"+q",tex1(v),"\\quad (p,q\\in{\\mathbb R})\\)");
-/* First choose the type of answer ans1 radio button(or dd) or check box */
-/*************************** CUSTOMIZATION ***************************/
+      <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+/* [全選択肢の数, 正解選択肢の数] (rb のときも2個以上可能) */
+[oN, cN]:[5, 1];
+/* random parameters (設定を変えて問題を複製するときに変える or 固定する部分) */
+[rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
+pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
+/*********************************** FLAGS ***********************************/
+/* 以下は不要ならさわらなくてよい(modification not required if not necessary) */
+/* Flags for mcq_template(before include pre template) */
+/* -cb と -rb は解答変数の型(checkbox or radio button) と以下の設定の違いのみ */
+__mcq_rb_cb:"cb";
+/* cN:(min or max)(cN, 正答パターン数), wN:(min or max)(oN_cN, 誤答パターン数) */
+__mcq_min_max:min;
+/* feedback を表示するか? (display feedback ? ) */
+__mcq_fbp:true;
+/* 部分点をつけるか? (use subscore ? cf. ATCM2022 ) */
+__mcq_subsc:true;
+/* "わからない"選択肢を含めるか? (false) */
+__mcq_noidea:false;
+/* "選択肢に正解はない"選択肢を含めるか? (false) */
+__mcq_nocorrectopt:false;
+/* 選択肢に正解はない選択肢は正解か? (__mcq_nocorrectopt と自動で and をとる) */
+__mcq_nocorrecttrue:rand([true, false]);
+ /* 自動で"1つ選べ", "すべて選べ" を付加するか? (true) */
+__mcq_qtext_auto:true;
+/****************************** DO NOT EDIT HERE *****************************/
+stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.txt");
+/*****************************************************************************/
 
-/**************************** PARAMETERS *****************************/
-fbp:true; /* display feedback? true(defalut) or false */
-ssc:1; /* subscore 1:yes(default), 0:no ? */
-noidea:true;/* include option "I have no idea" ? 「わからない」オプション */
-nocorrect:true; /* include option "there are no correct opts" ?  */
-/* "there are no correct opts" is correct? */
-nocorrecttrue:nocorrect and rand([true,false]);
-oN:rand(10)+10;/* total number of options */
-cN:rand(oN)+1;/* number of correct options(case of radio button: OK) */
-if nocorrecttrue then cN:0;
-wN:oN-cN;
-CmsgL:makelist(sconcat("正答パターン",k,"のdefault メッセージ"), k, 1, 100);
-WmsgL:makelist(sconcat("誤答パターン",k,"のdefault メッセージ"), k, 1, 100);
-/************************* END OF PARAMETERS *************************/
 /**************** QUESTION VARIABLES for MAIN CONTENT ****************/
-/* ここから問題の設定用変数 */
-
-/******************** 問題文/question text ***************************/
-/* 問題変数では、radio button か check box か判別できないので選択 */
-qtext:"次の選択肢から正しいものを";
-qtext:sconcat(qtext,"<b>すべて</b>選べ.");
-/* qtext:sconcat(qtext,"<b>1つ</b>選べ."); */
-/* qtext:sconcat(qtext,"<b>1つ</b>選べ. 正解が2つ以上ある場合も1つ選べばよい."); */
-
+/* 正答・誤答パターン生成用変数, 問題文生成 */
+matF:randechelon(rw, cl, pv, [-2, -1, -1, 0, 1, 1, 2]);
+matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
+matA:matP.matF;
+/* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
+qtext:sconcat("\\(A=\\)", tex2(matA), "のとき, 行簡約形として正しいものを");
 /************************ Patterns ********************/
-/* 変数名 CLbase,WLbaseは固定/do not change name of vars 'CLbase' 'WLbase' */
-CL1a:_rp(["正解パターン1-1"]);
-CmsgL[1]:"正答パターン1を選択しています. そのような考え方もありますね!";
-CL2a:_rp(["正解パターン2-1"]);
-CmsgL[2]:"正答パターン2を選択しています. そのような考え方もありますね!";
-CL3a:_rp(["正解パターン3-1","正解パターン3-2"]);
-CmsgL[3]:"正答パターン3のメッセージ!";
-CL4a:_rp(["正解パターン4-1","正解パターン4-2"]);
-CmsgL[4]:"正答パターン4のメッセージ!";
-CLbase:[CL1a,CL2a,CL3a,CL4a]; /* 正答パターン(最大100) */
-WL1a:_rp(["誤答パターン1-1"]);
-WmsgL[1]:"Feedback message for wrong pattern 1";
-WL2a:_rp(["誤答パターン2-1"]);
-WmsgL[2]:"Feedback message for wrong pattern 2";
-WL3a:_rp(["誤答パターン3-1","誤答パターン3-2"]);
-WmsgL[3]:"Feedback message for wrong pattern 3";
-WL4a:_rp(["誤答パターン4-1","誤答パターン4-2"]);
-WmsgL[4]:"Feedback message for wrong pattern 4";
-WL5a:_rp(["誤答パターン5-1","誤答パターン5-2","誤答パターン5-3"]);
-WmsgL[5]:"Feedback message for wrong pattern 5";
-WL6a:_rp(["誤答パターン6-1","誤答パターン6-2","誤答パターン6-3"]);
-WmsgL[6]:"Feedback message for wrong pattern 6";
-WLbase:[WL1a,WL2a,WL3a,WL4a,WL5a,WL6a]; /* 誤答パターン(最大100) */
+/* 正解/誤答のパターンとフィードバックをセットで List に push していく. */
+addCopt(_rp(["正解パターン1-1"]), "正答パターン1を選択しています. そのような考え方もありますね!");
+addCopt(_rp(["正解パターン2-1"]), "正答パターン2を選択しています. そのような考え方もありますね!");
+addCopt(_rp(["正解パターン3-1","正解パターン3-2"]), "標準的ではないですが, 正解です.");
+addWopt(_rp(["誤答パターン1-1"]), "Feedback message for wrong pattern 1");
+addWopt(_rp(["誤答パターン2-1"]), "Feedback message for wrong pattern 2");
+addWopt(_rp(["誤答パターン3-1","誤答パターン3-2"]), "Feedback message for wrong pattern 3");
+addWopt(_rp(["誤答パターン4-1","誤答パターン4-2"]), "Feedback message for wrong pattern 4");
 /* 各パターンからは1つ以上選択される. 何個ずつ選ぶかは自動で行う(mkPattern関数). */
-/************************ Messages ********************/
-/* Messages (変数名 CmsgL, WmsgL 以外は自由/do not change name of vars 'CmsgL' & 'WmsgL') */
-/* 正答パターンと誤答パターンのフィードバックメッセージ. html を想定(textでも可). */
 /**************** END OF QUESTION VARIABLES for MAIN CONTENT ******************/
 
-/**************************** END of CUSTOMIZATION ****************************/
-/******************************************************************************/
-/******************************* DO NOT EDIT BELOW ****************************/
-_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
-_max_patterns:99; /* 最大パターン数(正答・誤答共通) */
-_cw_delimiter:_max_opts*(_max_patterns+1); /* 選択肢リストのIDの正答・誤答境界値 */
-/* number of patterns of correct/incorrect(wrong) options(auto-gen) */
-CLlen:map(length,CLbase);
-WLlen:map(length,WLbase);
-cN:min(cN,length(flatten(CLbase)));
-wN:min(wN,length(flatten(WLbase)));
-/* number of patterns of correct/incorrect(wrong) options(auto-gen) /
-/ on: オプションの数, bsL: パターンのリスト(l:パターン数) /
-/ on がpattern数以上のときは, 各パターンから1つ以上選ぶ /
-/ on がpattern数ないときは, pattern のうちon個から1つずつ選ぶ */
-mkPattern(on,bsL):=block([l:length(bsL),k,ptL:map(length,bsL),pt],if on=0 then return([]) 
-else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1,if ptL[k]>1 then ptL[k]:ptL[k]-1) 
-else (ptL:makelist(0,l),while apply("+",ptL)<on do (k:rand(l)+1,if ptL[k]=0 then ptL[k]:1)),return(ptL));
-cNL:mkPattern(cN,CLbase);
-wNL:mkPattern(wN,WLbase);
-CLL:makelist(makelist(CLbase[k][j],j,1,min(cNL[k],length(CLbase[k]))),k,1,length(cNL));
-WLL:makelist(makelist(WLbase[k][j],j,1,min(wNL[k],length(WLbase[k]))),k,1,length(wNL));
-/* "no correct options above" */
-_nocorrect_flag:_max_patterns+1;
-_noc_id:_nocorrect_flag*_cw_delimiter;
-_noidea_flag:_max_patterns*10+1;
-_noi_id:_noidea_flag*_cw_delimiter;
-NCL:if nocorrecttrue then [[1,true,nocorrectS]] else [[_noc_id,false,nocorrectS]];
-/* "I have no idea" */
-NOI:[[_noi_id,false,noidS]];
-ListCL0:apply(append,makelist(makelist([_max_opts*k+j,true,CLL[k][j]],j,1,length(CLL[k])),k,1,length(CLL)));
-ListWL0:apply(append,makelist(makelist([_cw_delimiter*k+j,false,WLL[k][j]],j,1,length(WLL[k])),k,1,length(WLL)));
-ListCL1:_rp(ListCL0);
-ListWL1:_rp(ListWL0);
-taC:_rp(makelist(ListWL1[k],k,1,wN));
-taW:_rp(append(makelist(ListCL1[k],k,1,cN),makelist(ListWL1[k],k,1,wN)));
-ta1:taW;
-if nocorrect then if nocorrecttrue then ta1:append(taC,NCL) else ta1:append(taW,NCL);
-if noidea then ta1:append(ta1,NOI);
-Cans1:mcq_correct(ta1);]]></text>
+/****************************** DO NOT EDIT HERE *****************************/
+stack_include("https://stack.mathedu.jp/sc/mcq_template_post.txt");
+/*****************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@},</text>
+      <text>{@matA@}, {@matF@}, {@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -224,7 +164,7 @@ if not fbp then msg:"";]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
-        <description></description>
+        <description>NOIDEA-option-detection</description>
         <answertest>AlgEquiv</answertest>
         <sans>flgNOID</sans>
         <tans>true</tans>
@@ -250,7 +190,7 @@ if not fbp then msg:"";]]></text>
       </node>
       <node>
         <name>1</name>
-        <description></description>
+        <description>採点とFeedbackは解答変数で設定</description>
         <answertest>AlgEquiv</answertest>
         <sans>chk1</sans>
         <tans>true</tans>
@@ -277,31 +217,6 @@ if not fbp then msg:"";]]></text>
         </falsefeedback>
       </node>
     </prt>
-    <deployedseed>1045987030</deployedseed>
-    <deployedseed>1212428269</deployedseed>
-    <deployedseed>1949770966</deployedseed>
-    <deployedseed>1031630393</deployedseed>
-    <deployedseed>1262098762</deployedseed>
-    <deployedseed>909149238</deployedseed>
-    <deployedseed>264317917</deployedseed>
-    <deployedseed>2000644524</deployedseed>
-    <deployedseed>1058605155</deployedseed>
-    <deployedseed>601939212</deployedseed>
-    <deployedseed>1195429055</deployedseed>
-    <qtest>
-      <testcase>1</testcase>
-      <description>管理者のインプットを想定したテストケースは満点です。</description>
-      <testinput>
-        <name>ans1</name>
-        <value>mcq_correct(ta1)[1]</value>
-      </testinput>
-      <expected>
-        <name>prt1</name>
-        <expectedscore>1.0000000</expectedscore>
-        <expectedpenalty>0.0000000</expectedpenalty>
-        <expectedanswernote>prt1-2-T</expectedanswernote>
-      </expected>
-    </qtest>
   </question>
 
 </quiz>
