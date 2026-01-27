@@ -2,6 +2,7 @@
 /* Latest: https://stack.mathedu.jp/sc/tf_template_pre.txt */
 /* \( \)つきの tex1 */
 tex2(m):=sconcat("\\(",tex1(m),"\\)");
+tex2d(m):=sconcat("\\(\\displaystyle", tex1(m), "\\)";
 /* パラメータ表示関数 */
 texP1(va,vu1):=sconcat("\\(",tex1(va),"+p",tex1(vu1),"\\quad (p\\in{\\mathbb R})\\)");
 texP2(va,vu1,vu2):=sconcat("\\(",tex1(va),"+p",tex1(vu1),"+q",tex1(vu2),"\\quad (p,q\\in{\\mathbb R})\\)");
