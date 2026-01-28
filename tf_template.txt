@@ -4,13 +4,13 @@
 tex2(m):=sconcat("\\(",tex1(m),"\\)");
 tex2d(m):=sconcat("\\(\\displaystyle", tex1(m), "\\)");
 /* パラメータ表示関数 */
-texP1(va,vu1):=sconcat("\\(",tex1(va),"+p",tex1(vu1),"\\quad (p\\in{\\mathbb R})\\)");
-texP2(va,vu1,vu2):=sconcat("\\(",tex1(va),"+p",tex1(vu1),"+q",tex1(vu2),"\\quad (p,q\\in{\\mathbb R})\\)");
-texPn(va,vuL):=block([s:"\\(",ln:length(vuL),k],s:sconcat(s,tex1(va)),for k:1 thru ln do s:sconcat(s,"+",tex1(p[k]),tex1(vuL[k])),s:sconcat(s,"\\quad(",tex1(p[1]),",",if ln=3 then tex1(p[2]) else "\\dots",",",tex1(p[ln]),"\\in{\\mathbb R})\\)"),return(s));
+texP1(va,vu1):=sconcat("\\(", tex1(va), "+p", tex1(vu1), "\\quad (p\\in{\\mathbb R})\\)");
+texP2(va,vu1,vu2):=sconcat("\\(", tex1(va), "+p", tex1(vu1), "+q", tex1(vu2), "\\quad (p,q\\in{\\mathbb R})\\)");
+texPn(va,vuL):=block([s:"\\(", ln:length(vuL),k], s:sconcat(s,tex1(va)), for k:1 thru ln do s:sconcat(s, "+", tex1(p[k]), tex1(vuL[k])), s:sconcat(s, "\\quad(", tex1(p[1]), ",", if ln=3 then tex1(p[2]) else "\\dots", ",", tex1(p[ln]), "\\in{\\mathbb R})\\)"), return(s));
 
-mkva(TF):=makelist([k,if k=2-TF then true else false,if k=0 then " " else ["正しい","正しくない"][k]],k,0,2);
+mkva(TF):=makelist([k,if k=2-TF then true else false, if k=0 then " " else ["正しい", "正しくない"][k]], k, 0, 2);
 va:mkva(TFans);
 ta1:mkva(TFans);
-_rnd(m):=(rand(m)+1)*rand([-1,1]);
+_rnd(m):=(rand(m)+1)*rand([-1, 1]);
 _rp(L):=random_permutation(L);
 
