@@ -24,7 +24,7 @@ _nocorrect_flag:_max_patterns+1;
 _noc_id:_nocorrect_flag*_cw_delimiter;
 _noidea_flag:_max_patterns*10+1;
 _noi_id:_noidea_flag*_cw_delimiter;
-NCL:if __mcq_nocorrecttrue then [[1, true, nocorrectS]] else [[_noc_id, false, nocorrectS]];
+NCL:if __mcq_nocorrectopt and __mcq_nocorrecttrue then [[1, true, nocorrectS]] else [[_noc_id, false, nocorrectS]];
 /* "I have no idea" */
 NOI:[[_noi_id, false, noidS]];
 ListCL0:apply(append, makelist(makelist([_max_opts*k+j, true, CLL[k][j]], j, 1, length(CLL[k])), k, 1, length(CLL)));
