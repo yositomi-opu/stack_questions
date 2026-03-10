@@ -37,8 +37,6 @@ ta1:taW;
 if __mcq_nocorrectopt then (if __mcq_nocorrecttrue then ta1:append(taC, NCL) else ta1:append(taW, NCL));
 if __mcq_noidea then ta1:append(ta1, NOI);
 Cans1:mcq_correct(ta1);
-if __mcq_qtext_auto then qtext:sconcat(qtext,
- if __mcq_rb_cb="cb" then "すべて選べ." 
- else if cN>1 then "<b>1つ</b>選べ. 正解が2つ以上ある場合も1つ選べばよい."
- else "選べ.");
+if %_STACK_LANG="ja" then (if __mcq_rb_cb="cb" then __mcq_seltype:"すべて選べ" else if cN>1 then __mcq_seltype:"<b>1つ</b>選べ. 正解が2つ以上ある場合も1つ選べばよい" else __mcq_seltype:"選べ") else (if __mcq_rb_cb="cb" then __mcq_seltype:"all correct options " else if cN>1 then __mcq_seltype:"one correct one even if there are more than one correct options " else __mcq_seltype:"the correct one");
+if __mcq_qtext_auto then qtext:ssubst(__mcq_seltype, "__SELTYPE__", qtext);
 

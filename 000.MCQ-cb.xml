@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Latest version: https://raw.githubusercontent.com/yositomi-opu/stack_linear_algebra/main/000.MCQ-rb.xml -->
 <quiz>
-<!-- question: 109908  -->
+<!-- question: 110054  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-cb-2026-01-27</text>
+      <text>000.MCQ-cb-2026-03-10</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p><br></p>
@@ -25,7 +24,8 @@
       <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
 /* [全選択肢の数, 正解選択肢の数] (rb のときも2個以上可能) */
 [oN, cN]:[5, 1];
-/* random parameters (設定を変えて問題を複製するときに変える or 固定する部分) */
+/* random parameters */
+/* (同じ型の問題でvariationを調整(固定)するパラメータはここに書くのを推奨) */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
 /*********************************** FLAGS ***********************************/
@@ -57,7 +57,7 @@ matF:randechelon(rw, cl, pv, [-2, -1, -1, 0, 1, 1, 2]);
 matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
 matA:matP.matF;
 /* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
-qtext:sconcat("\\(A=\\)", tex2(matA), "のとき, 行簡約形として正しいものを");
+if %_STACK_LANG="ja" then qtext:sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.") else qtext:sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.");
 /************************ Patterns ********************/
 /* 正解/誤答のパターンとフィードバックをセットで List に push していく. */
 addCopt(_rp(["正解パターン1-1"]), "正答パターン1を選択しています. そのような考え方もありますね!");

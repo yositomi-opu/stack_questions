@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Latest version: https://raw.githubusercontent.com/yositomi-opu/stack_linear_algebra/main/000.MCQ-rb.xml -->
 <quiz>
-<!-- question: 109912  -->
+<!-- question: 110061  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-rb-2026-01-27</text>
+      <text>000.MCQ-rb-2026-03-10</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p><br></p>
@@ -24,8 +23,9 @@
     <questionvariables>
       <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
 /* [全選択肢の数, 正解選択肢の数] (rb のときも2個以上可能) */
-[oN, cN]:[10, 3];
-/* random parameters (設定を変えて問題を複製するときに変える or 固定する部分) */
+[oN, cN]:[5, 1];
+/* random parameters */
+/* (同じ型の問題でvariationを調整(固定)するパラメータはここに書くのを推奨) */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
 /*********************************** FLAGS ***********************************/
@@ -57,7 +57,7 @@ matF:randechelon(rw, cl, pv, [-2, -1, -1, 0, 1, 1, 2]);
 matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
 matA:matP.matF;
 /* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
-qtext:sconcat("\\(A=\\)", tex2(matA), "のとき, 行簡約形として正しいものを");
+if %_STACK_LANG="ja" then qtext:sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.") else qtext:sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.");
 /************************ Patterns ********************/
 /* 正解/誤答のパターンとフィードバックをセットで List に push していく. */
 addCopt(_rp(["正解パターン1-1"]), "正答パターン1を選択しています. そのような考え方もありますね!");
@@ -72,7 +72,8 @@ addWopt(_rp(["誤答パターン4-1","誤答パターン4-2"]), "Feedback messag
 
 /****************************** DO NOT EDIT HERE *****************************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.txt");
-/*****************************************************************************/]]></text>
+/*****************************************************************************/
+]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
@@ -218,120 +219,6 @@ if not fbp then msg:"";]]></text>
         </falsefeedback>
       </node>
     </prt>
-    <deployedseed>1182809594</deployedseed>
-    <deployedseed>2085548457</deployedseed>
-    <deployedseed>773701273</deployedseed>
-    <deployedseed>655472694</deployedseed>
-    <deployedseed>1249613553</deployedseed>
-    <deployedseed>519077920</deployedseed>
-    <deployedseed>1738289652</deployedseed>
-    <deployedseed>131970873</deployedseed>
-    <deployedseed>1488805594</deployedseed>
-    <deployedseed>2037850386</deployedseed>
-    <deployedseed>862677479</deployedseed>
-    <deployedseed>1840365972</deployedseed>
-    <deployedseed>314207632</deployedseed>
-    <deployedseed>1110743210</deployedseed>
-    <deployedseed>642613939</deployedseed>
-    <deployedseed>671972308</deployedseed>
-    <deployedseed>897902351</deployedseed>
-    <deployedseed>1684651903</deployedseed>
-    <deployedseed>1516829949</deployedseed>
-    <deployedseed>1494872326</deployedseed>
-    <deployedseed>1380356300</deployedseed>
-    <deployedseed>2081045341</deployedseed>
-    <deployedseed>727489884</deployedseed>
-    <deployedseed>1115536029</deployedseed>
-    <deployedseed>372101839</deployedseed>
-    <deployedseed>1541654861</deployedseed>
-    <deployedseed>1032707530</deployedseed>
-    <deployedseed>867940411</deployedseed>
-    <deployedseed>4949044</deployedseed>
-    <deployedseed>1830033960</deployedseed>
-    <deployedseed>876312283</deployedseed>
-    <deployedseed>1248258634</deployedseed>
-    <deployedseed>1306075324</deployedseed>
-    <deployedseed>66783509</deployedseed>
-    <deployedseed>1989922073</deployedseed>
-    <deployedseed>1358643795</deployedseed>
-    <deployedseed>1198521804</deployedseed>
-    <deployedseed>128946728</deployedseed>
-    <deployedseed>35526900</deployedseed>
-    <deployedseed>412383118</deployedseed>
-    <deployedseed>1335024755</deployedseed>
-    <deployedseed>154575501</deployedseed>
-    <deployedseed>1103934808</deployedseed>
-    <deployedseed>1601955648</deployedseed>
-    <deployedseed>1319264748</deployedseed>
-    <deployedseed>1180333732</deployedseed>
-    <deployedseed>6716332</deployedseed>
-    <deployedseed>2049403979</deployedseed>
-    <deployedseed>1316545688</deployedseed>
-    <deployedseed>952831783</deployedseed>
-    <deployedseed>1019007008</deployedseed>
-    <deployedseed>1168377454</deployedseed>
-    <deployedseed>654099589</deployedseed>
-    <deployedseed>230255982</deployedseed>
-    <deployedseed>1729431810</deployedseed>
-    <deployedseed>574620488</deployedseed>
-    <deployedseed>1880294916</deployedseed>
-    <deployedseed>2018390154</deployedseed>
-    <deployedseed>1050832529</deployedseed>
-    <deployedseed>536029862</deployedseed>
-    <deployedseed>762752135</deployedseed>
-    <deployedseed>1415487858</deployedseed>
-    <deployedseed>333536070</deployedseed>
-    <deployedseed>1416438983</deployedseed>
-    <deployedseed>925357110</deployedseed>
-    <deployedseed>1391184900</deployedseed>
-    <deployedseed>1805050280</deployedseed>
-    <deployedseed>1277076329</deployedseed>
-    <deployedseed>284093830</deployedseed>
-    <deployedseed>1580465621</deployedseed>
-    <deployedseed>745010445</deployedseed>
-    <deployedseed>897369620</deployedseed>
-    <deployedseed>1946800022</deployedseed>
-    <deployedseed>315498541</deployedseed>
-    <deployedseed>1631330351</deployedseed>
-    <deployedseed>288470029</deployedseed>
-    <deployedseed>2081239903</deployedseed>
-    <deployedseed>492249310</deployedseed>
-    <deployedseed>564437228</deployedseed>
-    <deployedseed>282808718</deployedseed>
-    <deployedseed>881437182</deployedseed>
-    <deployedseed>850037971</deployedseed>
-    <deployedseed>780794114</deployedseed>
-    <deployedseed>899848278</deployedseed>
-    <deployedseed>38588674</deployedseed>
-    <deployedseed>1023671254</deployedseed>
-    <deployedseed>74587293</deployedseed>
-    <deployedseed>1811475422</deployedseed>
-    <deployedseed>1185622847</deployedseed>
-    <deployedseed>163687487</deployedseed>
-    <deployedseed>1002956915</deployedseed>
-    <deployedseed>530169365</deployedseed>
-    <deployedseed>1746535065</deployedseed>
-    <deployedseed>540551071</deployedseed>
-    <deployedseed>1603893496</deployedseed>
-    <deployedseed>598325379</deployedseed>
-    <deployedseed>1180706914</deployedseed>
-    <deployedseed>184794274</deployedseed>
-    <deployedseed>1878184124</deployedseed>
-    <deployedseed>1189920308</deployedseed>
-    <qtest>
-      <testcase>1</testcase>
-      <description>管理者のインプットを想定したテストケースは満点です。</description>
-      <testinput>
-        <name>ans1</name>
-        <value>mcq_correct(ta1)[1]</value>
-      </testinput>
-      <expected>
-        <name>prt1</name>
-        <expectedscore>1.0000000</expectedscore>
-        <expectedpenalty>0.0000000</expectedpenalty>
-        <expectedanswernote>prt1-2-T</expectedanswernote>
-      </expected>
-    </qtest>
   </question>
 
 </quiz>
