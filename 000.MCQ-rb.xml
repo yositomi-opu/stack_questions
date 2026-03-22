@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115382  -->
+<!-- question: 115385  -->
   <question type="stack">
     <name>
-      <text>Sample010.MCQ-rb-2026-03-22</text>
+      <text>000.MCQ-rb-2026-03-22p1</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p>[[lang code='ja']][[/lang]][[lang code='en']][[/lang]]<br></p>
@@ -58,15 +58,18 @@ matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
 matA:matP.matF;
 /* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
 if %_STACK_LANG="ja" then qtext:sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.") else qtext:sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.");
+if %_STACK_LANG="ja" then _Cm1:"正解パターン1です." else _Cm1:"Correct pattern 1";
+if %_STACK_LANG="ja" then _Cm2:"正解パターン2です." else _Cm2:"Correct pattern 2";
+if %_STACK_LANG="ja" then _Wm1:"誤答パターン1です." else _Wm1:"Incorrect pattern 1";
+if %_STACK_LANG="ja" then _Wm2:"誤答パターン1です." else _Wm2:"Incorrect pattern 2";
+if %_STACK_LANG="ja" then _Wm3:"誤答パターン1です." else _Wm3:"Incorrect pattern 3";
 /************************ Patterns ********************/
 /* 正解/誤答のパターンとフィードバックをセットで List に push していく. */
-addCopt(_rp(["正解パターン1-1"]), "正答パターン1を選択しています. そのような考え方もありますね!");
-addCopt(_rp(["正解パターン2-1"]), "正答パターン2を選択しています. そのような考え方もありますね!");
-addCopt(_rp(["正解パターン3-1","正解パターン3-2"]), "標準的ではないですが, 正解です.");
-addWopt(_rp(["誤答パターン1-1"]), "Feedback message for wrong pattern 1");
-addWopt(_rp(["誤答パターン2-1"]), "Feedback message for wrong pattern 2");
-addWopt(_rp(["誤答パターン3-1","誤答パターン3-2"]), "Feedback message for wrong pattern 3");
-addWopt(_rp(["誤答パターン4-1","誤答パターン4-2"]), "Feedback message for wrong pattern 4");
+addCopt(_rp(["Correct pattern1-1"]), _Cm1);
+addCopt(_rp(["Correct pattern2-1"]), _Cm2);
+addWopt(_rp(["Wpattern1-1"]), _Wm1);
+addWopt(_rp(["Wpattern2-1"]), _Wm2);
+addWopt(_rp(["Wpattern3-1", "Wpattern3-2"]), _Wm3);
 /* 各パターンからは1つ以上選択される. 何個ずつ選ぶかは自動で行う(mkPattern関数). */
 /**************** END OF QUESTION VARIABLES for MAIN CONTENT ******************/
 
@@ -206,8 +209,8 @@ if not fbp then msg:"";]]></text>
         <truefeedback format="html">
           <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
 <p>
-[[lang code='ja']]{@msg_ja@}[[/lang]]
-[[lang code='en']]{@msg_en@}[[/lang]]
+[[lang code='ja']]{@msg@}[[/lang]]
+[[lang code='en']]{@msg@}[[/lang]]
 </p>]]></text>
         </truefeedback>
         <falsescoremode>=</falsescoremode>
@@ -218,8 +221,8 @@ if not fbp then msg:"";]]></text>
         <falsefeedback format="html">
           <text><![CDATA[<!-- general error / 一般の誤り -->
 <p>
-[[lang code='ja']]{@msg_ja@}[[/lang]]
-[[lang code='en']]{@msg_en@}[[/lang]]
+[[lang code='ja']]{@msg@}[[/lang]]
+[[lang code='en']]{@msg@}[[/lang]]
 </p>
 <p>
 [[lang code='ja']]得点は{@sc@}です.[[/lang]]
