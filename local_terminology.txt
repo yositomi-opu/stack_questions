@@ -1,0 +1,9 @@
+// 大学毎に異なる用語の違いに関するまとめ
+// stack_include("https://stack.mathedu.jp/sc/local_terminology.txt");
+// 
+_LT_RREF:["row reduced echelon form", "行簡約形", "行簡約行列", "被約階段行列"];
+_LT_VECSYS:["system of vectors", "ベクトルの集合", "ベクトルの組", "ベクトルの系", "ベクトルの順序組"];
+_LT_VECBASIS:["basis", "基底", "基"];
+_LT_ETRANS:["elementary transformation", "基本変形", "に関する基本変形"];
+_LT_FORMAL_ROWVEC:["formal row vector", "形式的な行ベクトル"];
+

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+  <question type="stack">
+    <name>
+      <text>CL023MR-d.合成関数微分(対数関数-多項式)</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[<p>{@qtext@}</p>
+<p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
+    </questiontext>
+    <questionvariables>
+      <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+[oN, cN]:[6, 1];
+__aa:rand([2, 3, 4]);
+__bb:rand([1, 5, 7]);
+/* 内側の関数: g(x) = ax^2 + b */
+__tf:lambda([x], __aa*x^2+__bb);
+__tf1:lambda([x], 2*__aa*x); /* g'(x) */
+/****************************** FLAGS ******************************/
+__mcq_rb_cb:"rb";
+__mcq_min_max:min;
+__mcq_fbp:true;
+__mcq_subsc:true;
+__mcq_noidea:false;
+__mcq_nocorrectopt:false;
+__mcq_qtext_auto:true;
+stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.txt");
+/*******************************************************************/
+powerdisp:false;
+/* 外側の関数: f(u) = log(u) */
+Qfx:ln(__tf(x));
+/* 選択肢生成 */
+Copt:sconcat("\\frac{1}{", tex2(__tf(x)), "}", "\\cdot", tex2(__tf1(x)));
+Wopt1:sconcat("\\frac{1}{", tex2(__tf(x)), "}"); /* 内側の微分忘れ */
+Wopt2:sconcat("\\frac{1}{", tex2(__tf1(x)), "}"); /* f'(g'(x)) の誤り */
+Wopt3:sconcat(tex2(__tf(x)), "\\cdot", tex2(__tf1(x))); /* 対数微分の逆数忘れ */
+Wopt4:sconcat("\\frac{1}{", tex2(__aa*x+__bb), "}", "\\cdot", tex2(__aa)); /* 2乗を忘れた計算 */
+
+qtext:sconcat(tex2(Qfx), "の導関数の計算式として正しいものを");
+addCopt(_rp([Copt]), "正解です. 対数関数の合成微分の公式を理解しています.");
+addWopt(_rp([Wopt1]), "合成関数の微分法を確認しましょう. 分子に内側の関数の微分が必要です.");
+addWopt(_rp([Wopt2]), "分母が \\(g'(x)\\) になっています. 公式を再確認してください.");
+addWopt(_rp([Wopt3]), "対数関数 \\(\\log(u)\\) の微分は \\(1/u\\) です.");
+addWopt(_rp([Wopt4]), "多項式の部分の微分が正しくないようです.");
+stack_include("https://stack.mathedu.jp/sc/mcq_template_post.txt");
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <input>
+      <name>ans1</name>
+      <type>radio</type>
+      <tans>ta1</tans>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1,Cans1);
+if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
+ans1WL:makelist(floor(ans1L[k]/_cw_delimiter),k,1,length(ans1L));
+ans1CL:makelist(if ans1L[k]<_cw_delimiter then floor(ans1L[k]/_max_opts) else -1,k,1,length(ans1L));
+countL(L,t):=block([k,rt:0],for k:1 thru length(L) do if L[k]=t then rt:rt+1,return(rt));
+cAN:countL(ans1WL,0);
+wAN:apply("+",makelist(countL(ans1WL,k),k,1,_max_patterns));
+flgCL:makelist(member(k,ans1CL),k,1,length(CLbase));
+flgWL:makelist(member(k,ans1WL),k,1,length(WLbase));
+msg:"";
+for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg,CmsgL[k],"<br>");
+for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg,WmsgL[k],"<br>");
+sc:cAN/(cN+wAN);
+]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk1</sans>
+        <tans>true</tans>
+        <truescore>1</truescore>
+        <falsescore>sc</falsescore>
+      </node>
+    </prt>
+  </question>
+</quiz>
