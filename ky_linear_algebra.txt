@@ -114,3 +114,6 @@ nullspace2(A):=block([rk, pv:[], pv1:[], F, FL:[], F1, rw, cl, rz, k, k1:1], rk:
 /* display determinant of matrix */
 vmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"|",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
 
+/* Assocative Array ,連想配列 */
+getAssArray(s, L):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+
