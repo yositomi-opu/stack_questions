@@ -1,0 +1,126 @@
+
+
+
+
+getDetL(n,aL,DL):=block([k,M],M:genmatrix(lambda([i,j],rand(aL)),n,n),for k while ((k<3000) and not member(determinant(M),DL)) do (M:genmatrix(lambda([i,j],rand(aL)),n,n)),return(M));
+
+getDetLnotE(n,aL,DL):=block([k,M,En],En:genmatrix(lambda([i,j],if i=j then 1 else 0),n,n),M:genmatrix(lambda([i,j],rand(aL)),n,n),for k while ((k<3000) and (not member(determinant(M),DL) or equal(M,En))) do (M:genmatrix(lambda([i,j],rand(aL)),n,n)),return(M));
+
+random_matrix_det_list(n,aL,DL):=getDetLnotE(n,aL,DL);
+
+getRegM(n,aL):=block([k,M],M:genmatrix(lambda([i,j],rand(aL)),n,n),for k while ((k<3000) and equal(determinant(M),0)) do (M:genmatrix(lambda([i,j],rand(aL)),n,n)),return(M));
+random_invertible_matrix(n,aL):=getRegM(n,aL);
+
+
+distMat(A,B):=block([i,j,r,c,dt],dt:0,[r,c]:matrix_size(A),for i:1 while i<=r do (for j:1 while j<=c do (if is(notequal(A[i,j],B[i,j])) then dt:dt+1)),return([dt,r*c]));
+
+chkDiag(m,n):=is(matrix_size(m)=[n,n]) and is(equal(m,genmatrix(lambda([i,j],if i=j then m[i,i] else 0),n,n)));
+
+LtoS(L):=block([s],s:ssubst("(","[",ssubst(")","]",string(L))),return(s));
+
+MtoTeX(M):=block([m,n,i,j,s],s:"\\begin{pmatrix}",[m,n]:matrix_size(M),for i:1 thru m do (for j:1 thru n do (s:sconcat(s,M[i,j]),if j<n then s:sconcat(s,"&")),if i<m then s:sconcat(s,"\\\\")),return(sconcat(s,"\\end{pmatrix}")));
+MtoTeX2(M,env):=block([m,n,i,j,s],s:sconcat("\\begin{",env,"}"),[m,n]:matrix_size(M),for i:1 thru m do (for j:1 thru n do (s:sconcat(s,M[i,j]),if j<n then s:sconcat(s,"&")),if i<m then s:sconcat(s,"\\\\")),return(sconcat(s,"\\end{",env,"}")));
+
+CountDf(m1,m2):=block([k,r,c,r1,c1],[r,c]:matrix_size(m1),k:0,for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then k:k+1,return(k));
+
+
+
+
+
+
+kihonP(n,i1,j1,c):=block([M],M:genmatrix(lambda([i,j],if i=j then 1 elseif equal([i,j],[i1,j1]) then c else 0),n,n),return(M));
+kihonQ(n,i1,c):=block([M],M:genmatrix(lambda([i,j],if i=j then (if i=i1 then c else 1) else 0),n,n),return(M));
+kihonR(n,i1,j1):=block([M],M:genmatrix(lambda([i,j],if i=j then 1 else 0),n,n),M[i1,i1]:0,M[j1,j1]:0,M[i1,j1]:1,M[j1,i1]:1,return(M));
+sweepout(rc,A,i1,j1):=block([k,M,m,n],[m,n]:matrix_size(A),M:A,if rc=1 then (for k:1 while (k<=n) do (if not k=j1 then M:M.kihonP(n,j1,k,-M[i1,k]/M[i1,j1])),return(M)) else (for k:1 while (k<=m) do (if notequal(k,i1) then M:kihonP(m,k,i1,-M[k,j1]/M[i1,j1]).M),return(M)));
+SweepCBij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),r,r),for k:i+1 thru r do em:kihonP(r,k,i,-M[k,j]/M[i,j]).em,return(em));
+SweepCij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),r,r),for k:1 thru r do if not k=i then em:kihonP(r,k,i,-M[k,j]/M[i,j]).em,return(em));
+SweepRij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),c,c),for k:1 thru c do if not k=j then em:em.kihonP(c,j,k,-M[i,k]/M[i,j]),return(em));
+SweepRRij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),c,c),for k:j+1 thru c do em:em.kihonP(c,j,k,-M[i,k]/M[i,j]),return(em));
+SweepCBj(M,j,im):=block([k,r],r:matrix_size(M)[1],for k:im thru r do if abs(M[k,j])=1 then return(kihonR(r,1,k)),for k:im thru r do if not M[k,j]=0 then return(kihonR(r,1,k)),return(kihonP(r,1,2,0)));
+FindNZcol(M,j,s):=block([r,i],r:-1,for i:s thru matrix_size(M)[1] do if not M[i,j]=0 and r=-1 then r:i,return(r));
+
+
+
+get_first_non_zero_column(M, r):=block([t,p,q],[p,q]:matrix_size(M),if M[r]=makelist(0,q) then return(q+1) else for t: 1 thru q do (if not M[r,t]=0 then return(t)));
+getFirstNZ(M, i):=get_first_non_zero_column(M, i);
+
+redeche(M):=block([p,q,r,i,j,t],[p,q]:matrix_size(M),M:echelon(M),r:rank(M),if r=1 then return (M),for i:r thru 2 step -1 do (j:getFirstNZ(M,i),for t:1  thru i-1 do (M:rowop(M,t,i,M[t,j]))),M);
+
+
+randechelon(i1,j1,pv,rL):=block([i,j,ret],genmatrix(lambda([i,j],if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 elseif member(j,pv) then 0 else rand(rL)),i1,j1));
+
+isechelon(M):=block([p,i,rw,cl,rt],[rw,cl]:matrix_size(M),p:makelist(getFirstNZ(M,i),i,1,rw),rt:true,for i:2 thru rw do (rt:rt and (is(p[i-1]<p[i]) or p[i]>cl)),return(rt));
+
+
+
+
+_tex1h(c):=if c=1 then "" else if c=-1 then "-" else if c>1 then tex1(c) else tex1(c);
+_tex1c(c):=if c=1 then "+" else if c=-1 then "-" else if c>1 then sconcat("+",tex1(c)) else tex1(c);
+polynomial_to_list(px,x):=block([cL:[],c,d:0,qx:px],while(not qx=0) do (c:coeff(qx,x,d),cL:push(c,cL),qx:qx-c*x^d,d:d+1),return(cL));
+_scon_lincomb(cL,vL):=block([s:"",k,ln:length(cL)],for k:1 thru ln do if not cL[k]=tex1(0) then s:sconcat(s,cL[k],vL[k]),return(s));
+_scon_lincomb_paren(cL,vL):=block([s:"",k,ln:length(cL)],for k:1 thru ln do if not cL[k]=tex1(0) then s:sconcat(s,cL[k],"(",vL[k],")"),return(s));
+display_polynomial_tex1(px,x,adf):=block([cL:polynomial_to_list(px,x),cLr,sL,xpL,k,ln],cLr:reverse(cL),ln:length(cL),if adf=1 then sL:makelist(if k=1 then _tex1h(cLr[k]) else _tex1c(cLr[k]),k,1,ln) else sL:makelist(if k=1 then _tex1h(cL[k]) else _tex1c(cL[k]),k,1,ln),if adf=1 then xpL:makelist(tex1(x^(k-1)),k,1,ln) else xpL:makelist(tex1(x^(ln-k)),k,1,ln),return(_scon_lincomb(sL,xpL)));
+display_polynomial(px,x,adf):=sconcat("\\(",display_polynomial(px,x,adf),"\\)");
+
+
+texput(Wa,"\\boldsymbol{a}");
+texput(Wb,"\\boldsymbol{b}");
+texput(Wc,"\\boldsymbol{c}");
+texput(Wd,"\\boldsymbol{d}");
+texput(We,"\\boldsymbol{e}");
+texput(Wf,"\\boldsymbol{f}");
+texput(Wg,"\\boldsymbol{g}");
+texput(Wh,"\\boldsymbol{h}");
+texput(Wi,"\\boldsymbol{i}");
+texput(Wj,"\\boldsymbol{j}");
+texput(Wk,"\\boldsymbol{k}");
+texput(Wm,"\\boldsymbol{m}");
+texput(Wn,"\\boldsymbol{n}");
+texput(Wo,"\\boldsymbol{o}");
+texput(Wp,"\\boldsymbol{p}");
+texput(Wq,"\\boldsymbol{q}");
+texput(Wr,"\\boldsymbol{r}");
+texput(Ws,"\\boldsymbol{s}");
+texput(Wt,"\\boldsymbol{t}");
+texput(Wu,"\\boldsymbol{u}");
+texput(Wv,"\\boldsymbol{v}");
+texput(Ww,"\\boldsymbol{w}");
+texput(Wx,"\\boldsymbol{x}");
+texput(Wy,"\\boldsymbol{y}");
+texput(Wz,"\\boldsymbol{z}");
+texput(WR,"{\\mathbb R}");
+texput(WN,"{\\mathbb N}");
+texput(WH,"{\\mathbb H}");
+texput(WC,"{\\mathbb C}");
+texput(WK,"{\\mathbb K}");
+
+head_list(L,n):=makelist(L[k],k,1,min(n,length(L)));
+all_sublist_len(L,n):=if n<1 then {} else map(listify,map(setify,map(lambda([x],head_list(x,n)),permutations(L))));
+all_sublist_geq(L,n):=apply(union,makelist(all_sublist_len(L,k),k,n,length(L)));
+all_sublist_leq(L,n):=apply(union,makelist(all_sublist_len(L,k),k,1,min(length(L),n)));
+
+
+
+
+
+
+check_basis_colspace(matA,vec_list):=block([matB,rw,cl,vlen:length(vec_list),ret:0],[rw,cl]:matrix_size(matA),if not apply("and",makelist(is(matrix_size(vec_list[k])=[rw,1]),k,1,vlen)) then return(-8),matB:apply(addcol,vec_list),if rank(addcol(matA,matB))>rank(matA) then return(-4),if not rank(matB)=vlen then ret:ret-2,if rank(matB)<rank(matA) then ret:ret-1,return(ret));
+colspace_basisp(matA,vec_list):=block([r],r:check_basis_colspace(matA,vec_list),if r=-8 then __msg:"the list of vectors include illegal size vectors" else if r=-4 then __msg:"the system of vectors include outside vectors" else if r=-3 then __msg:"the system of vectors are neither linearly independent nor span the space." else if r=-2 then __msg:"the system of vectors is not linear independent" else if r=-1 then __msg:"the vectors of the system do not span the space." else __msg:"ok, the list is basis.",return(is(r=0)));
+
+
+
+gcd_list(L):=block([k,g],g:L[1],for k:1 while (k<length(L)) do (g:gcd(g,L[k+1])),return(g));
+lcm_list(mL):=block([l,k],l:mL[1],for k:1 while (k<length(mL)) do (l:l*mL[k+1]/gcd(l,mL[k+1])),return(l));
+gcdL(L):=gcd_list(L);
+lcmL(mL):=lcm_list(mL);
+integer_vector(v):=block([d,g,dL,nL,vv,sz],sz:matrix_size(v)[1],dL:map(denom, list_matrix_entries(v)), d:lcmL(dL), vv:v*d, nL:list_matrix_entries(vv), g:gcdL(nL),return(vv/g));
+integer_vector2(v):=block([d,g,dL,nL,vv,sz],sz:matrix_size(v)[1],dL:map(denom, list_matrix_entries(v)), d:lcmL(dL), vv:v*d, nL:list_matrix_entries(vv), g:gcdL(nL),return([g, vv/g]));
+
+
+nullspace2(A):=block([rk, pv:[], pv1:[], F, FL:[], F1, rw, cl, rz, k, k1:1], rk:rank(A), [rw, cl]:matrix_size(A), F:redeche(A), for k:1 thru rk do pv:append(pv, [get_first_non_zero_column(F, k)]), rz:genmatrix(lambda([i,j], 0), 1, cl), for k:1 thru cl do if member(k, pv) then (FL:append(FL, [row(F, k1)]), k1:k1+1) else (FL:append(FL, [rz]), pv1:append(pv1, [k])), F1:-apply(addrow, FL)+genmatrix(lambda([i,j], if i=j then 1 else 0), cl, cl), return(makelist(col(F1, pv1[k]), k, 1, length(pv1))));
+
+
+vmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"|",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
+
+
+getAssArray(s, L):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
