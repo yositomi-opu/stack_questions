@@ -1,25 +1,32 @@
-/* You can get latest version via:  */
-/*     curl -O https://raw.githubusercontent.com/yositomi-opu/stack_linear_algebra/main/mcq_template_pre.txt */
+/* You can find latest version in github/yositomi-opu/stack_questionsv */
+/* 2026-04-05 Improvement using %_STACK_LANG */
 /* 2026-01-26 github version */
 /* 2026-01-25 github upload */
 /* 2026-01-05 use ky_linear_algebra.txt */
 /* 2025-08-17 Bug fix, add Cmsg, change code for correct patterns */
 /* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
-if __mcq_subsc then ssc:1 else ssc:0;
-if __mcq_nocorrectopt and __mcq_nocorrecttrue then cN:0;
-wN:oN-cN;
-__lc:2; /* lang code */
-_lang:["en", "ja"][__lc];
-nocorrectS:["No correct options above.", "選択肢に正解はない"][__lc];
-noidS:["I have no idea", "わからない"][__lc];
-powerdisp:true;
-_rp(L):=random_permutation(L);
-tex2(m):=sconcat("\\(",tex1(m),"\\)");
-texP1(a,u):=sconcat("\\(",tex1(a),"+p",tex1(u),"\\quad (p\\in{\\mathbb R})\\)");
-texP2(a,u,v):=sconcat("\\(",tex1(a),"+p",tex1(u),"+q",tex1(v),"\\quad (p,q\\in{\\mathbb R})\\)");
-CLbase:[];/* 正解パターン格納リスト */
-WLbase:[];/* 誤答パターン格納リスト */
-CmsgL:[];/* 正解パターン用フィードバックメッセージ */
-WmsgL:[];/* 誤答パターン用フィードバックメッセージ */
-addCopt(s, m):=block([], CLbase:append(CLbase, [s]), CmsgL:append(CmsgL, [m]));
-addWopt(s, m):=block([], WLbase:append(WLbase, [s]), WmsgL:append(WmsgL, [m]));
+/* get_assoc_array is also defined in ky_linear_algebra.txt */
+%__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
+if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
+%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* wN:oN-cN */
+%__mcq_nocoptSL:[["en", "None of the above."]];
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["ja", "選択肢に正解はない."]]);
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["fr", "Aucune des réponses ci-dessus."]]);
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["de", "Keine der oben genannten Antworten."]]);
+%__mcq_nocoptS:%__mcq_gaa(%__mcq_nocoptSL, %__STACK_LANG);
+if %__mcq_nocoptS="" then %__mcq_nocoptS:"None of the above.";
+%__mcq_noidSL:[["en", "I don't know yet."]];
+%__mcq_noidSL:append(%__mcq_noidSL, [["ja", "まだわからない."]]);
+%__mcq_noidSL:append(%__mcq_noidSL, [["fr", "Je ne sait pas encore."]]);
+%__mcq_noidSL:append(%__mcq_noidSL, [["de", "Ich weiß es noch nicht."]]);
+%__mcq_noidS:%__mcq_gaa(%__mcq_noidSL, %__STACK_LANG);
+%__mcq_CLbase:[];/* list of correct answer patterns */
+%__mcq_WLbase:[];/* list of incorrect(wrong) answer patterns */
+%__mcq_CmsgL:[];/* list of feedback messages for correct patterns */
+%__mcq_WmsgL:[];/* list of feedback messages for incorrect(wrong) patterns */
+%__mcq_addCopt(s, m):=block([], %__mcq_CLbase:append(%__mcq_CLbase, [s]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m]));
+%__mcq_addWopt(s, m):=block([], %__mcq_WLbase:append(%__mcq_WLbase, [s]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m]));
+
+/************* EOF **************/
+

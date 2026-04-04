@@ -1,40 +1,57 @@
-/* You can get latest version via:  */
-/*     curl -O https://raw.githubusercontent.com/yositomi-opu/stack_linear_algebra/main/mcq_template_pre.txt */
-_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
-_max_patterns:99; /* 最大パターン数(正答・誤答共通) */
-_cw_delimiter:_max_opts*(_max_patterns+1); /* 選択肢リストのIDの正答・誤答境界値 */
+/* You can find latest version in github/yositomi-opu/stack_questions  */
+/* setup lists to decide the list of options */
+/* %__mcq_gaa is defined in pre.txt */
+_Cm1:%__mcq_gaa(%__mcq_Cm1L, %_STACK_LANG);
+if listp(%__mcq_Cm2L) then %__mcq_Cm2:%__mcq_gaa(%__mcq_Cm2L, %_STACK_LANG);
+if listp(%__mcq_Cm3L) then %__mcq_Cm3:%__mcq_gaa(%__mcq_Cm3L, %_STACK_LANG);
+if listp(%__mcq_Cm4L) then %__mcq_Cm4:%__mcq_gaa(%__mcq_Cm4L, %_STACK_LANG);
+if listp(%__mcq_Cm5L) then %__mcq_Cm5:%__mcq_gaa(%__mcq_Cm5L, %_STACK_LANG);
+_Wm1:getAssocArray(%_MCQ_Wm1L, %_STACK_LANG);
+_Wm2:getAssocArray(%_MCQ_Wm2L, %_STACK_LANG);
+_Wm3:getAssocArray(%_MCQ_Wm3L, %_STACK_LANG);
+addCopt(_rp(%_MCQ_Cp1L), _Cm1);
+addCopt(_rp(%_MCQ_Cp2L), _Cm2);
+addWopt(_rp(%_MCQ_Wp1L), _Wm1);
+addWopt(_rp(%_MCQ_Wp2L), _Wm2);
+addWopt(_rp(%_MCQ_Wp3L), _Wm3);
+
+%__mcq_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
+%__mcq_max_patterns:99; /* 最大パターン数(正答・誤答共通) */
 /* number of patterns of correct/incorrect(wrong) options(auto-gen) */
-CLlen:map(length, CLbase);
-WLlen:map(length, WLbase);
-cN:__mcq_min_max(cN, length(flatten(CLbase)));
-wN:__mcq_min_max(wN, length(flatten(WLbase)));
+/* correct/incorrect boundary value of id of options list */
+%__mcq_cw_delimiter:%__mcq_max_opts*(%__mcq_max_patterns+1);
+%__mcq_CLlen:map(length, %__mcq_CLbase);
+%__mcq_WLlen:map(length, %__mcq_WLbase);
+%__mcq_cN:%__mcq_min_max(%__mcq_num_copts, length(flatten(%__mcq_CLbase)));
+%__mcq_wN:%__mcq_min_max(%__mcq_num_wopts, length(flatten(%__mcq_WLbase)));
 /* number of patterns of correct/incorrect(wrong) options(auto-gen) */
-/* on: オプションの数, bsL: パターンのリスト(l:パターン数) */
-/* on がpattern数以上のときは, 各パターンから1つ以上選ぶ */
-/* on がpattern数ないときは, pattern のうちon個から1つずつ選ぶ */
-mkPattern(on,bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
+/* on: number of options, bsL: list of all correct or incorrect patterns */
+/* if on>=number of patterns, pick up more than one opt from each pattern */
+/* if on<number of patterns, pick up one opt from randomly chosen on-patterns */
+%_rp(L):=random_permutation(L);
+%__mcq_mkPattern(on,bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
 else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1, if ptL[k]>1 then ptL[k]:ptL[k]-1) 
 else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 then ptL[k]:1)), return(ptL));
-cNL:mkPattern(cN, CLbase);
-wNL:mkPattern(wN, WLbase);
-CLL:makelist(makelist(CLbase[k][j], j, 1, min(cNL[k], length(CLbase[k]))), k, 1, length(cNL));
-WLL:makelist(makelist(WLbase[k][j], j, 1, min(wNL[k], length(WLbase[k]))), k, 1, length(wNL));
+%__mcq_cNL:%__mcq_mkPattern(%__mcq_cN, %__mcq_CLbase);
+%__mcq_wNL:%__mcq_mkPattern(%__mcq_wN, %__mcq_WLbase);
+%__mcq_CLL:makelist(makelist(%__mcq_CLbase[k][j], j, 1, min(%__mcq_cNL[k], length(%__mcq_CLbase[k]))), k, 1, length(%__mcq_cNL));
+%__mcq_WLL:makelist(makelist(%__mcq_WLbase[k][j], j, 1, min(%__mcq_wNL[k], length(%__mcq_WLbase[k]))), k, 1, length(%__mcq_wNL));
 /* "no correct options above" */
-_nocorrect_flag:_max_patterns+1;
-_noc_id:_nocorrect_flag*_cw_delimiter;
-_noidea_flag:_max_patterns*10+1;
-_noi_id:_noidea_flag*_cw_delimiter;
-NCL:if __mcq_nocorrectopt and __mcq_nocorrecttrue then [[1, true, nocorrectS]] else [[_noc_id, false, nocorrectS]];
+%__mcq_nocorrect_flag:%__mcq_max_patterns+1;
+%__mcq_noc_id:%__mcq_nocorrect_flag*%__mcq_cw_delimiter;
+%__mcq_noidea_flag:%__mcq_max_patterns*10+1;
+%__mcq_noi_id:%__mcq_noidea_flag*%__mcq_cw_delimiter;
+%__mcq_NCL:if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then [[1, true, %__mcq_nocoptS]] else [[%__mcq_noc_id, false, %__mcq_nocoptS]];
 /* "I have no idea" */
-NOI:[[_noi_id, false, noidS]];
-ListCL0:apply(append, makelist(makelist([_max_opts*k+j, true, CLL[k][j]], j, 1, length(CLL[k])), k, 1, length(CLL)));
-ListWL0:apply(append, makelist(makelist([_cw_delimiter*k+j, false, WLL[k][j]], j, 1, length(WLL[k])), k, 1,length(WLL)));
-ListCL1:_rp(ListCL0);
-ListWL1:_rp(ListWL0);
-taC:_rp(makelist(ListWL1[k], k, 1, wN));
-taW:_rp(append(makelist(ListCL1[k], k, 1, cN),makelist(ListWL1[k], k, 1, wN)));
+%__mcq_NOI:[[%__mcq_noi_id, false, %__mcq_noidS]];
+%__mcq_ListCL0:apply(append, makelist(makelist([%__mcq_max_opts*k+j, true, %__mcq_CLL[k][j]], j, 1, length(%__mcq_CLL[k])), k, 1, length(%__mcq_CLL)));
+%__mcq_ListWL0:apply(append, makelist(makelist([%__mcq_cw_delimiter*k+j, false, %__mcq_WLL[k][j]], j, 1, length(%__mcq_WLL[k])), k, 1, length(%__mcq_WLL)));
+%__mcq_ListCL1:%_rp(%__mcq_ListCL0);
+%__mcq_ListWL1:%_rp(%__mcq_ListWL0);
+%__mcq_taC:%_rp(makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts));
+%__mcq_taW:%_rp(append(makelist(ListCL1[k], k, 1, %__mcq_num_copts),makelist(ListWL1[k], k, 1, wN)));
 ta1:taW;
-if __mcq_nocorrectopt then (if __mcq_nocorrecttrue then ta1:append(taC, NCL) else ta1:append(taW, NCL));
+if %__mcq_nocorrectopt then (if %__mcq_nocorrecttrue then ta1:append(%__mcq_taC, NCL) else ta1:append(taW, NCL));
 if __mcq_noidea then ta1:append(ta1, NOI);
 Cans1:mcq_correct(ta1);
 if %_STACK_LANG="ja" then (if __mcq_rb_cb="cb" then __mcq_seltype:"すべて選べ" else if cN>1 then __mcq_seltype:"<b>1つ</b>選べ. 正解が2つ以上ある場合も1つ選べばよい" else __mcq_seltype:"選べ") else (if __mcq_rb_cb="cb" then __mcq_seltype:"all correct options " else if cN>1 then __mcq_seltype:"one correct one even if there are more than one correct options " else __mcq_seltype:"the correct one");
