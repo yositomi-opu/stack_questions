@@ -1,5 +1,4 @@
-/* ja:ラジオボタンの場合は, ans1 は数値， チェックボックスのときは, リスト */
-/* en:radio button case: ans1 is numerical , checkbox case: ans1 is list */
+/* radio button case: ans1 is integer, checkbox case: ans1 is list */
 if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
 if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
 ans1WL:makelist(floor(ans1L[k]/_cw_delimiter), k, 1, length(ans1L));
@@ -17,14 +16,14 @@ msg:"";
 for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg, CmsgL[k], "<br>");
 for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg, WmsgL[k], "<br>");
 msgC0L:[["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."]];
-mcgC0:getAssocArray(msgC0L, %_STACK_LANG);
+mcgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
 msgWncL:[["ja", "正解の選択肢があります!"], ["en", "There is a correct answer option(s)!"]];
-msgWnc:getAssocArray(msgWncL, %_STACK_LANG);
+msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
 if flgC0 then msg:sconcat(msg, msgC0, "<br>");
 if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
 sc:cAN/(cN+wAN)*ssc;
 /* There are real correct options (nocorrecttrue:false) & checked "no correct"-option(flgWnc:true) -> 0 */
-if (not nocorrecttrue) and flgWnc then sc:0;
+if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
 /* There are no real correct options and not checked "no correct" option -> cAN=0 -> score 0 */
 /* There are no real correct options and checked other incorrect options -> score 0 */
 if nocorrecttrue and apply("or", flgWL) then sc:0;
