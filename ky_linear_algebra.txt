@@ -107,7 +107,6 @@ all_sublist_leq(L,n):=apply(union,makelist(all_sublist_len(L,k),k,1,min(length(L
 check_basis_colspace(matA,vec_list):=block([matB,rw,cl,vlen:length(vec_list),ret:0],[rw,cl]:matrix_size(matA),if not apply("and",makelist(is(matrix_size(vec_list[k])=[rw,1]),k,1,vlen)) then return(-8),matB:apply(addcol,vec_list),if rank(addcol(matA,matB))>rank(matA) then return(-4),if not rank(matB)=vlen then ret:ret-2,if rank(matB)<rank(matA) then ret:ret-1,return(ret));
 colspace_basisp(matA,vec_list):=block([r],r:check_basis_colspace(matA,vec_list),if r=-8 then __msg:"the list of vectors include illegal size vectors" else if r=-4 then __msg:"the system of vectors include outside vectors" else if r=-3 then __msg:"the system of vectors are neither linearly independent nor span the space." else if r=-2 then __msg:"the system of vectors is not linear independent" else if r=-1 then __msg:"the vectors of the system do not span the space." else __msg:"ok, the list is basis.",return(is(r=0)));
 
-
 /* gcdL, lcmL, fixVec */
 gcd_list(L):=block([k,g],g:L[1],for k:1 while (k<length(L)) do (g:gcd(g,L[k+1])),return(g));
 lcm_list(mL):=block([l,k],l:mL[1],for k:1 while (k<length(mL)) do (l:l*mL[k+1]/gcd(l,mL[k+1])),return(l));
@@ -119,9 +118,14 @@ integer_vector2(v):=block([d,g,dL,nL,vv,sz],sz:matrix_size(v)[1],dL:map(denom, l
 /* new nullspace function for educational use */
 nullspace2(A):=block([rk, pv:[], pv1:[], F, FL:[], F1, rw, cl, rz, k, k1:1], rk:rank(A), [rw, cl]:matrix_size(A), F:redeche(A), for k:1 thru rk do pv:append(pv, [get_first_non_zero_column(F, k)]), rz:genmatrix(lambda([i,j], 0), 1, cl), for k:1 thru cl do if member(k, pv) then (FL:append(FL, [row(F, k1)]), k1:k1+1) else (FL:append(FL, [rz]), pv1:append(pv1, [k])), F1:-apply(addrow, FL)+genmatrix(lambda([i,j], if i=j then 1 else 0), cl, cl), return(makelist(col(F1, pv1[k]), k, 1, length(pv1))));
 
-/* display determinant of matrix */
+/* display determinant/paren/bracket paren of matrix */
 vmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"|",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
+pmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"(",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
+bmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"[",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
 
-/* Assocative Array ,連想配列 */
-getAssArray(s, L):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
-
+/* Associative Array : Application : for multilanguage messages */
+/* getAssocArray(L, s): [[s, "abc"], [t, "pqr"]] -> "abc" */
+getAssocArray(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+/* pushAssocArray(s, L, c): if L has "L[s]" entry, then replace the content to 'c' */
+/*   else append(L, [s, c]) */
+putAssocArray(L, s, c):=block([k, lgL, mL, rt:[]], if length(L)=0 then return ([[s, c]]), lgL:map(first, L), mL:map(second, L), if not member(s, lgL) then return(append(L, [[s, c]])) else for k:1 thru length(lgL) do  rt:append(rt, if lgL[k]=s then [[s, c]] else [L[k]]), return(rt));
