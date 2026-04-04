@@ -6,14 +6,21 @@ if listp(%__mcq_Cm2L) then %__mcq_Cm2:%__mcq_gaa(%__mcq_Cm2L, %_STACK_LANG);
 if listp(%__mcq_Cm3L) then %__mcq_Cm3:%__mcq_gaa(%__mcq_Cm3L, %_STACK_LANG);
 if listp(%__mcq_Cm4L) then %__mcq_Cm4:%__mcq_gaa(%__mcq_Cm4L, %_STACK_LANG);
 if listp(%__mcq_Cm5L) then %__mcq_Cm5:%__mcq_gaa(%__mcq_Cm5L, %_STACK_LANG);
-_Wm1:getAssocArray(%_MCQ_Wm1L, %_STACK_LANG);
-_Wm2:getAssocArray(%_MCQ_Wm2L, %_STACK_LANG);
-_Wm3:getAssocArray(%_MCQ_Wm3L, %_STACK_LANG);
-addCopt(_rp(%_MCQ_Cp1L), _Cm1);
-addCopt(_rp(%_MCQ_Cp2L), _Cm2);
-addWopt(_rp(%_MCQ_Wp1L), _Wm1);
-addWopt(_rp(%_MCQ_Wp2L), _Wm2);
-addWopt(_rp(%_MCQ_Wp3L), _Wm3);
+_Wm1:getAssocArray(%__mcq_Wm1L, %_STACK_LANG);
+if listp(%__mcq_Wm2L) then %__mcq_Wm2:%__mcq_gaa(%__mcq_Wm2L, %_STACK_LANG);
+if listp(%__mcq_Wm3L) then %__mcq_Wm3:%__mcq_gaa(%__mcq_Wm3L, %_STACK_LANG);
+if listp(%__mcq_Wm4L) then %__mcq_Wm4:%__mcq_gaa(%__mcq_Wm4L, %_STACK_LANG);
+if listp(%__mcq_Wm5L) then %__mcq_Wm5:%__mcq_gaa(%__mcq_Wm5L, %_STACK_LANG);
+%__mcq_addCopt(_rp(%__mcq_Cp1L), %__mcq_Cm1);
+%__mcq_addCopt(_rp(%__mcq_Cp2L), %__mcq_Cm2);
+%__mcq_addCopt(_rp(%__mcq_Cp3L), %__mcq_Cm3);
+%__mcq_addCopt(_rp(%__mcq_Cp4L), %__mcq_Cm4);
+%__mcq_addCopt(_rp(%__mcq_Cp5L), %__mcq_Cm5);
+%__mcq_addWopt(_rp(%__mcq_Wp1L), %__mcq_Wm1);
+%__mcq_addWopt(_rp(%__mcq_Wp2L), %__mcq_Wm2);
+%__mcq_addWopt(_rp(%__mcq_Wp3L), %__mcq_Wm3);
+%__mcq_addWopt(_rp(%__mcq_Wp4L), %__mcq_Wm4);
+%__mcq_addWopt(_rp(%__mcq_Wp5L), %__mcq_Wm5);
 
 %__mcq_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
 %__mcq_max_patterns:99; /* 最大パターン数(正答・誤答共通) */

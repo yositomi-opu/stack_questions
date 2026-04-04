@@ -7,6 +7,7 @@
 /* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
 /* get_assoc_array is also defined in ky_linear_algebra.txt */
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+%__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), return (m));
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
 %__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* wN:oN-cN */
@@ -14,13 +15,12 @@ if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
 %__mcq_nocoptSL:append(%__mcq_nocoptSL, [["ja", "選択肢に正解はない."]]);
 %__mcq_nocoptSL:append(%__mcq_nocoptSL, [["fr", "Aucune des réponses ci-dessus."]]);
 %__mcq_nocoptSL:append(%__mcq_nocoptSL, [["de", "Keine der oben genannten Antworten."]]);
-%__mcq_nocoptS:%__mcq_gaa(%__mcq_nocoptSL, %__STACK_LANG);
-if %__mcq_nocoptS="" then %__mcq_nocoptS:"None of the above.";
+%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
 %__mcq_noidSL:[["en", "I don't know yet."]];
 %__mcq_noidSL:append(%__mcq_noidSL, [["ja", "まだわからない."]]);
 %__mcq_noidSL:append(%__mcq_noidSL, [["fr", "Je ne sait pas encore."]]);
 %__mcq_noidSL:append(%__mcq_noidSL, [["de", "Ich weiß es noch nicht."]]);
-%__mcq_noidS:%__mcq_gaa(%__mcq_noidSL, %__STACK_LANG);
+%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %__STACK_LANG);
 %__mcq_CLbase:[];/* list of correct answer patterns */
 %__mcq_WLbase:[];/* list of incorrect(wrong) answer patterns */
 %__mcq_CmsgL:[];/* list of feedback messages for correct patterns */
