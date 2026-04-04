@@ -25,8 +25,8 @@ if %__mcq_nocoptS="" then %__mcq_nocoptS:"None of the above.";
 %__mcq_WLbase:[];/* list of incorrect(wrong) answer patterns */
 %__mcq_CmsgL:[];/* list of feedback messages for correct patterns */
 %__mcq_WmsgL:[];/* list of feedback messages for incorrect(wrong) patterns */
-%__mcq_addCopt(s, m):=block([], %__mcq_CLbase:append(%__mcq_CLbase, [s]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m]));
-%__mcq_addWopt(s, m):=block([], %__mcq_WLbase:append(%__mcq_WLbase, [s]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m]));
+%__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
+%__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
 
 /************* EOF **************/
 
