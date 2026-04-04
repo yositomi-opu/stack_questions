@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115385  -->
+<!-- question: 115431  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-rb-2026-03-22p1</text>
+      <text>000.MCQ-rb-2026-04-04</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p>[[lang code='ja']][[/lang]][[lang code='en']][[/lang]]<br></p>
@@ -18,34 +18,34 @@
     <hidden>0</hidden>
     <idnumber></idnumber>
     <stackversion>
-      <text>2025073100</text>
+      <text>2026010500</text>
     </stackversion>
     <questionvariables>
-      <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
-/* [全選択肢の数, 正解選択肢の数] (rb のときも2個以上可能) */
-[oN, cN]:[5, 1];
-/* random parameters */
-/* (同じ型の問題でvariationを調整(固定)するパラメータはここに書くのを推奨) */
+      <text><![CDATA[/* Latest version is github/yositomi-opu/stack_question */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+/* Number of [all options, correct options] (rb/radio button case does work) */
+[oN, cN]:[5, 2];
+/* key parameters(e.g. which control the only level of the question) here if required */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
 /*********************************** FLAGS ***********************************/
-/* 以下は不要ならさわらなくてよい(modification not required if not necessary) */
+/* Flags: modification not required if not necessary */
 /* Flags for mcq_template(before include pre template) */
-/* -cb と -rb は解答変数の型(checkbox or radio button) と以下の設定の違いのみ */
+/* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
 __mcq_rb_cb:"rb";
-/* cN:(min or max)(cN, 正答パターン数), wN:(min or max)(oN_cN, 誤答パターン数) */
+/* cN:(min or max)(cN, # of all correct patterns), wN:(min or max)(oN_cN, # of all incorrect patterns) */
 __mcq_min_max:min;
-/* feedback を表示するか? (display feedback ? ) */
+/* display feedback? ( true recommended ) */
 __mcq_fbp:true;
-/* 部分点をつけるか? (use subscore ? cf. ATCM2022 ) */
+/* use subscore ? cf. ATCM2022 Yoshitomi */
 __mcq_subsc:true;
-/* "わからない"選択肢を含めるか? (false) */
+/* include "I have no idea option? " (default: false) */
 __mcq_noidea:false;
-/* "選択肢に正解はない"選択肢を含めるか? (false) */
+/* include "nocorrect answer" option ? (default: false) */
 __mcq_nocorrectopt:false;
-/* 選択肢に正解はない選択肢は正解か? (__mcq_nocorrectopt と自動で and をとる) */
+/* if include nocorrect answer options, is it correct answer or not ? */
 __mcq_nocorrecttrue:rand([true, false]);
- /* 自動で"1つ選べ", "すべて選べ" を付加するか? (true) */
+/* add any of "choose one" or "choose all" automatically to question text ? (default: true) */
 __mcq_qtext_auto:true;
 /****************************** DO NOT EDIT HERE *****************************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.txt");
@@ -204,7 +204,7 @@ if not fbp then msg:"";]]></text>
         <truescoremode>=</truescoremode>
         <truescore>1</truescore>
         <truepenalty></truepenalty>
-        <truenextnode>-1</truenextnode>
+        <truenextnode>2</truenextnode>
         <trueanswernote>prt1-2-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
@@ -216,7 +216,7 @@ if not fbp then msg:"";]]></text>
         <falsescoremode>=</falsescoremode>
         <falsescore>sc</falsescore>
         <falsepenalty></falsepenalty>
-        <falsenextnode>-1</falsenextnode>
+        <falsenextnode>2</falsenextnode>
         <falseanswernote>prt1-2-F</falseanswernote>
         <falsefeedback format="html">
           <text><![CDATA[<!-- general error / 一般の誤り -->
@@ -228,6 +228,245 @@ if not fbp then msg:"";]]></text>
 [[lang code='ja']]得点は{@sc@}です.[[/lang]]
 [[lang code='en']]Your score is {@sc@}.[[/lang]]
 </p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>10</name>
+        <description>Wrong(Incorrect) Pattern 6</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[6]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-11-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-11-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description>Correct Pattern 1</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>3</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description>Correct Pattern 2</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>4</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description>Correct Pattern 3</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>5</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>5</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>5</name>
+        <description>Wrong(Incorrect) pattern 1</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>6</truenextnode>
+        <trueanswernote>prt1-6-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>6</falsenextnode>
+        <falseanswernote>prt1-6-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>6</name>
+        <description>Wrong(Incorrect) Pattern 2</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>7</truenextnode>
+        <trueanswernote>prt1-7-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>7</falsenextnode>
+        <falseanswernote>prt1-7-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>7</name>
+        <description>Wrong(Incorrect) Pattern 3</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>8</truenextnode>
+        <trueanswernote>prt1-8-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>8</falsenextnode>
+        <falseanswernote>prt1-8-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>8</name>
+        <description>Wrong(Incorrect) Pattern 4</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[4]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>9</truenextnode>
+        <trueanswernote>prt1-9-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>9</falsenextnode>
+        <falseanswernote>prt1-9-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- dummy -->
+<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>9</name>
+        <description>Wrong(Incorrect) Pattern 5</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>10</truenextnode>
+        <trueanswernote>prt1-10-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>10</falsenextnode>
+        <falseanswernote>prt1-10-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
         </falsefeedback>
       </node>
     </prt>
