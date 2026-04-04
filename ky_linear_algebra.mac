@@ -108,7 +108,6 @@ check_basis_colspace(matA,vec_list):=block([matB,rw,cl,vlen:length(vec_list),ret
 colspace_basisp(matA,vec_list):=block([r],r:check_basis_colspace(matA,vec_list),if r=-8 then __msg:"the list of vectors include illegal size vectors" else if r=-4 then __msg:"the system of vectors include outside vectors" else if r=-3 then __msg:"the system of vectors are neither linearly independent nor span the space." else if r=-2 then __msg:"the system of vectors is not linear independent" else if r=-1 then __msg:"the vectors of the system do not span the space." else __msg:"ok, the list is basis.",return(is(r=0)));
 
 
-
 gcd_list(L):=block([k,g],g:L[1],for k:1 while (k<length(L)) do (g:gcd(g,L[k+1])),return(g));
 lcm_list(mL):=block([l,k],l:mL[1],for k:1 while (k<length(mL)) do (l:l*mL[k+1]/gcd(l,mL[k+1])),return(l));
 gcdL(L):=gcd_list(L);
@@ -121,6 +120,12 @@ nullspace2(A):=block([rk, pv:[], pv1:[], F, FL:[], F1, rw, cl, rz, k, k1:1], rk:
 
 
 vmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"|",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
+pmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"(",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
+bmat(m):=block([lc:lmxchar,s:"\\("],lmxchar:"[",s:sconcat(s,tex1(m),"\\)"),lmxchar:lc,return(s));
 
 
-getAssArray(s, L):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+
+get_assoc_array(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+
+
+put_assoc_array(L, s, c):=block([k, lgL, mL, rt:[]], if length(L)=0 then return ([[s, c]]), lgL:map(first, L), mL:map(second, L), if not member(s, lgL) then return(append(L, [[s, c]])) else for k:1 thru length(lgL) do  rt:append(rt, if lgL[k]=s then [[s, c]] else [L[k]]), return(rt));
