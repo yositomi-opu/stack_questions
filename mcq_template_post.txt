@@ -1,29 +1,45 @@
 /* You can find latest version in github/yositomi-opu/stack_questions  */
 /* setup lists to decide the list of options */
-/* %__mcq_gaa is defined in pre.txt */
-_Cm1:%__mcq_gaa(%__mcq_Cm1L, %_STACK_LANG);
-if listp(%__mcq_Cm2L) then %__mcq_Cm2:%__mcq_gaa(%__mcq_Cm2L, %_STACK_LANG);
-if listp(%__mcq_Cm3L) then %__mcq_Cm3:%__mcq_gaa(%__mcq_Cm3L, %_STACK_LANG);
-if listp(%__mcq_Cm4L) then %__mcq_Cm4:%__mcq_gaa(%__mcq_Cm4L, %_STACK_LANG);
-if listp(%__mcq_Cm5L) then %__mcq_Cm5:%__mcq_gaa(%__mcq_Cm5L, %_STACK_LANG);
-_Wm1:getAssocArray(%__mcq_Wm1L, %_STACK_LANG);
-if listp(%__mcq_Wm2L) then %__mcq_Wm2:%__mcq_gaa(%__mcq_Wm2L, %_STACK_LANG);
-if listp(%__mcq_Wm3L) then %__mcq_Wm3:%__mcq_gaa(%__mcq_Wm3L, %_STACK_LANG);
-if listp(%__mcq_Wm4L) then %__mcq_Wm4:%__mcq_gaa(%__mcq_Wm4L, %_STACK_LANG);
-if listp(%__mcq_Wm5L) then %__mcq_Wm5:%__mcq_gaa(%__mcq_Wm5L, %_STACK_LANG);
-%__mcq_addCopt(_rp(%__mcq_Cp1L), %__mcq_Cm1);
-%__mcq_addCopt(_rp(%__mcq_Cp2L), %__mcq_Cm2);
-%__mcq_addCopt(_rp(%__mcq_Cp3L), %__mcq_Cm3);
-%__mcq_addCopt(_rp(%__mcq_Cp4L), %__mcq_Cm4);
-%__mcq_addCopt(_rp(%__mcq_Cp5L), %__mcq_Cm5);
-%__mcq_addWopt(_rp(%__mcq_Wp1L), %__mcq_Wm1);
-%__mcq_addWopt(_rp(%__mcq_Wp2L), %__mcq_Wm2);
-%__mcq_addWopt(_rp(%__mcq_Wp3L), %__mcq_Wm3);
-%__mcq_addWopt(_rp(%__mcq_Wp4L), %__mcq_Wm4);
-%__mcq_addWopt(_rp(%__mcq_Wp5L), %__mcq_Wm5);
+/* %__mcq_lang is defined in pre.txt */
+_Cm1:%__mcq_lang(%__mcq_Cm1L, %_STACK_LANG);
+%__mcq_Cm2:if listp(%__mcq_Cm2L) then %__mcq_lang(%__mcq_Cm2L, %_STACK_LANG);
+%__mcq_Cm3:if listp(%__mcq_Cm3L) then %__mcq_lang(%__mcq_Cm3L, %_STACK_LANG);
+%__mcq_Cm4:if listp(%__mcq_Cm4L) then %__mcq_lang(%__mcq_Cm4L, %_STACK_LANG);
+%__mcq_Cm5:if listp(%__mcq_Cm5L) then %__mcq_lang(%__mcq_Cm5L, %_STACK_LANG);
+%__mcq_Cm6:if listp(%__mcq_Cm6L) then %__mcq_lang(%__mcq_Cm6L, %_STACK_LANG);
+%__mcq_Cm7:if listp(%__mcq_Cm7L) then %__mcq_lang(%__mcq_Cm7L, %_STACK_LANG);
+%__mcq_Cm8:if listp(%__mcq_Cm8L) then %__mcq_lang(%__mcq_Cm8L, %_STACK_LANG);
+_Wm1:%__mcq_lang(%__mcq_Wm1L, %_STACK_LANG);
+%__mcq_Wm2:if listp(%__mcq_Wm2L) then %__mcq_lang(%__mcq_Wm2L, %_STACK_LANG) else "";
+%__mcq_Wm3:if listp(%__mcq_Wm3L) then %__mcq_lang(%__mcq_Wm3L, %_STACK_LANG) else "";
+%__mcq_Wm4:if listp(%__mcq_Wm4L) then %__mcq_lang(%__mcq_Wm4L, %_STACK_LANG) else "";
+%__mcq_Wm5:if listp(%__mcq_Wm5L) then %__mcq_lang(%__mcq_Wm5L, %_STACK_LANG) else "";
+%__mcq_Wm6:if listp(%__mcq_Wm6L) then %__mcq_lang(%__mcq_Wm6L, %_STACK_LANG) else "";
+%__mcq_Wm7:if listp(%__mcq_Wm7L) then %__mcq_lang(%__mcq_Wm7L, %_STACK_LANG) else "";
+%__mcq_Wm8:if listp(%__mcq_Wm8L) then %__mcq_lang(%__mcq_Wm8L, %_STACK_LANG) else "";
+%__mcq_Wm9:if listp(%__mcq_Wm9L) then %__mcq_lang(%__mcq_Wm9L, %_STACK_LANG) else "";
+%__mcq_Wm10:if listp(%__mcq_Wm10L) then %__mcq_lang(%__mcq_Wm10L, %_STACK_LANG) else "";
+%__mcq_addCopt(%__mcq_Cp1L, %__mcq_Cm1);
+%__mcq_addCopt(%__mcq_Cp2L, %__mcq_Cm2);
+%__mcq_addCopt(%__mcq_Cp3L, %__mcq_Cm3);
+%__mcq_addCopt(%__mcq_Cp4L, %__mcq_Cm4);
+%__mcq_addCopt(%__mcq_Cp5L, %__mcq_Cm5);
+%__mcq_addCopt(%__mcq_Cp6L, %__mcq_Cm6);
+%__mcq_addCopt(%__mcq_Cp7L, %__mcq_Cm7);
+%__mcq_addCopt(%__mcq_Cp8L, %__mcq_Cm8);
+%__mcq_addWopt(%__mcq_Wp1L, %__mcq_Wm1);
+%__mcq_addWopt(%__mcq_Wp2L, %__mcq_Wm2);
+%__mcq_addWopt(%__mcq_Wp3L, %__mcq_Wm3);
+%__mcq_addWopt(%__mcq_Wp4L, %__mcq_Wm4);
+%__mcq_addWopt(%__mcq_Wp5L, %__mcq_Wm5);
+%__mcq_addWopt(%__mcq_Wp6L, %__mcq_Wm6);
+%__mcq_addWopt(%__mcq_Wp7L, %__mcq_Wm7);
+%__mcq_addWopt(%__mcq_Wp8L, %__mcq_Wm8);
+%__mcq_addWopt(%__mcq_Wp9L, %__mcq_Wm9);
+%__mcq_addWopt(%__mcq_Wp10L, %__mcq_Wm10);
 
-%__mcq_max_opts:10; /* 各パターンの選択肢の数最大値 (正答・誤答共通) */
-%__mcq_max_patterns:99; /* 最大パターン数(正答・誤答共通) */
+%__mcq_max_opts:10; /* max num of opts of each pattern */
+%__mcq_max_patterns:99; /* max num of opts of each pattern */
 /* number of patterns of correct/incorrect(wrong) options(auto-gen) */
 /* correct/incorrect boundary value of id of options list */
 %__mcq_cw_delimiter:%__mcq_max_opts*(%__mcq_max_patterns+1);
