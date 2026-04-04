@@ -1,13 +1,13 @@
 /* radio button case: ans1 is integer, checkbox case: ans1 is list */
 if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
 if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
-ans1WL:makelist(floor(ans1L[k]/_cw_delimiter), k, 1, length(ans1L));
-ans1CL:makelist(if ans1L[k]<_cw_delimiter then floor(ans1L[k]/_max_opts) else -1, k, 1, length(ans1L));
+ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
+ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));
 countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
 cAN:countL(ans1WL, 0);
-wAN:apply("+", makelist(countL(ans1WL, k), k, 1, _max_patterns));
-flgCL:makelist(member(k, ans1CL), k, 1, max(%_MCQ_MAX_NCP, length(CLbase)));
-flgWL:makelist(member(k, ans1WL), k, 1, max(%_MCQ_MAX_NWP, length(WLbase)));
+wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
+flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(CLbase)));
+flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(WLbase)));
 flgWnc:member(_nocorrect_flag, ans1WL);
 flgC0:member(0, ans1CL);
 flgNOID:member(_noidea_flag, ans1WL);
@@ -21,11 +21,13 @@ msgWncL:[["ja", "正解の選択肢があります!"], ["en", "There is a correc
 msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
 if flgC0 then msg:sconcat(msg, msgC0, "<br>");
 if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
-sc:cAN/(cN+wAN)*ssc;
+cN:%__mcq_num_copts;
+wN:%__mcq_num_wopts;
+sc:cAN/(cN+wAN)*%__mcq_ssc;
 /* There are real correct options (nocorrecttrue:false) & checked "no correct"-option(flgWnc:true) -> 0 */
 if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
 /* There are no real correct options and not checked "no correct" option -> cAN=0 -> score 0 */
 /* There are no real correct options and checked other incorrect options -> score 0 */
-if nocorrecttrue and apply("or", flgWL) then sc:0;
-if not __mcq_fbp then msg:"";
+if %__mcq_nocorrecttrue and apply("or", flgWL) then sc:0;
+if not %__mcq_fbp then msg:"";
 
