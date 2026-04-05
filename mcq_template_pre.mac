@@ -34,3 +34,11 @@ if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
 %__mcq_WmsgL:[];
 %__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
+%__mcq_noidea_checkedL:[
+ ["en", "The option \"I don't know yet. \" is selected/checked. Score is 0."],
+ ["ja", "「まだわからない」が選択/チェックされました. 得点は0です."],
+ ["fr", "« Je ne sais pas » a été sélectionné. Le score est de 0."],
+ ["de", "„Ich weiß es nicht“ wurde ausgewählt. Die Punktzahl beträgt 0."],
+ ["other", ""]
+];
+%__mcq_noidea_checked:%__mcq_lang(%__mcq_noidea_checkedL, %_STACK_LANG);
