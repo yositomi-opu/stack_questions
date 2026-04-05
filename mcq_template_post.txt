@@ -2,14 +2,14 @@
 /* setup lists to decide the list of options */
 /* %__mcq_lang is defined in pre.txt */
 %__Cmsg1:%__mcq_lang(%__Cmsg1L, %_STACK_LANG);
-%__Cmsg2:if listp(%__Cmsg2L) then %__mcq_lang(%__Cmsg2L, %_STACK_LANG);
-%__Cmsg3:if listp(%__Cmsg3L) then %__mcq_lang(%__Cmsg3L, %_STACK_LANG);
-%__Cmsg4:if listp(%__Cmsg4L) then %__mcq_lang(%__Cmsg4L, %_STACK_LANG);
-%__Cmsg5:if listp(%__Cmsg5L) then %__mcq_lang(%__Cmsg5L, %_STACK_LANG);
-%__Cmsg6:if listp(%__Cmsg6L) then %__mcq_lang(%__Cmsg6L, %_STACK_LANG);
-%__Cmsg7:if listp(%__Cmsg7L) then %__mcq_lang(%__Cmsg7L, %_STACK_LANG);
-%__Cmsg8:if listp(%__Cmsg8L) then %__mcq_lang(%__Cmsg8L, %_STACK_LANG);
-%__Cmsg9:if listp(%__Cmsg9L) then %__mcq_lang(%__Cmsg9L, %_STACK_LANG);
+%__Cmsg2:if listp(%__Cmsg2L) then %__mcq_lang(%__Cmsg2L, %_STACK_LANG) else "";
+%__Cmsg3:if listp(%__Cmsg3L) then %__mcq_lang(%__Cmsg3L, %_STACK_LANG) else "";
+%__Cmsg4:if listp(%__Cmsg4L) then %__mcq_lang(%__Cmsg4L, %_STACK_LANG) else "";
+%__Cmsg5:if listp(%__Cmsg5L) then %__mcq_lang(%__Cmsg5L, %_STACK_LANG) else "";
+%__Cmsg6:if listp(%__Cmsg6L) then %__mcq_lang(%__Cmsg6L, %_STACK_LANG) else "";
+%__Cmsg7:if listp(%__Cmsg7L) then %__mcq_lang(%__Cmsg7L, %_STACK_LANG) else "";
+%__Cmsg8:if listp(%__Cmsg8L) then %__mcq_lang(%__Cmsg8L, %_STACK_LANG) else "";
+%__Cmsg9:if listp(%__Cmsg9L) then %__mcq_lang(%__Cmsg9L, %_STACK_LANG) else "";
 %__Wmsg1:%__mcq_lang(%__Wmsg1L, %_STACK_LANG);
 %__Wmsg2:if listp(%__Wmsg2L) then %__mcq_lang(%__Wmsg2L, %_STACK_LANG) else "";
 %__Wmsg3:if listp(%__Wmsg3L) then %__mcq_lang(%__Wmsg3L, %_STACK_LANG) else "";
