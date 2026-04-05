@@ -5,6 +5,12 @@
 /* 2026-01-05 use ky_linear_algebra.txt */
 /* 2025-08-17 Bug fix, add Cmsg, change code for correct patterns */
 /* MCQ for Q-matrix(fbp:false,ssc:0)  and general (fbp:true, ssc:1) */
+/* fbp: feedback message print or not ? */
+/* noidea: "I don't know" option is included? */
+/* nocorrectopt: "No correct options above." option is included?  */
+/* nocorrecttrue: "No correct options above." is correcct option? */
+/* qtext_auto: check the case of rb or cb and decide appropriate words for __SELTYPE__ */
+[%__mcq_min_max, %__mcq_fbp, %__mcq_subsc, %__mcq_noidea, %__mcq_nocorrectopt, %__mcq_nocorrecttrue, %__mcq_qtext_auto]:%_MCQ_FLAGS;
 /* get_assoc_array is also defined in ky_linear_algebra.txt */
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), return (m));
