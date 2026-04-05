@@ -10,7 +10,7 @@
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), return (m));
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
-%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* wN:oN-cN */
+%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* nW:nO-nC */
 %__mcq_nocoptSL:[["en", "None of the above."]];
 %__mcq_nocoptSL:append(%__mcq_nocoptSL, [["ja", "選択肢に正解はない."]]);
 %__mcq_nocoptSL:append(%__mcq_nocoptSL, [["fr", "Aucune des réponses ci-dessus."]]);

@@ -52,7 +52,7 @@ _Wm1:%__mcq_lang(%__mcq_Wm1L, %_STACK_LANG);
 /* if on>=number of patterns, pick up more than one opt from each pattern */
 /* if on<number of patterns, pick up one opt from randomly chosen on-patterns */
 %_rp(L):=random_permutation(L);
-%__mcq_make_pattern(on,bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
+%__mcq_make_pattern(on, bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
 else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1, if ptL[k]>1 then ptL[k]:ptL[k]-1) 
 else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 then ptL[k]:1)), return(ptL));
 %__mcq_nCL:%__mcq_make_pattern(%__mcq_nC, %__mcq_CLbase);
@@ -72,7 +72,7 @@ else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 t
 %__mcq_ListCL1:%_rp(%__mcq_ListCL0);
 %__mcq_ListWL1:%_rp(%__mcq_ListWL0);
 %__mcq_taC:%_rp(makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts));
-%__mcq_taW:%_rp(append(makelist(%__mcq_ListCL1[k], k, 1, %__mcq_num_copts), makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_copts)));
+%__mcq_taW:%_rp(append(makelist(%__mcq_ListCL1[k], k, 1, %__mcq_num_copts), makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts)));
 ta1:%__mcq_taW;
 if %__mcq_nocorrectopt then (if %__mcq_nocorrecttrue then ta1:append(%__mcq_taC, %__mcq_NCL) else ta1:append(%__mcq_taW, %__mcq_NCL));
 if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
