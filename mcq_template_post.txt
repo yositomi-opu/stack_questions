@@ -79,7 +79,7 @@ Cans1:mcq_correct(ta1);/* formal defintion. not used */
 %__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
 %__mcq_SELALLL:[
  ["en", "all correct options"],
- ["ja", "すべて選べ"]
+ ["ja", "すべて選べ"],
  ["fr", "Tout sélectionner"],
  ["de", "Alle zutreffenden auswählen."],
  ["other", ""]
