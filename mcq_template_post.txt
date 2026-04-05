@@ -62,8 +62,8 @@ else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 t
 %__mcq_CLL:makelist(makelist(%__mcq_CLbase[k][j], j, 1, min(%__mcq_nCL[k], length(%__mcq_CLbase[k]))), k, 1, length(%__mcq_nCL));
 %__mcq_WLL:makelist(makelist(%__mcq_WLbase[k][j], j, 1, min(%__mcq_nWL[k], length(%__mcq_WLbase[k]))), k, 1, length(%__mcq_nWL));
 /* "no correct options above" */
-%__mcq_nocorrect_flag:%__mcq_max_patterns+1;
-%__mcq_noc_id:%__mcq_nocorrect_flag*%__mcq_cw_delimiter;
+%__mcq_nocorrect_id:%__mcq_max_patterns+1;
+%__mcq_noc_id:%__mcq_nocorrect_id*%__mcq_cw_delimiter;
 %__mcq_noidea_flag:%__mcq_max_patterns*10+1;
 %__mcq_noi_id:%__mcq_noidea_flag*%__mcq_cw_delimiter;
 %__mcq_NCL:if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then [[1, true, %__mcq_nocoptS]] else [[%__mcq_noc_id, false, %__mcq_nocoptS]];

@@ -1,5 +1,5 @@
-
-if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
+出力しました: mcq_template_fvar.mac
+lse chk1:member(ans1, Cans1);
 if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
 ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
 ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));
@@ -8,7 +8,7 @@ cAN:countL(ans1WL, 0);
 wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
 flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(%__mcq_CLbase)));
 flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(%__mcq_WLbase)));
-flgWnc:member(%__mcq_nocorrect_flag, ans1WL);
+flgWnc:member(%__mcq_nocorrect_id, ans1WL);
 flgC0:member(0, ans1CL);
 flgNOID:member(%__mcq_noidea_flag, ans1WL);
 msg:"";
@@ -40,5 +40,5 @@ sc:cAN/(cN+wAN)*%__mcq_ssc;
 if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
 
 
-if %__mcq_nocorrecttrue and apply("or", flgWL) then sc:0;
+if %__mcq_nocorrecttrue and %__mcq_nocorrectopt and apply("or", flgWL) then sc:0;
 if not %__mcq_fbp then msg:"";
