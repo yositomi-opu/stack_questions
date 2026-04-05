@@ -14,7 +14,7 @@ flgNOID:member(%__mcq_noidea_flag, ans1WL);
 msg:"";
 /* customize appropriate message for each incorrect(wrong) pattern */
 for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
-for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__msg_WmsgL[k], "<br>");
+for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
 msgC0L:[
   ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."],
   ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], 
