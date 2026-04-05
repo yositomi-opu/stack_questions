@@ -93,8 +93,8 @@ Cans1:mcq_correct(ta1);/* formal defintion. not used */
  ["other", ""]
 ];
 %__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
-%__mcq_SELL:[["en", "choose"], ["ja", "選べ"], ["fr", "Choisissez."], ["de", "Wählen Sie."]];
+%__mcq_SELL:[["en", "Choose "], ["ja", "選べ."], ["fr", "Choisissez "], ["de", "Wählen Sie "], ["other", ""]];
 %__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
-if %__mcq_qtext_auto then qtext:ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext);
+qtext:ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext);
 
