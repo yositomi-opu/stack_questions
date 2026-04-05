@@ -87,7 +87,7 @@ Cans1:mcq_correct(ta1);/* formal defintion. not used */
  ["ja", "選べ. 正解が2つ以上ある場合も1つ選べばよい."],
  ["fr", "Choisissez une seule réponse. Même s’il y a plusieurs réponses correctes, n’en sélectionnez qu’une."],
  ["de", "Wählen Sie eine Antwort. Auch wenn es mehrere richtige Antworten gibt, wählen Sie nur eine."]
-]
+];
 %__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
 %__mcq_SELL:[["en", "choose"], ["ja", "選べ"], ["fr", "Choisissez."], ["de", "Wählen Sie."]];
 %__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
