@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115432  -->
+<!-- question: 115483  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-cb-2026-04-04</text>
+      <text>000.MCQ-cb-2026-04-05b</text>
     </name>
     <questiontext format="moodle_auto_format">
-      <text><![CDATA[<p>[[lang code='ja']][[/lang]][[lang code='en']][[/lang]]<br></p>
+      <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
 <p>{@qtext@}</p>
 <p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
     </questiontext>
@@ -21,61 +21,122 @@
       <text>2026010500</text>
     </stackversion>
     <questionvariables>
-      <text><![CDATA[/* Latest version is github/yositomi-opu/stack_question */
-stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
-/* Number of [all options, correct options] (rb/radio button case does work) */
-[oN, cN]:[5, 2];
+      <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+/* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
+%__mcq_rb_cb:"cb";
+/*************** some usual fuctions I use. Feel free to customize here **********************/
+powerdisp:true;
+%_rp(L):=random_permutation(L);
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+texP1(a,u):=sconcat("\\(", tex1(a), "+p", tex1(u), "\\quad (p\\in{\\mathbb R})\\)");
+texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q\\in{\\mathbb R})\\)");
+/*********************************** Settings ***********************************/
+/* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
+/* Number of all options and correct options (rb/radio button case admit does work) */
+/* If the number of all options (or the sum of options) for each pattern is less than this setting, */
+/* these values will be automatically adjusted. _wopts=_opts-_copts */
+%__mcq_num_opts:5;
+%__mcq_num_copts:2;/* may be randomized e.g. rand([1, 1, 2]) etc. */
+/* Flags : modification not required if not necessary. See mcq_template_pre.txt for details */
+/* [use feedback?, use subscore?, use noidea opt, use nocorrect opt, is nocorrect opt true?, use qtext_auto?] */
+%_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
+/* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
+/*       and adjust the following constants. */
+%__mcq_max_cp:5;
+%__mcq_max_wp:9;
+/********************************* DO NOT EDIT HERE **************************************/
+stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
+/*****************************************************************************************/
+/**** You can make database using the area below until END of MAIN QUESTION VARIABLES ****/
+/******************************** MAIN QUESTION VARIABLES ********************************/
 /* key parameters(e.g. which control the only level of the question) here if required */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
-/*********************************** FLAGS ***********************************/
-/* Flags: modification not required if not necessary */
-/* Flags for mcq_template(before include pre template) */
-/* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
-__mcq_rb_cb:"cb";
-/* cN:(min or max)(cN, # of all correct patterns), wN:(min or max)(oN_cN, # of all incorrect patterns) */
-__mcq_min_max:min;
-/* display feedback? ( true recommended ) */
-__mcq_fbp:true;
-/* use subscore ? cf. ATCM2022 Yoshitomi */
-__mcq_subsc:true;
-/* include "I have no idea option? " (default: false) */
-__mcq_noidea:false;
-/* include "nocorrect answer" option ? (default: false) */
-__mcq_nocorrectopt:false;
-/* if include nocorrect answer options, is it correct answer or not ? */
-__mcq_nocorrecttrue:rand([true, false]);
-/* add any of "choose one" or "choose all" automatically to question text ? (default: true) */
-__mcq_qtext_auto:true;
-/****************************** DO NOT EDIT HERE *****************************/
-stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.txt");
-/*****************************************************************************/
-
-/**************** QUESTION VARIABLES for MAIN CONTENT ****************/
-/* 正答・誤答パターン生成用変数, 問題文生成 */
+/* Generate correct/incorrect patterns and messages */
 matF:randechelon(rw, cl, pv, [-2, -1, -1, 0, 1, 1, 2]);
 matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
 matA:matP.matF;
-/* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
-if %_STACK_LANG="ja" then qtext:sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.") else qtext:sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.");
-if %_STACK_LANG="ja" then _Cm1:"正解パターン1です." else _Cm1:"Correct pattern 1";
-if %_STACK_LANG="ja" then _Cm2:"正解パターン2です." else _Cm2:"Correct pattern 2";
-if %_STACK_LANG="ja" then _Wm1:"誤答パターン1です." else _Wm1:"Incorrect pattern 1";
-if %_STACK_LANG="ja" then _Wm2:"誤答パターン1です." else _Wm2:"Incorrect pattern 2";
-if %_STACK_LANG="ja" then _Wm3:"誤答パターン1です." else _Wm3:"Incorrect pattern 3";
-/************************ Patterns ********************/
-/* 正解/誤答のパターンとフィードバックをセットで List に push していく. */
-addCopt(_rp(["Correct pattern1-1"]), _Cm1);
-addCopt(_rp(["Correct pattern2-1"]), _Cm2);
-addWopt(_rp(["Wpattern1-1"]), _Wm1);
-addWopt(_rp(["Wpattern2-1"]), _Wm2);
-addWopt(_rp(["Wpattern3-1", "Wpattern3-2"]), _Wm3);
-/* 各パターンからは1つ以上選択される. 何個ずつ選ぶかは自動で行う(mkPattern関数). */
-/**************** END OF QUESTION VARIABLES for MAIN CONTENT ******************/
-
-/****************************** DO NOT EDIT HERE *****************************/
-stack_include("https://stack.mathedu.jp/sc/mcq_template_post.txt");
-/*****************************************************************************/]]></text>
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+%__mcq_qtextL:[
+ ["en", sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.")],
+ ["ja", sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.")],
+ ["fr", sconcat("Lorsque \\(A=", tex1(matA), "\\), choisissez __SELTYPE__ comme forme échelonnée réduite.")],
+ ["de", sconcat("Wenn \\(A=", tex1(matA), "\\) ist, wählen Sie __SELTYPE__ als reduzierte Zeilenstufenform.")]
+];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__Copt1:[
+ ["Correct Pattern1-1"],
+ ["Correct Pattern1-2"]
+];
+%__Cmsg1L:[
+ ["en", "Correct pattern 1"],
+ ["ja", "正解パターン1です."], 
+ ["fr", "Motif de réponse correcte 1"],
+ ["de", "Richtiges Antwortmuster 1"],
+ ["other", ""]
+];
+/* Correct pattern 2 */
+%__Copt2:[
+ ["Correct Pattern2-1"], 
+ ["Correct Pattern2-2"]
+];
+%__Cmsg2L:[
+ ["en", "Correct pattern 2"],
+ ["ja", "正解パターン2です."], 
+ ["fr", "Motif de réponse correcte 2"],
+ ["de", "Richtiges Antwortmuster 2"], 
+ ["other", ""]
+];
+/* Incorrect(wrong) pattern 1 */
+%__Wopt1:[
+ ["Incorrect Pattern1-1"],
+ ["Incorrect Pattern1-2"]
+];
+%__Wmsg1L:[
+ ["en", "Incorrect pattern 1"],
+ ["ja", "誤答パターン1です."], 
+ ["fr", "Motif de réponse incorrecte 1"],
+ ["de", "Falsches Antwortmuster 1"],
+ ["other", ""]
+];
+/* Incorrect(wrong) pattern 2 */
+%__Wopt2:[
+ ["Incorrect Pattern2-1"], ["Incorrect Pattern2-2"]
+];
+%__Wmsg2L:[
+ ["en", "Incorrect pattern 2"],
+ ["ja", "誤答パターン2です."], 
+ ["fr", "Motif de réponse incorrecte 2"],
+ ["de", "Falsches Antwortmuster 2"],
+ ["other", ""]
+];
+/* Incorrect(wrong) pattern 3 */
+%__Wopt3:[
+ ["Incorrect Pattern3-1"], ["Incorrect Pattern3-2"]
+];
+%__Wmsg3L:[
+ ["en", "Incorrect pattern 3"],
+ ["ja", "誤答パターン3です."], 
+ ["fr", "Motif de réponse incorrecte 3"],
+ ["de", "Falsches Antwortmuster 3"],
+ ["other", ""]
+];
+/*****************************************************************************************/
+/***************************** END OF MAIN QUESTION VARIABLES ****************************/
+/*****************************************************************************************/
+/*********************************** DO NOT EDIT HERE ************************************/
+/*************** patterns is automatically generate by the post template *****************/
+stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
+/*****************************************************************************************/
+]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
@@ -138,33 +199,8 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.txt");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[/* ja:ラジオボタンの場合は, ans1 は数値， チェックボックスのときは, リスト */
-/* en:radio button case: ans1 is numerical , checkbox case: ans1 is list */
-if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1,Cans1);
-if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
-ans1WL:makelist(floor(ans1L[k]/_cw_delimiter),k,1,length(ans1L));
-ans1CL:makelist(if ans1L[k]<_cw_delimiter then floor(ans1L[k]/_max_opts) else -1,k,1,length(ans1L));
-countL(L,t):=block([k,rt:0],for k:1 thru length(L) do if L[k]=t then rt:rt+1,return(rt));
-cAN:countL(ans1WL,0);
-wAN:apply("+",makelist(countL(ans1WL,k),k,1,_max_patterns));
-flgCL:makelist(member(k,ans1CL),k,1,length(CLbase));
-flgWL:makelist(member(k,ans1WL),k,1,length(WLbase));
-flgWnc:member(_nocorrect_flag,ans1WL);
-flgC0:member(0,ans1CL);
-flgNOID:member(_noidea_flag,ans1WL);
-msg:"";
-/* customize appropriate message for each incorrect(wrong) pattern */
-for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg,CmsgL[k],"<br>");
-for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg,WmsgL[k],"<br>");
-if flgC0 then msg:sconcat(msg,"選択肢に正解はありません. 他を選択していなければ正解です.<br>");
-if flgWnc then msg:sconcat(msg,"正解の選択肢はあります!<br>");
-sc:cAN/(cN+wAN)*ssc;
-/* 選択肢に正解がある(nocorrecttrue:false)のに, 正解がないを選択した場合(flg9) は, 常に 0 点 */
-if (not nocorrecttrue) and flgWnc then sc:0;
-/* 選択肢に正解がない時, 正解がないを選択しなかった場合は, cAN=0 なので自動的に 0点 */
-/* 選択肢に正解がない時, 他の誤答選択肢を選択した場合は 0点 */
-if nocorrecttrue and apply("or", flgWL) then sc:0;
-if not fbp then msg:"";]]></text>
+        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");
+]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -180,9 +216,8 @@ if not fbp then msg:"";]]></text>
         <truenextnode>-1</truenextnode>
         <trueanswernote>prt1-1-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- 解答分析で PRT1-2T は, わからないを選択したことを検出 -->
-[[lang code='ja']]「わからない」を検出(得点は0)[[/lang]]
-[[lang code='en']] Detect "no idea options"(score is 0)[[/lang]]]]></text>
+          <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+<p>{@__mcq_noidea_checked@}</p>]]></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -195,7 +230,7 @@ if not fbp then msg:"";]]></text>
       </node>
       <node>
         <name>1</name>
-        <description>採点とFeedbackは解答変数で設定</description>
+        <description>Score and all messages are given here</description>
         <answertest>AlgEquiv</answertest>
         <sans>chk1</sans>
         <tans>true</tans>
@@ -208,10 +243,8 @@ if not fbp then msg:"";]]></text>
         <trueanswernote>prt1-2-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
-<p>
-[[lang code='ja']]{@msg@}[[/lang]]
-[[lang code='en']]{@msg@}[[/lang]]
-</p>]]></text>
+[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+<p>{@msg@}</p>]]></text>
         </truefeedback>
         <falsescoremode>=</falsescoremode>
         <falsescore>sc</falsescore>
@@ -220,28 +253,23 @@ if not fbp then msg:"";]]></text>
         <falseanswernote>prt1-2-F</falseanswernote>
         <falsefeedback format="html">
           <text><![CDATA[<!-- general error / 一般の誤り -->
-<p>
-[[lang code='ja']]{@msg@}[[/lang]]
-[[lang code='en']]{@msg@}[[/lang]]
-</p>
-<p>
-[[lang code='ja']]得点は{@sc@}です.[[/lang]]
-[[lang code='en']]Your score is {@sc@}.[[/lang]]
-</p>]]></text>
+[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+<p>{@msg@}. </p>
+<p>Score: {@sc@}</p>]]></text>
         </falsefeedback>
       </node>
       <node>
         <name>10</name>
-        <description>Wrong(Incorrect) Pattern 6</description>
+        <description>Wrong(Incorrect) Pattern 4</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[6]</sans>
+        <sans>flgWL[4]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
-        <truenextnode>-1</truenextnode>
+        <truenextnode>11</truenextnode>
         <trueanswernote>prt1-11-T</trueanswernote>
         <truefeedback format="html">
           <text></text>
@@ -249,8 +277,133 @@ if not fbp then msg:"";]]></text>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
         <falsepenalty></falsepenalty>
-        <falsenextnode>-1</falsenextnode>
+        <falsenextnode>11</falsenextnode>
         <falseanswernote>prt1-11-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>11</name>
+        <description>Wrong(Incorrect) Pattern 5</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>12</truenextnode>
+        <trueanswernote>prt1-12-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>12</falsenextnode>
+        <falseanswernote>prt1-12-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>12</name>
+        <description>Wrong(Incorrect) Pattern 6</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[6]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>13</truenextnode>
+        <trueanswernote>prt1-13-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>13</falsenextnode>
+        <falseanswernote>prt1-13-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>13</name>
+        <description>Wrong(Incorrect) Pattern 7</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[7]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>14</truenextnode>
+        <trueanswernote>prt1-14-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>14</falsenextnode>
+        <falseanswernote>prt1-14-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>14</name>
+        <description>Wrong(Incorrect) Pattern 8</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[8]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>15</truenextnode>
+        <trueanswernote>prt1-15-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>15</falsenextnode>
+        <falseanswernote>prt1-15-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>15</name>
+        <description>Wrong(Incorrect) Pattern 9</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[9]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-16-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-16-F</falseanswernote>
         <falsefeedback format="html">
           <text></text>
         </falsefeedback>
@@ -262,15 +415,14 @@ if not fbp then msg:"";]]></text>
         <sans>flgCL[1]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>3</truenextnode>
         <trueanswernote>prt1-3-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -278,8 +430,7 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>3</falsenextnode>
         <falseanswernote>prt1-3-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
@@ -289,15 +440,14 @@ if not fbp then msg:"";]]></text>
         <sans>flgCL[2]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>4</truenextnode>
         <trueanswernote>prt1-4-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -305,8 +455,7 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>4</falsenextnode>
         <falseanswernote>prt1-4-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
@@ -316,15 +465,14 @@ if not fbp then msg:"";]]></text>
         <sans>flgCL[3]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>5</truenextnode>
         <trueanswernote>prt1-5-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -332,26 +480,24 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>5</falsenextnode>
         <falseanswernote>prt1-5-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
         <name>5</name>
-        <description>Wrong(Incorrect) pattern 1</description>
+        <description>Correct Patern 4</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[1]</sans>
+        <sans>flgCL[4]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>6</truenextnode>
         <trueanswernote>prt1-6-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -359,15 +505,14 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>6</falsenextnode>
         <falseanswernote>prt1-6-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
         <name>6</name>
-        <description>Wrong(Incorrect) Pattern 2</description>
+        <description>Correct Pattern 5</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[2]</sans>
+        <sans>flgCL[5]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
         <quiet>0</quiet>
@@ -377,8 +522,7 @@ if not fbp then msg:"";]]></text>
         <truenextnode>7</truenextnode>
         <trueanswernote>prt1-7-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -386,26 +530,24 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>7</falsenextnode>
         <falseanswernote>prt1-7-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
         <name>7</name>
-        <description>Wrong(Incorrect) Pattern 3</description>
+        <description>Wrong(Incorrect) Pattern 1</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[3]</sans>
+        <sans>flgWL[1]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>8</truenextnode>
         <trueanswernote>prt1-8-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -413,26 +555,24 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>8</falsenextnode>
         <falseanswernote>prt1-8-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
         <name>8</name>
-        <description>Wrong(Incorrect) Pattern 4</description>
+        <description>Wrong(Incorrect) Pattern 2</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[4]</sans>
+        <sans>flgWL[2]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
         <truenextnode>9</truenextnode>
         <trueanswernote>prt1-9-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -440,18 +580,17 @@ if not fbp then msg:"";]]></text>
         <falsenextnode>9</falsenextnode>
         <falseanswernote>prt1-9-F</falseanswernote>
         <falsefeedback format="html">
-          <text><![CDATA[<!-- dummy -->
-<p>[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]</p>]]></text>
+          <text></text>
         </falsefeedback>
       </node>
       <node>
         <name>9</name>
-        <description>Wrong(Incorrect) Pattern 5</description>
+        <description>Wrong(Incorrect) Pattern 3</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[5]</sans>
+        <sans>flgWL[3]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>0</quiet>
+        <quiet>1</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
