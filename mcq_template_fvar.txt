@@ -22,7 +22,7 @@ msgC0L:[
   ["de", "Keine der angebotenen Antworten ist richtig. Sie liegen richtig, wenn Sie keine andere Option ausgewählt haben."],
   ["other", ""]
 ];
-mcgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
+msgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
 msgWncL:[
  ["en", "There is a correct answer option(s)!"],
  ["ja", "正解の選択肢があります!"],
