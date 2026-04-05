@@ -1,7 +1,7 @@
 
 
 
-_Cm1:%__mcq_lang(%__mcq_Cm1L, %_STACK_LANG);
+%__mcq_Cm1:%__mcq_lang(%__mcq_Cm1L, %_STACK_LANG);
 %__mcq_Cm2:if listp(%__mcq_Cm2L) then %__mcq_lang(%__mcq_Cm2L, %_STACK_LANG);
 %__mcq_Cm3:if listp(%__mcq_Cm3L) then %__mcq_lang(%__mcq_Cm3L, %_STACK_LANG);
 %__mcq_Cm4:if listp(%__mcq_Cm4L) then %__mcq_lang(%__mcq_Cm4L, %_STACK_LANG);
@@ -9,7 +9,7 @@ _Cm1:%__mcq_lang(%__mcq_Cm1L, %_STACK_LANG);
 %__mcq_Cm6:if listp(%__mcq_Cm6L) then %__mcq_lang(%__mcq_Cm6L, %_STACK_LANG);
 %__mcq_Cm7:if listp(%__mcq_Cm7L) then %__mcq_lang(%__mcq_Cm7L, %_STACK_LANG);
 %__mcq_Cm8:if listp(%__mcq_Cm8L) then %__mcq_lang(%__mcq_Cm8L, %_STACK_LANG);
-_Wm1:%__mcq_lang(%__mcq_Wm1L, %_STACK_LANG);
+%__mcq_Wm1:%__mcq_lang(%__mcq_Wm1L, %_STACK_LANG);
 %__mcq_Wm2:if listp(%__mcq_Wm2L) then %__mcq_lang(%__mcq_Wm2L, %_STACK_LANG) else "";
 %__mcq_Wm3:if listp(%__mcq_Wm3L) then %__mcq_lang(%__mcq_Wm3L, %_STACK_LANG) else "";
 %__mcq_Wm4:if listp(%__mcq_Wm4L) then %__mcq_lang(%__mcq_Wm4L, %_STACK_LANG) else "";
