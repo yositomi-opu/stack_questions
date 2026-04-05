@@ -6,18 +6,30 @@ ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_o
 countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
 cAN:countL(ans1WL, 0);
 wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
-flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(CLbase)));
-flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(WLbase)));
-flgWnc:member(_nocorrect_flag, ans1WL);
+flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(%__mcq_CLbase)));
+flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(%__mcq_WLbase)));
+flgWnc:member(%__mcq_nocorrect_flag, ans1WL);
 flgC0:member(0, ans1CL);
-flgNOID:member(_noidea_flag, ans1WL);
+flgNOID:member(%__mcq_noidea_flag, ans1WL);
 msg:"";
 /* customize appropriate message for each incorrect(wrong) pattern */
-for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg, CmsgL[k], "<br>");
-for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg, WmsgL[k], "<br>");
-msgC0L:[["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."]];
+for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
+for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__msg_WmsgL[k], "<br>");
+msgC0L:[
+  ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."],
+  ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], 
+  ["fr", "Aucune des réponses proposées n’est correcte. Vous avez la bonne réponse si vous n’avez sélectionné aucune autre option."],
+  ["de", "Keine der angebotenen Antworten ist richtig. Sie liegen richtig, wenn Sie keine andere Option ausgewählt haben."],
+  ["other", ""]
+];
 mcgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
-msgWncL:[["ja", "正解の選択肢があります!"], ["en", "There is a correct answer option(s)!"]];
+msgWncL:[
+ ["en", "There is a correct answer option(s)!"],
+ ["ja", "正解の選択肢があります!"],
+ ["fr", "Il y a au moins une réponse correcte."],
+ ["de", "Es gibt mindestens eine richtige Antwort."],
+ ["other", ""]
+];
 msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
 if flgC0 then msg:sconcat(msg, msgC0, "<br>");
 if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
