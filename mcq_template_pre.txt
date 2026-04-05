@@ -36,4 +36,3 @@ if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
 
 /************* EOF **************/
-
