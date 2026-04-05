@@ -20,25 +20,25 @@
 %__Wmsg8:if listp(%__Wmsg8L) then %__mcq_lang(%__Wmsg8L, %_STACK_LANG) else "";
 %__Wmsg9:if listp(%__Wmsg9L) then %__mcq_lang(%__Wmsg9L, %_STACK_LANG) else "";
 %__Wmsg10:if listp(%__Wmsg10L) then %__mcq_lang(%__Wmsg10L, %_STACK_LANG) else "";
-%__mcq_addCopt(%__Copt1L, %__Cmsg1);
-%__mcq_addCopt(%__Copt2L, %__Cmsg2);
-%__mcq_addCopt(%__Copt3L, %__Cmsg3);
-%__mcq_addCopt(%__Copt4L, %__Cmsg4);
-%__mcq_addCopt(%__Copt5L, %__Cmsg5);
-%__mcq_addCopt(%__Copt6L, %__Cmsg6);
-%__mcq_addCopt(%__Copt7L, %__Cmsg7);
-%__mcq_addCopt(%__Copt8L, %__Cmsg8);
-%__mcq_addCopt(%__Copt9L, %__Cmsg9);
-%__mcq_addWopt(%__Wopt1L, %__Wmsg1);
-%__mcq_addWopt(%__Wopt2L, %__Wmsg2);
-%__mcq_addWopt(%__Wopt3L, %__Wmsg3);
-%__mcq_addWopt(%__Wopt4L, %__Wmsg4);
-%__mcq_addWopt(%__Wopt5L, %__Wmsg5);
-%__mcq_addWopt(%__Wopt6L, %__Wmsg6);
-%__mcq_addWopt(%__Wopt7L, %__Wmsg7);
-%__mcq_addWopt(%__Wopt8L, %__Wmsg8);
-%__mcq_addWopt(%__Wopt9L, %__Wmsg9);
-%__mcq_addWopt(%__Wopt10L, %__Wmsg10);
+%__mcq_addCopt(%__Copt1, %__Cmsg1);
+%__mcq_addCopt(%__Copt2, %__Cmsg2);
+%__mcq_addCopt(%__Copt3, %__Cmsg3);
+%__mcq_addCopt(%__Copt4, %__Cmsg4);
+%__mcq_addCopt(%__Copt5, %__Cmsg5);
+%__mcq_addCopt(%__Copt6, %__Cmsg6);
+%__mcq_addCopt(%__Copt7, %__Cmsg7);
+%__mcq_addCopt(%__Copt8, %__Cmsg8);
+%__mcq_addCopt(%__Copt9, %__Cmsg9);
+%__mcq_addWopt(%__Wopt1, %__Wmsg1);
+%__mcq_addWopt(%__Wopt2, %__Wmsg2);
+%__mcq_addWopt(%__Wopt3, %__Wmsg3);
+%__mcq_addWopt(%__Wopt4, %__Wmsg4);
+%__mcq_addWopt(%__Wopt5, %__Wmsg5);
+%__mcq_addWopt(%__Wopt6, %__Wmsg6);
+%__mcq_addWopt(%__Wopt7, %__Wmsg7);
+%__mcq_addWopt(%__Wopt8, %__Wmsg8);
+%__mcq_addWopt(%__Wopt9, %__Wmsg9);
+%__mcq_addWopt(%__Wopt10, %__Wmsg10);
 
 %__mcq_max_opts:10; /* max num of opts of each pattern */
 %__mcq_max_patterns:99; /* max num of opts of each pattern */
