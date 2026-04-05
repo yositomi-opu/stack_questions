@@ -9,7 +9,6 @@
 %__Cmsg6:if listp(%__Cmsg6L) then %__mcq_lang(%__Cmsg6L, %_STACK_LANG) else "";
 %__Cmsg7:if listp(%__Cmsg7L) then %__mcq_lang(%__Cmsg7L, %_STACK_LANG) else "";
 %__Cmsg8:if listp(%__Cmsg8L) then %__mcq_lang(%__Cmsg8L, %_STACK_LANG) else "";
-%__Cmsg9:if listp(%__Cmsg9L) then %__mcq_lang(%__Cmsg9L, %_STACK_LANG) else "";
 %__Wmsg1:%__mcq_lang(%__Wmsg1L, %_STACK_LANG);
 %__Wmsg2:if listp(%__Wmsg2L) then %__mcq_lang(%__Wmsg2L, %_STACK_LANG) else "";
 %__Wmsg3:if listp(%__Wmsg3L) then %__mcq_lang(%__Wmsg3L, %_STACK_LANG) else "";
@@ -19,7 +18,6 @@
 %__Wmsg7:if listp(%__Wmsg7L) then %__mcq_lang(%__Wmsg7L, %_STACK_LANG) else "";
 %__Wmsg8:if listp(%__Wmsg8L) then %__mcq_lang(%__Wmsg8L, %_STACK_LANG) else "";
 %__Wmsg9:if listp(%__Wmsg9L) then %__mcq_lang(%__Wmsg9L, %_STACK_LANG) else "";
-%__Wmsg10:if listp(%__Wmsg10L) then %__mcq_lang(%__Wmsg10L, %_STACK_LANG) else "";
 %__mcq_addCopt(%__Copt1, %__Cmsg1);
 %__mcq_addCopt(%__Copt2, %__Cmsg2);
 %__mcq_addCopt(%__Copt3, %__Cmsg3);
@@ -28,7 +26,6 @@
 %__mcq_addCopt(%__Copt6, %__Cmsg6);
 %__mcq_addCopt(%__Copt7, %__Cmsg7);
 %__mcq_addCopt(%__Copt8, %__Cmsg8);
-%__mcq_addCopt(%__Copt9, %__Cmsg9);
 %__mcq_addWopt(%__Wopt1, %__Wmsg1);
 %__mcq_addWopt(%__Wopt2, %__Wmsg2);
 %__mcq_addWopt(%__Wopt3, %__Wmsg3);
@@ -38,7 +35,6 @@
 %__mcq_addWopt(%__Wopt7, %__Wmsg7);
 %__mcq_addWopt(%__Wopt8, %__Wmsg8);
 %__mcq_addWopt(%__Wopt9, %__Wmsg9);
-%__mcq_addWopt(%__Wopt10, %__Wmsg10);
 
 %__mcq_max_opts:10; /* max num of opts of each pattern */
 %__mcq_max_patterns:99; /* max num of opts of each pattern */
@@ -81,15 +77,20 @@ if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
 Cans1:mcq_correct(ta1);/* formal defintion. not used */
 /********** __SELTYPE__ (%__mcq_qtext_auto) **********/
 %__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
-%__mcq_SELALLL:[["en", "all correct options"], ["ja", "すべて選べ"]];
-%__mcq_SELALLL:append(%__mcq_SELALLL,
- [["fr", "Tout sélectionner"], ["de", "Alle zutreffenden auswählen."]]);
+%__mcq_SELALLL:[
+ ["en", "all correct options"],
+ ["ja", "すべて選べ"]
+ ["fr", "Tout sélectionner"],
+ ["de", "Alle zutreffenden auswählen."],
+ ["other", ""]
+];
 %__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
 %__mcq_SELONEANYL:[
  ["en", "Choose one. Even if there are multiple correct answers, select only one."],
  ["ja", "選べ. 正解が2つ以上ある場合も1つ選べばよい."],
  ["fr", "Choisissez une seule réponse. Même s’il y a plusieurs réponses correctes, n’en sélectionnez qu’une."],
- ["de", "Wählen Sie eine Antwort. Auch wenn es mehrere richtige Antworten gibt, wählen Sie nur eine."]
+ ["de", "Wählen Sie eine Antwort. Auch wenn es mehrere richtige Antworten gibt, wählen Sie nur eine."],
+ ["other", ""]
 ];
 %__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
 %__mcq_SELL:[["en", "choose"], ["ja", "選べ"], ["fr", "Choisissez."], ["de", "Wählen Sie."]];
