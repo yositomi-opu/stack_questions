@@ -1,0 +1,32 @@
+
+if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
+if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
+ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
+ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));
+countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
+cAN:countL(ans1WL, 0);
+wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
+flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(CLbase)));
+flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(WLbase)));
+flgWnc:member(_nocorrect_flag, ans1WL);
+flgC0:member(0, ans1CL);
+flgNOID:member(_noidea_flag, ans1WL);
+msg:"";
+
+for k:1 thru length(CLbase) do if flgCL[k] then msg:sconcat(msg, CmsgL[k], "<br>");
+for k:1 thru length(WLbase) do if flgWL[k] then msg:sconcat(msg, WmsgL[k], "<br>");
+msgC0L:[["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."]];
+mcgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
+msgWncL:[["ja", "正解の選択肢があります!"], ["en", "There is a correct answer option(s)!"]];
+msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
+if flgC0 then msg:sconcat(msg, msgC0, "<br>");
+if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
+cN:%__mcq_num_copts;
+wN:%__mcq_num_wopts;
+sc:cAN/(cN+wAN)*%__mcq_ssc;
+
+if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
+
+
+if %__mcq_nocorrecttrue and apply("or", flgWL) then sc:0;
+if not %__mcq_fbp then msg:"";

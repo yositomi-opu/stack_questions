@@ -1,0 +1,95 @@
+
+
+
+_Cm1:%__mcq_lang(%__mcq_Cm1L, %_STACK_LANG);
+%__mcq_Cm2:if listp(%__mcq_Cm2L) then %__mcq_lang(%__mcq_Cm2L, %_STACK_LANG);
+%__mcq_Cm3:if listp(%__mcq_Cm3L) then %__mcq_lang(%__mcq_Cm3L, %_STACK_LANG);
+%__mcq_Cm4:if listp(%__mcq_Cm4L) then %__mcq_lang(%__mcq_Cm4L, %_STACK_LANG);
+%__mcq_Cm5:if listp(%__mcq_Cm5L) then %__mcq_lang(%__mcq_Cm5L, %_STACK_LANG);
+%__mcq_Cm6:if listp(%__mcq_Cm6L) then %__mcq_lang(%__mcq_Cm6L, %_STACK_LANG);
+%__mcq_Cm7:if listp(%__mcq_Cm7L) then %__mcq_lang(%__mcq_Cm7L, %_STACK_LANG);
+%__mcq_Cm8:if listp(%__mcq_Cm8L) then %__mcq_lang(%__mcq_Cm8L, %_STACK_LANG);
+_Wm1:%__mcq_lang(%__mcq_Wm1L, %_STACK_LANG);
+%__mcq_Wm2:if listp(%__mcq_Wm2L) then %__mcq_lang(%__mcq_Wm2L, %_STACK_LANG) else "";
+%__mcq_Wm3:if listp(%__mcq_Wm3L) then %__mcq_lang(%__mcq_Wm3L, %_STACK_LANG) else "";
+%__mcq_Wm4:if listp(%__mcq_Wm4L) then %__mcq_lang(%__mcq_Wm4L, %_STACK_LANG) else "";
+%__mcq_Wm5:if listp(%__mcq_Wm5L) then %__mcq_lang(%__mcq_Wm5L, %_STACK_LANG) else "";
+%__mcq_Wm6:if listp(%__mcq_Wm6L) then %__mcq_lang(%__mcq_Wm6L, %_STACK_LANG) else "";
+%__mcq_Wm7:if listp(%__mcq_Wm7L) then %__mcq_lang(%__mcq_Wm7L, %_STACK_LANG) else "";
+%__mcq_Wm8:if listp(%__mcq_Wm8L) then %__mcq_lang(%__mcq_Wm8L, %_STACK_LANG) else "";
+%__mcq_Wm9:if listp(%__mcq_Wm9L) then %__mcq_lang(%__mcq_Wm9L, %_STACK_LANG) else "";
+%__mcq_Wm10:if listp(%__mcq_Wm10L) then %__mcq_lang(%__mcq_Wm10L, %_STACK_LANG) else "";
+%__mcq_addCopt(%__mcq_Cp1L, %__mcq_Cm1);
+%__mcq_addCopt(%__mcq_Cp2L, %__mcq_Cm2);
+%__mcq_addCopt(%__mcq_Cp3L, %__mcq_Cm3);
+%__mcq_addCopt(%__mcq_Cp4L, %__mcq_Cm4);
+%__mcq_addCopt(%__mcq_Cp5L, %__mcq_Cm5);
+%__mcq_addCopt(%__mcq_Cp6L, %__mcq_Cm6);
+%__mcq_addCopt(%__mcq_Cp7L, %__mcq_Cm7);
+%__mcq_addCopt(%__mcq_Cp8L, %__mcq_Cm8);
+%__mcq_addWopt(%__mcq_Wp1L, %__mcq_Wm1);
+%__mcq_addWopt(%__mcq_Wp2L, %__mcq_Wm2);
+%__mcq_addWopt(%__mcq_Wp3L, %__mcq_Wm3);
+%__mcq_addWopt(%__mcq_Wp4L, %__mcq_Wm4);
+%__mcq_addWopt(%__mcq_Wp5L, %__mcq_Wm5);
+%__mcq_addWopt(%__mcq_Wp6L, %__mcq_Wm6);
+%__mcq_addWopt(%__mcq_Wp7L, %__mcq_Wm7);
+%__mcq_addWopt(%__mcq_Wp8L, %__mcq_Wm8);
+%__mcq_addWopt(%__mcq_Wp9L, %__mcq_Wm9);
+%__mcq_addWopt(%__mcq_Wp10L, %__mcq_Wm10);
+
+%__mcq_max_opts:10; 
+%__mcq_max_patterns:99; 
+
+
+%__mcq_cw_delimiter:%__mcq_max_opts*(%__mcq_max_patterns+1);
+%__mcq_CLlen:map(length, %__mcq_CLbase);
+%__mcq_WLlen:map(length, %__mcq_WLbase);
+%__mcq_nC:%__mcq_min_max(%__mcq_num_copts, length(flatten(%__mcq_CLbase)));
+%__mcq_nW:%__mcq_min_max(%__mcq_num_wopts, length(flatten(%__mcq_WLbase)));
+
+
+
+
+%_rp(L):=random_permutation(L);
+%__mcq_make_pattern(on, bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
+else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1, if ptL[k]>1 then ptL[k]:ptL[k]-1) 
+else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 then ptL[k]:1)), return(ptL));
+%__mcq_nCL:%__mcq_make_pattern(%__mcq_nC, %__mcq_CLbase);
+%__mcq_nWL:%__mcq_make_pattern(%__mcq_nW, %__mcq_WLbase);
+%__mcq_CLL:makelist(makelist(%__mcq_CLbase[k][j], j, 1, min(%__mcq_nCL[k], length(%__mcq_CLbase[k]))), k, 1, length(%__mcq_nCL));
+%__mcq_WLL:makelist(makelist(%__mcq_WLbase[k][j], j, 1, min(%__mcq_nWL[k], length(%__mcq_WLbase[k]))), k, 1, length(%__mcq_nWL));
+
+%__mcq_nocorrect_flag:%__mcq_max_patterns+1;
+%__mcq_noc_id:%__mcq_nocorrect_flag*%__mcq_cw_delimiter;
+%__mcq_noidea_flag:%__mcq_max_patterns*10+1;
+%__mcq_noi_id:%__mcq_noidea_flag*%__mcq_cw_delimiter;
+%__mcq_NCL:if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then [[1, true, %__mcq_nocoptS]] else [[%__mcq_noc_id, false, %__mcq_nocoptS]];
+
+%__mcq_NOI:[[%__mcq_noi_id, false, %__mcq_noidS]];
+%__mcq_ListCL0:apply(append, makelist(makelist([%__mcq_max_opts*k+j, true, %__mcq_CLL[k][j]], j, 1, length(%__mcq_CLL[k])), k, 1, length(%__mcq_CLL)));
+%__mcq_ListWL0:apply(append, makelist(makelist([%__mcq_cw_delimiter*k+j, false, %__mcq_WLL[k][j]], j, 1, length(%__mcq_WLL[k])), k, 1, length(%__mcq_WLL)));
+%__mcq_ListCL1:%_rp(%__mcq_ListCL0);
+%__mcq_ListWL1:%_rp(%__mcq_ListWL0);
+%__mcq_taC:%_rp(makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts));
+%__mcq_taW:%_rp(append(makelist(%__mcq_ListCL1[k], k, 1, %__mcq_num_copts), makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts)));
+ta1:%__mcq_taW;
+if %__mcq_nocorrectopt then (if %__mcq_nocorrecttrue then ta1:append(%__mcq_taC, %__mcq_NCL) else ta1:append(%__mcq_taW, %__mcq_NCL));
+if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
+Cans1:mcq_correct(ta1);
+
+%__mcq_SELALLL:[["en", "all correct options"], ["ja", "すべて選べ"]];
+%__mcq_SELALLL:append(%__mcq_SELALLL,
+ [["fr", "Tout sélectionner"], ["de", "Alle zutreffenden auswählen."]]);
+%__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
+%__mcq_SELONEANYL:[
+ ["en", "Choose one. Even if there are multiple correct answers, select only one."],
+ ["ja", "選べ. 正解が2つ以上ある場合も1つ選べばよい."],
+ ["fr", "Choisissez une seule réponse. Même s’il y a plusieurs réponses correctes, n’en sélectionnez qu’une."],
+ ["de", "Wählen Sie eine Antwort. Auch wenn es mehrere richtige Antworten gibt, wählen Sie nur eine."]
+];
+%__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
+%__mcq_SELL:[["en", "choose"], ["ja", "選べ"], ["fr", "Choisissez."], ["de", "Wählen Sie."]];
+%__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
+if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
+if %__mcq_qtext_auto then qtext:ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext);

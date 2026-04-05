@@ -1,0 +1,29 @@
+
+
+
+
+
+
+
+
+%__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+%__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), return (m));
+if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
+if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
+%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;
+%__mcq_nocoptSL:[["en", "None of the above."]];
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["ja", "選択肢に正解はない."]]);
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["fr", "Aucune des réponses ci-dessus."]]);
+%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["de", "Keine der oben genannten Antworten."]]);
+%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
+%__mcq_noidSL:[["en", "I don't know yet."]];
+%__mcq_noidSL:append(%__mcq_noidSL, [["ja", "まだわからない."]]);
+%__mcq_noidSL:append(%__mcq_noidSL, [["fr", "Je ne sait pas encore."]]);
+%__mcq_noidSL:append(%__mcq_noidSL, [["de", "Ich weiß es noch nicht."]]);
+%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %__STACK_LANG);
+%__mcq_CLbase:[];
+%__mcq_WLbase:[];
+%__mcq_CmsgL:[];
+%__mcq_WmsgL:[];
+%__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
+%__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
