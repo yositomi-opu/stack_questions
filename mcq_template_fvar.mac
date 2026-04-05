@@ -1,5 +1,5 @@
-出力しました: mcq_template_fvar.mac
-lse chk1:member(ans1, Cans1);
+
+if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
 if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
 ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
 ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));

@@ -1,5 +1,7 @@
-出力しました: mcq_template_post.mac
-_LANG);
+
+
+
+%__Cmsg1:%__mcq_lang(%__Cmsg1L, %_STACK_LANG);
 %__Cmsg2:if listp(%__Cmsg2L) then %__mcq_lang(%__Cmsg2L, %_STACK_LANG) else "";
 %__Cmsg3:if listp(%__Cmsg3L) then %__mcq_lang(%__Cmsg3L, %_STACK_LANG) else "";
 %__Cmsg4:if listp(%__Cmsg4L) then %__mcq_lang(%__Cmsg4L, %_STACK_LANG) else "";

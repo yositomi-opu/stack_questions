@@ -8,4 +8,4 @@ perl -0pe '
   s/\s*\z//;         # 末尾の空行削除
 ' "$infile" > "$outfile"
 
-echo "出力しました: $outfile"
+echo "出力しました: $outfile" >&2
