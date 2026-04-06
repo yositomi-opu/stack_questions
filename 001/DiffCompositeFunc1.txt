@@ -1,0 +1,74 @@
+powerdisp:false;
+__tf1:lambda([x], diff(__tf(x), x, 1));
+__tf2:lambda([x], diff(-__tf(x), x, 1));
+__sf1:lambda([x], diff(__sf(x), x, 1));
+__sf2:lambda([x], diff(-__sf(x), x, 1));
+__aa:rand([3, 4, 4, 5]);
+__bb:rand_with_prohib(2, 8, [__aa, __aa*2, __aa*3, __aa*4]);
+__rf:lambda([x], 1/(__aa*x+__bb));
+Qfx:__rf(__tf(x));
+__rf1:lambda([x], -__aa/(__aa*x+__bb)^2);
+__rf2:lambda([x], -1/(__aa*x+__bb)^2); /* not equal __rf1 since __aa<>1 */
+__rf3:lambda([x], __aa/(__aa*x+__bb)^2); /* forget append "-" */
+__rf1tf:lambda([x], __rf1(__tf(x)));
+__rf2tf:lambda([x], __rf2(__tf(x)));
+__rf3tf:lambda([x], __rf3(__tf(x)));
+__rf1tf:lambda([x], __rf1(__tf(x)));
+__rf1tf1:lambda([x], __rf1(__tf1(x)));
+__rf1tf2:lambda([x], __rf1(__tf2(x)));
+_cdot:"\\(\\cdot\\)";
+_cdots:"\\(\\cdots\\)";
+_lbr:"\\((\\)";
+_rbr:"\\()\\)";
+Copt:sconcat(tex2(__rf1tf(x)), _cdot, tex2(__tf1(x)));
+Wopt1:tex2(__rf1tf(x));
+Wopt2:tex2(__rf1tf1(x));
+Wopt3a:sconcat(tex2(__rf1tf(x)), _cdot, _lbr, tex2(__tf2(x)), _rbr);
+Wopt3b:sconcat(tex2(__rf1tf(x)), _cdot, _lbr, tex2(__sf1(x)), _rbr);
+Wopt3c:sconcat(tex2(__rf1tf(x)), _cdot, _lbr, tex2(__sf2(x)), _rbr);
+Wopt4a:sconcat(tex2(__rf2tf(x)), _cdot, _lbr, tex2(__tf1(x)), _rbr);
+Wopt4b:sconcat(tex2(__rf3tf(x)), _cdot, _lbr, tex2(__tf1(x)), _rbr);
+Wopt5a:sconcat(tex2(__rf2tf(x)), _cdot, _lbr, tex2(__tf2(x)), _rbr);
+Wopt5b:sconcat(tex2(__rf3tf(x)), _cdot, _lbr, tex2(__tf2(x)), _rbr);
+Wopt5c:sconcat(tex2(__rf2tf(x)), _cdot, _lbr, tex2(__sf1(x)), _rbr);
+Wopt5d:sconcat(tex2(__rf3tf(x)), _cdot, _lbr, tex2(__sf2(x)), _rbr);
+/**************** QUESTION VARIABLES for MAIN CONTENT ****************/
+/* 正答・誤答パターン生成用変数, 問題文生成 */
+/* qtext : 問題文の主文(Main sentence for question text/"選べ"は自動) */
+%__mcq_qtextL:[["en", sconcat("Choose __SELTYPE__ that correctly gives the derivative of ", tex2(Qfx), ".")],
+ ["fr", sconcat("Choisissez __SELTYPE__ qui donne correctement la dérivée de ", tex2(Qfx), ".")],
+ ["de", sconcat("Wählen Sie __SELTYPE__, die die Ableitung von ", tex2(Qfx), " korrekt angibt.")],
+ ["ja", sconcat(tex2(Qfx), "の導関数の計算式として正しいものを__SELTYPE__")]];
+/***************************** Patterns and Messages *********************************************/
+%__CoptL1:[Copt];
+%__Cmsg1L:[["en", "Correct. You seem to understand the chain rule well."],
+["fr", "Correct. Vous semblez bien comprendre la règle de dérivation des fonctions composées."],
+["de", "Richtig. Sie scheinen die Kettenregel gut zu verstehen."],
+["ja", "正解です. 合成関数の微分法を正しく理解しているようです."]];
+%__WoptL1:[Wopt1];
+%__Wmsg1L:[["en", "Let’s review the chain rule. The derivative of \\(f(g(x))\\) is not \\(f'(g(x))\\)."],
+ ["fr", "Révisons la règle de dérivation des fonctions composées. La dérivée de \\(f(g(x))\\) n’est pas \\(f'(g(x))\\)."],
+ ["de", "Überprüfen wir die Kettenregel. Die Ableitung von \\(f(g(x))\\) ist nicht \\(f'(g(x))\\)."],
+ ["ja", "合成関数の微分法を確認しましょう. \\(f(g(x))\\)の微分は, \\(f'(g(x))\\\)ではありません."]];
+%__WoptL2:[Wopt2];
+%__Wmsg2L:[["en", "Let’s review the chain rule. The derivative of \\(f(g(x))\\) is not \\(f'(g'(x))\\)."],
+ ["fr", "Révisons la règle de dérivation des fonctions composées. La dérivée de \\(f(g(x))\\) n’est pas \\(f'(g'(x))\\)."],
+ ["de", "Überprüfen wir die Kettenregel. Die Ableitung von \\(f(g(x))\\) ist nicht \\(f'(g'(x))\\)."],
+ ["ja", "合成関数の微分法を確認しましょう. \\(f(g(x))\\)の微分は, \\(f'(g'(x))\\\)ではありません."]];
+%__WoptL3:[Wopt3a, Wopt3b, Wopt3c];
+%__Wmsg3L:[["en", "It seems you made a mistake in differentiating trigonometric functions."],
+ ["fr", "Il semble que vous ayez fait une erreur dans la dérivation des fonctions trigonométriques."],
+ ["de", "Es scheint, dass Sie einen Fehler bei der Ableitung trigonometrischer Funktionen gemacht haben."],
+ ["ja", "三角関数の微分を間違えているようです."]];
+%__WoptL4:[Wopt4a, Wopt4b];
+%__Wmsg4L:[["en", "It seems you made a mistake in differentiating rational functions."],
+ ["fr", "Il semble que vous ayez fait une erreur dans la dérivation des fonctions rationnelles."],
+ ["de", "Es scheint, dass Sie einen Fehler bei der Ableitung rationaler Funktionen gemacht haben."],
+ ["ja", "有理関数の微分を間違えているようです."]];
+%__WoptL5:[Wopt5a, Wopt5b, Wopt5c, Wopt5d];
+%__Wmsg5L:[["en", "Aren’t both the differentiation of rational functions and trigonometric functions incorrect?"],
+ ["fr", "N’avez-vous pas fait des erreurs à la fois dans la dérivation des fonctions rationnelles et des fonctions trigonométriques ?"],
+ ["de", "Haben Sie nicht sowohl bei der Ableitung rationaler Funktionen als auch bei trigonometrischen Funktionen Fehler gemacht?"],
+ ["ja", "有理関数の微分も三角関数の微分も間違えていませんか? "]];
+
+/********** EOF **********/
