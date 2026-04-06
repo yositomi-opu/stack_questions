@@ -1,0 +1,66 @@
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+texput("NOT", "\\lnot");
+texput("AND", "\\land");
+texput("OR", "\\lor");
+texput("THEN", "\\rightarrow");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+
+/* 1:false, 2:true */
+vP:rand([1, 2]); vQ:rand([1, 2]);
+tfP:[false, true][vP];
+tfQ:[false, true][vQ];
+TrueS:%__mcq_lang([["en", "True"], ["ja", "真"], ["fr", "Vrai"], ["de", "Wahr"]], %_STACK_LANG);
+FalseS:%__mcq_lang([["en", "False"], ["ja", "偽"], ["fr", "Faux"], ["de", "Falsch"]], %_STACK_LANG);
+sP:[FalseS, TrueS][vP];
+sQ:[FalseS, TrueS][vQ];
+
+/* and : 1 true one and 3 false ones */
+andList:[];
+andList:append(andList, [[tfP and tfQ, tex2L([P, AND, Q])]]);
+andList:append(andList, [[(not tfP) and tfQ, tex2L([NOT, P, AND, Q])]]);
+andList:append(andList, [[tfP and (not tfQ), tex2L([P, AND, NOT, Q])]]);
+andList:append(andList, [[(not tfP) and (not tfQ), tex2L([NOT, P, AND, NOT, Q])]]);
+/* or : 3 true ones and 1 false one */
+orList:[];
+orList:append(orList, [[tfP or tfQ, tex2L([P, OR, Q])]]);
+orList:append(orList, [[(not tfP) or tfQ, tex2L([NOT, P, OR, Q])]]);
+orList:append(orList, [[tfP or (not tfQ), tex2L([NOT, P, OR, NOT, Q])]]);
+orList:append(orList, [[(not tfP) or (not tfQ), tex2L([NOT, P, OR, NOT, Q])]]);
+/* then: 3 true ones and 1 false one */
+thList:[];
+thList:append(thList, [[(not tfP) or tfQ, tex2L([P, THEN, Q])]]);
+thList:append(thList, [[tfP or tfQ, tex2L([NOT, P, THEN, Q])]]);
+thList:append(thList, [[(not tfP) or (not tfQ), tex2L([P, THEN, NOT, Q])]]);
+thList:append(thList, [[tfP or (not tfQ), tex2L([NOT, P, THEN, NOT, Q])]]);
+allList:thList;
+/* allTF:maplist(first, allList);*/
+TList:[];
+FList:[];
+for k:1 thru length(allList) do if allList[k][1] then TList:append(TList, [allList[k][2]]) else FList:append(FList, [allList[k][2]]);
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("When proposition", tex2(P), " is ", sP, "and Q is ", sQ, ", then choose one FLASE  proposition.")],
+ ["fr", sconcat("Lorsque la proposition ", tex2(P), " est ", sP, " et ", tex2(Q), " est ", sQ, ", choisissez la proposition fausse.")],
+ ["de", sconcat("Wenn die Aussage ", tex2(P), " ist ", sP, " und ", tex2(Q), " ist ", sQ, " ist, wählen Sie die falshe Aussage.")],
+ ["ja", sconcat("命題", tex2(P), "が", sP, "で, ", tex2(Q), "が, ", sQ, "であるとき, 偽の命題を選べ.")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[FList[1]];
+%__Cmsg1L:[["en", "Correct. The implication is true when \\(P\\) is false, or when \\(P\\) is true and \\(Q\\) is true."],
+["fr", "Correct. L’implication est vraie lorsque \\(P\\) est faux, ou lorsque \\(P\\) est vrai et \\(Q\\) est vrai."],
+["de", "Richtig. Die Implikation ist wahr, wenn \\(P\\) falsch ist oder wenn \\(P\\) wahr und \\(Q\\) wahr ist."],
+["ja", "正解です。含意（ならば）は、\\(P\\) が偽のとき、または \\(P\\) が真で \\(Q\\) も真のときに真になるのでしたね。"]];
+/* Incorrect(wrong) pattern 1 */
+%__WoptL1:[TList[1], TList[2], TList[3]];
+%__Wmsg1L:[["en", "The implication \\(P\\to Q\\) is logically equivalent to \\(\\lnot P\\lor Q\\). In other words, it is true whenever \\(P\\) is false. If \\(P\\) is true, then it is true if and only if \\(Q\\) is true."],
+ ["fr", "L’implication \\(P\\to Q\\) est logiquement équivalente à \\(\\lnot P\\lor Q\\). Autrement dit, elle est vraie lorsque \\(P\\) est faux. Si \\(P\\) est vrai, alors elle est vraie si et seulement si \\(Q\\) est vrai."],
+ ["de", "Die Implikation \\(P\\to Q\\) ist logisch äquivalent zu \\(\\lnot P\\lor Q\\). Mit anderen Worten, sie ist wahr, wenn \\(P\\) falsch ist. Wenn \\(P\\) wahr ist, dann ist sie genau dann wahr, wenn \\(Q\\) wahr ist."],
+ ["ja", "含意 \\(P\\to Q\\) は \\(\\lnot P\\lor Q\\) と論理的に同値です。すなわち、\\(P\\) が偽であるときは常に真です。また、\\(P\\) が真である場合には、\\(Q\\) が真であるときに限り真となります。"]];
+

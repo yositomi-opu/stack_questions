@@ -58,13 +58,13 @@ for k:1 thru length(allList) do if allList[k][1] then TList:append(TList, [allLi
 ["de", "Richtig. Die Konjunktion ist wahr, wenn beide wahr sind."],
 ["ja", "正解です。論理積は、どちらも真のときに真になるのでしたね."]];
 /* Correct pattern 2 */
-%__CoptL2:[TList[3], TList[4], TList[5]];
+%__CoptL2:[TList[2], TList[3], TList[4]];
 %__Cmsg2L:[["en", "Correct. The disjunction is true when at least one of them is true."],
 ["fr", "Correct. La disjonction est vraie lorsqu’au moins l’un des deux est vrai."],
 ["de", "Richtig. Die Disjunktion ist wahr, wenn mindestens eine der beiden wahr ist."],
 ["ja", "正解です。論理和は、少なくともどちらか一方が真のときに真になるのでしたね。"]];
 /* Correct pattern 3 */
-%__CoptL3:[TList[6], TList[6], TList[7]];
+%__CoptL3:[TList[5], TList[6], TList[7]];
 %__Cmsg3L:[["en", "Correct. The implication is true when \\(P\\) is false, or when \\(P\\) is true and \\(Q\\) is true."],
 ["fr", "Correct. L’implication est vraie lorsque \\(P\\) est faux, ou lorsque \\(P\\) est vrai et \\(Q\\) est vrai."],
 ["de", "Richtig. Die Implikation ist wahr, wenn \\(P\\) falsch ist oder wenn \\(P\\) wahr und \\(Q\\) wahr ist."],
