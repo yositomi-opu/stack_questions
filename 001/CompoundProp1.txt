@@ -1,9 +1,11 @@
+/*** for 000.MCQ-rb.xml ***/
 /* key parameters(e.g. which control the only level of the question) here if required */
 /* The truth values of compound propositions. */
 texput("NOT", "\\lnot");
 texput("AND", "\\land");
 texput("OR", "\\lor");
 texput("THEN", "\\rightarrow");
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 
 /* 1:false, 2:true */

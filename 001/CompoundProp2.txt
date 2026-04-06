@@ -4,6 +4,7 @@ texput("NOT", "\\lnot");
 texput("AND", "\\land");
 texput("OR", "\\lor");
 texput("THEN", "\\rightarrow");
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 
 /* 1:false, 2:true */
