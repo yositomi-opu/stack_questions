@@ -1,0 +1,16 @@
+Here, I will explain the debugging method I use.
+There is a file named `dump.txt` on this GitHub repository. If you run `maxima < dump.txt`, it will create a file named `maxima-optimized.new`. If necessary, rename this file to something appropriate and place it somewhere convenient.
+
+Copy the file containing the necessary PATH settings to the clipboard using `pbcopy` on Mac or `clip` on Windows, then launch the dumped Maxima instance as an argument to a command that’s easy to control with keyboard shortcuts, such as `rlwrap`.
+When developing multiple-choice template questions,
+
+% cat mcq_template_pre.txt mcq_flag.txt (your code file) mcq_template_post.txt |pbcopy 
+
+and paste the output into Maxima to debug.
+
+If you see an error in your code, fix it there. STACK may sometimes display the line number and character position, but the cause is often found elsewhere.
+
+Let’s get developing! Please feel free to contribute your finished code!!!
+
+
+

@@ -1,0 +1,20 @@
+/* Please adjust this to suit your environment. /root/build/moodle_qtype_stack is fine, too. */
+__stacklocation:"/Users/yositomi/work-build/moodle-qtype_stack";
+__stacktmplocation:"/tmp";
+
+file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/###.{mac,mc}")] , file_search_maxima);
+file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/###.{lisp}")] , file_search_lisp);
+file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{mac,mc}")] , file_search_maxima);
+file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{lisp}")] , file_search_lisp);
+file_search_maxima:append( [sconcat(__stacktmplocation, "/###.{mac,mc}")] , file_search_maxima);
+file_search_lisp:append( [sconcat(__stacktmplocation, "/###.{lisp}")] , file_search_lisp);
+
+/* If you get an error saying something like, “Since `box` is a defined function in Maxima, do not modify it,” look for the line in `stackmaxima.mac` (you can find it, right?) that says `box(ex):= ex;` and comment it out using like this format. */
+
+load("stackmaxima.mac")$
+load("ky_linear_algebra.mac")$
+load(stats)$
+load(distrib)$
+load(descriptive)$
+alias(stack_include_contrib, load)$
+:lisp (sb-ext:save-lisp-and-die "maxima-optimised.new" :toplevel (symbol-function 'cl-user::run) :executable t)
