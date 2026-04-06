@@ -1,0 +1,26 @@
+
+
+%__mcq_rb_cb:"rb";
+
+powerdisp:true;
+%_rp(L):=random_permutation(L);
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+texP1(a,u):=sconcat("\\(", tex1(a), "+p", tex1(u), "\\quad (p\\in{\\mathbb R})\\)");
+texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q\\in{\\mathbb R})\\)");
+
+
+
+
+
+%__mcq_num_opts:4;
+%__mcq_num_copts:1;
+
+
+%_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
+
+
+%__mcq_max_cp:5;
+%__mcq_max_wp:9;
+
+
+l

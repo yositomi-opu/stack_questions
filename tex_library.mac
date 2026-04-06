@@ -1,0 +1,11 @@
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+
+texP1(a, u):=sconcat("\\(", tex1(a), "+p", tex1(u), "\\quad (p\\in{\\mathbb R})\\)");
+texP1p(a, p, u):=sconcat("\\(", tex1(a), "+", tex1(p), tex1(u), "\\quad (", tex1(p), "\\in{\\mathbb R})\\)");
+texP2(a, u, v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q\\in{\\mathbb R})\\)");
+texP2pq(a, p, u, q, v):=sconcat("\\(", tex1(a), "+", tex1(p), tex1(u), "+", tex1(q), tex1(v), "\\quad (", tex1(p), ", ", tex1(q), "\\in{\\mathbb R})\\)");
+
+
+vmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"|", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));
+pmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"(", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));
+bmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"[", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));

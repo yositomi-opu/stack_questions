@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 57823648  -->
+  <question type="stack">
+    <name>
+      <text>MTF template (Use This)</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p><p></p><h3></h3><p><span style="font-size: 0.9375rem;">{@preamble@}</span><br></p><table>
+<tbody>
+<tr>
+  <td>(A)</td>
+  <td>[[input:ans1]] [[validation:ans1]]&nbsp;</td><td>&nbsp;{@MTF_a[3]@}</td>
+</tr>
+<tr>
+<td>(B)</td>
+<td>[[input:ans2]] [[validation:ans2]]&nbsp;</td><td>&nbsp;{@MTF_b[3]@}</td>
+</tr>
+<tr>
+<td>(C)</td>
+<td>[[input:ans3]] [[validation:ans3]]&nbsp;</td><td>&nbsp;{@MTF_c[3]@}</td>
+</tr>
+<tr>
+<td>(D)</td>
+<td>[[input:ans4]] [[validation:ans4]]&nbsp;</td><td>&nbsp;{@MTF_d[3]@}</td>
+</tr>
+[[comment]]
+<tr><td>(E)</td>
+<td>[[input:ans5]] [[validation:ans5]]&nbsp;</td><td>&nbsp;{@MTF_e[3]@}</td>
+</tr>
+[[/comment]]
+[[comment]]
+<tr><td>(F)</td>
+<td>[[input:ans6]] [[validation:ans6]]&nbsp;</td><td>&nbsp;{@MTF_f[3]@}</td>
+</tr>
+[[/comment]]
+[[comment]]
+<tr><td>(G)</td>
+<td>[[input:ans7]] [[validation:ans7]]&nbsp;</td><td>&nbsp;{@MTF_g[3]@}</td>
+</tr>
+[[/comment]]
+[[comment]]
+<tr><td>(H)</td>
+<td>[[input:ans8]] [[validation:ans8]]&nbsp;</td><td>&nbsp;{@MTF_h[3]@}</td>
+</tr>
+[[/comment]]
+
+</tbody>
+</table>
+<p><span style="font-size: 0.9375rem;"><br></span></p><p><span style="font-size: 0.9375rem;">{@Marking_ja@}</span></p><br><br><p></p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2025040100</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[Qn:4;/* Number of questions  4,5,6,7,8? */
+/* Question text here */
+preamble:"A field is a set together with an addition and multiplication operation that obeys the list of axioms given in the notes. Determine which of the following statements are true. 
+";
+WM:"\\(\\def\\W#1{\\boldsymbol #1}\\def\\Wv{\\W v}\\def\\Ww{\\W w}\\def\\Wu{\\W u}\\)";
+
+texput(Wu,"{\\boldsymbol u}");
+texput(Wv,"{\\boldsymbol v}");
+
+ /* Each of the following lists of questions can be any length greater than or equal to 1. */
+
+MTF_A:[
+[a1,true, sconcat(WM,"\\(\\left<1, x\\right>","+\\left<x,x^2\\right>=\\left<1,x,x^2\\right>\\)")],
+[a2,false,sconcat(WM,"")],
+[a3,true, sconcat(WM,"")]
+];
+
+MTF_B:[
+[b1,false, ""],
+[b2,false, ""],
+[b3,false, ""],
+[b4,true, ""]
+];
+
+MTF_C:[
+[c1,false, ""],
+[c2,true, ""],
+[c3,false, ""],
+[c4,false, ""]
+];
+
+MTF_D:[
+[d1,true, ""],
+[d2,false, ""],
+[d3,true, ""],
+[d4,true, ""]
+];
+
+MTF_a:rand(MTF_A);  /* Select 1 answer from A's bank*/
+MTF_b:rand(MTF_B);  /* Select 1 answer from B's bank*/
+MTF_c:rand(MTF_C);  /* Select 1 answer from C's bank*/
+MTF_d:rand(MTF_D);  /* Select 1 answer from D's bank*/
+if Qn>4 then MTF_e:rand(MTF_E);
+if Qn>5 then MTF_f:rand(MTF_F);
+if Qn>6 then MTF_g:rand(MTF_G);
+if Qn>7 then MTF_g:rand(MTF_H);
+
+MTF:makelist([MTF_a,MTF_b,MTF_c,MTF_d,MTF_e,MTF_f,MTG_g,MTF_h][k],k,1,Qn) ;  /* List of all Qn questions */
+MTF_short: maplist(first,MTF); /* Key for checking which questions were used */
+MTF_ans: maplist(second,MTF);
+MTF_str: maplist(third,MTF);
+
+/* The following feedback text is visible to all students after each attempt, and should cover the key points that the student is expected to know for these questions. References to theorem numbers, etc, should be avoided, to future-proof the text.*/
+
+/* if the moodle is equipped with multilanguage filter, one may use the function. */
+feedbacktext:"<p>The definition of a field means all the axioms must be satisfied, so in particular, multiplication in any field must be associative and commutative.</p>
+
+<p>There are examples of objects that satisfy some but not all axioms\; these are not fields. For example, \\(F=\\mathbb Z_{>0}\\) has addition and multiplication, both of which are commutative and associative, but it isn't a field (since neither additive nor multiplicative inverses exist).</p>
+
+<p>\\(\\mathbb Q, \\mathbb R,\\) and \\(\\mathbb C\\) are the first examples of fields, but there are others, such as \\(\\mathbb{F}_5\\), the finite field with 5 elements. 
+</p>";
+
+feedbacktextja:"<p></p>
+<p></p>
+<p></p>
+";
+
+scP:floor(1000/Qn+0.5)*0.1;scM:(500/Qn+0.5)*0.1;
+Marking_en:sconcat("Marking:
+・For each correct answer: +",scP,"%
+・Blank answer: 0%
+・For each incorrect answer: -",scM,"%");
+Marking_ja:sconcat("配点: 各問正解: +",scP,"%, 未回答: 0%, 間違い: -",scM,"%");
+/* for reveal , but do not work , Qn5 is not input variable. */ 
+Qn5:if Qn>4 then "true" else "false";
+Qn6:if Qn>5 then "true" else "false";]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@Qn@}, MTF = \({@MTF_short@}\) , {@MTF_ans@} , {@MTF_str@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>Correct answer, well done.</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>Your answer is partially correct.</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>Incorrect answer.</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>dot</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>[</matrixparens>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>boolean</type>
+      <tans>MTF_a[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>boolean</type>
+      <tans>MTF_b[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>boolean</type>
+      <tans>MTF_c[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans4</name>
+      <type>boolean</type>
+      <tans>MTF_d[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans5</name>
+      <type>boolean</type>
+      <tans>MTF_e[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans6</name>
+      <type>boolean</type>
+      <tans>MTF_f[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans7</name>
+      <type>boolean</type>
+      <tans>MTF_g[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans8</name>
+      <type>boolean</type>
+      <tans>MTF_g[2]</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text>/* choose according to the num of questions is 4 or 5 */
+ansL:makelist([ans1,ans2,ans3,ans4,ans5,ans6,ans7,ans8,ans9,ans10][k],k,1,Qn);
+CansL:makelist([MTF_a[2],MTF_b[2],MTF_c[2],MTF_d[2],MTF_e[2],MTF_f[2],MTF_g[2],MTF_h[2],MTF_i[2],MTF_j[2]][k],k,1,Qn);
+getMark(L1,L2):=block([N,r,k],r:0,N:length(L1),for k:1 thru N do if L1[k]=L2[k] then r:r+1/N elseif not LA1[k]=EMPTYANSWER then r:r-0.5/N,return(r));
+sc:getMark(ansL,CansL);/* mark */</text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>PropLogic</answertest>
+        <sans>true</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>sc</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">{@feedbacktextja@}<br></p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>734366565</deployedseed>
+    <deployedseed>1771024639</deployedseed>
+    <deployedseed>177886929</deployedseed>
+    <deployedseed>1936692447</deployedseed>
+    <deployedseed>973116363</deployedseed>
+    <deployedseed>1554187105</deployedseed>
+    <deployedseed>1050373432</deployedseed>
+    <deployedseed>1067045281</deployedseed>
+    <deployedseed>1918683974</deployedseed>
+    <deployedseed>1922673237</deployedseed>
+    <deployedseed>424225679</deployedseed>
+    <deployedseed>272677780</deployedseed>
+    <deployedseed>26072677</deployedseed>
+    <deployedseed>1957549874</deployedseed>
+    <deployedseed>562804936</deployedseed>
+    <deployedseed>208915186</deployedseed>
+    <deployedseed>1921451612</deployedseed>
+    <deployedseed>2082350675</deployedseed>
+    <deployedseed>1042599310</deployedseed>
+    <deployedseed>1323596986</deployedseed>
+    <deployedseed>762801533</deployedseed>
+    <deployedseed>1210248854</deployedseed>
+    <deployedseed>795813432</deployedseed>
+    <deployedseed>1382681812</deployedseed>
+    <deployedseed>916077362</deployedseed>
+    <deployedseed>1729986666</deployedseed>
+    <deployedseed>748289306</deployedseed>
+    <deployedseed>989072635</deployedseed>
+    <deployedseed>765481873</deployedseed>
+    <deployedseed>1309753979</deployedseed>
+    <deployedseed>156885185</deployedseed>
+    <deployedseed>101763743</deployedseed>
+    <deployedseed>1367994909</deployedseed>
+    <deployedseed>1931508350</deployedseed>
+    <deployedseed>1353530242</deployedseed>
+  </question>
+
+</quiz>

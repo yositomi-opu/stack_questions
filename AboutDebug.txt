@@ -1,3 +1,5 @@
+[[lang code="en"]]
+
 Here, I will explain the debugging method I use.
 There is a file named `dump.txt` on this GitHub repository. If you run `maxima < dump.txt`, it will create a file named `maxima-optimized.new`. If necessary, rename this file to something appropriate and place it somewhere convenient.
 
@@ -12,5 +14,25 @@ If you see an error in your code, fix it there. STACK may sometimes display the 
 
 Let’s get developing! Please feel free to contribute your finished code!!!
 
+[[/lang]]
 
+[[lang code="ja"]]
+
+ここでは, 私の使っているデバッグの方法について説明します.
+
+dump.txt というファイルがこのgithub にありますが, maxima < dump.txt を実行すると maxima-optimized.new ができます. これを必要なら適切な名前に変更して使い安いところにおいておきます.
+
+必要なPATH の設定したファイルをMac なら pbcopy で, Windows なら多分 clip を使って クリップボードにながしこんでから, dump済みMaxima をrlwrap などのキー操作しやすいコマンドの引数として起動します.
+
+多肢選択テンプレート問題を開発するときは,
+
+cat mcq_template_pre.txt mcq_flag.txt (あなたのコードが書かれたファイル) mcq_template_post.txt |pbcopy 
+
+して, maxima にはりつければ, debug ができます.
+
+あなたのコードにerrorが見えればそこを直しましょう. STACKでも 何とか行目の何文字目というのを表示してくれることがありますが, 原因はもう少し違うところにあったりします. 
+
+ばんばん開発しましょう. できたコードは是非寄与して欲しいです.
+
+[[/lang]]
 
