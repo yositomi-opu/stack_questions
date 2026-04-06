@@ -23,7 +23,7 @@ W6:%_rp(append(W4, makelist(SS[nm+1+rand(5)], i, 1, rand([2,3,4]))));
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
 %__mcq_qtextL:[["en", sconcat("Select __SELTYPE__ item(s) that are equal to the set ", S0, ".")],
   ["fr", sconcat("Sélectionnez __SELTYPE__ élément(s) qui sont égaux à l’ensemble ", S0, ".")],
-  ["de", sconcat("Wählen Sie __SELTYPE__ Element(e) aus, die gleich der Menge ", S0 ,"sind."),]
+  ["de", sconcat("Wählen Sie __SELTYPE__ Element(e) aus, die gleich der Menge ", S0 ,"sind.")],
   ["ja", sconcat("集合", S0, "と同じになるものを __SELTYPE__ 選びなさい. ")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
