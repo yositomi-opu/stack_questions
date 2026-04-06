@@ -1,6 +1,8 @@
 #!/bin/bash
 
 infile="$1"
+[ ! -f $infile ] && exit 1
+
 outfile="${infile%.txt}.mac"
 
 perl -0pe '
