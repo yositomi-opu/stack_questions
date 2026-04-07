@@ -1,0 +1,56 @@
+/********** 001-MCB include file: K. Yoshitomi *********************/
+/* Objective: To learn, together with the corresponding notation,  */
+/*            the concepts of a set containing elements and        */
+/*            a set containing another set as a subset.            */
+/*******************************************************************/
+stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
+%_rp(L):=random_permutation(L);
+num_S:rand([4, 5, 6]);
+whole_list0:%_rp(makelist(k, k, -9, 9));
+whole_list:makelist(whole_list0[k], k, 1, num_S);
+sublistA:makelist(whole_set0[k], k, 2, num_S);
+sublistB:makelist(whole_set0[k], k, 1, num_S-1);
+aux_list:%_rp(makelist(k, num_S));
+elementA:whole_list[aux_list[1]];
+elementB:whole_list[aux_list[2]];
+non_elementA:whole_list[num_S+1];
+non_elementB:whole_list[num_S+2];
+tex2L(L):=
+%__CoptL1:[
+/* ListBL1: not true(element) */
+flg:rand([1,2]);
+IC11:[sconcat(c,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",c)][flg];
+IC12:[sconcat(d,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",d)][3-flg];
+flg:rand([1,2]);
+IC13:[sconcat(cx,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",cx)][flg];
+IC14:[sconcat(dx,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",dx)][3-flg];
+ListBL1:[IC11,IC12,IC13,IC14];
+/* ListBL2: not true(subset) */
+flg:rand([1,2]);
+IC21:[sconcat(T1,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",T1)][flg];
+IC22:[sconcat(T2,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",T2)][3-flg];
+flg:rand([1,2]);
+IC23:[sconcat(TX1,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",TX1)][flg];
+IC24:[sconcat(TX2,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",TX2)][3-flg];
+ListBL2:[IC21,IC22,IC23,IC24];
+/* ListBL3: not illegal usage */
+flg:rand([1,2]);
+IC31:[sconcat(c,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",c)][flg];
+IC32:[sconcat(cx,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",cx)][3-flg];
+flg:rand([1,2]);
+IC33:[sconcat(T1,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",T1)][flg];
+IC34:[sconcat(TX2,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",TX2)][3-flg];
+ListBL3:[IC31,IC32,IC33,IC34];
+
+/* MC setting */
+cwnL:append([2],random_permutation([1,1,2]));
+cn1:cwnL[1];cn:cn1;
+wn1:cwnL[2];wn2:cwnL[3];wn3:cwnL[4];wn:wn1+wn2+wn3;
+
+CorL1:random_permutation(makelist([i,true,ListAL1[i]],i,1,length(ListAL1)));
+/* CorL2:random_permutation(makelist([i+20,true,ListAL2[i]],i,1,length(ListAL2))); */
+WrgL1:random_permutation(makelist([100+i,false,ListBL1[i]],i,1,length(ListBL1)));
+WrgL2:random_permutation(makelist([200+i,false,ListBL2[i]],i,1,length(ListBL2)));
+WrgL3:random_permutation(makelist([300+i,false,ListBL3[i]],i,1,length(ListBL3)));
+va:random_permutation(append(makelist(CorL1[i],i,1,cn1),makelist(WrgL1[i],i,1,wn1),makelist(WrgL2[i],i,1,wn2),makelist(WrgL3[i],i,1,wn3)));
+Cans1:mcq_correct(va);
