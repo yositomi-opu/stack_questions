@@ -31,6 +31,7 @@ non_subsetA:setify(append(sublistA, [non_elementA]));
 non_subsetB:setify(append(sublistA, [non_elementA, non_elementB]));
 non_subsetQ:rand([non_subsetA, non_subsetB]);
 
+/* correct pattern 4 */
 %__CoptL1:[tex2L([elementQ, "\\in", wholeSet]), tex2L([wholeSet, "\\ni", elementQ])];
 %__COptL2:[tex2L([non_elementQ, "\\not\\in", wholeSet]), tex2L([wholeSet, "\\not\\ni", non_elementQ])];
 %__Cmsg1L:[["en", "You have selected the correct expression for the relationship between an element and a set."],
@@ -47,6 +48,7 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
  ["ja", "集合とその部分集合の関係の正しい式を選択しています."]];
 %__Cmsg4L:%__Cmsg3L;
 
+/* wrong answer pattern 4 */
 /* mistake in notation */
 %__WoptL1:[tex2L([elementQ, "\\subset", wholeSet]), tex2L([wholeSet, "\\supset", elementQ])];
 %__WoptL2:[tex2L([non_elementQ, "\\not\\subset", wholeSet]), tex2L([wholeSet, "\\not\\supset", non_elementQ])];
