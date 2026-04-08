@@ -44,10 +44,10 @@ for k:1 thru length(allList) do if allList[k][1] then TList:append(TList, [allLi
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("When proposition", tex2(P), " is ", sP, "and Q is ", sQ, ", then choose one FLASE  proposition.")],
- ["fr", sconcat("Lorsque la proposition ", tex2(P), " est ", sP, " et ", tex2(Q), " est ", sQ, ", choisissez la proposition fausse.")],
- ["de", sconcat("Wenn die Aussage ", tex2(P), " ist ", sP, " und ", tex2(Q), " ist ", sQ, " ist, wählen Sie die falshe Aussage.")],
- ["ja", sconcat("命題", tex2(P), "が", sP, "で, ", tex2(Q), if sP=sQ then "も" else "は", sQ, "であるとき, 偽の命題を選べ.")]];
+%__mcq_qtextL:[["en", sconcat("When the statement ", tex2(P), " is ", sP, " and ", tex2(Q), if sP=sQ then " is also " else " is ", sQ, ", choose __SELTYPE__ false statement(s).")],
+ ["fr", sconcat("Lorsque la proposition ", tex2(P), " est ", sP, " et ", tex2(Q), if sP=sQ then " est aussi " else " est ", sQ, ", choisissez __SELTYPE__ proposition(s) fausse(s).")],
+ ["de", sconcat("Wenn die Aussage ", tex2(P), " ", sP, " ist und ", tex2(Q), if sP=sQ then " ebenfalls " else " ", sQ, " ist, wählen Sie __SELTYPE__ falsche Aussage(n).")],
+ ["ja", sconcat("命題", tex2(P), "が", sP, "で, ", tex2(Q), if sP=sQ then "も" else "は", sQ, "であるとき, 偽の命題を __SELTYPE__ 選べ.")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
