@@ -72,7 +72,7 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
  ["ja", "記号の用法を間違えています. 部分集合として含む, 含まない, は\\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)を使います."]];
 
 /* mistake in conception */
-%__WoptL3:[tex2L([non_elementQ, "\\in ", wholeSet]), tex2L([wholeSet, "\\ni", non_elementQ])
+%__WoptL3:[tex2L([non_elementQ, "\\in ", wholeSet]), tex2L([wholeSet, "\\ni", non_elementQ]),
            tex2L([elementQ, "\\not\\in ", wholeSet]), tex2L([wholeSet, "\\not\\ni", elementQ])];
 %__Wmsg3L:[["en", "It seems you do not understand element membership and non-membership. Each individual object that makes up a set is called an element."],
  ["fr", "Il semble que vous ne compreniez pas l’appartenance et la non-appartenance des éléments. Chaque objet individuel qui constitue un ensemble est appelé un élément."],
