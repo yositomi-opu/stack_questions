@@ -34,7 +34,7 @@ thList:append(thList, [[(not tfP) or tfQ, tex2L([NOT P, THEN, Q])]]);
 thList:append(thList, [[tfP or tfQ, tex2L([P, THEN, Q])]]);
 thList:append(thList, [[(not tfP) or (not tfQ), tex2L([NOT P, THEN, NOT, Q])]]);
 thList:append(thList, [[tfP or (not tfQ), tex2L([P, THEN, NOT, Q])]]);
-allList:append(andList, orList, thList);
+allList:append(thList);
 /* allTF:maplist(first, allList);*/
 TList:[];
 FList:[];
