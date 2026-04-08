@@ -6,51 +6,77 @@
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 %_rp(L):=random_permutation(L);
 num_S:rand([4, 5, 6]);
-whole_list0:%_rp(makelist(k, k, -9, 9));
+whole_list0:%_rp(makelist(k, k, -6, 6));
 whole_list:makelist(whole_list0[k], k, 1, num_S);
+wholeSet:setify(whole_list);
 sublistA:makelist(whole_set0[k], k, 2, num_S);
-sublistB:makelist(whole_set0[k], k, 1, num_S-1);
+sublistB:makelist(whole_set0[k], k, 1, num_S-2);
+subsetA:setify(sublistA);
+subsetB:setify(sublistB);
 aux_list:%_rp(makelist(k, num_S));
 elementA:whole_list[aux_list[1]];
 elementB:whole_list[aux_list[2]];
-non_elementA:whole_list[num_S+1];
-non_elementB:whole_list[num_S+2];
-tex2L(L):=
-%__CoptL1:[
-/* ListBL1: not true(element) */
-flg:rand([1,2]);
-IC11:[sconcat(c,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",c)][flg];
-IC12:[sconcat(d,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",d)][3-flg];
-flg:rand([1,2]);
-IC13:[sconcat(cx,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",cx)][flg];
-IC14:[sconcat(dx,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",dx)][3-flg];
-ListBL1:[IC11,IC12,IC13,IC14];
-/* ListBL2: not true(subset) */
-flg:rand([1,2]);
-IC21:[sconcat(T1,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",T1)][flg];
-IC22:[sconcat(T2,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",T2)][3-flg];
-flg:rand([1,2]);
-IC23:[sconcat(TX1,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",TX1)][flg];
-IC24:[sconcat(TX2,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",TX2)][3-flg];
-ListBL2:[IC21,IC22,IC23,IC24];
-/* ListBL3: not illegal usage */
-flg:rand([1,2]);
-IC31:[sconcat(c,"\\(\\subset\\)",S),sconcat(S,"\\(\\supset\\)",c)][flg];
-IC32:[sconcat(cx,"\\(\\not\\subset\\)",S),sconcat(S,"\\(\\not\\supset\\)",cx)][3-flg];
-flg:rand([1,2]);
-IC33:[sconcat(T1,"\\(\\in\\)",S),sconcat(S,"\\(\\ni\\)",T1)][flg];
-IC34:[sconcat(TX2,"\\(\\not\\in\\)",S),sconcat(S,"\\(\\not\\ni\\)",TX2)][3-flg];
-ListBL3:[IC31,IC32,IC33,IC34];
+elementAS:{elementA};
+elementBS:{elementB};
+subsetQ:rand([subsetA, subsetB, elementAS, elementBS]);
+elementQ:rand([elementA, elementB]);
+elementSQ:rand([{elementA}, {elementB}]);
 
-/* MC setting */
-cwnL:append([2],random_permutation([1,1,2]));
-cn1:cwnL[1];cn:cn1;
-wn1:cwnL[2];wn2:cwnL[3];wn3:cwnL[4];wn:wn1+wn2+wn3;
+non_elementA:whole_list[num_S+rand([1,2,3])];
+non_elementB:whole_list[num_S+rand([4,5])];
+non_elementQ:rand([non_elementA, non_elementB]);
+non_subsetA:setify(append(sublistA, [non_elementA]));
+non_subsetB:setify(append(sublistA, [non_elementA, non_elementB]));
+non_subsetQ:rand([non_subsetA, non_subsetB]);
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Among the following statements, choose __SELTYPE__ those for which both the use of symbols and the claim are correct (true).")],
+ ["fr", sconcat("Parmi les énoncés suivants, choisissez __SELTYPE__ ceux pour lesquels l’usage des symboles et l’assertion sont tous deux corrects (vrais).")],
+ ["de", sconcat("Wählen Sie unter den folgenden Aussagen __SELTYPE__ diejenigen, bei denen sowohl die Verwendung der Symbole als auch die Aussage korrekt (wahr) ist.")],
+ ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__選べ."]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
 
-CorL1:random_permutation(makelist([i,true,ListAL1[i]],i,1,length(ListAL1)));
-/* CorL2:random_permutation(makelist([i+20,true,ListAL2[i]],i,1,length(ListAL2))); */
-WrgL1:random_permutation(makelist([100+i,false,ListBL1[i]],i,1,length(ListBL1)));
-WrgL2:random_permutation(makelist([200+i,false,ListBL2[i]],i,1,length(ListBL2)));
-WrgL3:random_permutation(makelist([300+i,false,ListBL3[i]],i,1,length(ListBL3)));
-va:random_permutation(append(makelist(CorL1[i],i,1,cn1),makelist(WrgL1[i],i,1,wn1),makelist(WrgL2[i],i,1,wn2),makelist(WrgL3[i],i,1,wn3)));
-Cans1:mcq_correct(va);
+%__CoptL1:[tex2L([elementQ, "\\in", wholeSet]), tex2L([wholeSet, "\\ni", elementQ]), 
+           tex2L([non_elementQ, "\\not\\in", wholeSet]), tex2L([wholeSet, "\\not\\ni", non_elementQ])];
+%__Cmsg1L:[["en", "You have selected the correct expression for the relationship between an element and a set."],
+ ["fr", "Vous avez sélectionné l’expression correcte pour la relation entre un élément et un ensemble."],
+ ["de", "Sie haben den richtigen Ausdruck für die Beziehung zwischen einem Element und einer Menge ausgewählt."],
+ ["ja", "要素と集合の関係の正しい式を選択しています."]];
+
+%__CoptL2:[tex2L([subsetQ, "\\subset", wholeSet]), tex2L([wholeSet, "\\supset", subsetQ]),
+           tex2L([non_subsetQ, "\\not\\subset", wholeSet]), tex2L([wholeSet, "\\not\\supset", non_subsetQ])];
+%__Cmsg2L:[["en", "You have selected the correct expression for the relationship between a set and its subset."],
+ ["fr", "Vous avez sélectionné l’expression correcte pour la relation entre un ensemble et son sous-ensemble."],
+ ["de", "Sie haben den richtigen Ausdruck für die Beziehung zwischen einer Menge und ihrer Teilmenge ausgewählt."],
+ ["ja", "集合とその部分集合の関係の正しい式を選択しています."]];
+
+/* mistake in notation */
+%__WoptL1:[tex2L([elementQ, "\\subset", wholeSet]), tex2L([wholeSet, "\\supset", elementQ]),
+           tex2L([non_elementQ, "\\not\\subset", wholeSet]), tex2L([wholeSet, "\\not\\supset", non_elementQ])];
+%__Wmsg1L:[["en", "You are using the symbols incorrectly. For element membership and non-membership, use \\(\\in, \\ni, \\not\\in, \\not\\ni\\)."],
+ ["fr", "Vous utilisez les symboles de manière incorrecte. Pour l’appartenance et la non-appartenance d’un élément, utilisez \\(\\in, \\ni, \\not\\in, \\not\\ni\\)."],
+ ["de", "Sie verwenden die Symbole falsch. Für die Zugehörigkeit und Nichtzugehörigkeit von Elementen verwenden Sie \\(\\in, \\ni, \\not\\in, \\not\\ni\\)."],
+ ["ja", "記号の用法を間違えています。要素として含む, 含まない, は, \\(\\in, \\ni, \\not\\in, \\not\\ni\\)を使います."]];
+
+%__WoptL2:[tex2L([subsetQ, "\\in", wholeSet]), tex2L([wholeSet, "\\ni", subsetQ]),
+           tex2L([non_subsetQ, "\\not\\in", wholeSet]), tex2L([wholeSet, "\\not\\ni", non_subsetQ])];
+%__Wmsg2L:[["en", "You are using the symbols incorrectly. For subset inclusion and non-inclusion, use \\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)."],
+ ["fr", "Vous utilisez les symboles de manière incorrecte. Pour l’inclusion et la non-inclusion en tant que sous-ensemble, utilisez \\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)."],
+ ["de", "Sie verwenden die Symbole falsch. Für das Enthaltensein als Teilmenge und dessen Negation verwenden Sie \\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)."],
+ ["ja", "記号の用法を間違えています. 部分集合として含む, 含まない, は\\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)を使います."]];
+
+/* mistake in conception */
+%__WoptL3:[tex2L([non_elementQ, "\\in ", wholeSet]), tex2L([wholeSet, "\\ni", non_elementQ])
+           tex2L([elementQ, "\\not\\in ", wholeSet]), tex2L([wholeSet, "\\not\\ni", elementQ])];
+%__Wmsg3L:[["en", "It seems you do not understand element membership and non-membership. Each individual object that makes up a set is called an element."],
+ ["fr", "Il semble que vous ne compreniez pas l’appartenance et la non-appartenance des éléments. Chaque objet individuel qui constitue un ensemble est appelé un élément."],
+ ["de", "Es scheint, dass Sie die Zugehörigkeit und Nichtzugehörigkeit von Elementen nicht verstehen. Jedes einzelne Objekt, das eine Menge bildet, wird ein Element genannt."],
+ ["ja", "要素を含む, 含まないが理解できていないです. その集合を構成するもの1つ1つを要素と言います."]];
+ 
+
