@@ -30,9 +30,9 @@ orList:append(orList, [[tfP or (not tfQ), tex2L([P, OR, NOT, Q])]]);
 orList:append(orList, [[(not tfP) or (not tfQ), tex2L([NOT, P, OR, NOT, Q])]]);
 /* then: 3 true ones and 1 false one */
 thList:[];
-thList:append(thList, [[(not tfP) or tfQ, tex2L([NOT P, THEN, Q])]]);
+thList:append(thList, [[(not tfP) or tfQ, tex2L([NOT, P, THEN, Q])]]);
 thList:append(thList, [[tfP or tfQ, tex2L([P, THEN, Q])]]);
-thList:append(thList, [[(not tfP) or (not tfQ), tex2L([NOT P, THEN, NOT, Q])]]);
+thList:append(thList, [[(not tfP) or (not tfQ), tex2L([NOT, P, THEN, NOT, Q])]]);
 thList:append(thList, [[tfP or (not tfQ), tex2L([P, THEN, NOT, Q])]]);
 allList:append(andList, orList, thList);
 /* allTF:maplist(first, allList);*/
