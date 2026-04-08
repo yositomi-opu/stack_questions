@@ -6,6 +6,8 @@ texP2(a, u, v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p
 texP2pq(a, p, u, q, v):=sconcat("\\(", tex1(a), "+", tex1(p), tex1(u), "+", tex1(q), tex1(v), "\\quad (", tex1(p), ", ", tex1(q), "\\in{\\mathbb R})\\)");
 
 
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+
 vmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"|", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));
 pmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"(", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));
 bmat(m):=block([lc:lmxchar, s:"\\("], lmxchar:"[", s:sconcat(s, tex1(m), "\\)"), lmxchar:lc, return(s));
