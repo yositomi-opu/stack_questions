@@ -3,7 +3,7 @@
 <!-- question: 115488  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-rb-2026-04-06</text>
+      <text>000.MCQ-rb-2026-04-08</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -28,9 +28,7 @@ stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /*************** some usual fuctions I use. Feel free to customize here **********************/
 powerdisp:true;
 %_rp(L):=random_permutation(L);
-tex2(m):=sconcat("\\(", tex1(m), "\\)");
-texP1(a,u):=sconcat("\\(", tex1(a), "+p", tex1(u), "\\quad (p\\in{\\mathbb R})\\)");
-texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q\\in{\\mathbb R})\\)");
+stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 /*********************************** Settings ***********************************/
 /* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
 /* Number of all options and correct options (rb/radio button case admit does work) */
