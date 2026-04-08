@@ -3,14 +3,15 @@
 /*            the concepts of a set containing elements and        */
 /*            a set containing another set as a subset.            */
 /*******************************************************************/
+/* cn=2, wn=3 */
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 %_rp(L):=random_permutation(L);
 num_S:rand([4, 5, 6]);
 whole_list0:%_rp(makelist(k, k, -6, 6));
 whole_list:makelist(whole_list0[k], k, 1, num_S);
 wholeSet:setify(whole_list);
-sublistA:makelist(whole_set0[k], k, 2, num_S);
-sublistB:makelist(whole_set0[k], k, 1, num_S-2);
+sublistA:makelist(whole_list0[k], k, 2, num_S);
+sublistB:makelist(whole_list0[k], k, 1, num_S-2);
 subsetA:setify(sublistA);
 subsetB:setify(sublistB);
 aux_list:%_rp(makelist(k, k, num_S));
@@ -22,12 +23,13 @@ subsetQ:rand([subsetA, subsetB, elementAS, elementBS]);
 elementQ:rand([elementA, elementB]);
 elementSQ:rand([{elementA}, {elementB}]);
 
-non_elementA:whole_list[num_S+rand([1,2,3])];
-non_elementB:whole_list[num_S+rand([4,5])];
+non_elementA:whole_list0[num_S+rand([1,2,3])];
+non_elementB:whole_list0[num_S+rand([4,5])];
 non_elementQ:rand([non_elementA, non_elementB]);
 non_subsetA:setify(append(sublistA, [non_elementA]));
 non_subsetB:setify(append(sublistA, [non_elementA, non_elementB]));
 non_subsetQ:rand([non_subsetA, non_subsetB]);
+
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
@@ -36,7 +38,7 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
 %__mcq_qtextL:[["en", sconcat("Among the following statements, choose __SELTYPE__ those for which both the use of symbols and the claim are correct (true).")],
  ["fr", sconcat("Parmi les énoncés suivants, choisissez __SELTYPE__ ceux pour lesquels l’usage des symboles et l’assertion sont tous deux corrects (vrais).")],
  ["de", sconcat("Wählen Sie unter den folgenden Aussagen __SELTYPE__ diejenigen, bei denen sowohl die Verwendung der Symbole als auch die Aussage korrekt (wahr) ist.")],
- ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__選べ."]];
+ ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__選べ.")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
@@ -80,3 +82,4 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
  ["ja", "要素を含む, 含まないが理解できていないです. その集合を構成するもの1つ1つを要素と言います."]];
  
 
+/********** EOF **********/

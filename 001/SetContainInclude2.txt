@@ -31,6 +31,20 @@ non_subsetA:setify(append(sublistA, [non_elementA]));
 non_subsetB:setify(append(sublistA, [non_elementA, non_elementB]));
 non_subsetQ:rand([non_subsetA, non_subsetB]);
 
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Among the following statements, choose __SELTYPE__ those for which both the use of symbols and the claim are correct (true).")],
+ ["fr", sconcat("Parmi les énoncés suivants, choisissez __SELTYPE__ ceux pour lesquels l’usage des symboles et l’assertion sont tous deux corrects (vrais).")],
+ ["de", sconcat("Wählen Sie unter den folgenden Aussagen __SELTYPE__ diejenigen, bei denen sowohl die Verwendung der Symbole als auch die Aussage korrekt (wahr) ist.")],
+ ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__選べ.")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+
 /* correct pattern 4 */
 %__CoptL1:[tex2L([elementQ, "\\in", wholeSet]), tex2L([wholeSet, "\\ni", elementQ])];
 %__COptL2:[tex2L([non_elementQ, "\\not\\in", wholeSet]), tex2L([wholeSet, "\\not\\ni", non_elementQ])];
