@@ -4,7 +4,6 @@
 /*            a set containing another set as a subset.            */
 /*******************************************************************/
 /* cn=2, wn=3 */
-stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 %_rp(L):=random_permutation(L);
 num_S:rand([4, 5, 6]);
 whole_list0:%_rp(makelist(k, k, -6, 6));
