@@ -14,7 +14,7 @@ sublistA:makelist(whole_set0[k], k, 2, num_S);
 sublistB:makelist(whole_set0[k], k, 1, num_S-2);
 subsetA:setify(sublistA);
 subsetB:setify(sublistB);
-aux_list:%_rp(makelist(k, num_S));
+aux_list:%_rp(makelist(k, k, num_S));
 elementA:whole_list[aux_list[1]];
 elementB:whole_list[aux_list[2]];
 elementAS:{elementA};
@@ -79,5 +79,5 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
  ["ja", "記号の用法を間違えています. 部分集合として含む, 含まない, は\\(\\subset, \\supset, \\not\\subset, \\not\\supset\\)を使います."]];
 %__Wmsg4L:%__Wmsg3L;
 
- 
+/********** EOF **********/ 
 
