@@ -46,7 +46,7 @@ WL1c:setify(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]]));
   "Falls für jedes \\((a,b)\\in F\\) kein \\((a,b')\\in F\\) mit \\(b'\\ne b\\) existiert, schreibt man \\(F(a)=b\\) und sagt, dass \\(F\\) eine Abbildung ist. ",
   "Mit anderen Worten: Jedem \\(a\\in A\\) ist genau ein \\(b\\in B\\) zugeordnet. ",
   __SELTYPE__, " Zuordnungen, die Abbildungen sind")],
- ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times\\B\\)の",
+ ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times B\\)の",
   "部分集合\\(F\\)は対応と言われる. \\((a, b)\\in F\\)ならば, \\(b'\\ne b\\)のとき, \\((a, b')\\in F\\)のとき, ",
   "\\(F(a)=b\\)と書いて写像であるという. つまり, \\(a\\in A\\)にただ1つの\\(b\\in B\\)が対応しているということである.",
   "次のうち, 写像であるものを__SELTYPE__")]];
