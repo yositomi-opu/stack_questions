@@ -53,6 +53,12 @@ if listp(%__WoptL9L) then %__WoptL9:%__mcq_lang(%__WoptL9L, %_STACK_LANG);
 %__mcq_addWopt(%__WoptL8, %__Wmsg8);
 %__mcq_addWopt(%__WoptL9, %__Wmsg9);
 
+/* moved from mcq_template_pre and forward compatibility */
+if numberp(%_MCQ_NUM_OPTS) then %__mcq_num_opts:%_MCQ_NUM_OPTS;
+if numberp(%_MCQ_NUM_COPTS) then %__mcq_num_copts:%_MCQ_NUM_COPTS;
+if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
+%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* nW:nO-nC */
+
 %__mcq_max_opts:10; /* max num of opts of each pattern */
 %__mcq_max_patterns:99; /* max num of opts of each pattern */
 /* number of patterns of correct/incorrect(wrong) options(auto-gen) */

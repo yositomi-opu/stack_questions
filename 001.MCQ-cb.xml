@@ -31,86 +31,27 @@ powerdisp:true;
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 /*********************************** Settings ***********************************/
 /* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
-/* Number of all options and correct options (rb/radio button case admit does work) */
-/* If the number of all options (or the sum of options) for each pattern is less than this setting, */
-/* these values will be automatically adjusted. _wopts=_opts-_copts */
-%__mcq_num_opts:5;
-%__mcq_num_copts:2;/* may be randomized e.g. rand([1, 1, 2]) etc. */
+
 /* Flags : modification not required if not necessary. See mcq_template_pre.txt for details */
 /* [use feedback?, use subscore?, use noidea opt, use nocorrect opt, is nocorrect opt true?, use qtext_auto?] */
+
 %_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
+
 /* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
 /*       and adjust the following constants. */
 %__mcq_max_cp:5;
 %__mcq_max_wp:9;
+
 /********************************* DO NOT EDIT HERE **************************************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 /*****************************************************************************************/
-/**** You can make database using the area below until END of MAIN QUESTION VARIABLES ****/
+
 /******************************** MAIN QUESTION VARIABLES ********************************/
-/* key parameters(e.g. which control the only level of the question) here if required */
-[rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
-pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
-/* Generate correct/incorrect patterns and messages */
-matF:randechelon(rw, cl, pv, [-2, -1, -1, 0, 1, 1, 2]);
-matP:random_matrix_det_list(rw, [-2, -1, -1, 0, 1, 1, 2], [-1, 1]);
-matA:matP.matF;
-/********************************** Question text ****************************************/
-/* %__mcq_qtextL : question text language list                                           */
-/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
-/*****************************************************************************************/
-/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[
- ["en", sconcat("When \\(A=", tex1(matA), "\\), then choose __SELTYPE__ as the row reduced echelonform.")],
- ["ja", sconcat("\\(A=", tex1(matA), "\\)のとき, 行簡約形として正しいものを __SELTYPE__.")],
- ["fr", sconcat("Lorsque \\(A=", tex1(matA), "\\), choisissez __SELTYPE__ comme forme échelonnée réduite.")],
- ["de", sconcat("Wenn \\(A=", tex1(matA), "\\) ist, wählen Sie __SELTYPE__ als reduzierte Zeilenstufenform.")]
-];
-/******************************** List of patterns/feedbacks *****************************/
-/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
-/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
-/*****************************************************************************************/
-/* Correct pattern 1 */
-%__CoptL1L:[["en", ["Correct Answer Pattern1-1", "Correct Answer Pattern1-2"]], 
-            ["fr", ["Motif de réponse correcte 1-1", "Motif de réponse correcte 1-2"]],
-            ["de", ["Richtiges Antwortmuster 1-1", "Richtiges Antwortmuster 1-2"]],
-            ["ja", ["正解パターン1-1", "正解パターン1-2"]]];
-%__Cmsg1L:[["en", "Correct pattern 1"], ["fr", "Motif de réponse correcte 1"], ["de", "Richtiges Antwortmuster 1"],
- ["ja", "正解パターン1です."]];
-/* Correct pattern 2 */
-%__CoptL2:["\\(y+x\\)", "\\(x+y\\)"]; /* not depend on locale case */
-/* %__CoptL2L:[["en", ["Correct Ans Pattern2-1", "Correct Ans Pattern2-2"]],
-            ["fr", ["Motif de réponse correcte 1-1", "Motif de réponse correcte 1-2"]],
-            ["de", ["Richtiges Antwortmuster 1-1", "Richtiges Antwortmuster 1-2"]],
-            ["ja", ["正解パターン2-1", "正解パターン2-2"]]]; */
-/* if message not depend on locale, define %__Cmsg2 */
-%__Cmsg2L:[["en", "Correct pattern 2"], ["fr", "Motif de réponse correcte 2"], ["de", "Richtiges Antwortmuster 2"], 
- ["ja", "正解パターン2です."]];
-/* Incorrect(wrong) pattern 1 */
-%__WoptL1L:[["en", ["Incorrect Ans Pattern1-1", "Incorrect Ans Pattern1-2"]],
-          ["fr", ["Motif de réponse incorrecte 1-1", "Motif de réponse incorrecte 1-2"]],
-          ["de", ["Falsches Antwortmuster 1-1", "Falsches Antwortmuster 1-2"]],
-          ["ja", ["誤答パターン1-1", "誤答パターン1-2"]]];
-%__Wmsg1L:[["en", "Incorrect pattern 1"],
- ["fr", "Motif de réponse incorrecte 1"],
- ["de", "Falsches Antwortmuster 1"],
- ["ja", "誤答パターン1です."]];
-/* Incorrect(wrong) pattern 2 */
-%__WoptL2L:[["en", ["Incorrect Ans Pattern1-1", "Incorrect Ans Pattern1-2"]],
-          ["fr", ["Motif de réponse incorrecte 1-1", "Motif de réponse incorrecte 1-2"]],
-          ["de", ["Falsches Antwortmuster 1-1", "Falsches Antwortmuster 1-2"]],
-          ["ja", ["誤答パターン1-1", "誤答パターン1-2"]]];
-%__Wmsg2L:[["en", "Incorrect Ans Pattern 2"],
- ["fr", "Motif de réponse incorrecte 2"], ["de", "Falsches Antwortmuster 2"],
- ["ja", "誤答パターン2です."]];
-/* Incorrect(wrong) pattern 3 */
-%__WoptL3:["Bad formula3-1", "Bad formula3-2"];/* not depend on locale case */
-%__Wmsg3L:[["en", "Incorrect pattern 3"],
- ["fr", "Motif de réponse incorrecte 3"], ["de", "Falsches Antwortmuster 3"],
- ["ja", "誤答パターン3です."]];
-/*****************************************************************************************/
+
+stack_include("https://stack.mathedu.jp/sc/Sample.txt");
+
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
-/*****************************************************************************************/
+
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
