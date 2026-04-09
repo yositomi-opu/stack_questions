@@ -16,7 +16,7 @@ lenB:length(ListB);
 SetAxB:cartesian_product(SetA, SetB);
 ListAxB:listify(SetAxB);
 ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
-MapL:$_rp(map(rand, ByA));
+MapL:%_rp(map(rand, ByA));
 SetL:setify(MapL);
 aux_list:%_rp(makelist(k, k, lenA*lenB));
 CL1:setify(sort(MapL));
