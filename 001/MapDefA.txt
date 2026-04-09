@@ -2,7 +2,7 @@
 /* 001-MCB include file		                                    */
 /* Objective: To learn, definition of map w.r.t correspondence      */
 /********************************************************************/
-/***** NOTE: c:[2], w:[3]
+/***** NOTE: c:[1, 1], w:[3]                                        */
 %_MCQ_NUM_OPTS:4;
 %_MCQ_NUM_COPTS:2;
 /********************************************************************/
