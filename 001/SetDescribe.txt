@@ -24,7 +24,7 @@ C1:setify(append(makelist(i, i, -bb, -aa), makelist(i, i, aa, bb)));
 W1a:setify(append(makelist(i, i, aa-1, bb), makelist(i, i, -bb, -aa+1)));
 W1b:setify(append(makelist(i, i, aa, bb+1), makelist(i, i, -bb-1, -aa)));
 W2:setify(makelist(i, i, aa, bb));
-qS:sconcat("\\(\\{x \\in \\mathbb Z\\,|\\,", tex1(Xaa), " \\leqq x \\leqq ", tex1(Xbb), "\\}\\)");
+qS:sconcat("\\(\\{x \\in \\mathbb Z\\,|\\,", tex1(Xaa), " \\leqq x^2 \\leqq ", tex1(Xbb), "\\}\\)");
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
