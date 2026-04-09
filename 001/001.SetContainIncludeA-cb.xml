@@ -49,7 +49,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 /**** You can make database using the area below until END of MAIN QUESTION VARIABLES ****/
 /******************************** MAIN QUESTION VARIABLES ********************************/l
 
-stack_include("https://stack.mathedu.jp/sc/001/SetContainInclude1.txt");
+stack_include("https://stack.mathedu.jp/sc/001/SetContainIncludeA.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 

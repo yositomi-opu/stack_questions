@@ -45,7 +45,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
 
-stack_include("https://stack.mathedu.jp/sc/001/PropCompound1.txt");
+stack_include("https://stack.mathedu.jp/sc/001/PropCompoundA.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
