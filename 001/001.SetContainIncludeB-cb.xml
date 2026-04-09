@@ -3,7 +3,7 @@
 <!-- question: 115526  -->
   <question type="stack">
     <name>
-      <text>001.SetContainInclude2-cb</text>
+      <text>001.SetContainIncludeB-cb</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
