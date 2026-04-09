@@ -26,9 +26,8 @@ stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
 %__mcq_rb_cb:"rb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
-/* stack_incluide("https://stack.mathedu.jp/sc/tex_library.mac");*/
 %_rp(L):=random_permutation(L);
-stack_incliude("https://stack.mathedu.jp/sc/tex_library.mac");
+stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 /*********************************** Settings ***********************************/
 /* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
 /* Number of all options and correct options (rb/radio button case admit does work) */
@@ -532,3 +531,4 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
   </question>
 
 </quiz>
+

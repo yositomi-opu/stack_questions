@@ -1,3 +1,7 @@
+/********** DiffCompositeFunc1-rb **********/
+%_MCQ_NUM_OPTS:6;
+%_MCQ_NUM_COPTS:1;
+/*******************************************/
 powerdisp:false;
 __tf1:lambda([x], diff(__tf(x), x, 1));
 __tf2:lambda([x], diff(-__tf(x), x, 1));

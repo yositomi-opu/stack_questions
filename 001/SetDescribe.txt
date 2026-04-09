@@ -1,0 +1,48 @@
+/* For 001.MCQ-rb : Set description */
+/* appropriate number of options:cn=1, wn=3 */
+%_rp(L):=random_permutation(L);
+aa:rand(2)+2;
+bb:rand(3)+5;
+whole_list:makelist(i, i, aa, bb);
+Xaa:aa*aa-rand([1, 2]);
+Xbb:bb*bb+rand([2, 3, 4, 5]);
+
+/* do not use setify because we do not want to reorder!! */
+CtoS(L):=sconcat("\\(", ssubst("\\{", "[", ssubst("\\}", "]", tex1(L))), "\\)");
+C1:setify(append(makelist(i, i, -bb, -aa), makelist(i, i, aa, bb)));
+W1a:setify(append(makelist(i, i, aa-1, bb), makelist(i, i, -bb, -aa+1)));
+W1b:setify(append(makelist(i, i, aa, bb+1), makelist(i, i, -bb-b1, -aa)));
+W2:setify(makelist(i, i, aa, bb);
+qS:sconcat("\\(\\{\\x \\in \\mathbb Z\\,|\\,", tex1(Xaa), " \\leqq x \\leqq ", tex1(Xbb), "\\}\\)");
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Select __SELTYPE__ item(s) that are equal to the set ", qS, ".")],
+  ["fr", sconcat("Sélectionnez __SELTYPE__ élément(s) qui sont égaux à l’ensemble ", qS, ".")],
+  ["de", sconcat("Wählen Sie __SELTYPE__ Element(e) aus, die gleich der Menge ", qS ,"sind.")],
+  ["ja", sconcat("集合", qS, "と同じになるものを __SELTYPE__ 選びなさい. ")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[CtoS(C1)];
+%__Cmsg1L:[["en", "They match as sets when order and duplicates are ignored."],
+ ["fr", "Ils correspondent en tant qu’ensembles lorsque l’ordre et les doublons sont ignorés."],
+ ["de", "Sie stimmen als Mengen überein, wenn Reihenfolge und Duplikate ignoriert werden."],
+ ["ja", "整数には\\(\\pm \\)があるのでそうなりますね."]];
+%__WoptL1:[CtoS(W1a), CtoS(W1b)];
+%__Wmsg1L:[["en", "The interval seems to be incorrect. Let's check the condition."],
+ ["fr", "L’intervalle semble incorrect. Vérifions la condition."],
+ ["de", "Der Bereich scheint nicht richtig zu sein. Überprüfen wir die Bedingung."],
+ ["ja", "範囲があっていないようです. 条件を確認してみましょう."]];
+%__WoptL2:[CtoS(W2)];
+%__Wmsg2L:[["en", "It is not necessarily a positive integer."],
+ ["fr", "Ce n’est pas nécessairement un entier positif."],
+ ["de", "Es ist nicht notwendigerweise eine positive ganze Zahl."],
+ ["ja", "正の整数とは限りません."]];
+
+/********** EOF ***********/
+
