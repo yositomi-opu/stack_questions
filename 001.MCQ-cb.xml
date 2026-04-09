@@ -47,7 +47,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 /*****************************************************************************************/
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
-
+/***** See the Sample.txt file below for how to describe question variables here *********/
 stack_include("https://stack.mathedu.jp/sc/Sample.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
