@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115526  -->
+<!-- question: 115518  -->
   <question type="stack">
     <name>
-      <text>001.SetContainInclude1-cb</text>
+      <text>001.SetDescribe-rb</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -24,35 +24,36 @@
       <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
 stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
-%__mcq_rb_cb:"cb";
+%__mcq_rb_cb:"rb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
 powerdisp:true;
 %_rp(L):=random_permutation(L);
-stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+texP1(a,u):=sconcat("\\(", tex1(a), "+p", tex1(u), "\\quad (p\\in{\\mathbb R})\\)");
+texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q\\in{\\mathbb R})\\)");
 /*********************************** Settings ***********************************/
 /* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
-/* Number of all options and correct options (rb/radio button case admit does work) */
-/* If the number of all options (or the sum of options) for each pattern is less than this setting, */
-/* these values will be automatically adjusted. _wopts=_opts-_copts */
-%__mcq_num_opts:6;
-%__mcq_num_copts:rand([2,3, 4]);
+
 /* Flags : modification not required if not necessary. See mcq_template_pre.txt for details */
 /* [use feedback?, use subscore?, use noidea opt, use nocorrect opt, is nocorrect opt true?, use qtext_auto?] */
+
 %_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
+
 /* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
 /*       and adjust the following constants. */
 %__mcq_max_cp:5;
 %__mcq_max_wp:9;
+
 /********************************* DO NOT EDIT HERE **************************************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 /*****************************************************************************************/
-/**** You can make database using the area below until END of MAIN QUESTION VARIABLES ****/
-/******************************** MAIN QUESTION VARIABLES ********************************/l
-stack_include("https://stack.mathedu.jp/sc/001/SetContainInclude1.txt");
 
-/*****************************************************************************************/
+/******************************** MAIN QUESTION VARIABLES ********************************/l
+
+stack_include("https://stack.mathedu.jp/sc/001/SetDescribe.txt");
+
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
-/*****************************************************************************************/
+
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
@@ -97,7 +98,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
     <variantsselectionseed></variantsselectionseed>
     <input>
       <name>ans1</name>
-      <type>checkbox</type>
+      <type>radio</type>
       <tans>ta1</tans>
       <boxsize>10</boxsize>
       <strictsyntax>1</strictsyntax>
@@ -119,8 +120,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");
-]]></text>
+        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -532,4 +532,3 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
   </question>
 
 </quiz>
-

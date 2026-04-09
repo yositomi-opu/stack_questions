@@ -1,4 +1,4 @@
-/******************** SetDescribe (cb/rb) ***************************/
+/*********************** SetDescribe (rb) ***************************/
 /* 001-MCB include file		                                    */
 /* Objective: To learn, together with the corresponding notation,   */
 /*            the concepts of a set containing elements and         */
