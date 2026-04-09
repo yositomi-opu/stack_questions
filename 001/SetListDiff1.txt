@@ -1,5 +1,13 @@
-/* For 001.MCQ-cb : Difference of Set and List(permutation) */
-
+/******************** SetListDiff1 (cb/rb) **************************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn, together with the corresponding notation,   */
+/*            the concepts of a set containing elements and         */
+/*            a set containing another set as a subset.             */
+/********************************************************************/
+/***** NOTE: c:[4], w:[6]                                         */
+%_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:rand([2, 3]);
+/********************************************************************/
 SS:%_rp(makelist(i,i,-8,8));
 nm:rand([4, 5]);
 /* do not use setify because we do not want to reorder!! */

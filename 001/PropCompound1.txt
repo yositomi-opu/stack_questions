@@ -81,3 +81,5 @@ for k:1 thru length(allList) do if allList[k][1] then TList:append(TList, [allLi
  ["fr", "La disjonction \\(P\\lor Q\\) est vraie lorsque au moins l’un de \\(P\\) ou \\(Q\\) est vrai."],
  ["de", "Die Disjunktion \\(P\\lor Q\\) ist wahr, wenn mindestens eine von \\(P\\) oder \\(Q\\) wahr ist."],
  ["ja", "論理和 \\(P\\lor Q\\) は, \\(P, Q\\) の少なくともどちらかが真のとき真です."]];
+
+/********** EOF **********/

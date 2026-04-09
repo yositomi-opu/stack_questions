@@ -1,3 +1,14 @@
+/******************** SetDescribe (cb/rb) ***************************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn, together with the corresponding notation,   */
+/*            the concepts of a set containing elements and         */
+/*            a set containing another set as a subset.             */
+/********************************************************************/
+/***** NOTE: c:[1], w:[2,1]                                         */
+%_MCQ_NUM_OPTS:4;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
 /* For 001.MCQ-rb : Set description */
 /* appropriate number of options:cn=1, wn=3 */
 %_rp(L):=random_permutation(L);

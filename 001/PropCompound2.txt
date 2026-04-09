@@ -1,3 +1,8 @@
+/********** PropCompound2(rb) **********/
+%_MCQ_NUM_OPTS:4;
+%_MCQ_NUM_COPTS:1;
+/*******************************************/
+
 /* key parameters(e.g. which control the only level of the question) here if required */
 /* The truth values of compound propositions. */
 texput("NOT", "\\lnot");
@@ -65,3 +70,4 @@ for k:1 thru length(allList) do if allList[k][1] then TList:append(TList, [allLi
  ["de", "Die Implikation \\(P\\to Q\\) ist logisch äquivalent zu \\(\\lnot P\\lor Q\\). Mit anderen Worten, sie ist wahr, wenn \\(P\\) falsch ist. Wenn \\(P\\) wahr ist, dann ist sie genau dann wahr, wenn \\(Q\\) wahr ist."],
  ["ja", "含意 \\(P\\to Q\\) は \\(\\lnot P\\lor Q\\) と論理的に同値です。すなわち、\\(P\\) が偽であるときは常に真です。また、\\(P\\) が真である場合には、\\(Q\\) が真であるときに限り真となります。"]];
 
+/********** EOF **********/

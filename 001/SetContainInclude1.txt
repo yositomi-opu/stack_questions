@@ -1,9 +1,13 @@
-/********** 001-MCB include file: K. Yoshitomi *********************/
-/* Objective: To learn, together with the corresponding notation,  */
-/*            the concepts of a set containing elements and        */
-/*            a set containing another set as a subset.            */
-/*******************************************************************/
-/* cn=2, wn=3 */
+/******************** SetContainInclude1 (cb/rb) ********************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn, together with the corresponding notation,   */
+/*            the concepts of a set containing elements and         */
+/*            a set containing another set as a subset.             */
+/********************************************************************/
+/***** NOTE: c:[4,4,4], w:[4,4]                                     */
+%_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:2;
+/********************************************************************/
 %_rp(L):=random_permutation(L);
 num_S:rand([4, 5, 6]);
 whole_list0:%_rp(makelist(k, k, -6, 6));
