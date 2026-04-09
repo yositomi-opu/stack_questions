@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 115545  -->
+  <question type="stack">
+    <name>
+      <text>005.SetDescibe</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>集合 \(S\)を\(S=\left\{x\in {\mathbb Z}|{@a@}\leqq x^2 \leqq {@b@}\right\}\)とする. ただし, \({\mathbb Z}\)は整数全体の集合である.</p>
+<p>\(S\)を具体的に列挙法で記述せよ. たとえば, \(\{1,2,3\}\)ならば &nbsp;{1,2,3} と答えよ.&nbsp;</p><p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p dir="ltr" style="text-align: left;">集合の外延的定義(外延記法)とは, その集合の要素の満たすべき性質を記述することにより, 集合を数学的に定めるものである. 例えば, 1以上の整数 は自然数の集合の外延的定義であり, \(\{2k|k\in {\mathbb Z}\}\)は偶数全体の外延記法である. 一方, \(\{1,2,3,4,\dots,\}\)や \(\{\dots,-8,-6,-4,-2,0,2,4,6,8,\dots\}\)は列挙することによって, 集合を記述しようとするものである. 有限集合の場合は, 内包定義で十分な場合もあるが, 無限集合の場合は, しばしば曖昧さが伴うため, 一般には, 外延的に記述する.</p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 集合の外延定義から列挙記述(内包記述)に変換 */
+/* v002 : 文言整備 (2023.3.20) */
+CtoS(L):=sconcat("\\(",ssubst("\\{","[",ssubst("\\}","]",tex1(L))),"\\)");
+s:rand([1,2,3,4,5]);t:s+rand([1,2,2,2,3,3,4]);
+a:rand_with_prohib((s-1)^2+1,s^2,[]);
+b:rand_with_prohib(t^2,(t+1)^2-1,[]);
+Cans1:union(setify(makelist(i,i,s,t)),setify(makelist(-i,i,s,t)));
+Sans1:setify(makelist(i,i,s,t));
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@[s,t]@},{@[a,b]@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>dot</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>[</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>algebraic</type>
+      <tans>Cans1</tans>
+      <boxsize>20</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>1</mustverify>
+      <showvalidation>1</showvalidation>
+      <options></options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>Cans1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>Sans1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.7</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text>おしい. 整数には負の数もあるので, 負の数も必要ですね.</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>1938122797</deployedseed>
+    <deployedseed>1211336207</deployedseed>
+    <deployedseed>3024936</deployedseed>
+    <deployedseed>773883634</deployedseed>
+    <deployedseed>984600621</deployedseed>
+    <deployedseed>799954985</deployedseed>
+    <deployedseed>1408184223</deployedseed>
+    <deployedseed>1800136500</deployedseed>
+    <deployedseed>169923519</deployedseed>
+    <deployedseed>1662378599</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>Cans1</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-1-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>

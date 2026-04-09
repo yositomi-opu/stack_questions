@@ -1,0 +1,1 @@
+This is pool of simple answer type question like as only one letter/number.
