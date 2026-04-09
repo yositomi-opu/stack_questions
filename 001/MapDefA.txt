@@ -19,12 +19,12 @@ ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
 MapL:%_rp(map(rand, ByA));
 SetL:setify(MapL);
 aux_list:%_rp(makelist(k, k, lenA*lenB));
-CL1:setify(sort(MapL));
-CL2:setify(makelist(MapL[k], k, 1, lenA-1));
-WL1a:setify(append(MapL, [ListAxB[aux_list[1]]]));
-WL1b:setify(append(MapL, [ListAxB[aux_list[2]]]));
-WL1c:setify(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]]));
 texCS(L):=sconcat("\\(", tex1(setify(map(ntupleify, L))), "\\)");
+CL1:texCS(sort(MapL));
+CL2:texCS(makelist(MapL[k], k, 1, lenA-1));
+WL1a:texCS(append(MapL, [ListAxB[aux_list[1]]]));
+WL1b:texCS(append(MapL, [ListAxB[aux_list[2]]]));
+WL1c:texCS(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]]));
 /* do not use setify because we do not want to reorder!! */
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
@@ -55,17 +55,17 @@ texCS(L):=sconcat("\\(", tex1(setify(map(ntupleify, L))), "\\)");
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:[texCS(CL1)];
+%__CoptL1:[CL1];
 %__Cmsg1L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
  ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
  ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
  ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
-%__CoptL2:[texCS(CL2)];
+%__CoptL2:[CL2];
 %__Cmsg2L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
  ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
  ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
  ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
-%__WoptL1:[texCS(WL1a), texCS(WL1b), texCS(WL1c)];
+%__WoptL1:[WL1a, WL1b, WL1c];
 %__Wmsg1L:[["en", "Does an element of \\(A\\) appear more than once? In that case, it becomes unclear to which element of \\(B\\) it corresponds."],
  ["fr", "Un élément de \\(A\\) n’apparaît-il pas plusieurs fois ? Dans ce cas, il devient impossible de déterminer à quel élément de \\(B\\) il correspond."],
  ["de", "Kommt ein Element von \\(A\\) mehr als einmal vor? In diesem Fall ist unklar, welchem Element von \\(B\\) es zugeordnet ist."],
