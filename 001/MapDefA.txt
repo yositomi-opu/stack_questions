@@ -1,0 +1,75 @@
+/*************************** MapDefA (cb) ***************************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn, definition of map w.r.t correspondence      */
+/********************************************************************/
+/***** NOTE: c:[2], w:[3]
+%_MCQ_NUM_OPTS:4;
+%_MCQ_NUM_COPTS:2;
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+ListA:rand([[1, 2, 3, 4], [2, 3, 5, 7], [3, 4, 7, 9]]);
+SetA:setify(ListA);
+lenA:length(ListA);
+ListB:rand([[a, b, c], [p, q, r], [x, y, z]]);
+SetB:setify(ListB);
+lenB:length(ListB);
+SetAxB:cartesian_product(SetA, SetB);
+ListAxB:listify(SetAxB);
+ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
+MapL:$_rp(map(rand, ByA));
+SetL:setify(MapL);
+aux_list:%_rp(makelist(k, k, lenA*lenB));
+CL1:setify(sort(MapL));
+CL2:setify(makelist(MapL[k], k, 1, lenA-1));
+WL1a:setify(append(MapL, [ListAxB[aux_list[1]]]));
+WL1b:setify(append(MapL, [ListAxB[aux_list[2]]]));
+WL1c:setify(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]]));
+
+/* do not use setify because we do not want to reorder!! */
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Let \\(A\\) and \\(B\\) be sets with \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "A subset \\(F\\) of the Cartesian product \\(A\\times B\\) is called a correspondence. ",
+  "If, whenever \\((a,b)\\in F\\), there is no \\((a,b')\\in F\\) with \\(b'\\ne b\\), then we write \\(F(a)=b\\) and say that \\(F\\) is a function. ",
+  "In other words, each \\(a\\in A\\) corresponds to exactly one \\(b\\in B\\). ",
+  __SELTYPE__, " correspondences that are functions")],
+["fr", sconcat("Soient \\(A\\) et \\(B\\) des ensembles tels que \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "Une partie \\(F\\) du produit cartésien \\(A\\times B\\) est appelée une correspondance. ",
+  "Si, pour tout \\((a,b)\\in F\\), il n’existe pas de \\((a,b')\\in F\\) avec \\(b'\\ne b\\), alors on écrit \\(F(a)=b\\) et on dit que \\(F\\) est une fonction. ",
+  "Autrement dit, à chaque \\(a\\in A\\) correspond exactement un \\(b\\in B\\). ",
+  __SELTYPE__, " correspondances qui sont des fonctions")],
+["de", sconcat("Seien \\(A\\) und \\(B\\) Mengen mit \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "Eine Teilmenge \\(F\\) des kartesischen Produkts \\(A\\times B\\) heißt Zuordnung. ",
+  "Falls für jedes \\((a,b)\\in F\\) kein \\((a,b')\\in F\\) mit \\(b'\\ne b\\) existiert, schreibt man \\(F(a)=b\\) und sagt, dass \\(F\\) eine Abbildung ist. ",
+  "Mit anderen Worten: Jedem \\(a\\in A\\) ist genau ein \\(b\\in B\\) zugeordnet. ",
+  __SELTYPE__, " Zuordnungen, die Abbildungen sind")],
+ ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times\\B\\)の",
+  "部分集合\\(F\\)は対応と言われる. \\((a, b)\\in F\\)ならば, \\(b'\\ne b\\)のとき, \\((a, b')\\in F\\)のとき, ",
+  "\\(F(a)=b\\)と書いて写像であるという. つまり, \\(a\\in A\\)にただ1つの\\(b\\in B\\)が対応しているということである.",
+  "次のうち, 写像であるものを__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[tex2(CL1)];
+%__Cmsg1L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
+ ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
+ ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
+ ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
+%__CoptL2:[tex2(CL2)];
+%__Cmsg2L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
+ ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
+ ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
+ ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
+%__WoptL1:[tex2(WL1a), tex2(WL1b), tex2(WL1c)];
+%__Wmsg1L:[["en", "Does an element of \\(A\\) appear more than once? In that case, it becomes unclear to which element of \\(B\\) it corresponds."],
+ ["fr", "Un élément de \\(A\\) n’apparaît-il pas plusieurs fois ? Dans ce cas, il devient impossible de déterminer à quel élément de \\(B\\) il correspond."],
+ ["de", "Kommt ein Element von \\(A\\) mehr als einmal vor? In diesem Fall ist unklar, welchem Element von \\(B\\) es zugeordnet ist."],
+ ["ja", "\\(A\\)の要素が2回出てきていませんか? その場合, その要素が\\(B\\)の何に対応するかが不明になります."]];
+
+/********** EOF ***********/
+
