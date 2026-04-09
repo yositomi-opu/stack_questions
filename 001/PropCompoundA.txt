@@ -1,6 +1,10 @@
-/********** PropCompound1(rb/cb) **********/
-%_MCQ_NUM_OPTS:6;
-%_MCQ_NUM_COPTS:rand([2, 3, 4]);
+/*********************** PropCompoundA (rb/cb) **********************/
+/* 001.MCB include file		                                    */
+/* Objective: To learn, basic logic                                 */
+/********************************************************************/
+/* c:[1, 3], w:[3, 1]; */
+%_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:rand([1, 2, 2, 3]);
 /*******************************************/
 
 /*** for 000.MCQ-rb.xml ***/

@@ -1,6 +1,10 @@
-/********** PropCompound3(rb/cb) **********/
-%_MCQ_NUM_OPTS:6;
-%_MCQ_NUM_COPTS:rand([2, 3, 3, 4]);
+/*********************** PropCompoundC (cb/rb) **********************/
+/* 001.MCB include file		                                    */
+/* Objective: To learn, basic logic                                 */
+/********************************************************************/
+/* c:[1, 3, 3], w:[3, 1, 1] */
+%_MCQ_NUM_OPTS:7;
+%_MCQ_NUM_COPTS:rand([2, 3, 3, 4, 4, 5]);
 /*******************************************/
 
 /* key parameters(e.g. which control the only level of the question) here if required */
