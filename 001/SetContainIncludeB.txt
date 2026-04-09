@@ -40,10 +40,10 @@ non_subsetQ:rand([non_subsetA, non_subsetB]);
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("Among the following statements, choose __SELTYPE__ those for which both the use of symbols and the claim are correct (true).")],
- ["fr", sconcat("Parmi les énoncés suivants, choisissez __SELTYPE__ ceux pour lesquels l’usage des symboles et l’assertion sont tous deux corrects (vrais).")],
- ["de", sconcat("Wählen Sie unter den folgenden Aussagen __SELTYPE__ diejenigen, bei denen sowohl die Verwendung der Symbole als auch die Aussage korrekt (wahr) ist.")],
- ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__選べ.")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " statements for which both the notation and the claim are correct (true)")],
+ ["fr", sconcat(__SELTYPE__, " énoncés pour lesquels la notation et l’affirmation sont toutes deux correctes (vraies)")],
+ ["de", sconcat(__SELTYPE__, " Aussagen, bei denen sowohl die Notation als auch die Aussage korrekt (wahr) sind")],
+ ["ja", sconcat("次の記述のうち, 記号の用法, 主張いずれも正しい(真である)ものを__SELTYPE__")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
