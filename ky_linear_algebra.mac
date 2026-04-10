@@ -129,3 +129,9 @@ get_assoc_array(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L),
 
 
 put_assoc_array(L, s, c):=block([k, lgL, mL, rt:[]], if length(L)=0 then return ([[s, c]]), lgL:map(first, L), mL:map(second, L), if not member(s, lgL) then return(append(L, [[s, c]])) else for k:1 thru length(lgL) do  rt:append(rt, if lgL[k]=s then [[s, c]] else [L[k]]), return(rt));
+
+
+make_random_distribution(L):=block([DL:[], k, i], for k:1 thru length(L) do DL:append(DL, makelist(L[k][1], L[k][2])), return(DL));
+%_mk_rand_dist(L):=make_random_distribution(L);
+make_random_distribution_pm(L):=append(%_mk_rand_dist(L), -%_mk_rand_dist(L));
+%_mk_rand_dist_pm(L):=make_random_distribution_pm(L);
