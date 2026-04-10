@@ -1,0 +1,69 @@
+/*********************** SpaceLineParaEq (rb)  ********************/
+/* 001.MCB include file		                                  */
+/* Objective: To learn paratrization of line given equation       */
+/******************************************************************/
+/* c:[2], w:[1, 1, 1]; */
+%_MCQ_NUM_OPTS:4;
+%_MCQ_NUM_COPTS:1;
+/*******************************************/
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+
+matP:random_invertible_matrix(3, [-2,-1,-1,-1,0,0,1,1,1,2]);
+va:col(matP, 1);
+vu:col(matP, 2);
+vv:col(matP, 3);
+vx:matrix([x],[y],[z]);
+tL:%_rp([-3, -2, -1, 1, 2, 3, 4]);
+Leq1:(x-va[1,1])/vu[1,1];
+Leq2:(y-va[2,1])/vu[2,1];
+Leq3:(z-va[3,1])/vu[3,1];
+EqS:tex2L([Leq1, "=", Leq2, "=", Leq3]);
+Ceq1a:tex2L([va+vu, "+p", rand([-2, -1, 1, 2])*vu]);
+Ceq1b:tex2L([va-vu, "+p", rand([-2, -1, 1, 2])*vu]);
+/* 通る点OK, 方向X */
+Weq1:tex2L([va+rand([-1, 1]))*vu, "+p", rand([-1, 1])*rand([va, vv])]);
+/* 通る点X, 方向OK */
+Weq2:tex2L([rand([-va, va+vv, vu, vv]), "+p", rand([-2, -1, 2])*vu]);
+/* 通る点X, 方向X */
+Weq3:tex2L([rand([-va, va+vu]), "+p", rand([va, vv])]);
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct parametric representations of the line given by the equation ", EqS)],
+ ["fr", sconcat(__SELTYPE__, " représentations paramétriques correctes de la droite donnée par l’équation ", EqS)],
+ ["de", sconcat(__SELTYPE__, " korrekte Parameterdarstellungen der durch die Gleichung ", EqS, " gegebenen Geraden")],
+ ["ja", sconcat("方程式", EqS, "で与えられる直線のパラメータ表示として正しいものを__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[Ceq1a, Ceq1b];
+%__Cmsg1L:[["en", "Correct. You can correctly determine whether it is another point on the line."],
+ ["fr", "Correct. Vous savez correctement déterminer s’il s’agit d’un autre point de la droite."],
+ ["de", "Richtig. Sie können korrekt feststellen, ob es sich um einen weiteren Punkt auf der Geraden handelt."],
+ ["ja", "正解です。他の通る点であるかどうかがきちんと判別できています."]];
+/* Wrong pattern 1 */
+%__WoptL1:[Weq1];
+%__Wmsg1L:[["en", "Is the direction vector correct? The position vector of a point on the line serves as a direction vector only when the line passes through the origin."],
+ ["fr", "Le vecteur directeur est-il correct ? Le vecteur de position d’un point de la droite ne sert de vecteur directeur que lorsque la droite passe par l’origine."],
+ ["de", "Ist der Richtungsvektor korrekt? Der Ortsvektor eines Punktes auf der Geraden ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft."],
+ ["ja", "方向ベクトルはあってるでしょうか？ 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです."]];
+/* Wrong pattern 2 */
+%__WoptL2:[Weq2];
+%__Wmsg2L:[["en", "Is the point on the line correct? The direction vector seems to be correct."],
+ ["fr", "Le point de passage est-il correct ? Le vecteur directeur semble correct."],
+ ["de", "Ist der Punkt auf der Geraden korrekt? Der Richtungsvektor scheint korrekt zu sein."],
+ ["ja", "通る点はあっていますか？ 方向ベクトルはあっているようです."]];
+/* Wrong pattern 3 */
+%__WoptL3:[Weq3];
+%__Wmsg3L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here)."],
+ ["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici)."],
+ ["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist)."],
+ ["ja", "通る点, 方向ベクトルともに違うようです. 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです(今の場合通りません)."]];
+
+/********** EOF **********/
