@@ -22,7 +22,7 @@ EqS:tex2L([Leq1, "=", Leq2, "=", Leq3]);
 Ceq1a:tex2L([va+vu, "+p", rand([-2, -1, 1, 2])*vu]);
 Ceq1b:tex2L([va-vu, "+p", rand([-2, -1, 1, 2])*vu]);
 /* 通る点OK, 方向X */
-Weq1:tex2L([va+rand([-1, 1]))*vu, "+p", rand([-1, 1])*rand([va, vv])]);
+Weq1:tex2L([va+rand([-1, 1])*vu, "+p", rand([-1, 1])*rand([va, vv])]);
 /* 通る点X, 方向OK */
 Weq2:tex2L([rand([-va, va+vv, vu, vv]), "+p", rand([-2, -1, 2])*vu]);
 /* 通る点X, 方向X */
