@@ -3,7 +3,7 @@
 <!-- question: 115487  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-cb-2026-04-09b</text>
+      <text>000.MCQ-cb-2026-04-12</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -29,7 +29,7 @@ stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 powerdisp:true;
 %_rp(L):=random_permutation(L);
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
-/*********************************** Settings ***********************************/
+/*********************************** Flags ***********************************/
 /* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
 
 /* Flags : modification not required if not necessary. See mcq_template_pre.txt for details */
@@ -47,6 +47,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 /*****************************************************************************************/
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
+
 /***** See the Sample.txt file below for how to describe question variables here *********/
 stack_include("https://stack.mathedu.jp/sc/001/Sample.txt");
 
