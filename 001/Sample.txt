@@ -23,14 +23,14 @@ matA:matP.matF;
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
-/* Correct pattern 1 */
+/* Correct answer pattern 1 */
 %__CoptL1L:[["en", ["Correct Answer Pattern1-1", "Correct Answer Pattern1-2"]], 
             ["fr", ["Motif de réponse correcte 1-1", "Motif de réponse correcte 1-2"]],
             ["de", ["Richtiges Antwortmuster 1-1", "Richtiges Antwortmuster 1-2"]],
             ["ja", ["正解パターン1-1", "正解パターン1-2"]]];
 %__Cmsg1L:[["en", "Correct pattern 1"], ["fr", "Motif de réponse correcte 1"], ["de", "Richtiges Antwortmuster 1"],
  ["ja", "正解パターン1です."]];
-/* Correct pattern 2 */
+/* Correct pattern answer 2 */
 %__CoptL2:["\\(y+x\\)", "\\(x+y\\)"]; /* not depend on locale case */
 /* %__CoptL2L:[["en", ["Correct Ans Pattern2-1", "Correct Ans Pattern2-2"]],
             ["fr", ["Motif de réponse correcte 1-1", "Motif de réponse correcte 1-2"]],
@@ -39,7 +39,7 @@ matA:matP.matF;
 /* if message not depend on locale, define %__Cmsg2 */
 %__Cmsg2L:[["en", "Correct pattern 2"], ["fr", "Motif de réponse correcte 2"], ["de", "Richtiges Antwortmuster 2"], 
  ["ja", "正解パターン2です."]];
-/* Incorrect(wrong) pattern 1 */
+/* Incorrect(wrong) answer pattern 1 */
 %__WoptL1L:[["en", ["Incorrect Ans Pattern1-1", "Incorrect Ans Pattern1-2"]],
           ["fr", ["Motif de réponse incorrecte 1-1", "Motif de réponse incorrecte 1-2"]],
           ["de", ["Falsches Antwortmuster 1-1", "Falsches Antwortmuster 1-2"]],
@@ -48,7 +48,7 @@ matA:matP.matF;
  ["fr", "Motif de réponse incorrecte 1"],
  ["de", "Falsches Antwortmuster 1"],
  ["ja", "誤答パターン1です."]];
-/* Incorrect(wrong) pattern 2 */
+/* Incorrect(wrong) answer pattern 2 */
 %__WoptL2L:[["en", ["Incorrect Ans Pattern1-1", "Incorrect Ans Pattern1-2"]],
           ["fr", ["Motif de réponse incorrecte 1-1", "Motif de réponse incorrecte 1-2"]],
           ["de", ["Falsches Antwortmuster 1-1", "Falsches Antwortmuster 1-2"]],
@@ -56,7 +56,7 @@ matA:matP.matF;
 %__Wmsg2L:[["en", "Incorrect Ans Pattern 2"],
  ["fr", "Motif de réponse incorrecte 2"], ["de", "Falsches Antwortmuster 2"],
  ["ja", "誤答パターン2です."]];
-/* Incorrect(wrong) pattern 3 */
+/* Incorrect(wrong) answer pattern 3 */
 %__WoptL3:["Bad formula3-1", "Bad formula3-2"];/* not depend on locale case */
 %__Wmsg3L:[["en", "Incorrect pattern 3"],
  ["fr", "Motif de réponse incorrecte 3"], ["de", "Falsches Antwortmuster 3"],

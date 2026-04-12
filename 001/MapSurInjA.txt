@@ -1,0 +1,98 @@
+/*************************** MapSurInjA (cb/rb) ************************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn definition of surjection and injection       */
+/********************************************************************/
+/***** NOTE: c:[2], w:[3]                                           */
+%_MCQ_NUM_OPTS:4;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+/* SIflag:1 -> Surj, 2 -> Inj, 3 -> Bij, 4 -> neither */
+SIflag:rand([1, 2]);
+ListA3:rand([[1, 2, 3], [2, 3, 5], [3, 4, 7]]);
+ListA4:rand([[1, 2, 3, 4], [2, 3, 5, 7], [3, 4, 7, 9]]);
+SetA3:setify(ListA3);
+SetA4:setify(ListA4);
+
+ListB3:%_rp(rand([[a, b, c], [p, q, r], [x, y, z]]));
+ListB4:%_rp(rand([[a, b, c, d], [p, q, r, s], [x, y, z, w]]));
+SetB3:setify(ListB3);
+SetB4:setify(ListB4);
+ListPair1L:[[ListA3, ListB3], [ListA4, ListB3], [ListA4, ListB4]];
+ListPair2L:[[ListA3, ListB3], [ListA3, ListB4], [ListA4, ListB4]];
+ListPair3L:[[ListA3, ListB3], [ListA4, ListB4]];
+ListPair4L:[[ListA3, ListB3], [ListA4, ListB3], [ListA4, ListB3], [ListA4, ListB4]];
+LP1:rand(ListPair1L);
+LP2:rand(ListPair2L);
+LP3:rand(ListPair3L);
+LP4:rand(ListPair4L);
+ListPair:[LP1, LP2, LP3, LP4][SIflag];
+ListA:ListPair[1];
+ListB:ListPair[2];
+SetA:setify(ListA);
+SetB:setify(ListB);
+SetAxB:cartesian_product(SetA, SetB);
+ListAxB:listify(SetAxB);
+/* B から A の個数個選ぶ重複順列全体 */
+lenA:length(ListA);
+ALL123:flatten(makelist(makelist(makelist([ListB[k1], ListB[k2], ListB[k3]], k1, 1, 3), k2, 1, 3), k3, 1, 3));
+if lenA=3 then AllListB:makelist([ListB[k1], ListB[k2] ListB[k3]], 
+AllMapsL:makelist(makelist([ListA[k], ListB[l]], l, 1, length(ListB)), k, 1, length(ListA));
+ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
+MapL:%_rp(map(rand, ByA));
+SetL:setify(MapL);
+aux_list:%_rp(makelist(k, k, lenA*lenB));
+texCS(L):=sconcat("\\(", tex1(setify(map(ntupleify, L))), "\\)");
+CL1:texCS(sort(MapL));
+CL2:texCS(makelist(MapL[k], k, 1, lenA-1));
+WL1a:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]]])));
+WL1b:texCS(%_rp(append(MapL, [ListAxB[aux_list[2]]])));
+WL1c:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]])));
+/* do not use setify because we do not want to reorder!! */
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Let \\(A\\) and \\(B\\) be sets with \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "A subset \\(F\\) of the Cartesian product \\(A\\times B\\) is called a correspondence. ",
+  "If \\((a,b)\\in F\\), and for every other \\(b'\\ne b\\in B\\) we have \\((a,b')\\not\\in F\\), then we write \\(F(a)=b\\) and say that \\(F\\) is a function. ",
+  "In other words, each \\(a\\in A\\) corresponds to exactly one \\(b\\in B\\). ",
+  __SELTYPE__, " correspondences that are functions")],
+ ["fr", sconcat("Soient \\(A\\) et \\(B\\) des ensembles tels que \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "Une partie \\(F\\) du produit cartésien \\(A\\times B\\) est appelée une correspondance. ",
+  "Si \\((a,b)\\in F\\) et que, pour tout autre \\(b'\\ne b\\in B\\), on a \\((a,b')\\not\\in F\\), alors on écrit \\(F(a)=b\\) et on dit que \\(F\\) est une fonction. ",
+  "Autrement dit, à chaque \\(a\\in A\\) correspond exactement un \\(b\\in B\\). ",
+  __SELTYPE__, " correspondances qui sont des fonctions")],
+ ["de", sconcat("Seien \\(A\\) und \\(B\\) Mengen mit \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "Eine Teilmenge \\(F\\) des kartesischen Produkts \\(A\\times B\\) heißt Zuordnung. ",
+  "Wenn \\((a,b)\\in F\\) gilt und für jedes andere \\(b'\\ne b\\in B\\) \\((a,b')\\not\\in F\\) gilt, dann schreibt man \\(F(a)=b\\) und sagt, dass \\(F\\) eine Abbildung ist. ",
+  "Mit anderen Worten: Jedem \\(a\\in A\\) ist genau ein \\(b\\in B\\) zugeordnet. ",
+  __SELTYPE__, " Zuordnungen, die Abbildungen sind")],
+ ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times B\\)の",
+  "部分集合\\(F\\)は対応と言われる. \\(F\\)に \\((a, b)\\)が含まれるならば, 他の \\(b'\\ne b\\in B\\)については, \\((a, b')\\not\\in F\\)のとき, ",
+  "\\(F(a)=b\\)と書いて写像であるという. つまり, \\(a\\in A\\)にただ1つの\\(b\\in B\\)が対応しているということである.",
+  "次のうち, 写像であるものを__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[CL1];
+%__Cmsg1L:[["en", "Correct. "],
+ ["fr", "Correct. "],
+ ["de", "Richtig. "],
+ ["ja", "正解です. "]];
+%__CoptL2:[CL2];
+%__Cmsg2L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
+ ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
+ ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
+ ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
+%__WoptL1:[WL1a, WL1b, WL1c];
+%__Wmsg1L:[["en", "Does an element of \\(A\\) appear more than once? In that case, it becomes unclear to which element of \\(B\\) it corresponds."],
+ ["fr", "Un élément de \\(A\\) n’apparaît-il pas plusieurs fois ? Dans ce cas, il devient impossible de déterminer à quel élément de \\(B\\) il correspond."],
+ ["de", "Kommt ein Element von \\(A\\) mehr als einmal vor? In diesem Fall ist unklar, welchem Element von \\(B\\) es zugeordnet ist."],
+ ["ja", "\\(A\\)の要素が2回出てきていませんか? その場合, その要素が\\(B\\)の何に対応するかが不明になります."]];
+
+/********** EOF ***********/
+
