@@ -135,3 +135,11 @@ make_random_distribution(L):=block([DL:[], k, i], for k:1 thru length(L) do DL:a
 %_mk_rand_dist(L):=make_random_distribution(L);
 make_random_distribution_pm(L):=append(%_mk_rand_dist(L), -%_mk_rand_dist(L));
 %_mk_rand_dist_pm(L):=make_random_distribution_pm(L);
+
+/* cross_product of R3 vectors */
+cross_product(va, vb):=matrix(
+  [va[2,1]*vb[3,1]-va[3,1]*vb[2,1]],
+  [va[3,1]*vb[1,1]-va[1,1]*vb[3,1]],
+  [va[1,1]*vb[2,1]-va[2,1]*vb[1,1]]);
+
+/********* EOF *********/
