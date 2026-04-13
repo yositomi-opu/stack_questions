@@ -58,14 +58,14 @@ while (length(NoneL)<2) do (
  s:sconcat("\\(f:", tex1(setify(A)), "\\rightarrow", tex1(setify(B)), "\\), "),
  for k:1 thru ln do s:sconcat(s, "f(", A[k], ")=", L[k], if k<ln then ", " else ""), s:sconcat(s, "\\)"), return(s));
 
-List1:makelist(format_question(ListA1, ListB1, BijL[k]), k, 1, length(BijL));
-List2:makelist(format_question(ListA1, ListB1, SurjL[k]), k, 1, length(SurjL));
-List3:makelist(format_question(ListA1, ListB1, InjL[k]), k, 1, length(InjL));
-List4:makelist(format_question(ListA1, ListB1, NoneL[k]), k, 1, length(NoneL));
+List1:makelist(%_format_question(ListA1, ListB1, BijL[k]), k, 1, length(BijL));
+List2:makelist(%_format_question(ListA2, ListB2, SurjL[k]), k, 1, length(SurjL));
+List3:makelist(%_format_question(ListA3, ListB3, InjL[k]), k, 1, length(InjL));
+List4:makelist(%_format_question(ListA4, ListB4, NoneL[k]), k, 1, length(NoneL));
 
-if Flag=1 then (CL1:List1, WL1:List2, WL2:List3, WL4:List4)
-else if Flag=2 then (CL1:List2, WL1:List1, WL2:List3, WL4:List4)
-else if Flag=3 then (CL1:List3, WL1:List1, WL2:List2, WL4:List4)
+if Flag=1 then (CL1:List1, WL1:List2, WL2:List3, WL3:List4)
+else if Flag=2 then (CL1:List2, WL1:List1, WL2:List3, WL3:List4)
+else if Flag=3 then (CL1:List3, WL1:List1, WL2:List2, WL3:List4)
 else (CL1:List4, WL1:List1, WL2:List2, WL4:List3);
 MapTypeL:[["en", ["bijective", "surjective but not injective", "injective but not surjective", "neither surjective nor injective"]],
  ["fr", ["bijective", "surjective mais non injective", "injective mais non surjective", "ni surjective ni injective"]],
