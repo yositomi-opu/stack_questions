@@ -29,7 +29,7 @@ ListB4:makelist(Bbase[i], i, nm4[2]);
 permutations_with_repetition(L, m) := block([sub, x, r, ans:[]],
     if m < 0 then error("m must be nonnegative")
     elseif m = 0 then return([[]])
-    else (sub:dup_perm_list(L, m-1), for x in L do for r in sub do ans:endcons(cons(x, r), ans),
+    else (sub:permutations_with_repetition(L, m-1), for x in L do for r in sub do ans:endcons(cons(x, r), ans),
     return(ans)));
 AllImageList1:random_permutation(permutations_with_repetition(ListB1, length(ListA1)));
 AllImageList2:random_permutation(permutations_with_repetition(ListB2, length(ListA2)));
@@ -70,17 +70,17 @@ else (CL1:List4, WL1:List1, WL2:List2, WL4:List3);
 MapTypeL:[["en", ["bijective", "surjective but not injective", "injective but not surjective", "neither surjective nor injective"]],
  ["fr", ["bijective", "surjective mais non injective", "injective mais non surjective", "ni surjective ni injective"]],
  ["de", ["bijektiv", "surjektiv, aber nicht injektiv", "injektiv, aber nicht surjektiv", "weder surjektiv noch injektiv"]],
- ["ja", ["全単射である", "全射であって単射でない", "単射であって全射でない", "全射でも単射でもない"]];
-MapType
+ ["ja", ["全単射である", "全射であって単射でない", "単射であって全射でない", "全射でも単射でもない"]]];
+
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " maps among the following that are ", get_assoc_array("en", MapTypeL)[Flag], ".")],
- ["fr", sconcat(__SELTYPE__, " applications parmi les suivantes qui sont ", get_assoc_array("fr", MapTypeL)[Flag], ".")],
- ["de", sconcat(__SELTYPE__, " Abbildungen unter den folgenden, die ", get_assoc_array("de", MapTypeL)[Flag], " sind.")],
- ["ja", sconcat("次の各写像のうち, ", get_assoc_array("ja", MapTypeL)[Flag], "ものを __SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " maps among the following that are ", %__mcq_lang(MapTypeL, "en")[Flag], ".")],
+ ["fr", sconcat(__SELTYPE__, " applications parmi les suivantes qui sont ", %__mcq_lang( MapTypeL, "fr")[Flag], ".")],
+ ["de", sconcat(__SELTYPE__, " Abbildungen unter den folgenden, die ", %__mcq_lang(MapTypeL, "de")[Flag], " sind.")],
+ ["ja", sconcat("次の各写像のうち, ", %__mcq_lang(MapTypeL, "ja")[Flag], "ものを __SELTYPE__")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
