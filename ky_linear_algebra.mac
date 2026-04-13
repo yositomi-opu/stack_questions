@@ -61,8 +61,9 @@ polynomial_to_list(px,x):=block([cL:[],c,d:0,qx:px],while(not qx=0) do (c:coeff(
 
 polynomial_to_list_varlist(px, xL):=block([cL:[], c, d:1, qx:px], while(d<=length(xL)) do (c:coeff(qx, xL[d]), cL:append(cL, [c]), qx:qx-c*xL[d], d:d+1), cL:append(cL, [qx]), return(cL));
 _scon_lincomb(cL, vL):=block([s:"", k, ln:length(cL), hflag:true], for k:1 thru ln do (
-  if hflag then s:sconcat(s, _tex1h(cL[k])) else s:sconcat(s, _tex1c(cL[k])),
-  if not cL[k]=0 then (if stringp(vL[k]) then s:sconcat(s, vL[k]) else s:sconcat(s, tex1(vL[k])), hflag:false)),
+  if not cL[k]=0 then (
+    if hflag then s:sconcat(s, _tex1h(cL[k])) else s:sconcat(s, _tex1c(cL[k])), hflag:false,
+    if stringp(vL[k]) then s:sconcat(s, vL[k]) else s:sconcat(s, tex1(vL[k])))),
   return(s));
 _scon_lincomb_paren(cL,vL):=block([s:"",k,ln:length(cL)],for k:1 thru ln do if not cL[k]=tex1(0) then s:sconcat(s,cL[k],"(",vL[k],")"),return(s));
 display_polynomial_tex1(px, x, adf):=block([cL:polynomial_to_list(px,x),cLr,sL,xpL,k,ln],cLr:reverse(cL),ln:length(cL),if adf=1 then sL:makelist(if k=1 then _tex1h(cLr[k]) else _tex1c(cLr[k]),k,1,ln) else sL:makelist(if k=1 then _tex1h(cL[k]) else _tex1c(cL[k]),k,1,ln),if adf=1 then xpL:makelist(tex1(x^(k-1)),k,1,ln) else xpL:makelist(tex1(x^(ln-k)),k,1,ln),return(_scon_lincomb(sL,xpL)));
