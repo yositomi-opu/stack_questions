@@ -24,7 +24,7 @@
       <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
 stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
-%__mcq_rb_cb:"cb";
+%__mcq_rb_cb:"rb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
 powerdisp:true;
 %_rp(L):=random_permutation(L);
@@ -97,7 +97,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
     <variantsselectionseed></variantsselectionseed>
     <input>
       <name>ans1</name>
-      <type>checkbox</type>
+      <type>radio</type>
       <tans>ta1</tans>
       <boxsize>10</boxsize>
       <strictsyntax>1</strictsyntax>
