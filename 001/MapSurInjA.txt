@@ -1,98 +1,102 @@
-/*************************** MapSurInjA (cb/rb) ************************/
+/************************ MapSurInjA (cb/rb) ************************/
 /* 001-MCB include file		                                    */
-/* Objective: To learn definition of surjection and injection       */
+/* Objective: To learn definition of surjective and injective map   */
 /********************************************************************/
-/***** NOTE: c:[2], w:[3]                                           */
-%_MCQ_NUM_OPTS:4;
-%_MCQ_NUM_COPTS:1;
+/***** NOTE: c:[3], w:[3] *****/
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:4;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
-/* SIflag:1 -> Surj, 2 -> Inj, 3 -> Bij, 4 -> neither */
-SIflag:rand([1, 2]);
-ListA3:rand([[1, 2, 3], [2, 3, 5], [3, 4, 7]]);
-ListA4:rand([[1, 2, 3, 4], [2, 3, 5, 7], [3, 4, 7, 9]]);
-SetA3:setify(ListA3);
-SetA4:setify(ListA4);
+/* 1:bij, 2:sur, 3:inj, 4:neither */
+if not numberp(Flag) then Flag:1;
+nm1:rand([[3, 3], [4, 4]]);
+nm2:rand([[3, 2], [4, 3]]);
+nm3:rand([[2, 3], [3, 4]]);
+nm4:[rand([3, 4]), rand([3, 4])];
 
-ListB3:%_rp(rand([[a, b, c], [p, q, r], [x, y, z]]));
-ListB4:%_rp(rand([[a, b, c, d], [p, q, r, s], [x, y, z, w]]));
-SetB3:setify(ListB3);
-SetB4:setify(ListB4);
-ListPair1L:[[ListA3, ListB3], [ListA4, ListB3], [ListA4, ListB4]];
-ListPair2L:[[ListA3, ListB3], [ListA3, ListB4], [ListA4, ListB4]];
-ListPair3L:[[ListA3, ListB3], [ListA4, ListB4]];
-ListPair4L:[[ListA3, ListB3], [ListA4, ListB3], [ListA4, ListB3], [ListA4, ListB4]];
-LP1:rand(ListPair1L);
-LP2:rand(ListPair2L);
-LP3:rand(ListPair3L);
-LP4:rand(ListPair4L);
-ListPair:[LP1, LP2, LP3, LP4][SIflag];
-ListA:ListPair[1];
-ListB:ListPair[2];
-SetA:setify(ListA);
-SetB:setify(ListB);
-SetAxB:cartesian_product(SetA, SetB);
-ListAxB:listify(SetAxB);
+Abase:rand([[1, 2, 3, 4, 5], [2, 3, 5, 7, 11], [3, 4, 5, 6, 7]]);
+Bbase:rand([[a, b, c, d, e], [x, y, z, w, v], [p, q, r, s, t]]);
+ListA1:makelist(Abase[i], i, nm1[1]);
+ListB1:makelist(Bbase[i], i, nm1[2]);
+ListA2:makelist(Abase[i], i, nm2[1]);
+ListB2:makelist(Bbase[i], i, nm2[2]);
+ListA3:makelist(Abase[i], i, nm3[1]);
+ListB3:makelist(Bbase[i], i, nm3[2]);
+ListA4:makelist(Abase[i], i, nm4[1]);
+ListB4:makelist(Bbase[i], i, nm4[2]);
+
 /* B から A の個数個選ぶ重複順列全体 */
-lenA:length(ListA);
-ALL123:flatten(makelist(makelist(makelist([ListB[k1], ListB[k2], ListB[k3]], k1, 1, 3), k2, 1, 3), k3, 1, 3));
-if lenA=3 then AllListB:makelist([ListB[k1], ListB[k2] ListB[k3]], 
-AllMapsL:makelist(makelist([ListA[k], ListB[l]], l, 1, length(ListB)), k, 1, length(ListA));
-ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
-MapL:%_rp(map(rand, ByA));
-SetL:setify(MapL);
-aux_list:%_rp(makelist(k, k, lenA*lenB));
-texCS(L):=sconcat("\\(", tex1(setify(map(ntupleify, L))), "\\)");
-CL1:texCS(sort(MapL));
-CL2:texCS(makelist(MapL[k], k, 1, lenA-1));
-WL1a:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]]])));
-WL1b:texCS(%_rp(append(MapL, [ListAxB[aux_list[2]]])));
-WL1c:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]])));
-/* do not use setify because we do not want to reorder!! */
+permutations_with_repetition(L, m) := block([sub, x, r, ans:[]],
+    if m < 0 then error("m must be nonnegative")
+    elseif m = 0 then return([[]])
+    else (sub:dup_perm_list(L, m-1), for x in L do for r in sub do ans:endcons(cons(x, r), ans),
+    return(ans)));
+AllImageList1:random_permutation(permutations_with_repetition(ListB1, length(ListA1)));
+AllImageList2:random_permutation(permutations_with_repetition(ListB2, length(ListA2)));
+AllImageList3:random_permutation(permutations_with_repetition(ListB3, length(ListA3)));
+AllImageList4:random_permutation(permutations_with_repetition(ListB4, length(ListA4)));
+%_is_surj(L, B):=is(sort(unique(L))=sort(B));
+%_is_inj(L):=is(length(unique(L))=length(L));
+
+BijL:[];k:1;
+while (length(BijL)<2) do (
+  if %_is_surj(AllImageList1[k], ListB1) and %_is_inj(AllImageList1[k]) then BijL:endcons(AllImageList1[k], BijL),
+  k:k+1);
+SurjL:[];k:1;
+while (length(SurjL)<2) do (
+  if %_is_surj(AllImageList2[k], ListB2) and not (%_is_inj(AllImageList2[k])) then SurjL:endcons(AllImageList2[k], SurjL),
+  k:k+1);
+InjL:[];k:1;
+while (length(InjL)<2) do (
+  if not %_is_surj(AllImageList3[k], ListB3) and %_is_inj(AllImageList3[k]) then InjL:endcons(AllImageList3[k], InjL),
+  k:k+1);
+NoneL:[];k:1;
+while (length(NoneL)<2) do (
+  if not %_is_surj(AllImageList4[k], ListB4) and not %_is_inj(AllImageList4[k]) then NoneL:endcons(AllImageList4[k], NoneL),
+  k:k+1);
+%_format_question(A, B, L):=block([s, k, ln:length(A)],
+ s:sconcat("\\(f:", tex1(setify(A)), "\\rightarrow", tex1(setify(B)), "\\), "),
+ for k:1 thru ln do s:sconcat(s, "f(", A[k], ")=", L[k], if k<ln then ", " else ""), s:sconcat(s, "\\)"), return(s));
+
+List1:makelist(format_question(ListA1, ListB1, BijL[k]), k, 1, length(BijL));
+List2:makelist(format_question(ListA1, ListB1, SurjL[k]), k, 1, length(SurjL));
+List3:makelist(format_question(ListA1, ListB1, InjL[k]), k, 1, length(InjL));
+List4:makelist(format_question(ListA1, ListB1, NoneL[k]), k, 1, length(NoneL));
+
+if Flag=1 then (CL1:List1, WL1:List2, WL2:List3, WL4:List4)
+else if Flag=2 then (CL1:List2, WL1:List1, WL2:List3, WL4:List4)
+else if Flag=3 then (CL1:List3, WL1:List1, WL2:List2, WL4:List4)
+else (CL1:List4, WL1:List1, WL2:List2, WL4:List3);
+MapTypeL:[["en", ["bijective", "surjective but not injective", "injective but not surjective", "neither surjective nor injective"]],
+ ["fr", ["bijective", "surjective mais non injective", "injective mais non surjective", "ni surjective ni injective"]],
+ ["de", ["bijektiv", "surjektiv, aber nicht injektiv", "injektiv, aber nicht surjektiv", "weder surjektiv noch injektiv"]],
+ ["ja", ["全単射である", "全射であって単射でない", "単射であって全射でない", "全射でも単射でもない"]];
+MapType
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("Let \\(A\\) and \\(B\\) be sets with \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
-  "A subset \\(F\\) of the Cartesian product \\(A\\times B\\) is called a correspondence. ",
-  "If \\((a,b)\\in F\\), and for every other \\(b'\\ne b\\in B\\) we have \\((a,b')\\not\\in F\\), then we write \\(F(a)=b\\) and say that \\(F\\) is a function. ",
-  "In other words, each \\(a\\in A\\) corresponds to exactly one \\(b\\in B\\). ",
-  __SELTYPE__, " correspondences that are functions")],
- ["fr", sconcat("Soient \\(A\\) et \\(B\\) des ensembles tels que \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
-  "Une partie \\(F\\) du produit cartésien \\(A\\times B\\) est appelée une correspondance. ",
-  "Si \\((a,b)\\in F\\) et que, pour tout autre \\(b'\\ne b\\in B\\), on a \\((a,b')\\not\\in F\\), alors on écrit \\(F(a)=b\\) et on dit que \\(F\\) est une fonction. ",
-  "Autrement dit, à chaque \\(a\\in A\\) correspond exactement un \\(b\\in B\\). ",
-  __SELTYPE__, " correspondances qui sont des fonctions")],
- ["de", sconcat("Seien \\(A\\) und \\(B\\) Mengen mit \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
-  "Eine Teilmenge \\(F\\) des kartesischen Produkts \\(A\\times B\\) heißt Zuordnung. ",
-  "Wenn \\((a,b)\\in F\\) gilt und für jedes andere \\(b'\\ne b\\in B\\) \\((a,b')\\not\\in F\\) gilt, dann schreibt man \\(F(a)=b\\) und sagt, dass \\(F\\) eine Abbildung ist. ",
-  "Mit anderen Worten: Jedem \\(a\\in A\\) ist genau ein \\(b\\in B\\) zugeordnet. ",
-  __SELTYPE__, " Zuordnungen, die Abbildungen sind")],
- ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times B\\)の",
-  "部分集合\\(F\\)は対応と言われる. \\(F\\)に \\((a, b)\\)が含まれるならば, 他の \\(b'\\ne b\\in B\\)については, \\((a, b')\\not\\in F\\)のとき, ",
-  "\\(F(a)=b\\)と書いて写像であるという. つまり, \\(a\\in A\\)にただ1つの\\(b\\in B\\)が対応しているということである.",
-  "次のうち, 写像であるものを__SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " maps among the following that are ", get_assoc_array("en", MapTypeL)[Flag], ".")],
+ ["fr", sconcat(__SELTYPE__, " applications parmi les suivantes qui sont ", get_assoc_array("fr", MapTypeL)[Flag], ".")],
+ ["de", sconcat(__SELTYPE__, " Abbildungen unter den folgenden, die ", get_assoc_array("de", MapTypeL)[Flag], " sind.")],
+ ["ja", sconcat("次の各写像のうち, ", get_assoc_array("ja", MapTypeL)[Flag], "ものを __SELTYPE__")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:[CL1];
+%__CoptL1:CL1;
 %__Cmsg1L:[["en", "Correct. "],
  ["fr", "Correct. "],
  ["de", "Richtig. "],
  ["ja", "正解です. "]];
-%__CoptL2:[CL2];
-%__Cmsg2L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
- ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
- ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
- ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
-%__WoptL1:[WL1a, WL1b, WL1c];
-%__Wmsg1L:[["en", "Does an element of \\(A\\) appear more than once? In that case, it becomes unclear to which element of \\(B\\) it corresponds."],
- ["fr", "Un élément de \\(A\\) n’apparaît-il pas plusieurs fois ? Dans ce cas, il devient impossible de déterminer à quel élément de \\(B\\) il correspond."],
- ["de", "Kommt ein Element von \\(A\\) mehr als einmal vor? In diesem Fall ist unklar, welchem Element von \\(B\\) es zugeordnet ist."],
- ["ja", "\\(A\\)の要素が2回出てきていませんか? その場合, その要素が\\(B\\)の何に対応するかが不明になります."]];
+%__WoptL1:[rand(WL1), rand(WL2), rand(WL3)];
+if %__mcq_rb_cb="cb" then %__WoptL1:append(WL1, WL2, WL3);
+%__Wmsg1L:[["en", "Incorrect. Be careful of misconceptions such as “a function that is not surjective is injective.” There are functions that are both surjective and injective, as well as functions that are neither."],
+ ["fr", "Incorrect. Attention aux idées fausses telles que « une application qui n’est pas surjective est injective ». Il existe des applications à la fois surjectives et injectives, ainsi que des applications qui ne sont ni surjectives ni injectives."],
+ ["de", "Falsch. Achten Sie auf Fehlvorstellungen wie „Eine Abbildung, die nicht surjektiv ist, ist injektiv“. Es gibt Abbildungen, die sowohl surjektiv als auch injektiv sind, sowie Abbildungen, die weder surjektiv noch injektiv sind."],
+ ["ja", "間違っています. 「全射でないものが単射」などの誤概念に注意しましょう. 全射かつ単射のものや全射でも単射でもないもがあります."]];
 
 /********** EOF ***********/
 
