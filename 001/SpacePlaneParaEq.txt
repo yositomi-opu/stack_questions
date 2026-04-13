@@ -22,7 +22,7 @@ aB:pvB;uB:pvA-pvB;vB:pvC-pvB;
 aC:pvC;uC:pvA-pvC;vC:pvB-pvC;
 nvec:integer_vector(cross_product(vv, ww));
 plane_eq:expand(matrix([x-pp[1, 1], y-pp[2, 1], z-pp[3, 1]]).nvec);
-plane_eqS:sconcat("\\(", display_polynomial_varlist_tex1(plane_eq, [x, y, z]), "\\)");
+plane_eqS:sconcat("\\(", display_polynomial_varlist_tex1(plane_eq, [x, y, z]), "=0\\)");
 
 PtA:tex2L(["(", sequenceify(list_matrix_entries(pvA)), ")"]);
 PtB:tex2L(["(", sequenceify(list_matrix_entries(pvB)), ")"]);
