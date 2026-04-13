@@ -1,0 +1,86 @@
+/*********************** SpacePlaneEqParaEq (rb)*********************/
+/* 001.MCB include file		                                    */
+/* Objective: To select equation from parametric representation.    */
+/********************************************************************/
+/* c:[1], w:[4] */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
+/*******************************************/
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+pL:%_mk_rand_dist_pm([[1, 10], [2, 1], [3, 1], [0, 2]]);
+nzL:%_mk_rand_dist_pm([[1,10], [2, 4], [3, 3], [4, 2], [0, 1]]);
+matP:random_invertible_matrix(3, nzL);
+nvec:col(matP, 1);
+nvec:integer_vector(nvec);
+dummy_vec1:col(matP, 2);
+dummy_vec2:col(matP, 3);
+matA:transpose(nvec);
+plane_eqL:expand(matrix([x, y, z]).nvec);
+vecA:genmatrix(lambda([i, j], rand(nzL)), 3, 1);
+while (transpose(vecA).nvec=0) do vecA:genmatrix(lambda([i, j], rand(nzL)), 3, 1);
+plane_eqR:subst(makelist([x, y, z][k]=list_matrix_entries(vecA)[k], k, 1, 3), plane_eqL);
+
+vecL:nullspace2(matA);
+vec1:integer_vector(vecL[1]);
+vec2:integer_vector(vecL[2]);
+
+Ceq1a:tex2(plane_eqL=plane_eqR);
+Ceq1b:tex2(expand(2*plane_eqL)=2*plane_eqR);
+
+
+/* normal vector OK */
+Weq1:plane_eqL=plane_eqR+rand([-2, -1, 1, 2]);
+/* normal vector NG , thru vecA */
+Weq2a:expand(matrix([x, y, z]).dummy_vec1)=transpose(vecA).dummy_vec1;
+Weq2b:expand(matrix([x, y, z]).dummy_vec2)=transpose(vecA).dummy_vec2;
+Weq2c:expand(matrix([x, y, z]).vecA)=transpose(vecA).vecA;
+/* normal vector, point both NG */
+Weq3a:expand(matrix([x, y, z]).vecA)=0;
+Weq3b:expand(matrix([x, y, z]).vecA)=transpose(vecA).vecA+rand([-2, -1, 1, 2]);
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct equations of the plane with parametric representation ", tex2L([vecA, "+p", vec1, "+q", vec2]))],
+ ["fr", sconcat(__SELTYPE__, " équations correctes du plan ayant pour représentation paramétrique ", tex2L([vecA, "+p", vec1, "+q", vec2]))],
+ ["de", sconcat(__SELTYPE__, " korrekte Gleichungen der Ebene mit der Parameterdarstellung ", tex2L([vecA, "+p", vec1, "+q", vec2]))],
+ ["ja", sconcat("パラメータ表示", tex2L([vecA, "+p", vec1, "+q", vec2]), "を持つ平面の方程式として正しいものを __SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+
+/* Correct answer pattern 1 */
+%__CoptL1:map(tex2, [Ceq1a, Ceq1b]);
+%__Cmsg1L:[["en", "Correct. You have correctly checked orthogonality and the point on the plane."],
+ ["fr", "Correct. Vous avez correctement vérifié l’orthogonalité et le point de passage."],
+ ["de", "Richtig. Sie haben die Orthogonalität und den Punkt auf der Ebene korrekt überprüft."],
+ ["ja", "正解です. 直交性, 通る点の確認ができています."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, [Weq1]);
+%__Wmsg1L:[["en", "It seems you have checked the normal vector, but you have not checked the point on the plane."],
+ ["fr", "Il semble que vous ayez vérifié le vecteur normal, mais que vous n’ayez pas vérifié le point de passage."],
+ ["de", "Es scheint, dass Sie den Normalenvektor überprüft haben, aber den Punkt auf der Ebene nicht überprüft haben."],
+ ["ja", "法線ベクトルの確認はできているようですが, 通る点を確認していないようです."]];
+
+/* Wrong answer pattern 2 */
+%__WoptL2:map(tex2, [Weq2a, Weq2b, Weq2c]);
+%__Wmsg2L:[["en", "It seems you have correctly checked the point on the plane, but the normal vector is incorrect."],
+ ["fr", "Il semble que vous ayez correctement vérifié le point de passage, mais que le vecteur normal soit incorrect."],
+ ["de", "Es scheint, dass Sie den Punkt auf der Ebene korrekt überprüft haben, aber der Normalenvektor ist falsch."],
+ ["ja", "通る点の確認はできているようですが, 法線ベクトルを間違えているようです."]];
+
+/* Wrong answer pattern 3 */
+%__WoptL3:map(tex2, [Weq3a, Weq3b]);
+%__Wmsg3L:[["en", "It seems you have not correctly checked either the normal vector or the point on the plane."],
+ ["fr", "Il semble que vous n’ayez correctement vérifié ni le vecteur normal ni le point de passage."],
+ ["de", "Es scheint, dass Sie weder den Normalenvektor noch den Punkt auf der Ebene korrekt überprüft haben."],
+ ["ja", "法線ベクトルも通る点の確認もできていないようです."]];
+
+
+/********** EOF **********/
