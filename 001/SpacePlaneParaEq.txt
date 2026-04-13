@@ -2,7 +2,7 @@
 /* 001.MCB include file		                                    */
 /* Objective: To learn paratrization of plane given by 3 points     */
 /********************************************************************/
-/* c:[3], w:[6, 6, 6]; */
+/* c:[3], w:[6, 6, 6, 6]; */
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*******************************************/
