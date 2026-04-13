@@ -69,40 +69,31 @@ Weq4f:tex2L([uC, "+p", pvB, "+q", pvA]);
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
-
 /* Correct answer pattern 1 */
 %__CoptL1:[Ceq1a, Ceq1b, Ceq1c];
 %__Cmsg1L:[["en", "Correct. You can clearly distinguish between the point on the line and the direction vector."],
  ["fr", "Correct. Vous distinguez bien le point de passage et le vecteur directeur."],
  ["de", "Richtig. Sie können den Punkt auf der Geraden und den Richtungsvektor klar unterscheiden."],
  ["ja", "正解です。通る点と方向ベクトルがきちんと区別できています."]];
-
 /* Wrong answer pattern 1 */
 %__WoptL1:[Weq1a, Weq1b, Weq1c, Weq1d, Weq1e, Weq1f];
 %__Wmsg1L:[["en", "Is the direction vector correct? The position vector of a point on the line serves as a direction vector only when the line passes through the origin."],
  ["fr", "Le vecteur directeur est-il correct ? Le vecteur de position d’un point de la droite ne sert de vecteur directeur que lorsque la droite passe par l’origine."],
  ["de", "Ist der Richtungsvektor korrekt? Der Ortsvektor eines Punktes auf der Geraden ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft."],
  ["ja", "方向ベクトルはあってるでしょうか？ 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです."]];
-
 /* Wrong answer pattern 2 */
 %__WoptL2:[Weq2a, Weq2b, Weq2c, Weq2d, Weq2e, Weq2f];
-%__Wmsg2L:[["en", "How many parameters are needed?"],
- ["fr", "Combien de paramètres sont nécessaires ?"],
- ["de", "Wie viele Parameter werden benötigt?"],
- ["ja", "パラメータはいくつ必要ですか？"]];
-
+%__Wmsg2L:[["en", "Is the point on the line correct? The direction vector seems to be correct."],
+ ["fr", "Le point de passage est-il correct ? Le vecteur directeur semble correct."],
+ ["de", "Ist der Punkt auf der Geraden korrekt? Der Richtungsvektor scheint korrekt zu sein."],
+ ["ja", "通る点はあっていますか？ 方向ベクトルはあっているようです."]];
 /* Wrong answer pattern 3 */
 %__WoptL3:[Weq3a, Weq3b, Weq3c, Weq3d, Weq3e, Weq3f];
-%__Wmsg3L:[["en", sconcat("The point is correct, but the vectors parallel to the plane (", _tmpEq, "), namely ", tex2(Wu), " and ", tex2(Wv), ", are not correct.")],
- ["fr", sconcat("Le point est correct, mais les vecteurs parallèles au plan (", _tmpEq, "), à savoir ", tex2(Wu), " et ", tex2(Wv), ", ne sont pas corrects.")],
- ["de", sconcat("Der Punkt ist korrekt, aber die zum Ebenengleichung (", _tmpEq, ") parallelen Vektoren ", tex2(Wu), " und ", tex2(Wv), " sind nicht korrekt.")],
- ["ja", "通る点は正しいですが, 平面に平行なベクトル(", _tmpEq, "における", tex2(Wu), ", ", tex2(Wv), ")が正しくありません."]];
-
-/* Wrong answer pattern 4 */
-%__WoptL4:[Weq4a, Weq4b, Weq4c, Weq4d, Weq4e, Weq4f];
-%__Wmsg4L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here)."],
+%__Wmsg3L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here)."],
  ["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici)."],
  ["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist)."],
  ["ja", "通る点, 方向ベクトルともに違うようです. 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです(今の場合通りません)."]];
+/* Wrong answer pattern 4 */
+%__WoptL3:[Weq3a, Weq3b, Weq3c, Weq3d, Weq3e, Weq3f];
 
 /********** EOF **********/
