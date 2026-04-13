@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115707  -->
+<!-- question: 115721  -->
   <question type="stack">
     <name>
       <text>001.SpacePlaneEqPara-rb</text>
@@ -58,7 +58,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@}<br>{@plane_eq@}:{@vecA@},{@vec1@}, {@vec2@}</text>
+      <text>{@map(first,ta1)@}:{@ta1@}, {@vecA@}, {@vec1@}, {@vec2@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
