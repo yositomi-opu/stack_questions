@@ -55,7 +55,7 @@ while (length(NoneL)<2) do (
   if not %_is_surj(AllImageList4[k], ListB4) and not %_is_inj(AllImageList4[k]) then NoneL:endcons(AllImageList4[k], NoneL),
   k:k+1);
 %_format_question(A, B, L):=block([s, k, ln:length(A)],
- s:sconcat("\\(f:", tex1(setify(A)), "\\rightarrow", tex1(setify(B)), "\\), "),
+ s:sconcat("\\(f:", tex1(setify(A)), "\\rightarrow", tex1(setify(B)), ",\\quad "),
  for k:1 thru ln do s:sconcat(s, "f(", A[k], ")=", L[k], if k<ln then ", " else ""), s:sconcat(s, "\\)"), return(s));
 
 List1:makelist(%_format_question(ListA1, ListB1, BijL[k]), k, 1, length(BijL));
