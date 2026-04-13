@@ -92,7 +92,7 @@ MapTypeL:[["en", ["bijective", "surjective but not injective", "injective but no
  ["de", "Richtig. "],
  ["ja", "正解です. "]];
 %__WoptL1:[rand(WL1), rand(WL2), rand(WL3)];
-if %__mcq_rb_cb="cb" then %__WoptL1:append(WL1, WL2, WL3);
+if %_MCQ_NUM_OPTS>4 then %__WoptL1:append(WL1, WL2, WL3);
 %__Wmsg1L:[["en", "Incorrect. Be careful of misconceptions such as “a function that is not surjective is injective.” There are functions that are both surjective and injective, as well as functions that are neither."],
  ["fr", "Incorrect. Attention aux idées fausses telles que « une application qui n’est pas surjective est injective ». Il existe des applications à la fois surjectives et injectives, ainsi que des applications qui ne sont ni surjectives ni injectives."],
  ["de", "Falsch. Achten Sie auf Fehlvorstellungen wie „Eine Abbildung, die nicht surjektiv ist, ist injektiv“. Es gibt Abbildungen, die sowohl surjektiv als auch injektiv sind, sowie Abbildungen, die weder surjektiv noch injektiv sind."],
