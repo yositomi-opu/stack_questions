@@ -66,7 +66,8 @@ _scon_lincomb(cL, vL):=block([s:"", k, ln:length(cL), hflag:true], for k:1 thru 
   return(s));
 _scon_lincomb_paren(cL,vL):=block([s:"",k,ln:length(cL)],for k:1 thru ln do if not cL[k]=tex1(0) then s:sconcat(s,cL[k],"(",vL[k],")"),return(s));
 display_polynomial_tex1(px, x, adf):=block([cL:polynomial_to_list(px,x),cLr,sL,xpL,k,ln],cLr:reverse(cL),ln:length(cL),if adf=1 then sL:makelist(if k=1 then _tex1h(cLr[k]) else _tex1c(cLr[k]),k,1,ln) else sL:makelist(if k=1 then _tex1h(cL[k]) else _tex1c(cL[k]),k,1,ln),if adf=1 then xpL:makelist(tex1(x^(k-1)),k,1,ln) else xpL:makelist(tex1(x^(ln-k)),k,1,ln),return(_scon_lincomb(sL,xpL)));
-display_polynomial_varlist_tex1(px, xL):=block([cL:polynomial_to_list_varlist(px, xL), sL, k, headflag:true], ln:length(cL), if length(xL)=ln-1 then xL:append(xL, [""]), sL:makelist(if headflag then _tex1h(cL[k]) else _tex1c(cL[k]), k, 1, ln), return(_scon_lincomb(sL, xL)));
+display_polynomial_varlist_tex1(px, xL):=block([cL:polynomial_to_list_varlist(px, xL), vL], if length(xL)=length(cL)-1 then vL:endcons("", xL) else vL:xL, return(_scon_lincomb(cL, vL)));
+, sL, k, headflag:true], ln:length(cL), if length(xL)=ln-1 then xL:append(xL, [""]), sL:makelist(if headflag then _tex1h(cL[k]) else _tex1c(cL[k]), k, 1, ln), return(_scon_lincomb(sL, xL)));
 display_polynomial(px,x,adf):=sconcat("\\(",display_polynomial(px,x,adf),"\\)");
 
 
