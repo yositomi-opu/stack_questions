@@ -25,19 +25,20 @@ vecL:nullspace2(matA);
 vec1:integer_vector(vecL[1]);
 vec2:integer_vector(vecL[2]);
 
-Ceq1a:tex2(plane_eqL=plane_eqR);
-Ceq1b:tex2(expand(2*plane_eqL)=2*plane_eqR);
+Ceq1a:[plane_eqL, plane_eqR];
+Ceq1b:[expand(2*plane_eqL), 2*plane_eqR];
 
+_tmp(LR):=sconcat("\\(", display_polynomial_varlist_tex1(LR[1], [x, y, z]), "=", tex1(LR[2]), "\\)");
 
 /* normal vector OK */
-Weq1:plane_eqL=plane_eqR+rand([-2, -1, 1, 2]);
+Weq1:[plane_eqL, plane_eqR+rand([-2, -1, 1, 2])];
 /* normal vector NG , thru vecA */
-Weq2a:expand(matrix([x, y, z]).dummy_vec1)=transpose(vecA).dummy_vec1;
-Weq2b:expand(matrix([x, y, z]).dummy_vec2)=transpose(vecA).dummy_vec2;
-Weq2c:expand(matrix([x, y, z]).vecA)=transpose(vecA).vecA;
+Weq2a:[expand(matrix([x, y, z]).dummy_vec1), transpose(vecA).dummy_vec1];
+Weq2b:[expand(matrix([x, y, z]).dummy_vec2), transpose(vecA).dummy_vec2];
+Weq2c:[expand(matrix([x, y, z]).vecA), transpose(vecA).vecA];
 /* normal vector, point both NG */
-Weq3a:expand(matrix([x, y, z]).vecA)=0;
-Weq3b:expand(matrix([x, y, z]).vecA)=transpose(vecA).vecA+rand([-2, -1, 1, 2]);
+Weq3a:[expand(matrix([x, y, z]).vecA), 0];
+Weq3b:[expand(matrix([x, y, z]).vecA), transpose(vecA).vecA+rand([-2, -1, 1, 2])];
 
 
 /********************************** Question text ****************************************/
@@ -55,28 +56,28 @@ Weq3b:expand(matrix([x, y, z]).vecA)=transpose(vecA).vecA+rand([-2, -1, 1, 2]);
 /*****************************************************************************************/
 
 /* Correct answer pattern 1 */
-%__CoptL1:map(tex2, [Ceq1a, Ceq1b]);
+%__CoptL1:map(_tmp, [Ceq1a, Ceq1b]);
 %__Cmsg1L:[["en", "Correct. You have correctly checked orthogonality and the point on the plane."],
  ["fr", "Correct. Vous avez correctement vérifié l’orthogonalité et le point de passage."],
  ["de", "Richtig. Sie haben die Orthogonalität und den Punkt auf der Ebene korrekt überprüft."],
  ["ja", "正解です. 直交性, 通る点の確認ができています."]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:map(tex2, [Weq1]);
+%__WoptL1:map(_tmp, [Weq1]);
 %__Wmsg1L:[["en", "It seems you have checked the normal vector, but you have not checked the point on the plane."],
  ["fr", "Il semble que vous ayez vérifié le vecteur normal, mais que vous n’ayez pas vérifié le point de passage."],
  ["de", "Es scheint, dass Sie den Normalenvektor überprüft haben, aber den Punkt auf der Ebene nicht überprüft haben."],
  ["ja", "法線ベクトルの確認はできているようですが, 通る点を確認していないようです."]];
 
 /* Wrong answer pattern 2 */
-%__WoptL2:map(tex2, [Weq2a, Weq2b, Weq2c]);
+%__WoptL2:map(_tmp, [Weq2a, Weq2b, Weq2c]);
 %__Wmsg2L:[["en", "It seems you have correctly checked the point on the plane, but the normal vector is incorrect."],
  ["fr", "Il semble que vous ayez correctement vérifié le point de passage, mais que le vecteur normal soit incorrect."],
  ["de", "Es scheint, dass Sie den Punkt auf der Ebene korrekt überprüft haben, aber der Normalenvektor ist falsch."],
  ["ja", "通る点の確認はできているようですが, 法線ベクトルを間違えているようです."]];
 
 /* Wrong answer pattern 3 */
-%__WoptL3:map(tex2, [Weq3a, Weq3b]);
+%__WoptL3:map(_tmp, [Weq3a, Weq3b]);
 %__Wmsg3L:[["en", "It seems you have not correctly checked either the normal vector or the point on the plane."],
  ["fr", "Il semble que vous n’ayez correctement vérifié ni le vecteur normal ni le point de passage."],
  ["de", "Es scheint, dass Sie weder den Normalenvektor noch den Punkt auf der Ebene korrekt überprüft haben."],
