@@ -2,9 +2,9 @@
 /* 001.MCB include file		                                    */
 /* Objective: To learn paratrization of plane given by 3 points     */
 /********************************************************************/
-/* c:[3], w:[6, 6, 6]; */
-%_MCQ_NUM_OPTS:4;
-%_MCQ_NUM_COPTS:1;
+/* c:[3], w:[6, 6, 6, 6]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*******************************************/
 tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
