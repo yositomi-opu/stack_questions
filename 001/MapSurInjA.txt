@@ -8,7 +8,7 @@ if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
 /* 1:bij, 2:sur, 3:inj, 4:neither */
-if not numberp(Flag) then Flag:1;
+if not numberp(Flag) then Flag:rand([1, 2, 3, 4];
 nm1:rand([[3, 3], [4, 4]]);
 nm2:rand([[3, 2], [4, 3]]);
 nm3:rand([[2, 3], [3, 4]]);
@@ -66,7 +66,7 @@ List4:makelist(%_format_question(ListA4, ListB4, NoneL[k]), k, 1, length(NoneL))
 if Flag=1 then (CL1:List1, WL1:List2, WL2:List3, WL3:List4)
 else if Flag=2 then (CL1:List2, WL1:List1, WL2:List3, WL3:List4)
 else if Flag=3 then (CL1:List3, WL1:List1, WL2:List2, WL3:List4)
-else (CL1:List4, WL1:List1, WL2:List2, WL4:List3);
+else (CL1:List4, WL1:List1, WL2:List2, WL3:List3);
 MapTypeL:[["en", ["bijective", "surjective but not injective", "injective but not surjective", "neither surjective nor injective"]],
  ["fr", ["bijective", "surjective mais non injective", "injective mais non surjective", "ni surjective ni injective"]],
  ["de", ["bijektiv", "surjektiv, aber nicht injektiv", "injektiv, aber nicht surjektiv", "weder surjektiv noch injektiv"]],
