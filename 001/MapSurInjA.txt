@@ -8,7 +8,7 @@ if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
 /* 1:bij, 2:sur, 3:inj, 4:neither */
-if not numberp(Flag) then Flag:rand([1, 2, 3, 4];
+if not numberp(Flag) then Flag:rand([1, 2, 3, 4]);
 nm1:rand([[3, 3], [4, 4]]);
 nm2:rand([[3, 2], [4, 3]]);
 nm3:rand([[2, 3], [3, 4]]);
