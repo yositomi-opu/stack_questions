@@ -27,7 +27,7 @@ ListB4:makelist(Bbase[i], i, nm4[2]);
 
 /* B から A の個数個選ぶ重複順列全体 */
 permutations_with_repetition(L, m) := block([sub, x, r, ans:[]],
-    if m < 0 then error("m must be nonnegative")
+    if m < 0 then return("m must be nonnegative")
     elseif m = 0 then return([[]])
     else (sub:permutations_with_repetition(L, m-1), for x in L do for r in sub do ans:endcons(cons(x, r), ans),
     return(ans)));
