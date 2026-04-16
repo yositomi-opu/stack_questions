@@ -1,0 +1,121 @@
+/*********************** SpacePlaneParaPara (cb/rb)  ***********************/
+/* 001.MCB include file		                                           */
+/* Objective: To learn/check whieh parametric representations are correct  */
+/*              for the plane given by parametric representation           */
+/***************************************************************************/
+/* c:[5], w:[5, 5, 4, 4]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 2, 2, 3, 3, 4]);
+/* sc:cAN/(cN+wAN): 全部選択したときの得点は, 正解選択肢の割合と一致 */
+/*******************************************/
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+pL:%_mk_rand_dist_pm([[1, 5], [2, 2], [3, 2], [4, 2], [5, 2], [0, 1]]);
+matP2L:[matrix([1, 1], [1, -1])];
+while length(matP2L)<5 do matP2L:cons(random_matrix_det_list(2, pL, [-1, 1]), matP2L);
+cfL:%_rp(makelist(expand([Wu, Wv].matP2L[k].matrix([p], [q])), k, 1, 5));
+matX2L:[];
+while length(matX2L)<5 do matX2L:cons(random_matrix_det_list(2, pL, [0]), matX2L);
+wfL:%_rp(makelist(expand([Wu, Wv].matX2L[k].matrix([p], [q])), k, 1, 5));
+
+ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
+%_disp_pq(px):=display_polynomial_varlist_tex1(px, [Wu, Wv]);
+
+%_texPQ(pqx):=block([s:"", pp, qq],
+  pp:coeff(pqx, p), qq:coeff(pqx, q),
+  if not pp=0 then (
+    s:sconcat(s, "+p"),
+    if pp=Wu or pp=Wv
+      then s:sconcat(s, tex1(pp))
+      else s:sconcat(s, "(", %_disp_pq(pp), ")")),
+  if not qq=0 then (
+    s:sconcat(s, "+q"),
+    if qq=Wu or qq=Wv
+      then s:sconcat(s, tex1(qq))
+      else s:sconcat(s, "(", %_disp_pq(qq), ")")),
+  return(s));
+
+/* correct pu+qv */
+CL1a:tex2L(["(", Wa+Wu, ")", %_texPQ(cfL[1])]);
+CL1b:tex2L(["(", Wa-Wu, ")", %_texPQ(cfL[1])]);
+CL1c:tex2L(["(", Wa+Wv, ")", %_texPQ(cfL[1])]);
+CL1d:tex2L(["(", Wa-Wv, ")", %_texPQ(cfL[1])]);
+CL1e:tex2L([Wa, %_texPQ(cfL[1])]);
+/* Point OK, paralle vectors NG */
+WL1a:tex2L(["(", Wa+Wu, ")", %_texPQ(wfL[1])]);
+WL1b:tex2L(["(", Wa-Wu, ")", %_texPQ(wfL[1])]);
+WL1c:tex2L(["(", Wa+Wv, ")", %_texPQ(wfL[1])]);
+WL1d:tex2L(["(", Wa-Wv, ")", %_texPQ(wfL[1])]);
+WL1e:tex2L([Wa, %_texPQ(wfL[1])]);
+/* Point OK, 1 para */
+WL2a:tex2L(["(", Wa+Wu, ")+p", tex1(Wu)]);
+WL2b:tex2L(["(", Wa-Wu, ")+q", tex1(Wu-Wv)]);
+WL2c:tex2L(["(", Wa+Wv, ")+p", tex1(-Wu-Wv)]);
+WL2d:tex2L(["(", Wa-Wv, ")+q", tex1(Wv)]);
+WL2e:tex2L([Wa, "+p", tex1(Wu+Wv)]);
+/* Point NG, parallel vectors ok */
+WL3a:tex2L([tex1(rand([2, 3, 4])), Wa, %_texPQ(cfL[1])]);
+WL3b:tex2L(["-", Wa, %_texPQ(cfL[2])]);
+WL3c:tex2L(["(", Wu+Wv, ")", %_texPQ(cfL[3])]);
+WL3d:tex2L(["(", tex1(rand([2, 3, 4])),  Wa+rand([-1, 1])*rand([Wu, Wv]), ")", %_texPQ(cfL[4])]);
+/* Point NG, parallel vectors NG */
+WL4a:tex2L([tex1(rand([2, 3, 4])), Wa, %_texPQ(wfL[1])]);
+WL4b:tex2L(["-", Wa, %_texPQ(wfL[2])]);
+WL4c:tex2L(["(", Wu+Wv, ")", %_texPQ(wfL[3])]);
+WL4d:tex2L(["(", tex1(rand([2, 3, 4])),  Wa+rand([-1, 1])*rand([Wu, Wv]), ")", %_texPQ(wfL[4])]);
+
+_tmpEq:tex2L([Wa, "+s", Wu, "+t", Wv]);
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct parametric representations of the plane not passing through the origin and having parametric representation ", _tmpEq)],
+ ["fr", sconcat(__SELTYPE__, " représentations paramétriques correctes du plan ne passant pas par l’origine et ayant pour représentation paramétrique ", _tmpEq)],
+ ["de", sconcat(__SELTYPE__, " korrekte Parameterdarstellungen der Ebene, die nicht durch den Ursprung geht und die Parameterdarstellung ", _tmpEq, " hat")],
+ ["it", sconcat(__SELTYPE__, " rappresentazioni parametriche corrette del piano che non passa per l’origine e che ha rappresentazione parametrica ", _tmpEq)],
+ ["ja", sconcat("パラメータ表示", _tmpEq, "を持つ原点を通らない平面のパラメータ表示として正しいものを__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+
+/* Correct answer pattern 1 */
+%__CoptL1:[CL1a, CL1b, CL1c, CL1d, CL1e];
+%__Cmsg1L:[["en", "Correct. You can clearly distinguish between the point on the line and the direction vector."],
+ ["fr", "Correct. Vous distinguez bien le point de passage et le vecteur directeur."],
+ ["de", "Richtig. Sie können den Punkt auf der Geraden und den Richtungsvektor klar unterscheiden."],
+ ["ja", "正解です. 通る点と方向ベクトルの条件が理解できています."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:[WL1a, WL1b, WL1c, WL1d, WL1e];
+%__Wmsg1L:[["en", sconcat("What properties are required for ", tex2(Wu), " and ", tex2(Wv), " in ", _tmpEQ, "?")],
+ ["fr", sconcat("Quelles propriétés sont requises pour ", tex2(Wu), " et ", tex2(Wv), " dans ", _tmpEQ, " ?")],
+ ["de", sconcat("Welche Eigenschaften müssen ", tex2(Wu), " und ", tex2(Wv), " in ", _tmpEQ, " haben?")],
+ ["it", sconcat("Quali proprietà devono avere ", tex2(Wu), " e ", tex2(Wv), " in ", _tmpEQ, "?")],
+ ["ja", sconcat(_tmpEQ, "における", tex2(Wu), ", ", tex2(Wv), " はどのような性質が必要でしょうか.")]];
+
+/* Wrong answer pattern 2 */
+%__WoptL2:[WL2a, WL2b, WL2c, WL2d, WL2e];
+%__Wmsg2L:[["en", "How many parameters are needed?"],
+ ["fr", "Combien de paramètres sont nécessaires ?"],
+ ["de", "Wie viele Parameter werden benötigt?"],
+ ["ja", "パラメータはいくつ必要ですか？"]];
+
+/* Wrong answer pattern 3 */
+%__WoptL3:[WL3a, WL3b, WL3c, WL3d];
+%__Wmsg3L:[["en", sconcat("In ", _tmpEq, ", ", tex2(Wa), " (that is, the point on the plane) is not correct. Since the plane does not pass through the origin, ", tex2(-Wa), " and ", tex2(2*Wa+Wu), " are not on the plane.")],
+ ["fr", sconcat("Dans ", _tmpEq, ", ", tex2(Wa), " (c’est-à-dire le point de passage) n’est pas correct. Comme le plan ne passe pas par l’origine, ", tex2(-Wa), " et ", tex2(2*Wa+Wu), " ne sont pas sur le plan.")],
+ ["de", sconcat("In ", _tmpEq, " ist ", tex2(Wa), " (also der Punkt auf der Ebene) nicht korrekt. Da die Ebene nicht durch den Ursprung verläuft, liegen ", tex2(-Wa), " und ", tex2(2*Wa+Wu), " nicht auf der Ebene.")],
+ ["it", sconcat("In ", _tmpEq, ", ", tex2(Wa), " (cioè il punto del piano) non è corretto. Poiché il piano non passa per l’origine, ", tex2(-Wa), " e ", tex2(2*Wa+Wu), " non appartengono al piano.")],
+ ["ja", sconcat(_tmpEq, "における", tex2(Wa), "つまり, 通る点が正しくありません. 原点を通らないことから, ", tex2(-Wa), "や", tex2(2*Wa+Wu), "などは平面上にありません.")]];
+
+/* Wrong answer pattern 4 */
+%__WoptL4:[WL4a, WL4b, WL4c, WL4d];
+%__Wmsg4L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here)."],
+ ["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici)."],
+ ["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist)."],
+ ["ja", "通る点, 方向ベクトルともに違うようです. 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです(今の場合通りません)."]];
+
+/********** EOF **********/
