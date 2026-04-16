@@ -100,8 +100,14 @@ if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
 Cans1:mcq_correct(ta1);
 
 %__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
-%__mcq_SELL:[["en", "Choose one "], ["fr", "Choisissez "], ["de", "Wählen Sie "], ["ja", "1つ選べ."]];
+%__mcq_SELL:[["en", "Choose one "], ["fr", "Choisissez "], ["de", "Wählen Sie "], ["it", "Scegli "], ["ja", "1つ選べ."]];
 %__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
+%__mcq_SELALLL:[
+ ["en", "Select all correct answers "],
+ ["fr", "Sélectionnez toutes les réponses correctes "],
+ ["de", "Wählen Sie alle richtigen Antworten aus "],
+ ["it", "Seleziona tutte le risposte corrette "],
+ ["ja", "すべて選べ."]];
 %__mcq_SELALLL:[["en", "Select all correct answers "],
  ["fr", "Sélectionnez toutes les réponses correctes "],
  ["de", "Wählen Sie alle richtigen Antworten aus "],
@@ -111,6 +117,7 @@ Cans1:mcq_correct(ta1);
  ["en", "Choose one (even if multiple correct answers exist)"],
  ["fr", "Choisissez une (même s’il existe plusieurs réponses correctes)"],
  ["de", "Wählen Sie eine (auch wenn es mehrere richtige Antworten gibt)"],
+ ["it", "Scegli una (anche se esistono più risposte corrette)"],
  ["ja", "1つ選べ（正解が複数あっても1つでよい）"]];
 %__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
