@@ -52,7 +52,7 @@ WL2a:tex2L(["(", Wa+Wu, ")+p", tex1(rand([Wu, Wv]))]);
 WL2b:tex2L(["(", Wa-Wu, ")+q(", tex1(rand([2, 3])*Wu+rand([-1, 1])*Wv), ")"]);
 WL2c:tex2L(["(", Wa+Wv, ")+p(", tex1(rand([-1, 1])*Wu+rand([-2, 2, 3])*Wv), ")"]);
 WL2d:tex2L(["(", Wa-Wv, ")+q", tex1(rand([Wu, Wv]))]);
-WL2e:tex2L([Wa, "+p", tex1(Wu+Wv)]);
+WL2e:tex2L([Wa, "+p(", tex1(rand([-1, 1, 2])*Wu+rand([-2, -1, 1])*Wv), ")"]);
 /* Point NG, parallel vectors ok */
 WL3a:tex2L([tex1(rand([2, 3, 4])), Wa, %_texPQ(cfL[1])]);
 WL3b:tex2L(["-", Wa, %_texPQ(cfL[2])]);
