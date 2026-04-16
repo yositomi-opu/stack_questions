@@ -56,8 +56,10 @@ ww1:transpose(matA).vv1;
  ["de", sconcat("Richtig. Es ist die Summe von ", tex1(c1), "-mal der Spalte ", tex1(ii), " und ", tex1(c2), "-mal der Spalte ", tex1(jj), ".")],
  ["it", sconcat("Corretto. È la somma di ", tex1(c1), " volte la colonna ", tex1(ii), " e ", tex1(c2), " volte la colonna ", tex1(jj), ".")],
  ["ja", sconcat("正解です. ", tex1(ii), "列の", tex1(c1), "倍と", tex1(jj), "列の", tex1(c2), "倍の和ですね.")]];
+
 /* Wrong answer pattern (almost dummy) */
-%__WoptL1:[tex2(ww+rand(eLr)),tex2(ww+c1*eLr[ii1]+c2*eLr[jj1]),tex2(ww1),tex2(ww1+rand(eLc)),tex2(ww1+c1*eLc[ii]+c2*eLc[jj])]);
+%__WoptL1:[tex2(ww+rand(eLr)), tex2(ww+c1*eLr[ii1]+c2*eLr[jj1]), tex2(ww1),
+  tex2(ww1+rand(eLc)), tex2(ww1+c1*eLc[ii]+c2*eLc[jj])];
 %__Wmsg1L:[["en", "Incorrect. It may be easier to understand if you think of it as a linear combination of the column vectors of the matrix."],
  ["fr", "Incorrect. Il sera peut-être plus facile de comprendre en le considérant comme une combinaison linéaire des vecteurs colonnes de la matrice."],
  ["de", "Falsch. Es ist vielleicht leichter zu verstehen, wenn Sie es als Linearkombination der Spaltenvektoren der Matrix betrachten."],
