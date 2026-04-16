@@ -49,8 +49,8 @@ WL1d:tex2L(["(", Wa-Wv, ")", %_texPQ(wfL[1])]);
 WL1e:tex2L([Wa, %_texPQ(wfL[1])]);
 /* Point OK, 1 para */
 WL2a:tex2L(["(", Wa+Wu, ")+p", tex1(Wu)]);
-WL2b:tex2L(["(", Wa-Wu, ")+q", tex1(Wu-Wv)]);
-WL2c:tex2L(["(", Wa+Wv, ")+p", tex1(-Wu-Wv)]);
+WL2b:tex2L(["(", Wa-Wu, ")+q(", tex1(Wu-Wv), ")"]);
+WL2c:tex2L(["(", Wa+Wv, ")+p(", tex1(-Wu-Wv), ")"]);
 WL2d:tex2L(["(", Wa-Wv, ")+q", tex1(Wv)]);
 WL2e:tex2L([Wa, "+p", tex1(Wu+Wv)]);
 /* Point NG, parallel vectors ok */
