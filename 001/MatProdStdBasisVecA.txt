@@ -10,29 +10,26 @@ if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*** for 000.MCQ-rb.xml ***/
 /* key parameters(e.g. which control the only level of the question) here if required */
 /* The truth values of compound propositions. */
-texput("NOT", "\\lnot");
-texput("AND", "\\land");
-texput("OR", "\\lor");
-texput("THEN", "\\rightarrow");
 tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
 
 rcL:%_rp([2, 3, 4, 5, 6]);
-num_rows:rcL[1];
-num_cols:rcL[2];
-aL:%_mk_rand_dist_pm([[3, 1], [2, 1], [1, 3]]);
+if not nubmerp(num_rows) then num_rows:rcL[1];
+if not numberp(num_cols) then num_cols:rcL[2];
+aL:%_mk_rand_dist_pm([[5, 1], [4, 1], [3, 2], [2, 3], [1, 8]]);
 matA:genmatrix(lambda([i,j], rand(aL)), num_rows, num_cols);
 matEr:genmatrix(lambda([i,j], if i=j then 1 else 0), num_rows, num_rows);
-matEc:genmatrix(lambda([i,j], if i=j then 1 else 0), num_rows, num_cols);
+matEc:genmatrix(lambda([i,j], if i=j then 1 else 0), num_cols, num_cols);
 eLr:makelist(col(matEr, k), k, 1, num_rows);
 eLc:makelist(col(matEc, k), k, 1, num_cols);
-ijL:%_rp(makelist(k, k, 1, num_cols));
+ijL:%_rp(makelist(k, k, num_cols));
 ij:sort([ijL[1], ijL[2]]);
 ii:ij[1];jj:ij[2];
 c1:rand([1, -1]);c2:rand([1, -1]);
 vv:c1*eLc[ii]+c2*eLc[jj];
 ww:matA.vv;
-ijL1:%_rp(makelist(k, num_rows));
+ijL1:%_rp(makelist(k, k, num_rows));
 ij1:sort([ijL1[1], ijL1[2]]);
 ii1:ij1[1];jj1:ij1[2];
 vv1:c1*eLr[ii1]+c2*eLr[jj1];
