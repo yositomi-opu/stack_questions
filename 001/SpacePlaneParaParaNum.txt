@@ -21,14 +21,16 @@ wfL:%_rp(makelist(expand([Wu, Wv].matX2L[k].matrix([p], [q])), k, 1, 5));
 
 aL:makelist(k, k, -9, 9);
 matA3:random_invertible_matrix(3, aL);
-_Wa:col(matA3, 1);
-_Wu:col(matA3, 2);
-_Wv:col(matA3, 3);
-textput(Wa, tex1(_Wa));
-textput(Wu, tex1(_Wu));
-textput(Wv, tex1(_Wv));
+%_Wa:tex1(col(matA3, 1));
+%_Wu:tex1(col(matA3, 2));
+%_Wv:tex1(col(matA3, 3));
 
-ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
+
+textput(Xa, %_Wa);
+textput(Xu, %_Wu);
+textput(Xv, %_Wv);
+
+ParaEq:tex2L([Xa, "+p", Xu, "+q", Xv, ", (p, q \\in ", WR, ")"]);
 %_disp_pq(px):=display_polynomial_varlist_tex1(px, [Wu, Wv]);
 %_disp_a(pa):=display_polynomial_varlist_tex1(pa, [Wa, Wu, Wv]);
 
