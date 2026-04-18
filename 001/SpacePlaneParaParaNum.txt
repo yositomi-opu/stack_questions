@@ -21,9 +21,12 @@ wfL:%_rp(makelist(expand([Wu, Wv].matX2L[k].matrix([p], [q])), k, 1, 5));
 
 aL:makelist(k, k, -9, 9);
 matA3:random_invertible_matrix(3, aL);
-Wa:col(matA3, 1);
-Wu:col(matA3, 2);
-Wv:col(matA3, 3);
+_Wa:col(matA3, 1);
+_Wu:col(matA3, 2);
+_Wv:col(matA3, 3);
+textput(Wa, tex1(_Wa));
+textput(Wu, tex1(_Wu));
+textput(Wv, tex1(_Wv));
 
 ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
 %_disp_pq(px):=display_polynomial_varlist_tex1(px, [Wu, Wv]);
@@ -44,7 +47,7 @@ ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
   return(s));
 
 /* correct pu+qv */
-CL1a:tex2L(["(", %_disp_a(Wa+Wu), ")", %_texPQ(cfL[1])]);
+CL1a:tex2L([Wa+Wu, %_texPQ(cfL[1])]);
 CL1b:tex2L(["(", %_disp_a(Wa-Wu), ")", %_texPQ(cfL[2])]);
 CL1c:tex2L(["(", %_disp_a(Wa+Wv), ")", %_texPQ(cfL[3])]);
 CL1d:tex2L(["(", %_disp_a(Wa-Wv), ")", %_texPQ(cfL[4])]);
