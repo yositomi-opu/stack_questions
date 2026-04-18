@@ -49,7 +49,7 @@ CL1a:tex2L([Wa+Wu, %_texPQ(cfL[1])]);
 CL1b:tex2L(["(", %_disp_a(Wa-Wu), ")", %_texPQ(cfL[2])]);
 CL1c:tex2L(["(", %_disp_a(Wa+Wv), ")", %_texPQ(cfL[3])]);
 CL1d:tex2L(["(", %_disp_a(Wa-Wv), ")", %_texPQ(cfL[4])]);
-CL1e:tex2L([Wa, %_texPQ(cfL[5])]));
+CL1e:tex2L([Wa, %_texPQ(cfL[5])]);
 /* Point OK, paralle vectors NG */
 WL1a:tex2L(["(", %_disp_a(Wa+Wu), ")", %_texPQ(wfL[1])]);
 WL1b:tex2L(["(", %_disp_a(Wa-Wu), ")", %_texPQ(wfL[2])]);
