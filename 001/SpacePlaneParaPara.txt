@@ -8,6 +8,7 @@ if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 2, 2, 3, 3, 4]);
 /* sc:cAN/(cN+wAN): 全部選択したときの得点は, 正解選択肢の割合と一致 */
 /*******************************************/
+%_rp(L):=random_permutation(L);
 tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 pL:%_mk_rand_dist_pm([[1, 5], [2, 2], [3, 2], [4, 2], [5, 2], [0, 1]]);
@@ -20,6 +21,7 @@ wfL:%_rp(makelist(expand([Wu, Wv].matX2L[k].matrix([p], [q])), k, 1, 5));
 
 ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
 %_disp_pq(px):=display_polynomial_varlist_tex1(px, [Wu, Wv]);
+%_disp_a(pa):=display_polynomial_varlist_tex1(pa, [Wa, Wu, Wv]);
 
 %_texPQ(pqx):=block([s:"", pp, qq],
   pp:coeff(pqx, p), qq:coeff(pqx, q),
@@ -36,22 +38,22 @@ ParaEq:tex2L([Wa, "+p", Wu, "+q", Wv, ", (p, q \\in ", WR, ")"]);
   return(s));
 
 /* correct pu+qv */
-CL1a:tex2L(["(", Wa+Wu, ")", %_texPQ(cfL[1])]);
-CL1b:tex2L(["(", Wa-Wu, ")", %_texPQ(cfL[2])]);
-CL1c:tex2L(["(", Wa+Wv, ")", %_texPQ(cfL[3])]);
-CL1d:tex2L(["(", Wa-Wv, ")", %_texPQ(cfL[4])]);
+CL1a:tex2L(["(", %_disp_a(Wa+Wu), ")", %_texPQ(cfL[1])]);
+CL1b:tex2L(["(", %_disp_a(Wa-Wu), ")", %_texPQ(cfL[2])]);
+CL1c:tex2L(["(", %_disp_a(Wa+Wv), ")", %_texPQ(cfL[3])]);
+CL1d:tex2L(["(", %_disp_a(Wa-Wv), ")", %_texPQ(cfL[4])]);
 CL1e:tex2L([Wa, %_texPQ(cfL[5])]);
 /* Point OK, paralle vectors NG */
-WL1a:tex2L(["(", Wa+Wu, ")", %_texPQ(wfL[1])]);
-WL1b:tex2L(["(", Wa-Wu, ")", %_texPQ(wfL[2])]);
-WL1c:tex2L(["(", Wa+Wv, ")", %_texPQ(wfL[3])]);
-WL1d:tex2L(["(", Wa-Wv, ")", %_texPQ(wfL[4])]);
+WL1a:tex2L(["(", %_disp_a(Wa+Wu), ")", %_texPQ(wfL[1])]);
+WL1b:tex2L(["(", %_disp_a(Wa-Wu), ")", %_texPQ(wfL[2])]);
+WL1c:tex2L(["(", %_disp_a(Wa+Wv), ")", %_texPQ(wfL[3])]);
+WL1d:tex2L(["(", %_disp_a(Wa-Wv), ")", %_texPQ(wfL[4])]);
 WL1e:tex2L([Wa, %_texPQ(wfL[5])]);
 /* Point OK, 1 para */
-WL2a:tex2L(["(", Wa+Wu, ")+p", tex1(rand([Wu, Wv]))]);
-WL2b:tex2L(["(", Wa-Wu, ")+q(", tex1(rand([2, 3])*Wu+rand([-1, 1])*Wv), ")"]);
-WL2c:tex2L(["(", Wa+Wv, ")+p(", tex1(rand([-1, 1])*Wu+rand([-2, 2, 3])*Wv), ")"]);
-WL2d:tex2L(["(", Wa-Wv, ")+q", tex1(rand([Wu, Wv]))]);
+WL2a:tex2L(["(", %_disp_a(Wa+Wu), ")+p", tex1(rand([Wu, Wv]))]);
+WL2b:tex2L(["(", %_disp_a(Wa-Wu), ")+q(", tex1(rand([2, 3])*Wu+rand([-1, 1])*Wv), ")"]);
+WL2c:tex2L(["(", %_disp_a(Wa+Wv), ")+p(", tex1(rand([-1, 1])*Wu+rand([-2, 2, 3])*Wv), ")"]);
+WL2d:tex2L(["(", %_disp_a(Wa-Wv), ")+q", tex1(rand([Wu, Wv]))]);
 WL2e:tex2L([Wa, "+p(", tex1(rand([-1, 1, 2])*Wu+rand([-2, -1, 1])*Wv), ")"]);
 /* Point NG, parallel vectors ok */
 WL3a:tex2L([tex1(rand([2, 3, 4])), Wa, %_texPQ(cfL[1])]);
@@ -62,7 +64,7 @@ WL3d:tex2L(["(", tex1(rand([2, 3, 4])),  Wa+rand([-1, 1])*rand([Wu, Wv]), ")", %
 WL4a:tex2L([tex1(rand([2, 3, 4])), Wa, %_texPQ(wfL[1])]);
 WL4b:tex2L(["-", Wa, %_texPQ(wfL[2])]);
 WL4c:tex2L(["(", Wu+Wv, ")", %_texPQ(wfL[3])]);
-WL4d:tex2L(["(", tex1(rand([2, 3, 4])),  Wa+rand([-1, 1])*rand([Wu, Wv]), ")", %_texPQ(wfL[4])]);
+WL4d:tex2L(["(", %_disp_a(rand([2, 3, 4])*Wa+rand([-1, 1])*rand([Wu, Wv])), ")", %_texPQ(wfL[4])]);
 
 _tmpEq:tex2L([Wa, "+s", Wu, "+t", Wv]);
 
