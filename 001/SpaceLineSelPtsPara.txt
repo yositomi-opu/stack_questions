@@ -8,7 +8,7 @@ if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*******************************************/
 tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
-matP:random_invertible_matrix(3, [-2,-1,-1,-1,0,0,1,1,1,2]);
+matP:random_invertible_matrix(3, [-3, -2, -1, -1, -1, 1, 1, 1, 2]);
 
 pp:col(matP, 1);
 vv:col(matP, 2);
