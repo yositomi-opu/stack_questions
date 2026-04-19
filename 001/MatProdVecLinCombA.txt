@@ -2,7 +2,7 @@
 /* 001.MCB include file		                                     */
 /* Objective: To learn/check matrix x vector matches given lin comb  */
 /*********************************************************************/
-/* c:[2], w:[5]; */
+/* c:[3], w:[3, 2, 3]; */
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /********************************************************************/
@@ -15,10 +15,9 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
-/* rcL:%_rp([2, 3, 4, 5, 6]); */
 pvlen:3;
-if not numberp(num_rows) then num_rows:rand([3, 4]);
-if not numberp(num_cols) then num_cols:rand([5, 6]);
+if not numberp(num_rows) then num_rows:3;
+if not numberp(num_cols) then num_cols:5;
 %_tmpL:%_rp((makelist(k, k, 4)));
 %_pv:sort(makelist(%_tmpL[k], k, 1, pvlen));
 
@@ -28,9 +27,7 @@ fL:[-2, -1, 1, 2];
 matFL:[randechelon(num_rows, num_cols, %_pv, fL)];
 while (length(matFL)<3) do (matFL:unique(cons(randechelon(num_rows, num_cols, %_pv, fL), matFL)));
 
-
-pvL:makelist(col(matP, k), k, 1, num_cols);
-avL:makelist(Wa[k], k, 1, num_cols);
+pvL:makelist(col(matP, k), k, 1, num_rows);
 
 qL:%_rp(append(makelist(k, k, 4), makelist(-k, k, 4)));
 vecQ:genmatrix(lambda([i, j], if member(i, %_pv) then qL[i] else 0), num_cols, 1);
@@ -41,9 +38,11 @@ vecQ:genmatrix(lambda([i, j], if member(i, %_pv) then qL[i] else 0), num_cols, 1
 %_tmpQS:ssubst(tex1(pvL[3]), "\\boldsymbol{c}", %_tmpQS);
 %_LEQ:sconcat("\\(", %_tmpQS, "\\)");
 
-matC1:matP.matFL[1];
-matC2:matP.matFL[2];
-matC3:matP.matFL[3];
+matC1a:matP.matFL[1];
+matC1b:matP.matFL[2];
+matC1c:matP.matFL[3];
+matC1L:[matC1a, matC1b, matC1c];
+
 /* random, never equal */
 matW1L:[];
 genmatW(C):=block([M], M:genmatrix(lambda([i, j], rand(aL)), num_rows, num_cols),
@@ -78,7 +77,7 @@ matW3L:[matW3a, matW3b, matW3c];
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:[matC1, matC2, matC3];
+%__CoptL1:map(tex2, matC1L);
 %__Cmsg1L:[["en", "Correct. You have established the perspective of viewing the product of a matrix and a vector as a linear combination."],
  ["fr", "Correct. Vous avez acquis la perspective de considérer le produit d’une matrice et d’un vecteur comme une combinaison linéaire."],
  ["de", "Richtig. Sie haben die Auffassung verinnerlicht, das Produkt einer Matrix mit einem Vektor als Linearkombination zu betrachten."],
@@ -86,7 +85,7 @@ matW3L:[matW3a, matW3b, matW3c];
  ["ja", "正解です. 行列とベクトルの積を1次結合としてとらえる見方が定着していますね."]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:matW1L;
+%__WoptL1:map(tex2, matW1L);
 %__Wmsg1L:[["en", "The product is defined, but even if you compute it, the result does not match. You do not need to select those whose computed results coincide."],
  ["fr", "Le produit est défini, mais même en le calculant, le résultat ne coïncide pas. Il n’est pas nécessaire de sélectionner ceux dont les résultats coïncident."],
  ["de", "Das Produkt ist definiert, aber selbst bei der Berechnung stimmen die Ergebnisse nicht überein. Es ist nicht erforderlich, diejenigen auszuwählen, deren Ergebnisse übereinstimmen."],
@@ -94,7 +93,7 @@ matW3L:[matW3a, matW3b, matW3c];
  ["ja", "積は定義されるのですが, 計算しても結果は一致しません. 計算して一致するものを選ぶ必要はありません."]];
 
 /* Wrong answer pattern 2 */
-%__WoptL2:matW2L;
+%__WoptL2:map(tex2, matW2L);
 %__Wmsg2L:[["en", "The product is not defined."],
  ["fr", "Le produit n’est pas défini."],
  ["de", "Das Produkt ist nicht definiert."],
@@ -102,7 +101,7 @@ matW3L:[matW3a, matW3b, matW3c];
  ["ja", "積が定義されません."]];
 
 /* Wrong answer pattern 3 */
-%__WoptL3:matW3L;
+%__WoptL3:map(tex2, matW3L);
 %__Wmsg3L:[["en", "They would coincide if the coefficients of the linear combination were swapped, but you have selected those that are not equal."],
  ["fr", "Ils coïncideraient si l’on échangeait les coefficients de la combinaison linéaire, mais vous avez sélectionné des éléments qui ne sont pas égaux."],
  ["de", "Sie würden übereinstimmen, wenn man die Koeffizienten der Linearkombination vertauscht, aber Sie haben solche ausgewählt, die nicht gleich sind."],
