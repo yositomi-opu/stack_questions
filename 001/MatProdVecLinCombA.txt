@@ -15,9 +15,10 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
-pvlen:3;
 if not numberp(num_rows) then num_rows:3;
 if not numberp(num_cols) then num_cols:5;
+if num_cols>4 then pvlen:3 else pvlen:2;
+
 %_tmpL:%_rp((makelist(k, k, 4)));
 %_pv:sort(makelist(%_tmpL[k], k, 1, pvlen));
 
