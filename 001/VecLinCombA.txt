@@ -1,0 +1,69 @@
+/*************************** VecLinCombA (cb/rb) ******************/
+/* 001-MCB include file		                                  */
+/* Objective: To learn linear combination of numerical vectors    */
+/******************************************************************/
+/***** NOTE: c:[3], w:[6] *****/
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3]);
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+/* au+bv+w=0が成り立っているときに, pu+qv と等しいものを選べ */
+matP:random_invertible_matrix(3, [-3, -2, -1, -1, 1, 1, 2, 3]);
+vu:col(matP, 1);
+vv:col(matP, 2);
+
+aa:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
+bb:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
+pp:rand([-1, -1, 1, 1, 1, 2, 3]);
+qq:rand([-2, -1, 1, 2]);
+vw:-aa*vu-bb*vw;
+%_dpv(eq):=sconcat("\\(", display_polynomial_varlist_tex1(eq, [Wu, Wv, Ww]), "\\)");
+RelationEq:sconcat(%_dpv(aa*Wu+bb*Wv+Ww), "\\(=\\boldsymbol{0}\\)");
+QuestionEq:%_dpv(pp*Wu+qq*Wv);
+
+C1a:%_dpv(expand((aa*Wu+bb*Wv+Ww)+pp*Wu+qq*Wv));
+C1b:%_dpv(expand(2*(aa*Wu+bb*Wv+Ww)+pp*Wu+qq*Wv));
+C1c:%_dpv(expand(-(aa*Wu+bb*Wv+Ww)+pp*Wu+qq*Wv));
+W1a:%_dpv(expand((aa*Wu+bb*Wv-Ww)+pp*Wu+qq*Wv));
+W1b:%_dpv(expand(2*(aa*Wu+bb*Wv-Ww)+pp*Wu+qq*Wv));
+W1c:%_dpv(expand(-(aa*Wu+bb*Wv-Ww)+pp*Wu+qq*Wv));
+W1d:%_dpv(expand((aa*Wu+bb*Wv+Ww)+pp*Wu-qq*Wv));
+W1e:%_dpv(expand(2*(aa*Wu+bb*Wv+Ww)-pp*Wu+qq*Wv));
+W1f:%_dpv(expand(-(aa*Wu+bb*Wv+Ww)-pp*Wu-qq*Wv));
+
+qtext1:tex2L([Wu, "=", vu, ", ", Wv, "=", vv, ", ", Ww, "=", vw]);
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(qtext1, " satisfies the relation ", RelationEq, ". ", __SELTYPE__, " linear combinations among the following that are equal to ", QuestionEq)],
+ ["fr", sconcat(qtext1, " satisfait la relation ", RelationEq, ". ", __SELTYPE__, " combinaisons linéaires parmi les suivantes qui sont égales à ", QuestionEq)],
+ ["de", sconcat(qtext1, " erfüllt die Relation ", RelationEq, ". ", __SELTYPE__, " Linearkombinationen unter den folgenden, die gleich ", QuestionEq, " sind")],
+ ["it", sconcat(qtext1, " soddisfa la relazione ", RelationEq, ". ", __SELTYPE__, " combinazioni lineari tra le seguenti che sono uguali a ", QuestionEq)],
+ ["ja", sconcat(qtext1, " は関係式:", RelationEq, "を満たしている. 次の1次結合のうち, ", QuestionEq, "と等しい1次結合を__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[CL1a, CL1b, CL1c];
+%__Cmsg1L:[["en", "Correct. "],
+ ["fr", "Correct. "],
+ ["de", "Richtig. "],
+ ["it", "Corretto. "],
+ ["en", "Correct. "],
+ ["ja", "正解です. "]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:[WL1a, WL1b, WL1c, WL1d, WL1e, WL1f];
+%__Wmsg1L:[["en", sconcat("You have selected incorrect ones. Any expression obtained by adding a scalar multiple of the linear relation ", RelationEq, " to the given expression will be equal to it.")],
+ ["fr", sconcat("Vous avez sélectionné des éléments incorrects. Toute expression obtenue en ajoutant à l’expression donnée un multiple scalaire de la relation linéaire ", RelationEq, " lui sera égale.")],
+ ["de", sconcat("Sie haben falsche ausgewählt. Jeder Ausdruck, der entsteht, wenn man zum gegebenen Ausdruck ein skalares Vielfaches der linearen Relation ", RelationEq, " addiert, ist gleich diesem Ausdruck.")],
+ ["it", sconcat("Hai selezionato elementi non corretti. Qualsiasi espressione ottenuta aggiungendo all’espressione data un multiplo scalare della relazione lineare ", RelationEq, " risulta uguale ad essa.")],
+ ["ja", sconcat("正しくないのを選んでいます. 1次関係式", RelationEq, "の定数倍を与式に加えた式がすべて等しいことになります.")]];
+
+/********** EOF ***********/
+
