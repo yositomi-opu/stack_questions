@@ -56,9 +56,9 @@ matW2b:matP.randechelon(num_rows, num_cols+1, %_pv, fL);
 matW2L:[matW2a, matW2b];
 
 /* swap cols */
-matW3a:matC1.kihonR(num_cols, %_pv[1], %_pv[2]);
-matW3b:matC2.kihonR(num_cols, %_pv[2], %_pv[3]);
-matW3c:matC3.kihonR(num_cols, %_pv[1], %_pv[3]);
+matW3a:matC1a.kihonR(num_cols, %_pv[1], %_pv[2]);
+matW3b:matC1b.kihonR(num_cols, %_pv[2], %_pv[3]);
+matW3c:matC1c.kihonR(num_cols, %_pv[1], %_pv[3]);
 matW3L:[matW3a, matW3b, matW3c];
 
 /********************************** Question text ****************************************/
