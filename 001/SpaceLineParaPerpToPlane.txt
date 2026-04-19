@@ -33,10 +33,11 @@ Weq3b:tex2L([rand([-2, -1, 2])*vv, "+p", rand([ww, pp+vv, pp-vv])]);
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " parametric representations of the line passing through the two points A", PtA, " and B", PtB)],
- ["fr", sconcat(__SELTYPE__, " représentations paramétriques correctes de la droite passant par les deux points A", PtA, " et B", PtB)],
- ["de", sconcat(__SELTYPE__, " korrekte Parameterdarstellungen der Geraden durch die beiden Punkte A", PtA, " und B", PtB)],
- ["ja", sconcat("点A", PtA, "を通って, 平面", PlaneEq, "に垂直な直線のパラメータ表示として正しいものを__SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct parametric representations of the line passing through point A", PtA, " and perpendicular to the plane ", PlaneEq)],
+ ["fr", sconcat(__SELTYPE__, " représentations paramétriques correctes de la droite passant par le point A", PtA, " et perpendiculaire au plan ", PlaneEq)],
+ ["de", sconcat(__SELTYPE__, " korrekte Parameterdarstellungen der Geraden durch den Punkt A", PtA, " und senkrecht zur Ebene ", PlaneEq)],
+ ["it", sconcat(__SELTYPE__, " rappresentazioni parametriche corrette della retta passante per il punto A", PtA, " e perpendicolare al piano ", PlaneEq)],
+ ["ja", sconcat("点A", PtA, "を通って, 平面 ", PlaneEq, "に垂直な直線のパラメータ表示として正しいものを__SELTYPE__")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
@@ -46,10 +47,10 @@ Weq3b:tex2L([rand([-2, -1, 2])*vv, "+p", rand([ww, pp+vv, pp-vv])]);
 /* Correct answer pattern 1 */
 %__CoptL1:[Ceq1a, Ceq1b];
 %__Cmsg1L:[["en", "Correct. You seem to understand the point on the plane, the direction vectors, and the normal vector of the plane."],
-["fr", "Correct. Vous semblez comprendre le point de passage, les vecteurs directeurs et le vecteur normal du plan."],
-["de", "Richtig. Sie scheinen den Punkt auf der Ebene, die Richtungsvektoren und den Normalenvektor der Ebene zu verstehen."],
-["it", "Corretto. Sembra che tu comprenda il punto sul piano, i vettori direttori e il vettore normale del piano."],
-["ja", "正解です。通る点と方向ベクトル, 平面の法線ベクトルが理解できているようです."]];
+ ["fr", "Correct. Vous semblez comprendre le point de passage, les vecteurs directeurs et le vecteur normal du plan."],
+ ["de", "Richtig. Sie scheinen den Punkt auf der Ebene, die Richtungsvektoren und den Normalenvektor der Ebene zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda il punto sul piano, i vettori direttori e il vettore normale del piano."],
+ ["ja", "正解です。通る点と方向ベクトル, 平面の法線ベクトルが理解できているようです."]];
 
 /* Wrong pattern 1 */
 %__WoptL1:[Weq1a, Weq1b];
@@ -69,9 +70,9 @@ Weq3b:tex2L([rand([-2, -1, 2])*vv, "+p", rand([ww, pp+vv, pp-vv])]);
 /* Wrong answer pattern 3 */
 %__WoptL3:[Weq3a, Weq3b];
 %__Wmsg3L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here). Also, have you understood the normal vector of the plane?"],
-["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici). De plus, avez-vous bien compris le vecteur normal du plan ?"],
-["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist). Außerdem: Haben Sie den Normalenvektor der Ebene verstanden?"],
-["it", "Sia il punto sulla retta sia il vettore direttore sembrano essere errati. Il vettore posizione di un punto funge da vettore direttore solo quando la retta passa per l’origine (cosa che in questo caso non avviene). Inoltre, hai compreso il vettore normale del piano?"],
+ ["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici). De plus, avez-vous bien compris le vecteur normal du plan ?"],
+ ["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist). Außerdem: Haben Sie den Normalenvektor der Ebene verstanden?"],
+ ["it", "Sia il punto sulla retta sia il vettore direttore sembrano essere errati. Il vettore posizione di un punto funge da vettore direttore solo quando la retta passa per l’origine (cosa che in questo caso non avviene). Inoltre, hai compreso il vettore normale del piano?"],
  ["ja", "通る点, 方向ベクトルともに違うようです. 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです(今の場合通りません). あるいは, 平面の法線ベクトルは理解できているでしょうか？"]];
 
 /********** EOF **********/
