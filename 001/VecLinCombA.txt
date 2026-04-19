@@ -16,7 +16,7 @@ aa:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
 bb:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
 pp:rand([-1, -1, 1, 1, 1, 2, 3]);
 qq:rand([-2, -1, 1, 2]);
-vw:-aa*vu-bb*vw;
+vw:-aa*vu-bb*vv;
 %_dpv(eq):=sconcat("\\(", display_polynomial_varlist_tex1(eq, [Wu, Wv, Ww]), "\\)");
 RelationEq:sconcat(%_dpv(aa*Wu+bb*Wv+Ww), "\\(=\\boldsymbol{0}\\)");
 QuestionEq:%_dpv(pp*Wu+qq*Wv);
@@ -49,7 +49,7 @@ qtext1:tex2L([Wu, "=", vu, ", ", Wv, "=", vv, ", ", Ww, "=", vw]);
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:[CL1a, CL1b, CL1c];
+%__CoptL1:[C1a, C1b, C1c];
 %__Cmsg1L:[["en", "Correct. "],
  ["fr", "Correct. "],
  ["de", "Richtig. "],
@@ -58,7 +58,7 @@ qtext1:tex2L([Wu, "=", vu, ", ", Wv, "=", vv, ", ", Ww, "=", vw]);
  ["ja", "正解です. "]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:[WL1a, WL1b, WL1c, WL1d, WL1e, WL1f];
+%__WoptL1:[W1a, W1b, W1c, W1d, W1e, W1f];
 %__Wmsg1L:[["en", sconcat("You have selected incorrect ones. Any expression obtained by adding a scalar multiple of the linear relation ", RelationEq, " to the given expression will be equal to it.")],
  ["fr", sconcat("Vous avez sélectionné des éléments incorrects. Toute expression obtenue en ajoutant à l’expression donnée un multiple scalaire de la relation linéaire ", RelationEq, " lui sera égale.")],
  ["de", sconcat("Sie haben falsche ausgewählt. Jeder Ausdruck, der entsteht, wenn man zum gegebenen Ausdruck ein skalares Vielfaches der linearen Relation ", RelationEq, " addiert, ist gleich diesem Ausdruck.")],
