@@ -3,14 +3,15 @@
 /* Objective: To learn, definition of numerical vector              */
 /********************************************************************/
 /***** NOTE: c:[7], w:[10]                                          */
-if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
-if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3, 4]);
 /********************************************************************/
 %_rp(L):=random_permutation(L);
 chkRank(pp,rr):=is(rank(apply(addcol,makelist(col(matF,pp[i]),i,1,length(pp))))=rr);
 rnz0(n):=rand_with_prohib(-n,n,[]);
 rnz1(n):=rand_with_prohib(-n,n,[0]);
 rnz2(n):=rand(makelist(k,k,-n,n)/2);
+
 /* ListAL1 */
 ListAL1:[[rnz1(5)*pi,exp(rnz2(6))]];
 ListAL1:append(ListAL1,[[exp(rnz2(6)),rnz1(5)*pi]]);
@@ -49,12 +50,12 @@ ListBL1:unique(ListBL1);
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:map(lambda([ll], transpose(matrix(ll)), ListAL1);
+%__CoptL1:map(lambda([ll], transpose(matrix(ll))), ListAL1);
 %__Cmsg1L:[["en", "Correct. "],
  ["fr", "Correct. "],
  ["de", "Richtig. "],
  ["ja", "正解です. "]];
-%__WoptL1:map(lambda([ll], transpose(matrix(ll)), ListBL1);
+%__WoptL1:map(lambda([ll], transpose(matrix(ll))), ListBL1);
 %__Wmsg1L:[["en", "Any components are acceptable as long as they are real numbers. If any component is a complex number that is not real, then it is not a real vector."],
 ["fr", "Les composantes peuvent être quelconques tant qu’elles sont réelles. Si l’une des composantes est un nombre complexe non réel, alors ce n’est pas un vecteur réel."],
 ["de", "Die Komponenten können beliebig sein, solange sie reelle Zahlen sind. Wenn eine Komponente eine komplexe Zahl ist, die nicht reell ist, dann ist es kein reeller Vektor."],
