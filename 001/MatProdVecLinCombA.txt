@@ -17,7 +17,7 @@ tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(
 
 if not numberp(num_rows) then num_rows:3;
 if not numberp(num_cols) then num_cols:5;
-if num_cols>4 then pvlen:3 else pvlen:2;
+pvlen:3;
 
 %_tmpL:%_rp((makelist(k, k, 4)));
 %_pv:sort(makelist(%_tmpL[k], k, 1, pvlen));
