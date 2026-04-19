@@ -46,6 +46,11 @@ WL1c:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]])));
   "Wenn \\((a,b)\\in F\\) gilt und für jedes andere \\(b'\\ne b\\in B\\) \\((a,b')\\not\\in F\\) gilt, dann schreibt man \\(F(a)=b\\) und sagt, dass \\(F\\) eine Abbildung ist. ",
   "Mit anderen Worten: Jedem \\(a\\in A\\) ist genau ein \\(b\\in B\\) zugeordnet. ",
   __SELTYPE__, " Zuordnungen, die Abbildungen sind")],
+ ["it", sconcat("Siano \\(A\\) e \\(B\\) insiemi con \\(A=", tex1(SetA), ", B=", tex1(SetB), "\\). ",
+  "Un sottoinsieme \\(F\\) del prodotto cartesiano \\(A\\times B\\) è chiamato una corrispondenza. ",
+  "Se \\((a,b)\\in F\\) e per ogni altro \\(b'\\ne b\\in B\\) si ha \\((a,b')\\not\\in F\\), allora si scrive \\(F(a)=b\\) e si dice che \\(F\\) è una funzione. ",
+  "In altre parole, a ogni \\(a\\in A\\) corrisponde esattamente un \\(b\\in B\\). ",
+  __SELTYPE__, " corrispondenze che sono funzioni")],
  ["ja", sconcat("集合\\(A, B\\)を\\(A=", tex1(SetA), ", B=", tex1(SetB), "\\)とする. 直積集合\\(A\\times B\\)の",
   "部分集合\\(F\\)は対応と言われる. \\(F\\)に \\((a, b)\\)が含まれるならば, 他の \\(b'\\ne b\\in B\\)については, \\((a, b')\\not\\in F\\)のとき, ",
   "\\(F(a)=b\\)と書いて写像であるという. つまり, \\(a\\in A\\)にただ1つの\\(b\\in B\\)が対応しているということである.",
@@ -59,17 +64,19 @@ WL1c:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]])));
 %__Cmsg1L:[["en", "Correct. "],
  ["fr", "Correct. "],
  ["de", "Richtig. "],
+ ["it", "Corretto. "],
  ["ja", "正解です. "]];
 %__CoptL2:[CL2];
 %__Cmsg2L:[["en", "Correct. However, it is not necessary that for every \\(a\\in A\\), there exists \\((a,b)\\) that is an element of \\(F\\)."],
  ["fr", "Correct. Cependant, il n’est pas nécessaire que pour tout \\(a\\in A\\), il existe \\((a,b)\\) qui soit un élément de \\(F\\)."],
  ["de", "Richtig. Es ist jedoch nicht erforderlich, dass für jedes \\(a\\in A\\) ein \\((a,b)\\) existiert, das ein Element von \\(F\\) ist."],
+ ["it", "Corretto. Tuttavia, non è necessario che per ogni \\(a\\in A\\) esista \\((a,b)\\) che sia un elemento di \\(F\\)."],
  ["ja", "正解です. ただし, すべての \\(a\\in A\\)に対して, ある \\((a, b)\\)が \\(F\\)の要素である必要はありません."]];
 %__WoptL1:[WL1a, WL1b, WL1c];
 %__Wmsg1L:[["en", "Does an element of \\(A\\) appear more than once? In that case, it becomes unclear to which element of \\(B\\) it corresponds."],
  ["fr", "Un élément de \\(A\\) n’apparaît-il pas plusieurs fois ? Dans ce cas, il devient impossible de déterminer à quel élément de \\(B\\) il correspond."],
  ["de", "Kommt ein Element von \\(A\\) mehr als einmal vor? In diesem Fall ist unklar, welchem Element von \\(B\\) es zugeordnet ist."],
+ ["it", "Un elemento di \\(A\\) compare più di una volta? In tal caso, non è chiaro a quale elemento di \\(B\\) corrisponda."],
  ["ja", "\\(A\\)の要素が2回出てきていませんか? その場合, その要素が\\(B\\)の何に対応するかが不明になります."]];
 
 /********** EOF ***********/
-
