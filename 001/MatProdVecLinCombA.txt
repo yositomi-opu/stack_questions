@@ -1,0 +1,112 @@
+/********************** MatProdVecLinCombA (rb) **********************/
+/* 001.MCB include file		                                     */
+/* Objective: To learn/check matrix x vector matches given lin comb  */
+/*********************************************************************/
+/* c:[2], w:[5]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
+/********************************************************************/
+/* vector V との積が定義できて, 1次結合が....と一致するような行列を選べ. */
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* rcL:%_rp([2, 3, 4, 5, 6]); */
+pvlen:3;
+if not numberp(num_rows) then num_rows:rand([3, 4]);
+if not numberp(num_cols) then num_cols:rand([5, 6]);
+%_tmpL:%_rp((makelist(k, k, 4)));
+%_pv:sort(makelist(%_tmpL[k], k, 1, pvlen));
+
+aL:append(makelist(k, k, -4, -1), makelist(k, k, 1, 4));
+matP:random_invertible_matrix(num_rows, aL);
+fL:[-2, -1, 1, 2];
+matFL:[randechelon(num_rows, num_cols, %_pv, fL)];
+while (length(matFL)<3) do (matFL:unique(cons(randechelon(num_rows, num_cols, %_pv, fL), matFL)));
+
+
+pvL:makelist(col(matP, k), k, 1, num_cols);
+avL:makelist(Wa[k], k, 1, num_cols);
+
+qL:%_rp(append(makelist(k, k, 4), makelist(-k, k, 4)));
+vecQ:genmatrix(lambda([i, j], if member(i, %_pv) then qL[i] else 0), num_cols, 1);
+
+%_tmpQS:display_polynomial_varlist_tex1(vecQ[%_pv[1], 1]*Wa+vecQ[%_pv[2], 1]*Wb+vecQ[%_pv[3], 1]*Wc, [Wa, Wb, Wc]);
+%_tmpQS:ssubst(tex1(pvL[1]), "\\boldsymbol{a}", %_tmpQS);
+%_tmpQS:ssubst(tex1(pvL[2]), "\\boldsymbol{b}", %_tmpQS);
+%_tmpQS:ssubst(tex1(pvL[3]), "\\boldsymbol{c}", %_tmpQS);
+%_LEQ:sconcat("\\(", %_tmpQS, "\\)");
+
+matC1:matP.matFL[1];
+matC2:matP.matFL[2];
+matC3:matP.matFL[3];
+/* random, never equal */
+matW1L:[];
+genmatW(C):=block([M], M:genmatrix(lambda([i, j], rand(aL)), num_rows, num_cols),
+ while (M.vecQ=C.vecQ) do (M:genmatrix(lambda([i, j], rand(aL)), num_rows, num_cols)),
+ return(M));
+while (length(matW1L)<3) do matW1L:unique(cons(genmatW(matC1), matW1L));
+
+/* cannot define product */
+matW2a:matP.randechelon(num_rows, num_cols-1, %_pv, fL);
+matW2b:matP.randechelon(num_rows, num_cols+1, %_pv, fL);
+matW2L:[matW2a, matW2b];
+
+/* swap cols */
+matW3a:matC1.kihonR(num_cols, %_pv[1], %_pv[2]);
+matW3b:matC2.kihonR(num_cols, %_pv[2], %_pv[3]);
+matW3c:matC3.kihonR(num_cols, %_pv[1], %_pv[3]);
+matW3L:[matW3a, matW3b, matW3c];
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " matrices among the following whose product with the vector ", tex2(vecQ), " is defined and coincides with the linear combination ", %_LEQ)],
+ ["fr", sconcat(__SELTYPE__, " matrices parmi les suivantes dont le produit avec le vecteur ", tex2(vecQ), " est défini et coïncide avec la combinaison linéaire ", %_LEQ)],
+ ["de", sconcat(__SELTYPE__, " Matrizen unter den folgenden, für die das Produkt mit dem Vektor ", tex2(vecQ), " definiert ist und mit der Linearkombination ", %_LEQ, " übereinstimmt")],
+ ["it", sconcat(__SELTYPE__, " matrici tra le seguenti per cui il prodotto con il vettore ", tex2(vecQ), " è definito e coincide con la combinazione lineare ", %_LEQ)],
+ ["ja", sconcat("以下の行列のうち, ベクトル", tex2(vecQ), "との積が定義されて, 1次結合", %_LEQ, "と一致するものを__SELTYPE__")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[matC1, matC2, matC3];
+%__Cmsg1L:[["en", "Correct. You have established the perspective of viewing the product of a matrix and a vector as a linear combination."],
+ ["fr", "Correct. Vous avez acquis la perspective de considérer le produit d’une matrice et d’un vecteur comme une combinaison linéaire."],
+ ["de", "Richtig. Sie haben die Auffassung verinnerlicht, das Produkt einer Matrix mit einem Vektor als Linearkombination zu betrachten."],
+ ["it", "Corretto. Hai consolidato la prospettiva di considerare il prodotto tra una matrice e un vettore come una combinazione lineare."],
+ ["ja", "正解です. 行列とベクトルの積を1次結合としてとらえる見方が定着していますね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:matW1L;
+%__Wmsg1L:[["en", "The product is defined, but even if you compute it, the result does not match. You do not need to select those whose computed results coincide."],
+ ["fr", "Le produit est défini, mais même en le calculant, le résultat ne coïncide pas. Il n’est pas nécessaire de sélectionner ceux dont les résultats coïncident."],
+ ["de", "Das Produkt ist definiert, aber selbst bei der Berechnung stimmen die Ergebnisse nicht überein. Es ist nicht erforderlich, diejenigen auszuwählen, deren Ergebnisse übereinstimmen."],
+ ["it", "Il prodotto è definito, ma anche calcolandolo il risultato non coincide. Non è necessario selezionare quelli i cui risultati coincidono."],
+ ["ja", "積は定義されるのですが, 計算しても結果は一致しません. 計算して一致するものを選ぶ必要はありません."]];
+
+/* Wrong answer pattern 2 */
+%__WoptL2:matW2L;
+%__Wmsg2L:[["en", "The product is not defined."],
+ ["fr", "Le produit n’est pas défini."],
+ ["de", "Das Produkt ist nicht definiert."],
+ ["it", "Il prodotto non è definito."],
+ ["ja", "積が定義されません."]];
+
+/* Wrong answer pattern 3 */
+%__WoptL3:matW3L;
+%__Wmsg3L:[["en", "They would coincide if the coefficients of the linear combination were swapped, but you have selected those that are not equal."],
+ ["fr", "Ils coïncideraient si l’on échangeait les coefficients de la combinaison linéaire, mais vous avez sélectionné des éléments qui ne sont pas égaux."],
+ ["de", "Sie würden übereinstimmen, wenn man die Koeffizienten der Linearkombination vertauscht, aber Sie haben solche ausgewählt, die nicht gleich sind."],
+ ["it", "Coinciderebbero se si scambiassero i coefficienti della combinazione lineare, ma hai selezionato elementi che non sono uguali."],
+ ["ja", "1次結合の係数を入れかえれば一致しますが, 等しくはないものを選んでしまっています."]];
+
+/********** EOF **********/
