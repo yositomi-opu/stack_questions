@@ -1,6 +1,9 @@
-/********** DiffCompositeFunc1 (rb) **********/
-%_MCQ_NUM_OPTS:6;
-%_MCQ_NUM_COPTS:1;
+/********************** DiffCompositeFunc1 (rb) *********************/
+/* 001-MCB include file		                                    */
+/* Objective: To learn, differential of composite function          */
+/********************************************************************/
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*********************************************/
 powerdisp:false;
 __tf1:lambda([x], diff(__tf(x), x, 1));
@@ -42,37 +45,44 @@ Wopt5d:sconcat(tex2(__rf3tf(x)), _cdot, _lbr, tex2(__sf2(x)), _rbr);
 %__mcq_qtextL:[["en", sconcat("Choose __SELTYPE__ that correctly gives the derivative of ", tex2(Qfx), ".")],
  ["fr", sconcat("Choisissez __SELTYPE__ qui donne correctement la dérivée de ", tex2(Qfx), ".")],
  ["de", sconcat("Wählen Sie __SELTYPE__, die die Ableitung von ", tex2(Qfx), " korrekt angibt.")],
+ ["it", sconcat("Scegli __SELTYPE__ che forniscono correttamente la derivata di ", tex2(Qfx), ".")],
  ["ja", sconcat(tex2(Qfx), "の導関数の計算式として正しいものを__SELTYPE__")]];
 /***************************** Patterns and Messages *********************************************/
 %__CoptL1:[Copt];
 %__Cmsg1L:[["en", "Correct. You seem to understand the chain rule well."],
-["fr", "Correct. Vous semblez bien comprendre la règle de dérivation des fonctions composées."],
-["de", "Richtig. Sie scheinen die Kettenregel gut zu verstehen."],
-["ja", "正解です. 合成関数の微分法を正しく理解しているようです."]];
+ ["fr", "Correct. Vous semblez bien comprendre la règle de dérivation des fonctions composées."],
+ ["de", "Richtig. Sie scheinen die Kettenregel gut zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda bene la regola della catena."],
+ ["ja", "正解です. 合成関数の微分法を正しく理解しているようです."]];
 %__WoptL1:[Wopt1];
 %__Wmsg1L:[["en", "Let’s review the chain rule. The derivative of \\(f(g(x))\\) is not \\(f'(g(x))\\)."],
  ["fr", "Révisons la règle de dérivation des fonctions composées. La dérivée de \\(f(g(x))\\) n’est pas \\(f'(g(x))\\)."],
  ["de", "Überprüfen wir die Kettenregel. Die Ableitung von \\(f(g(x))\\) ist nicht \\(f'(g(x))\\)."],
+ ["it", "Rivediamo la regola della catena. La derivata di \\(f(g(x))\\) non è \\(f'(g(x))\\)."],
  ["ja", "合成関数の微分法を確認しましょう. \\(f(g(x))\\)の微分は, \\(f'(g(x))\\\)ではありません."]];
 %__WoptL2:[Wopt2];
 %__Wmsg2L:[["en", "Let’s review the chain rule. The derivative of \\(f(g(x))\\) is not \\(f'(g'(x))\\)."],
  ["fr", "Révisons la règle de dérivation des fonctions composées. La dérivée de \\(f(g(x))\\) n’est pas \\(f'(g'(x))\\)."],
  ["de", "Überprüfen wir die Kettenregel. Die Ableitung von \\(f(g(x))\\) ist nicht \\(f'(g'(x))\\)."],
+ ["it", "Rivediamo la regola della catena. La derivata di \\(f(g(x))\\) non è \\(f'(g'(x))\\)."],
  ["ja", "合成関数の微分法を確認しましょう. \\(f(g(x))\\)の微分は, \\(f'(g'(x))\\\)ではありません."]];
 %__WoptL3:[Wopt3a, Wopt3b, Wopt3c];
 %__Wmsg3L:[["en", "It seems you made a mistake in differentiating trigonometric functions."],
  ["fr", "Il semble que vous ayez fait une erreur dans la dérivation des fonctions trigonométriques."],
  ["de", "Es scheint, dass Sie einen Fehler bei der Ableitung trigonometrischer Funktionen gemacht haben."],
+ ["it", "Sembra che tu abbia commesso un errore nella derivazione delle funzioni trigonometriche."],
  ["ja", "三角関数の微分を間違えているようです."]];
 %__WoptL4:[Wopt4a, Wopt4b];
 %__Wmsg4L:[["en", "It seems you made a mistake in differentiating rational functions."],
  ["fr", "Il semble que vous ayez fait une erreur dans la dérivation des fonctions rationnelles."],
  ["de", "Es scheint, dass Sie einen Fehler bei der Ableitung rationaler Funktionen gemacht haben."],
+ ["it", "Sembra che tu abbia commesso un errore nella derivazione delle funzioni razionali."],
  ["ja", "有理関数の微分を間違えているようです."]];
 %__WoptL5:[Wopt5a, Wopt5b, Wopt5c, Wopt5d];
 %__Wmsg5L:[["en", "Aren’t both the differentiation of rational functions and trigonometric functions incorrect?"],
  ["fr", "N’avez-vous pas fait des erreurs à la fois dans la dérivation des fonctions rationnelles et des fonctions trigonométriques ?"],
  ["de", "Haben Sie nicht sowohl bei der Ableitung rationaler Funktionen als auch bei trigonometrischen Funktionen Fehler gemacht?"],
+ ["it", "Non hai commesso errori sia nella derivazione delle funzioni razionali sia in quelle trigonometriche?"],
  ["ja", "有理関数の微分も三角関数の微分も間違えていませんか? "]];
 
 /********** EOF **********/
