@@ -80,11 +80,11 @@ _tmpEq:%_ss(tex2L([Wa, "+s", Wu, "+t", Wv]));
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct parametric representations of the plane not passing through the origin and having parametric representation ", _tmpEq)],
- ["fr", sconcat(__SELTYPE__, " représentations paramétriques correctes du plan ne passant pas par l’origine et ayant pour représentation paramétrique ", _tmpEq)],
- ["de", sconcat(__SELTYPE__, " korrekte Parameterdarstellungen der Ebene, die nicht durch den Ursprung geht und die Parameterdarstellung ", _tmpEq, " hat")],
- ["it", sconcat(__SELTYPE__, " rappresentazioni parametriche corrette del piano che non passa per l’origine e che ha rappresentazione parametrica ", _tmpEq)],
- ["ja", sconcat("パラメータ表示", _tmpEq, "を持つ原点を通らない平面のパラメータ表示として正しいものを__SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct alternative parametric representations of a plane not passing through the origin with parametric representation ", _tmpEq)],
+ ["fr", sconcat(__SELTYPE__, " représentations paramétriques alternatives correctes d’un plan ne passant pas par l’origine ayant pour représentation paramétrique ", _tmpEq)],
+ ["de", sconcat(__SELTYPE__, " korrekte alternative Parameterdarstellungen einer Ebene, die nicht durch den Ursprung geht und die Parameterdarstellung ", _tmpEq, " hat")],
+ ["it", sconcat(__SELTYPE__, " rappresentazioni parametriche alternative corrette di un piano che non passa per l’origine e che ha rappresentazione parametrica ", _tmpEq)],
+ ["ja", sconcat("ある原点を通らない平面がパラメータ表示", _tmpEq, "を持つとき, この平面の別のパラメータ表示として正しいものを__SELTYPE__")]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
@@ -92,9 +92,10 @@ _tmpEq:%_ss(tex2L([Wa, "+s", Wu, "+t", Wv]));
 
 /* Correct answer pattern 1 */
 %__CoptL1:map(%_ss, [CL1a, CL1b, CL1c, CL1d, CL1e]);
-%__Cmsg1L:[["en", "Correct. You can clearly distinguish between the point on the line and the direction vector."],
- ["fr", "Correct. Vous distinguez bien le point de passage et le vecteur directeur."],
- ["de", "Richtig. Sie können den Punkt auf der Geraden und den Richtungsvektor klar unterscheiden."],
+%__Cmsg1L:[["en", "Correct. You understand the conditions for the point on the line and the direction vectors."],
+ ["fr", "Correct. Vous comprenez les conditions concernant le point de passage et les vecteurs directeurs."],
+ ["de", "Richtig. Sie verstehen die Bedingungen für den Punkt auf der Geraden und die Richtungsvektoren."],
+ ["it", "Corretto. Comprendi le condizioni relative al punto di passaggio e ai vettori direttori."],
  ["ja", "正解です. 通る点と方向ベクトルの条件が理解できています."]];
 
 /* Wrong answer pattern 1 */
@@ -110,6 +111,7 @@ _tmpEq:%_ss(tex2L([Wa, "+s", Wu, "+t", Wv]));
 %__Wmsg2L:[["en", "How many parameters are needed?"],
  ["fr", "Combien de paramètres sont nécessaires ?"],
  ["de", "Wie viele Parameter werden benötigt?"],
+ ["it", "Quanti parametri sono necessari?"],
  ["ja", "パラメータはいくつ必要ですか？"]];
 
 /* Wrong answer pattern 3 */
@@ -125,6 +127,7 @@ _tmpEq:%_ss(tex2L([Wa, "+s", Wu, "+t", Wv]));
 %__Wmsg4L:[["en", "Both the point on the line and the direction vector seem to be incorrect. The position vector of a point serves as a direction vector only when the line passes through the origin (which is not the case here)."],
  ["fr", "Le point de passage et le vecteur directeur semblent tous deux incorrects. Le vecteur de position d’un point ne sert de vecteur directeur que lorsque la droite passe par l’origine (ce qui n’est pas le cas ici)."],
  ["de", "Sowohl der Punkt auf der Geraden als auch der Richtungsvektor scheinen falsch zu sein. Der Ortsvektor eines Punktes ist nur dann ein Richtungsvektor, wenn die Gerade durch den Ursprung verläuft (was hier nicht der Fall ist)."],
+ ["it", "Sia il punto di passaggio sia il vettore direttore sembrano essere errati. Il vettore posizione di un punto funge da vettore direttore solo quando la retta passa per l’origine (cosa che in questo caso non avviene)."],
  ["ja", "通る点, 方向ベクトルともに違うようです. 通る点の位置ベクトルが方向ベクトルになるのは原点を通るときだけです(今の場合通りません)."]];
 
 /********** EOF **********/
