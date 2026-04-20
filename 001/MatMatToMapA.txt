@@ -1,0 +1,126 @@
+/********************** MatMatToMapA (cb/rb) ******************/
+/* 001.MCB include file		                              */
+/* Objective: To learn/check map defined by matrix(mat to map */
+/**************************************************************/
+/* c:[3], w:[3, 3]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 2, 3]);
+/********************************************************************/
+
+psel:rand([1,2,3,4,5,6]);
+nm:[[2, 3], [2, 4], [3, 3], [3, 4], [4, 3], [4, 4]][psel];
+%_nr:nm[1];%_nc:nm[2];
+aLL:[[-5, -4, -3, -2, -1, 1, 2, 3, 4, 5],
+     [-4, -3, -2, -1, -1, -1, 1, 1, 1, 2, 3, 4],
+     [-3, -2, -1, -1, -1, -1, 0, 1, 1, 1, 1, 2, 3]];
+aL:aLL[floor((psel+1)/2)];
+matA:genmatrix(lambda([i, j], rand(aL)), %_nr, %_nc);
+matA1:genmatrix(lambda([i, j], if j<=%_nc then matA[i, j] else rand(aL)), %_nr, %_nc+1);
+matA2:genmatrix(lambda([i, j], if i<=%_nr then matA[i, j] else rand(aL)), %_nr+1, %_nc);
+vLL:[[-4, -3, -2, -1, 1, 2, 3, 4],
+     [-3, -2, -1, 1, 2, 3],
+     [-2, -1, -1, -1, 0, 1, 1, 1, 2]];
+vL:vLL[floor((psel+1)/2)];
+
+/* common function or assert function */
+chkRank(pp, rr):=is(rank(apply(addcol, makelist(col(matF, pp[i]), i, 1, length(pp))))=rr);
+genAL(k):=block([], return([k]));/* dummy */
+genBL(k):=block([], return([k]));/* dummy */
+
+/* ListAL1 (trivial / ej to aj or [-1, 0, 1, 0] to -a1+a3 type) */
+ejL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), %_nc, 1), k, 1, %_nc);
+ListAL1:makelist([ejL[k], matA.ejL[k]], k, 1, %_nc);
+xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc)));
+ListAL1:append(ListAL1, [[xv, matA.xv]]);
+xL:random_permutation([-2, -1, 0, 1, 2]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc)));
+ListAL1:append(ListAL1, [[xv, matA.xv]]);
+ListAL1:unique(ListAL1);
+
+/* ListBL1: size mismatch */
+fjL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), m+1, 1), k, 1, %_nc+1);
+ListBL1:makelist([fjL[k], matA1.fjL[k]], k, 1, %_nc+1);
+xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc+1)));
+ListBL1:append(ListBL1, [[xv, matA1.xv]]);
+ejL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), %_nc, 1), k, 1, %_nc);
+ListBL1:append(ListBL1, makelist([ejL[k], matA2.ejL[k]], k, 1, %_nc));
+ListBL1:unique(ListBL1);
+
+/* ListBL2: illegal value */
+ejL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), %_nc, 1), k, 1, %_nc);
+addBL2(x, y):=block([], if matA.x=y then return([]) else return([x, y]));
+ListBL2:[];
+ListBL2:append(ListBL2, makelist(addBL2(ejL[k], matA.ejL[k-1]), k, 2, %_nc));
+ListBL2:append(ListBL2, makelist(addBL2(ejL[k], matA.ejL[k+1]), k, 1, %_nc-1));
+errx:genmatrix(lambda([i, j],  if i=1 then rand([-1, 1]) else 0), %_nc, 1);
+xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc)));
+ListBL2:append(ListBL2, [addBL2(xv, matA.(xv+errx))]);
+xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc)));
+ListBL2:append(ListBL2, [addBL2(xv, matA.(xv+errx))]);
+xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc)));
+ListBL2:append(ListBL2, [addBL2(xv, matA.(xv+errx))]);
+ListBL2:unique(ListBL2);
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2);*/
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/*SetBL3:setify(ListBL3);*/
+/*chkAA12:intersection(SetAL1, SetAL2); */
+chkAB11:intersection(SetAL1, SetBL1);
+chkAB12:intersection(SetAL1, SetBL2);
+/*chkAB13:intersection(SetAL1, SetBL3);*/
+/*chkAB21:intersection(SetAL2, SetBL1);*/
+/*chkAB22:intersection(SetAL2, SetBL2);*/
+/*chkAB23:intersection(SetAL2, SetBL3);*/
+chkBB12:intersection(SetBL1, SetBL2);
+/*chkBB13:intersection(SetBL1, SetBL3);*/
+/*chkBB23:intersection(SetBL2, SetBL3);*/
+/*allchk:[chkAA12, chkAB11, chkAB12, chkAB13, chkAB21];*/
+/*allchk:append(allchk, [chkAB22, chkAB23, chkBB12, chkBB13, chkBB23]);*/
+allchk:[chkAB11, chkAB12, chkBB12];
+texput(xx, "{\\boldsymbol x}");
+texput(yy, "{\\boldsymbol y}");
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " correct pairs of vectors [ ", tex2(Wx), ", ", tex2(Wy), " ] such that under the map defined by the matrix \\(A=\\)", tex2(matA), ", ", tex2(Wx), " is mapped to ", tex2(Wy))],
+ ["fr", sconcat(__SELTYPE__, " paires de vecteurs correctes [ ", tex2(Wx), ", ", tex2(Wy), " ] telles que, sous l’application définie par la matrice \\(A=\\)", tex2(matA), ", ", tex2(Wx), " est envoyé sur ", tex2(Wy))],
+ ["de", sconcat(__SELTYPE__, " korrekte Vektorpaaren [ ", tex2(Wx), ", ", tex2(Wy), " ], sodass unter der durch die Matrix \\(A=\\)", tex2(matA), " definierten Abbildung ", tex2(Wx), " auf ", tex2(Wy), " abgebildet wird")],
+ ["it", sconcat(__SELTYPE__, " coppie di vettori corrette [ ", tex2(Wx), ", ", tex2(Wy), " ] tali che, sotto l’applicazione definita dalla matrice \\(A=\\)", tex2(matA), ", ", tex2(Wx), " venga mandato in ", tex2(Wy))],
+ ["ja", sconcat(" 行列\\(A=\\)", tex2(matA), "によって定まる写像により, ", tex2(Wx}, "が",  tex2(Wy), "に写るようなベクトルの組[ ", tex2(Wx), ", ", tex2(Wy), "]として正しいものを __SELTYPE__")]];
+
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(tex2, ListAL1);
+%__Cmsg1L:[["en", "Correct. You seem to understand the domain and image of the map defined by a matrix."],
+ ["fr", "Correct. Vous semblez comprendre le domaine et l’image de l’application définie par une matrice."],
+ ["de", "Richtig. Sie scheinen den Definitionsbereich und das Bild der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda il dominio e l’immagine dell’applicazione definita da una matrice."],
+ ["ja", "正解です. 行列の定める写像の定義域と像について理解できているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, ListBL1);
+%__Wmsg1L:[["en", sconcat(tex2(Wx), " does not belong to the domain of the matrix map, or ", tex2(Wy), " does not belong to the codomain of the matrix map.")],
+ ["fr", sconcat(tex2(Wx), " n’appartient pas au domaine de l’application matricielle, ou ", tex2(Wy), " n’appartient pas à l’espace d’arrivée de l’application matricielle.")],
+ ["de", sconcat(tex2(Wx), " gehört nicht zum Definitionsbereich der Matrixabbildung, oder ", tex2(Wy), " gehört nicht zum Zielraum der Matrixabbildung.")],
+ ["it", sconcat(tex2(Wx), " non appartiene al dominio dell’applicazione matriciale, oppure ", tex2(Wy), " non appartiene allo spazio di arrivo dell’applicazione matriciale.")],
+ ["ja", sconcat(tex2(Wx), "が行列写像の定義域に属さないか, ", tex2(Wy), "が行列写像の終域の空間に属しません.")]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:map(tex2, ListBL2);
+%__Wmsg2L:[["en", "Each vector belongs to the correct space, but you have selected ones for which the correspondence is incorrect."],
+ ["fr", "Chaque vecteur appartient au bon espace, mais vous avez sélectionné des éléments dont la correspondance est incorrecte."],
+ ["de", "Jeder Vektor gehört zum richtigen Raum, aber Sie haben solche ausgewählt, bei denen die Zuordnung nicht korrekt ist."],
+ ["it", "Ogni vettore appartiene allo spazio corretto, ma hai selezionato elementi per cui la corrispondenza non è corretta."],
+ ["ja", "各ベクトルの属する空間は正しいのですが, 対応が正しくないものを選んでいます."]];
+
+
+/********** EOF **********/
