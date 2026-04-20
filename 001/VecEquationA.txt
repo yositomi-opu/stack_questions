@@ -44,7 +44,7 @@ W1h:tex2L([p, "=", -pp, ", q=", -qq, ", r=", rr]);
 WL:unique([W1a, W1b, W1c, W1d, W1e, W1f, W1g, W1h]);
 
 
-qtext1:tex2L([Wu, "=", vu, ", ", Wv, "=", vv, ", ", Ww, "=", vw]);
+qtext1:tex2L([Wu, "=", vQu, ", ", Wv, "=", vQv, ", ", Ww, "=", vQw]);
 
 
 /********************************** Question text ****************************************/
