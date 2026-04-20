@@ -1,0 +1,88 @@
+/*************************** VecEquationA (cb/rb) **************/
+/* 001-MCB include file		                               */
+/* Objective: To learn linear equation as lin comb=0           */
+/***************************************************************/
+/***** NOTE: c:[1], w:[5] *****/
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3]);
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+/* au+bv=w が成り立つように, 成分を決める */
+/* 成分は non0 */
+sz:rand([3, 4]);
+matP:random_invertible_matrix(sz, [-3, -2, -1, -1, 1, 1, 2, 3]);
+vu:col(matP, 1);
+vv:col(matP, 2);
+
+aa:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
+bb:rand([-2, -1, -1, 1, 1, 1, 1, 2, 2, 3]);
+vw:aa*vu+bb*vv;
+
+ijL:%_rp([1, 2, 3]);
+if sz=4 then ijL:%_rp([1, 2, 3, 4]);
+i1:ijL[1];i2:ijL[2];i3:ijL[3];
+vQu:genmatrix(lambda([i, j], if i=i1 then p else vu[i, 1]), sz, 1);
+vQv:genmatrix(lambda([i, j], if i=i2 then q else vv[i, 1]), sz, 1);
+vQw:genmatrix(lambda([i, j], if i=i3 then r else vw[i, 1]), sz, 1);
+pp:vu[i1, 1];
+qq:vv[i2, 1];
+rr:vw[i3, 1];
+
+%_dpv(eq):=sconcat("\\(", display_polynomial_varlist_tex1(eq, [Wu, Wv, Ww]), "\\)");
+RelationEq:sconcat(%_dpv(aa*Wu+bb*Wv), "\\(=\\)", tex2(Ww));
+
+C1:tex2L([p, "=", pp, ", q=", qq, ", r=", rr]);
+W1a:tex2L([p, "=", pp+1, ", q=", qq, ", r=", rr+1]);
+W1b:tex2L([p, "=", pp-1, ", q=", qq+1, ", r=", rr+1]);
+W1c:tex2L([p, "=", pp+1, ", q=", qq, ", r=", rr+1]);
+W1d:tex2L([p, "=", -pp, ", q=", qq+1, ", r=", rr+1]);
+W1e:tex2L([p, "=", 2*pp, ", q=", qq, ", r=", -rr]);
+W1f:tex2L([p, "=", pp, ", q=", qq, ", r=", rr+1]);
+W1g:tex2L([p, "=", qq, ", q=", pp, ", r=", rr-1]);
+W1h:tex2L([p, "=", -pp, ", q=", -qq, ", r=", rr]);
+
+WL:unique([W1a, W1b, W1c, W1d, W1e, W1f, W1g, W1h]);
+
+
+
+
+
+
+
+
+qtext1:tex2L([Wu, "=", vu, ", ", Wv, "=", vv, ", ", Ww, "=", vw]);
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(qtext1, " satisfies the relation ", RelationEq, ". ", __SELTYPE__, " linear combinations among the following that are equal to ", QuestionEq)],
+ ["fr", sconcat(qtext1, " satisfait la relation ", RelationEq, ". ", __SELTYPE__, " combinaisons linéaires parmi les suivantes qui sont égales à ", QuestionEq)],
+ ["de", sconcat(qtext1, " erfüllt die Relation ", RelationEq, ". ", __SELTYPE__, " Linearkombinationen unter den folgenden, die gleich ", QuestionEq, " sind")],
+ ["it", sconcat(qtext1, " soddisfa la relazione ", RelationEq, ". ", __SELTYPE__, " combinazioni lineari tra le seguenti che sono uguali a ", QuestionEq)],
+ ["ja", sconcat(qtext1, " は関係式:", RelationEq, "を満たしている. 次の1次結合のうち, ", QuestionEq, "と等しい1次結合を__SELTYPE__")]];
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:[C1];
+%__Cmsg1L:[["en", "Correct. "],
+ ["fr", "Correct. "],
+ ["de", "Richtig. "],
+ ["it", "Corretto. "],
+ ["en", "Correct. "],
+ ["ja", "正解です. "]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:WL;
+%__Wmsg1L:[["en", "You have selected an incorrect one."],
+ ["fr", "Vous avez sélectionné une réponse incorrecte."],
+ ["de", "Sie haben eine falsche Auswahl getroffen."],
+ ["it", "Hai selezionato una risposta non corretta."],
+ ["ja", "正しくないのを選びました."]];
+
+/********** EOF ***********/
+
