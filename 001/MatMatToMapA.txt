@@ -24,8 +24,6 @@ vL:vLL[floor((psel+1)/2)];
 
 /* common function or assert function */
 chkRank(pp, rr):=is(rank(apply(addcol, makelist(col(matF, pp[i]), i, 1, length(pp))))=rr);
-genAL(k):=block([], return([k]));/* dummy */
-genBL(k):=block([], return([k]));/* dummy */
 
 /* ListAL1 (trivial / ej to aj or [-1, 0, 1, 0] to -a1+a3 type) */
 ejL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), %_nc, 1), k, 1, %_nc);
@@ -79,8 +77,6 @@ chkBB12:intersection(SetBL1, SetBL2);
 /*allchk:[chkAA12, chkAB11, chkAB12, chkAB13, chkAB21];*/
 /*allchk:append(allchk, [chkAB22, chkAB23, chkBB12, chkBB13, chkBB23]);*/
 allchk:[chkAB11, chkAB12, chkBB12];
-texput(xx, "{\\boldsymbol x}");
-texput(yy, "{\\boldsymbol y}");
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
@@ -91,7 +87,7 @@ texput(yy, "{\\boldsymbol y}");
  ["fr", sconcat(__SELTYPE__, " paires de vecteurs correctes [ ", tex2(Wx), ", ", tex2(Wy), " ] telles que, sous l’application définie par la matrice \\(A=\\)", tex2(matA), ", ", tex2(Wx), " est envoyé sur ", tex2(Wy))],
  ["de", sconcat(__SELTYPE__, " korrekte Vektorpaaren [ ", tex2(Wx), ", ", tex2(Wy), " ], sodass unter der durch die Matrix \\(A=\\)", tex2(matA), " definierten Abbildung ", tex2(Wx), " auf ", tex2(Wy), " abgebildet wird")],
  ["it", sconcat(__SELTYPE__, " coppie di vettori corrette [ ", tex2(Wx), ", ", tex2(Wy), " ] tali che, sotto l’applicazione definita dalla matrice \\(A=\\)", tex2(matA), ", ", tex2(Wx), " venga mandato in ", tex2(Wy))],
- ["ja", sconcat(" 行列\\(A=\\)", tex2(matA), "によって定まる写像により, ", tex2(Wx}, "が",  tex2(Wy), "に写るようなベクトルの組[ ", tex2(Wx), ", ", tex2(Wy), "]として正しいものを __SELTYPE__")]];
+ ["ja", sconcat(" 行列\\(A=\\)", tex2(matA), "によって定まる写像により, ", tex2(Wx), "が",  tex2(Wy), "に写るようなベクトルの組[ ", tex2(Wx), ", ", tex2(Wy), "]として正しいものを __SELTYPE__")]];
 
 
 /******************************** List of patterns/feedbacks *****************************/
