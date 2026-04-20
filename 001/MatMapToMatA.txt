@@ -1,0 +1,135 @@
+/******************** MatMapToMatA (cb/rb) *************/
+/* 001.MCB include file		                       */
+/* Objective: To learn/check map defined by matrix     */
+/*******************************************************/
+/* c:[4], w:[4, 4]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3]);
+/********************************************************************/
+
+/********* u.c. ************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* number of rows and cols */
+nmL:rand([[2, 3], [2, 4], [3, 3], [3, 4], [4,3], [4, 4]]);
+num_rows:nmL[1];num_cols:nmL[2];
+%_nr:num_rows;
+%_nc:num_cols;
+
+j12:%_rp(makelist(k, k, %_nc));
+j1:j12[1];j2:j12[2];j3:j12[3];
+
+r1:rand([-1, 1]);
+r2:rand([-1, 1]);
+ejj:genmatrix(lambda([i, j], if i=j1 then r1 elseif i=j2 then r2 else 0), %_nc, 1);
+aL:make_random_distribution_pm([[3, 1], [2, 2], [1, 8],[0, 2]]);
+matA:genmatrix(lambda([i,j], rand(aL)), %_nr, %_nc);
+
+Ajj:matA.ejj;
+
+/* ListAL1 */
+r12:r1/r2;
+rL:[-2, -1, -1, -1, 0, 1, 1, 1, 2];
+cv1:genmatrix(lambda([i, j], rand(rL)), %_nr, 1);
+matA1:genmatrix(lambda([i, j],
+    if j=j1 then matA[i, j]+cv1[i, 1]
+    elseif j=j2 then matA[i, j]-r12*cv1[i, 1]
+    else rand(aL)), %_nr, %_nc);
+    
+cv2:genmatrix(lambda([i, j], rand(rL)), %_nr, 1);
+matA2:genmatrix(lambda([i, j],
+    if j=j1 then matA[i, j]-cv2[i, 1]
+    elseif j=j2 then matA[i, j]+r12*cv2[i, 1] else rand(aL)), %_nr, %_nc);
+ListAL1:unique([matA, matA1, matA2]);
+
+/* ListBL1: type mismatch */
+matB11:genmatrix(lambda([i, j], if i<=%_nr and j<=%_nc then matA[i, j] else rand(aL)), %_nr, %_nc+rand([-1, 1]));
+matB12:genmatrix(lambda([i, j], if i<=%_nr and j<=%_nc then matA1[i, j] else rand(aL)), %_nr, %_nc+rand([-1, 1]));
+matB13:genmatrix(lambda([i, j], if i<=%_nr and j<=%_nc then matA2[i, j] else rand(aL)), %_nr, %_nc+rand([-1, 1]));
+ListBL1:unique([matB11,matB12,matB13]);
+
+/* ListBL2: type ok but not fit */
+addBL2(M):=block([],if M.eij=Aij then return([]) else return([M]));
+ListBL2:[];
+
+matB21:genmatrix(lambda([i, j], if j=j1 then matA[i, j]+rand([-1, 1]) else rand(aL)), %_nr, %_nc);
+ListBL2:append(ListBL2,addBL2(matB21));
+
+matB22:genmatrix(lambda([i, j], if j=j3 then matA[i, j1] elseif j=j1 then matA[i, j2] else rand(aL)), %_nr, %_nc);
+ListBL2:append(ListBL2,addBL2(matB22));
+
+matB23:genmatrix(lambda([i, j], if j=j3 then matA[i, j2] elseif j=j2 then matA[i, j1] else rand(aL)), %_nr, %_nc);
+ListBL2:append(ListBL2,addBL2(matB23));
+
+matB24:genmatrix(lambda([i, j], rand(aL)), %_nr, %_nc);
+ListBL2:append(ListBL2, addBL2(matB24));
+
+ListBL2:unique(ListBL2);
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+chkAB12:intersection(SetAL1,SetBL2);
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3);*/
+chkBB12:intersection(SetBL1,SetBL2);
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+allchk:[chkAB11,chkAB12,chkBB12];
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " matrices among the following whose associated linear map sends ", tex2(ejj), " to ", tex2(Ajj))],
+ ["fr", sconcat(__SELTYPE__, " matrices parmi les suivantes dont l’application linéaire envoie ", tex2(ejj), " sur ", tex2(Ajj))],
+ ["de", sconcat(__SELTYPE__, " Matrizen unter den folgenden, deren zugehörige lineare Abbildung ", tex2(ejj), " auf ", tex2(Ajj), " abbildet")],
+ ["it", sconcat(__SELTYPE__, " matrici tra le seguenti la cui applicazione lineare associata manda ", tex2(ejj), " in ", tex2(Ajj))],
+ ["ja", sconcat("以下の行列のうち, その行列の定める写像により, ", tex2(ejj), "が", tex2(Ajj), "に写されるものを__SELTYPE__")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(tex2, ListAL1);
+%__Cmsg1L:[["en", "Correct. You seem to understand the domain and image of the map defined by a matrix."],
+ ["fr", "Correct. Vous semblez comprendre le domaine et l’image de l’application définie par une matrice."],
+ ["de", "Richtig. Sie scheinen den Definitionsbereich und das Bild der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda il dominio e l’immagine dell’applicazione definita da una matrice."],
+ ["ja", "正解です. 行列の定める写像の定義域と像について理解できているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, ListBL1);
+%__Wmsg1L:[["en", sconcat("You have selected matrices for which the vector ", tex2(ejj), " does not belong to the domain of the associated linear map.")],
+ ["fr", sconcat("Vous avez sélectionné des matrices pour lesquelles le vecteur ", tex2(ejj), " n’appartient pas au domaine de l’application linéaire associée.")],
+ ["de", sconcat("Sie haben Matrizen ausgewählt, für die der Vektor ", tex2(ejj), " nicht zum Definitionsbereich der zugehörigen linearen Abbildung gehört.")],
+ ["it", sconcat("Hai selezionato matrici per le quali il vettore ", tex2(ejj), " non appartiene al dominio dell’applicazione lineare associata.")],
+ ["ja", sconcat("行列の写像の定義域にベクトル", tex2(ejj), "が属していないような行列を選んでいます.")]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:map(tex2, ListBL2);
+%__Wmsg2L:[["en", "The size (shape) of the matrix is correct, but you have selected ones that do not produce the given correspondence."],
+ ["fr", "La taille (dimension) de la matrice est correcte, mais vous avez sélectionné des matrices qui ne réalisent pas la correspondance donnée."],
+ ["de", "Die Größe (Dimension) der Matrix ist korrekt, aber Sie haben solche ausgewählt, die nicht die gegebene Zuordnung liefern."],
+ ["it", "La dimensione (forma) della matrice è corretta, ma hai selezionato matrici che non realizzano la corrispondenza data."],
+ ["ja", "行列の型(サイズ)は正しいが, 与えられた元の対応にならないものを選んでいます."]];
+
+
+/********** EOF **********/
