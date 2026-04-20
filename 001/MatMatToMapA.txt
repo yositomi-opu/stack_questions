@@ -37,7 +37,7 @@ ListAL1:append(ListAL1, [[xv, matA.xv]]);
 ListAL1:unique(ListAL1);
 
 /* ListBL1: size mismatch */
-fjL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), m+1, 1), k, 1, %_nc+1);
+fjL:makelist(genmatrix(lambda([i, j], if i=k then 1 else 0), %_nc+1, 1), k, 1, %_nc+1);
 ListBL1:makelist([fjL[k], matA1.fjL[k]], k, 1, %_nc+1);
 xL:random_permutation([-1, -1, 0, 1, 1]);xv:transpose(matrix(makelist(xL[k], k, 1, %_nc+1)));
 ListBL1:append(ListBL1, [[xv, matA1.xv]]);
