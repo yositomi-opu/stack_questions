@@ -1,0 +1,60 @@
+/********************** MatProdDefA (cb/rb) ******************/
+/* 001.MCB include file		                             */
+/* Objective: To learn/check matrix x matrix product         */
+/*************************************************************/
+/* c:[6], w:[6]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3]);
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
+%_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
+%_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
+nmL:[1, 2, 3, 4, 5];
+%_mkpair(A, B):=sconcat(tex2(A), tex2(B));
+
+CL1:[];
+for k:1 thru 6 do (aa:rand(nmL),
+    CL1:cons(%_mkpair(%_mkmat(%_nmk_all[k][1], aa), %_mkmat(aa, %_nmk_all[k][2])), CL1));
+
+WL1:[];
+for k:1 thru 6 do (aa:rand(nmL), bb:rand_with_prohib(1, 5, [aa]),
+    WL1:randCL1:cons(%_mkpair(%_mkmat(%_nmk_all[k][1], aa), %_mkmat(bb, %_nmk_all[k][2])), WL1));
+
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " expressions among the following for which the matrix product is actually defined")],
+ ["fr", sconcat(__SELTYPE__, " expressions parmi les suivantes pour lesquelles le produit de matrices est effectivement défini")],
+ ["de", sconcat(__SELTYPE__, " Ausdrücke unter den folgenden, für die das Matrixprodukt tatsächlich definiert ist")],
+ ["it", sconcat(__SELTYPE__, " espressioni tra le seguenti per cui il prodotto di matrici è effettivamente definito")],
+ ["ja", "次の行列の積の式のうち, 実際に行列の積が定義されるものを __SELTYPE__"]];
+
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:CL1;
+%__Cmsg1L:[["en", "Correct. You seem to understand the domain and image of the map defined by a matrix."],
+ ["fr", "Correct. Vous semblez comprendre le domaine et l’image de l’application définie par une matrice."],
+ ["de", "Richtig. Sie scheinen den Definitionsbereich und das Bild der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda il dominio e l’immagine dell’applicazione definita da una matrice."],
+ ["ja", "積が定義されている行列式の積が選択されています."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:WL1;
+%__Wmsg1L:[["en", "You have selected ones for which the product is not defined."],
+ ["fr", "Vous avez sélectionné des éléments pour lesquels le produit n’est pas défini."],
+ ["de", "Sie haben solche ausgewählt, für die das Produkt nicht definiert ist."],
+ ["it", "Hai selezionato elementi per cui il prodotto non è definito."],
+ ["ja", "積が定義されていないものを選んでいます."]];
+
+
+/********** EOF **********/
