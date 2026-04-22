@@ -78,7 +78,7 @@ Sans1:setify(makelist(i,i,s,t));
       <checkanswertype>0</checkanswertype>
       <mustverify>1</mustverify>
       <showvalidation>1</showvalidation>
-      <options></options>
+      <options>hideanswer</options>
     </input>
     <prt>
       <name>prt1</name>

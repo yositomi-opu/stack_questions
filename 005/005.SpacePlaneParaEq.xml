@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 115718  -->
+  <question type="stack">
+    <name>
+      <text>005.SpacePlaneParaEq</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>方程式 {@question_eqS@}で定まる平面のパラメータ表示を求めよ.</p>
+<table><thead>
+<tr><th scope="col">\( \begin{pmatrix}x\\y\\z\end{pmatrix}=\)</th><th scope="col">[[input:ans1]]</th><th scope="col">\( + s\)</th><th scope="col">[[input:ans2]]</th><th scope="col">\( + t\)</th><th scope="col">[[input:ans3]]</th><th scope="col">\( \quad s,t \in {\mathbb R} \)</th></tr></thead><tbody></tbody></table>
+<br><br><p></p>
+<p>[[validation:ans1]][[validation:ans2]][[validation:ans3]]</p><p><br></p>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '100px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p dir="ltr" style="text-align: left;">&nbsp;パラメータ表示\({\boldsymbol x}=\){@_tmpEq@}において, \({\boldsymbol u}\)や\({\boldsymbol v}\)は平面に平行な, ゼロでない, 互いに平行でないベクトルである必要があります. また, \({\boldsymbol a}\)はこの平面上の点なので, 3点を通る条件が与えられている場合, 3点のいずれかをとればよいでしょう(もちろん, 他の任意の平面上の点でも構いません).<br></p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* Parametic representation of a plan given by equation */
+%_MAX_NODES:15;
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
+powerdisp:true;
+pL:make_random_distribution_pm([[3, 1], [2, 2], [1, 10], [0, 3]]);
+matP:random_invertible_matrix(3, pL);
+vecA:col(matP, 1);
+vecB:col(matP, 2);
+vecC:col(matP, 3);
+vec_to_point(vec):=sconcat("\\((", tex1(sequenceify(list_matrix_entries(vec))), ")\\)");
+pointA:vec_to_point(vecA);
+pointB:vec_to_point(vecB);
+pointC:vec_to_point(vecC);
+
+Cans1:vecA;
+Cans2:vecB-vecA;
+Cans3:vecC-vecA;
+
+vec1:vecB-vecA;
+vec2:vecC-vecA;
+zerovec:matrix([0], [0], [0]);
+%_tmpvec:cross_product(vec1, vec2);
+if %_tmpnvec[1, 1]<0 then %_tmpvec:-%_tmpvec;
+nvec:integer_vector(%_tmpvec);
+question_eq:expand(matrix([x-vecA[1, 1], y-vecA[2, 1], z-vecA[3, 1]]).nvec);
+question_eqS:sconcat("\\(", display_polynomial_varlist_tex1(question_eq, [x, y, z]), "=0\\)");
+
+/* check error pattern of the answer(s) */
+check_ans(a1, a2, a3):=block([flg, _nn:6, chkL:makelist(false, %_MAX_NODES)],
+  chkL[1]:is(rank(addcol(a1-vecA, vec1, vec2))=2),
+  chkL[2]:not(sort([a2, a3])=sort([vecB, vecC])),
+  chkL[3]:not(a2=zerovec) and not(a3=zerovec),
+  chkL[4]:chkL[3] and is(rank(addcol(vec1, vec2, a2))=2),
+  chkL[5]:chkL[3] and is(rank(addcol(vec1, vec2, a3))=2),
+  chkL[6]:chkL[2] and is(rank(addcol(a2, a3))=2),
+  chkL[%_MAX_NODES]:apply("and", makelist(chkL[k], k, 1, _nn)),
+  return([_nn, chkL]));
+/* Message List : 問題記録に入れるためにはここで定義されていなければならない. */
+_tmpEq:tex2L([Wa, "+s", Wu, "+t", Wv]);
+/* 1: true, 2: false */
+MsgHead:sconcat("パラメータ表示", _tmpEq, "において");
+MsgL:makelist(["", ""], %_MAX_NODES);
+MsgL[1][1]:sconcat(tex2(Wa), "が平面上にあります.");
+MsgL[1][2]:sconcat(tex2(Wa), "が平面上にありません.");
+MsgL[2][2]:sconcat(tex2(Wu), "や", tex2(Wv), "は通る点の位置ベクトルではありません.");
+MsgL[3][2]:sconcat(tex2(Wu), ", ", tex2(Wv), "はゼロベクトルではいけません.");
+MsgL[4][1]:sconcat(tex2(Wu), "が平面と平行ではありません.");
+MsgL[4][2]:sconcat(tex2(Wu), "が平面と平行ではありません.");
+MsgL[5][2]:sconcat(tex2(Wv), "が平面と平行ではありません.");
+MsgL[6][2]:sconcat(tex2(Wu), "と", tex2(Wv), "が平行になっています.");
+MsgL[%_MAX_NODES]:"正解です. 方程式があたえられた場合のパラメータ表示を正しく理解しています.";
+/* Score List */
+ScL:makelist(0, %_MAX_NODES);
+ScL[1]:0.2;ScL[2]:0.2;ScL[3]:0.2;ScL[4]:0.2;ScL[5]:0.2;
+/* compose message function : user should define */
+chk_to_message(chkL):=block([msg:MsgHead],
+  if chkL[%_MAX_NODES] then msg:"正解です. 平面のパラメータ表示についてよく理解しているようです."
+  else if (not chkL[1]) or (not chkL[2]) then msg:sconcat(msg, MsgL[1][2], "<br>", MsgL[2][2])
+  else for k:3 thru 6 do (msg:sconcat(msg, "<br>", if chkL[k] then MsgL[k][1] else MsgL[k][2])),
+  return(msg));
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matP@},{@Cans1@},{@Cans2@},{@Cans3@}
+MsgL:{@MsgL@}, ScL:{@ScL@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>symi</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>Cans1</tans>
+      <boxsize>4</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords>[[BASIC-ALGEBRA]],[[BASIC-CALCULUS]],[[BASIC-MATRIX]]</forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>hideanswer</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>Cans2</tans>
+      <boxsize>4</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords>[[BASIC-ALGEBRA]],[[BASIC-CALCULUS]],[[BASIC-MATRIX]]</forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>hideanswer</options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>varmatrix</type>
+      <tans>Cans3</tans>
+      <boxsize>4</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords>[[BASIC-ALGEBRA]],[[BASIC-CALCULUS]],[[BASIC-MATRIX]]</forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text>[num_nodes, ChkL]:check_ans(ans1, ans2, ans3);
+Sc:0;
+if chkL[%_MAX_NODES] then Sc:1 else for k:1 thru num_nodes do Sc:Sc+(if ChkL[k] then ScL[k] else 0);
+feedback_message:chk_to_message(ChkL);
+</text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>true</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>Sc</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>{@feedbac_message@}</p>
+<p>Your Score is : {@Sc@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description>Check point 01</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore></truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>2</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>{@MsgL[1]@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>10</name>
+        <description>Check point 10</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[10]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>11</truenextnode>
+        <trueanswernote>prt1-11-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>11</falsenextnode>
+        <falseanswernote>prt1-11-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>11</name>
+        <description>Check point 11</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[11]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>12</truenextnode>
+        <trueanswernote>prt1-12-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>12</falsenextnode>
+        <falseanswernote>prt1-12-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>12</name>
+        <description>Check point 12</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[12]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>13</truenextnode>
+        <trueanswernote>prt1-13-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>13</falsenextnode>
+        <falseanswernote>prt1-13-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>13</name>
+        <description>Check point 13</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[13]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>14</truenextnode>
+        <trueanswernote>prt1-14-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>14</falsenextnode>
+        <falseanswernote>prt1-14-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>14</name>
+        <description>Check point 14</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[14]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-15-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-15-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description>Check point 02</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>3</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>{@MsgL[2]@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description>Check point 03</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>4</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>{@MsgL[3]@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description>Check point 04</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[4]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>5</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>5</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>{@MsgL[4]@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>5</name>
+        <description>Check point 05</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>6</truenextnode>
+        <trueanswernote>prt1-6-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>6</falsenextnode>
+        <falseanswernote>prt1-6-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>{@MsgL[5]@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>6</name>
+        <description>Check point 06</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[6]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>7</truenextnode>
+        <trueanswernote>prt1-7-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>7</falsenextnode>
+        <falseanswernote>prt1-7-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>7</name>
+        <description>Check point 07</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[7]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>8</truenextnode>
+        <trueanswernote>prt1-8-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>8</falsenextnode>
+        <falseanswernote>prt1-8-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>8</name>
+        <description>Check point 09</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[8]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>9</truenextnode>
+        <trueanswernote>prt1-9-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>9</falsenextnode>
+        <falseanswernote>prt1-9-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>9</name>
+        <description>Check point 09</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ChkL[9]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>10</truenextnode>
+        <trueanswernote>prt1-10-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>+</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>10</falsenextnode>
+        <falseanswernote>prt1-10-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>743422283</deployedseed>
+    <deployedseed>717265260</deployedseed>
+    <deployedseed>808638021</deployedseed>
+    <deployedseed>1435666896</deployedseed>
+    <deployedseed>1010645643</deployedseed>
+    <deployedseed>1106470660</deployedseed>
+    <deployedseed>1603670753</deployedseed>
+    <deployedseed>1839219477</deployedseed>
+    <deployedseed>1370547313</deployedseed>
+    <deployedseed>889525376</deployedseed>
+    <deployedseed>356632195</deployedseed>
+    <deployedseed>128915117</deployedseed>
+    <deployedseed>1664179434</deployedseed>
+    <deployedseed>1521950369</deployedseed>
+    <deployedseed>890700923</deployedseed>
+    <deployedseed>1223526005</deployedseed>
+    <deployedseed>808196429</deployedseed>
+    <deployedseed>1140750691</deployedseed>
+    <deployedseed>1922544386</deployedseed>
+    <deployedseed>1176240923</deployedseed>
+    <deployedseed>1782571264</deployedseed>
+    <deployedseed>193355708</deployedseed>
+    <deployedseed>223619430</deployedseed>
+    <deployedseed>1060054681</deployedseed>
+    <deployedseed>1664699200</deployedseed>
+    <deployedseed>1389900011</deployedseed>
+    <deployedseed>494348955</deployedseed>
+    <deployedseed>18416105</deployedseed>
+    <deployedseed>1711062102</deployedseed>
+    <deployedseed>851225372</deployedseed>
+  </question>
+
+</quiz>
