@@ -51,9 +51,9 @@ WL1:listify(setdifference(%_allS, {matA}));
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
 %__mcq_qtextL:[["en", sconcat("__SELTYPE__ matrices A such that the product of a matrix A and for the matrix \\(X=\\)", EmatQ, ", then ", XAS, " is equal to ", tex2(matAQ))],
-/* ["fr", sconcat("__SELTYPE__ matrices A telles que le produit d’une matrice A et de la matrice \\(X=\\)", EmatQ, " (", XAS, ") est égal à ", tex2(matAQ))], */
-/* ["de", sconcat("__SELTYPE__ mMatrizen A, für die das Produkt einer Matrix A mit der Matrix \\(X=\\)", EmatQ, " (", XAS, ") gleich ", tex2(matAQ), " ist")], */
-/* ["it", sconcat("__SELTYPE__ matrici A tali che il prodotto di una matrice A con la matrice \\(X=\\)", EmatQ, " (", XAS, ") è uguale a ", tex2(matAQ))], */
+ ["fr", sconcat("__SELTYPE__ matrices A telles que le produit d’une matrice A et de la matrice \\(X=\\)", EmatQ, " (", XAS, ") est égal à ", tex2(matAQ))], 
+ ["de", sconcat("__SELTYPE__ mMatrizen A, für die das Produkt einer Matrix A mit der Matrix \\(X=\\)", EmatQ, " (", XAS, ") gleich ", tex2(matAQ), " ist")], 
+ ["it", sconcat("__SELTYPE__ matrici A tali che il prodotto di una matrice A con la matrice \\(X=\\)", EmatQ, " (", XAS, ") è uguale a ", tex2(matAQ))], 
  ["ja", sconcat("ある行列\\(A\\)と行列\\(X=\\)", EmatQ, "との積", XAS, "が, ", tex2(matAQ), "のとき, \\(A\\)として正しいものを __SELTYPE__")]];
 
 
@@ -75,7 +75,7 @@ WL1:listify(setdifference(%_allS, {matA}));
  ["fr", "Incorrect. Réfléchissons à ce qui se passe lorsqu’on multiplie par une matrice obtenue en échangeant des lignes ou des colonnes de la matrice identité (appelée matrice de permutation)."],
  ["de", "Falsch. Überlegen wir, was geschieht, wenn man mit einer Matrix multipliziert, die durch Vertauschen von Zeilen oder Spalten der Einheitsmatrix entsteht (eine sogenannte Permutationsmatrix)."],
  ["it", "Non è corretto. Consideriamo che cosa accade quando si moltiplica per una matrice ottenuta scambiando righe o colonne della matrice identità (detta matrice di permutazione)."],
- ["ja", "違います. このような単位行列の行もしくは列をいれかえた行列(置換行列という)をかけると何がおこるか考察してみましょう.""]];
+ ["ja", "違います. このような単位行列の行もしくは列をいれかえた行列(置換行列という)をかけると何がおこるか考察してみましょう."]];
 
 
 /********** EOF **********/
