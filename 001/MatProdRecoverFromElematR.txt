@@ -50,10 +50,10 @@ WL1:listify(setdifference(%_allS, {matA}));
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("__SELTYPE__ matrices A such that the product of a matrix A and the matrix \\(X=\\)", EmatQ, " (", XAS, ") is equal to ", tex2(matAQ))],
- ["fr", sconcat("__SELTYPE__ matrices A telles que le produit d’une matrice A et de la matrice \\(X=\\)", EmatQ, " (", XAS, ") est égal à ", tex2(matAQ))],
- ["de", sconcat("__SELTYPE__ mMatrizen A, für die das Produkt einer Matrix A mit der Matrix \\(X=\\)", EmatQ, " (", XAS, ") gleich ", tex2(matAQ), " ist")],
- ["it", sconcat("__SELTYPE__ matrici A tali che il prodotto di una matrice A con la matrice \\(X=\\)", EmatQ, " (", XAS, ") è uguale a ", tex2(matAQ))],
+%__mcq_qtextL:[["en", sconcat("__SELTYPE__ matrices A such that the product of a matrix A and for the matrix \\(X=\\)", EmatQ, ", then ", XAS, " is equal to ", tex2(matAQ))],
+/* ["fr", sconcat("__SELTYPE__ matrices A telles que le produit d’une matrice A et de la matrice \\(X=\\)", EmatQ, " (", XAS, ") est égal à ", tex2(matAQ))], */
+/* ["de", sconcat("__SELTYPE__ mMatrizen A, für die das Produkt einer Matrix A mit der Matrix \\(X=\\)", EmatQ, " (", XAS, ") gleich ", tex2(matAQ), " ist")], */
+/* ["it", sconcat("__SELTYPE__ matrici A tali che il prodotto di una matrice A con la matrice \\(X=\\)", EmatQ, " (", XAS, ") è uguale a ", tex2(matAQ))], */
  ["ja", sconcat("ある行列\\(A\\)と行列\\(X=\\)", EmatQ, "との積", XAS, "が, ", tex2(matAQ), "のとき, \\(A\\)として正しいものを __SELTYPE__")]];
 
 
