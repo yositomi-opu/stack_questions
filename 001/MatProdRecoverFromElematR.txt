@@ -31,8 +31,8 @@ matQ3:[[matX1, matX2, matX3], [matY1, matY2, matY3]][3-flagXY][1];
 matQ4:[[matX1, matX2, matX3], [matY1, matY2, matY3]][3-flagXY][2];
 matQ5:[[matX1, matX2, matX3], [matY1, matY2, matY3]][3-flagXY][3];
 EmatQ:tex2(matQ);
-if flagXY=1 then XAS:"\\(XA\\" else XAS:"\\(AX\\)";
 
+XAS:if flagXY=1 then "\\(XA\\)" else "\\(AX\\)";
 matAQ:if flagXY=1 then matQ.matA else matA.matQ;
 
 
