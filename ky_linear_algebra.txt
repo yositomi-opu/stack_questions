@@ -23,14 +23,21 @@ MtoTeX2(M,env):=block([m,n,i,j,s],s:sconcat("\\begin{",env,"}"),[m,n]:matrix_siz
 /* CountDf(m1, m2):=count the differences of entries of the matrices m1 and m2, just like distMat (only number of differences) */
 CountDf(m1,m2):=block([k,r,c,r1,c1],[r,c]:matrix_size(m1),k:0,for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then k:k+1,return(k));
 /* --- getDetL.txt (EOF) --- */
-/* kihon gyouretu (elem. matrix) by K.Yoshitomi */
-/* v004 : add SweepRij (2023.6.4) */
-/* v003 : fix SweepCij, SweepCBij (2023.6.3) */
+
+/* kihon gyouretu (elem. matrices) by K.Yoshitomi */
+/* v004 : add SweepRij (2023.6.4)                 */
+/* v003 : fix SweepCij, SweepCBij (2023.6.3)      */
 /* v002 : fix sweepout(mal function) and add FindNZcol function (2023.5.28) */
 /* added sweep function */
 kihonP(n,i1,j1,c):=block([M],M:genmatrix(lambda([i,j],if i=j then 1 elseif equal([i,j],[i1,j1]) then c else 0),n,n),return(M));
 kihonQ(n,i1,c):=block([M],M:genmatrix(lambda([i,j],if i=j then (if i=i1 then c else 1) else 0),n,n),return(M));
 kihonR(n,i1,j1):=block([M],M:genmatrix(lambda([i,j],if i=j then 1 else 0),n,n),M[i1,i1]:0,M[j1,j1]:0,M[i1,j1]:1,M[j1,i1]:1,return(M));
+/* kihonP/Q/R is for backward compatibility only. Use below or standard STACK linbrary */
+elementary_matrix_rowadd(n, i, j, c):=kihonP(n, i, j, c);
+elementary_matrix_swap(n, i, j):=kihonR(n, i, j);
+elementary_matrix_mult(n, i, c):=kihonQ(n, i, c);
+
+/* sweepout functions */
 sweepout(rc,A,i1,j1):=block([k,M,m,n],[m,n]:matrix_size(A),M:A,if rc=1 then (for k:1 while (k<=n) do (if not k=j1 then M:M.kihonP(n,j1,k,-M[i1,k]/M[i1,j1])),return(M)) else (for k:1 while (k<=m) do (if notequal(k,i1) then M:kihonP(m,k,i1,-M[k,j1]/M[i1,j1]).M),return(M)));
 SweepCBij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),r,r),for k:i+1 thru r do em:kihonP(r,k,i,-M[k,j]/M[i,j]).em,return(em));
 SweepCij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j],if i=j then 1 else 0),r,r),for k:1 thru r do if not k=i then em:kihonP(r,k,i,-M[k,j]/M[i,j]).em,return(em));
@@ -39,18 +46,21 @@ SweepRRij(M,i,j):=block([em,k,r,c],[r,c]:matrix_size(M),em:genmatrix(lambda([i,j
 SweepCBj(M,j,im):=block([k,r],r:matrix_size(M)[1],for k:im thru r do if abs(M[k,j])=1 then return(kihonR(r,1,k)),for k:im thru r do if not M[k,j]=0 then return(kihonR(r,1,k)),return(kihonP(r,1,2,0)));
 FindNZcol(M,j,s):=block([r,i],r:-1,for i:s thru matrix_size(M)[1] do if not M[i,j]=0 and r=-1 then r:i,return(r));
 /* -- END of kihonPQR.txt --- */
-/* -- library : redechelon.txt  -- */
+
+/******** library : redechelon.txt ********/
 /* Return which column is first non-zero entry of i-th row vector */
 get_first_non_zero_column(M, r):=block([t,p,q],[p,q]:matrix_size(M),if M[r]=makelist(0,q) then return(q+1) else for t: 1 thru q do (if not M[r,t]=0 then return(t)));
 getFirstNZ(M, i):=get_first_non_zero_column(M, i);
-/* reduced echelon form */
+
+/* reduced echelon form (from maxima echelon form) */
 redeche(M):=block([p,q,r,i,j,t],[p,q]:matrix_size(M),M:echelon(M),r:rank(M),if r=1 then return (M),for i:r thru 2 step -1 do (j:getFirstNZ(M,i),for t:1  thru i-1 do (M:rowop(M,t,i,M[t,j]))),M);
-/* randechelon : random echelon form given pv */
-/* randechelon(i1,j1,pv,rL):=block([i,j,ret],redeche(genmatrix(lambda([i,j],if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 else rand(rL)),i1,j1))); */
-randechelon(i1,j1,pv,rL):=block([i,j,ret],genmatrix(lambda([i,j],if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 elseif member(j,pv) then 0 else rand(rL)),i1,j1));
+
+/* randechelon : random echelon form given pivot pv */
+randechelon(i1, j1, pv, rL):=block([i, j, ret],
+  genmatrix(lambda([i, j], if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 elseif member(j,pv) then 0 else rand(rL)), i1, j1));
 /* sample : randechelon(3,5,[1,3],[-2,-1,-1,0,1,1,2]); */
 isechelon(M):=block([p,i,rw,cl,rt],[rw,cl]:matrix_size(M),p:makelist(getFirstNZ(M,i),i,1,rw),rt:true,for i:2 thru rw do (rt:rt and (is(p[i-1]<p[i]) or p[i]>cl)),return(rt));
-/* --- End of redechelon.txt --- */
+/********* End of redechelon.txt *********/
 
 /* support display polynomials/linear combination */
 /* display_polynomial(px,x,adflag) px:polynomial, x:variable, adflag:1=asscend,-1=descend */
