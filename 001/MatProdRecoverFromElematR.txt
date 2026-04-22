@@ -39,7 +39,7 @@ matAQ:if flagXY=1 then XA:matQ.matA else XA:matA.matQ;
 CL1:[matA];
 
 if flagXY=1 then %_allS:{matQ.matAQ, matQ1.matAQ, matQ2.matAQ, matAQ.matQ3, matAQ.matQ4, matAQ.matQ5}
-else %_allS:{matAQ.matQ, matAQ.matQ1, matAQ.matQ2, matA3.matAQ, matA4.matAQ, matA5.matAQ};
+            else %_allS:{matAQ.matQ, matAQ.matQ1, matAQ.matQ2, matQ3.matAQ, matQ4.matAQ, matQ5.matAQ};
 WL1:listify(setdifference(%_allS, {matA}));
 
 
