@@ -40,11 +40,11 @@ for k:1 thru 4 do (aa:rand(nmL), bb:rand_with_prohib(1, 5, [aa]),
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("__SELTYPE__", "expressions of matrix products among the following for which the product is defined and equals ", tex2(TSqS))],
- ["fr", sconcat("__SELTYPE__ expressions de produits de matrices parmi les suivantes pour lesquelles le produit est défini et est égal à ", tex2(TSqS))],
- ["de", sconcat("__SELTYPE__ Ausdrücke von Matrixprodukten unter den folgenden, für die das Produkt definiert ist und gleich ", tex2(TSqS), " ist")],
- ["it", sconcat("__SELTYPE__ espressioni di prodotti di matrici tra le seguenti per cui il prodotto è definito ed è uguale a ", tex2(TSqS))],
- ["ja", sconcat("次の行列の積の式のうち, 行列の積が定義されて, 積が", tex2(TSqS), "となるものを __SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat("__SELTYPE__", "expressions of matrix products among the following for which the product is defined and equals ", TSqS)],
+ ["fr", sconcat("__SELTYPE__ expressions de produits de matrices parmi les suivantes pour lesquelles le produit est défini et est égal à ", TSqS)],
+ ["de", sconcat("__SELTYPE__ Ausdrücke von Matrixprodukten unter den folgenden, für die das Produkt definiert ist und gleich ", TSqS, " ist")],
+ ["it", sconcat("__SELTYPE__ espressioni di prodotti di matrici tra le seguenti per cui il prodotto è definito ed è uguale a ", TSqS)],
+ ["ja", sconcat("次の行列の積の式のうち, 行列の積が定義されて, 積が", TSqS, "となるものを __SELTYPE__")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
