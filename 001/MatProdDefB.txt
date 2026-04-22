@@ -18,19 +18,21 @@ aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
 %_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
 %_rc_all1:%_rp(listify(cartesian_product(setdifference({1, 2, 3, 4, 5}, {TSr}), setdifference({1, 2, 3, 4, 5}, {TSc}))));
 %_rc_all2:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
-nmL:[1, 2, 3, 4, 5];
 %_mkpair(A, B):=sconcat(tex2(A), tex2(B));
 
+nmL:%_rp([1, 2, 3, 4, 5]);
 CL1:[];
-for k:1 thru 4 do (aa:rand(nmL),
+for k:1 thru 4 do (aa:nmL[k],
     CL1:cons(%_mkpair(%_mkmat(TSr, aa), %_mkmat(aa, TSc)), CL1));
 
+nmL:%_rp([1, 2, 3, 4, 5]);
 WL1:[];
-for k:1 thru 4 do (aa:rand(nmL), 
+for k:1 thru 4 do (aa:nmL[k],
     WL1:cons(%_mkpair(%_mkmat(%_rc_all1[k][1], aa), %_mkmat(aa, %_rc_all1[k][2])), WL1));
 
+nmL:%_rp([1, 2, 3, 4, 5]);
 WL2:[];
-for k:1 thru 4 do (aa:rand(nmL), bb:rand_with_prohib(1, 5, [aa]),
+for k:1 thru 4 do (aa:nmL[k], bb:rand_with_prohib(1, 5, [aa]),
     WL2:cons(%_mkpair(%_mkmat(%_rc_all2[k][1], aa), %_mkmat(bb, %_rc_all2[k][2])), WL2));
 
 
