@@ -33,7 +33,7 @@ matQ5:[[matX1, matX2, matX3], [matY1, matY2, matY3]][3-flagXY][3];
 EmatQ:tex2(matQ);
 if flagXY=1 then XAS:"\\(XA\\" else XAS:"\\(AX\\)";
 
-matAQ:if flagXY=1 then XA:matQ.matA else XA:matA.matQ;
+matAQ:if flagXY=1 then matQ.matA else matA.matQ;
 
 
 CL1:[matA];
