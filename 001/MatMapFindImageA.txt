@@ -1,0 +1,117 @@
+/******************** MatMapFindImageA (rb) ************/
+/* 001.MCB include file		                       */
+/* Objective: To learn/check image of linear map       */
+/*******************************************************/
+/* c:[1], w:[3, 3]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>7 then %_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/********* u.c. ************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* number of rows and cols */
+rcL:rand([[2, 3], [3, 2], [2, 4], [4, 2], [3, 4], [4, 3]]);
+num_rows:rcL[1];num_cols:rcL[2];
+%_nr:num_rows;
+%_nc:num_cols;
+aL:make_random_distribution_pm([[1, 8], [2, 3], [3, 1], [4, 1]]);
+matP:random_invertible_matrix(%_nr, aL);
+matA:matP.randechelon(%_nr, %_nc, makelist(k, k, min(%_nr, %_nc)), [-2, -1, 1, 2]);
+
+/* n x m matrix: Rm -> Rn */
+matEm:genmatrix(lambda([i, j], if i=j then 1 else 0), %_nc, %_nc);
+weL:makelist(col(matEm, k), k, 1, %_nc);
+wfeL:makelist(col(matA, k), k, 1, %_nc);
+
+/* source vector */
+aa1:rand([-2, -1, 1, 2]);
+aa2:rand([-2, -1, 1, 2]);
+vecS:aa1*weL[1]+aa2*weL[2];
+vecS1:-aa1*weL[1]-aa2*weL[2];
+vecS2:aa1*weL[1]-aa2*weL[2];
+vecS3:-aa1*weL[1]+aa2*weL[2];
+matA1:transpose(matA);
+matEm:genmatrix(lambda([i, j], if i=j then 1 else 0), %_nr, %_nr);
+wxL:makelist(col(matEm, k), k, 1, %_nr);
+vecX:aa1*wxL[1]+aa2*wxL[2];
+vecX1:-aa1*wxL[1]-aa2*wxL[2];
+vecX2:aa1*wxL[1]-aa2*wxL[2];
+vecX3:-aa1*wxL[1]+aa2*wxL[2];
+
+/* ListAL1 */
+ListAL1:[matA.vecS];
+    
+ListBL1:[matA.vecS1, matA.vecS2, matA.vecS3];
+ListBL2:[matA1.vecX, matA1.vecX1, matA1.vecX2, matA1.vecX3];
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+chkAB12:intersection(SetAL1,SetBL2);
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3);*/
+chkBB12:intersection(SetBL1,SetBL2);
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+allchk:[chkAB11,chkAB12,chkBB12];
+
+MapFRmRn:sconcat("\\(F:", tex2(WR), "^m\\to ", tex2(WR), "^n\\)");
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " images of the vector ", tex2(vecS), " under the linear map ", MapFRmRn, " where the basis vector ", tex2(WeL[1]), " is mapped to ", tex2(WfeL[1]), " and ", tex2(WeL[2]), " is mapped to ", tex2(WfeL[2]))],
+ ["fr", sconcat(__SELTYPE__, " images du vecteur ", tex2(vecS), " par l’application linéaire ", MapFRmRn, " où le vecteur de base ", tex2(WeL[1]), " est envoyé sur ", tex2(WfeL[1]), " et ", tex2(WeL[2]), " sur ", tex2(WfeL[2]))],
+ ["de", sconcat(__SELTYPE__, " Bilder des Vektors ", tex2(vecS), " unter der linearen Abbildung ", MapFRmRn, ", wobei der Basisvektor ", tex2(WeL[1]), " auf ", tex2(WfeL[1]), " und ", tex2(WeL[2]), " auf ", tex2(WfeL[2]), " abgebildet wird")],
+ ["it", sconcat(__SELTYPE__, " immagini del vettore ", tex2(vecS), " mediante l’applicazione lineare ", MapFRmRn, ", in cui il vettore di base ", tex2(WeL[1]), " è mandato in ", tex2(WfeL[1]), " e ", tex2(WeL[2]), " in ", tex2(WfeL[2]))],
+ ["ja", sconcat("線形写像", MapFRmRn, "は, 基本ベクトル ", tex2(WeL[1]), " を ", tex2(WfeL[1]), "に, ", tex2(WeL[2]), " を ", tex2(WfeL[2]), " にそれぞれ写す. ベクトル", tex2(vecS), "の像を __SELTYPE__")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(tex2, ListAL1);
+%__Cmsg1L:[["en", "Correct. You seem to be able to compute the image using linearity."],
+ ["fr", "Correct. Vous semblez pouvoir calculer l’image en utilisant la linéarité."],
+ ["de", "Richtig. Sie scheinen das Bild mithilfe der Linearität berechnen zu können."],
+ ["it", "Corretto. Sembra che tu sia in grado di calcolare l’immagine usando la linearità."],
+ ["ja", "正解です. 線形性による像の計算ができているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, ListBL1);
+%__Wmsg1L:[["en", "The size of the vector is correct, but you have selected an option that is not the correct answer."],
+ ["fr", "La taille du vecteur est correcte, mais vous avez sélectionné une réponse qui n’est pas correcte."],
+ ["de", "Die Größe des Vektors ist korrekt, aber Sie haben eine Antwort gewählt, die nicht korrekt ist."],
+ ["it", "La dimensione del vettore è corretta, ma è stata selezionata una risposta che non è corretta."],
+ ["ja", "ベクトルのサイズはあっていますが, 答とは違うものを選んでいます."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:map(tex2, ListBL2);
+%__Wmsg2L:[["en", "The image vector does not have that size."],
+ ["fr", "Le vecteur image n’a pas cette dimension."],
+ ["de", "Der Bildvektor hat nicht diese Dimension."],
+ ["it", "Il vettore immagine non ha quella dimensione."],
+ ["ja", "像のベクトルはそのサイズではありません."]];
+
+
+/********** EOF **********/
