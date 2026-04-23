@@ -72,7 +72,7 @@ chkBB12:intersection(SetBL1,SetBL2);
 /* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
 allchk:[chkAB11,chkAB12,chkBB12];
 
-MapFRmRn:sconcat("\\(F:", tex2(WR), "^m\\to ", tex2(WR), "^n\\)");
+MapFRmRn:sconcat("\\(F:", tex1(WR), "^m\\to ", tex1(WR), "^n\\)");
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
