@@ -17,14 +17,17 @@ SetAxB:cartesian_product(SetA, SetB);
 ListAxB:listify(SetAxB);
 ByA:makelist(makelist(ListAxB[lenB*k+j], j, 1, lenB), k, 0, lenA-1);
 MapL:%_rp(map(rand, ByA));
+MapS:setify(MapL);
+MapSout:setdifference(SetAxB, MapS);
+MapLout:listify(MapSout);
 SetL:setify(MapL);
-aux_list:%_rp(makelist(k, k, lenA*lenB));
+aux_list:%_rp(makelist(k, k, length(MapLout)));
 texCS(L):=sconcat("\\(", tex1(setify(map(ntupleify, L))), "\\)");
 CL1:texCS(sort(MapL));
 CL2:texCS(makelist(MapL[k], k, 1, lenA-1));
-WL1a:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]]])));
-WL1b:texCS(%_rp(append(MapL, [ListAxB[aux_list[2]]])));
-WL1c:texCS(%_rp(append(MapL, [ListAxB[aux_list[1]], ListAxB[aux_list[3]]])));
+WL1a:texCS(%_rp(append(MapL, [MapLout[aux_list[1]]])));
+WL1b:texCS(%_rp(append(MapL, [MapLout[aux_list[2]]])));
+WL1c:texCS(%_rp(append(MapL, [MapLout[aux_list[1]], MapLout[aux_list[3]]])));
 /* do not use setify because we do not want to reorder!! */
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
