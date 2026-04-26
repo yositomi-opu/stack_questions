@@ -39,6 +39,8 @@ vwL:makelist(vcL[k], k, 2, length(vcL));
 
 vecS:vsL.vc;
 matB:matrix(makelist(Wb[k], k, 1, 2));
+matBnum:random_invertible_matrix(%_nr, aaL);
+wbL:makelist(col(matBnum, k), k, 1, %_nr);
 
 %_fmt(s):=sconcat("\\(", display_polynomial_varlist_tex1(s, [Wb[1], Wb[2]]), "\\)");
 
@@ -75,11 +77,11 @@ MapFRmRn:sconcat("\\(F:", tex1(WR), "^m\\to ", tex1(WR), "^n\\)");
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " images of the vector ", tex2(vecS), " under the linear map ", MapFRmRn, " where the vector ", tex2(vsL[1]), " is mapped to ", tex2(Wb[1]), " and ", tex2(vsL[2]), " is mapped to ", tex2(Wb[2]))],
- ["fr", sconcat(__SELTYPE__, " images du vecteur ", tex2(vecS), " par l’application linéaire ", MapFRmRn, " où le vecteur ", tex2(vsL[1]), " est envoyé sur ", tex2(Wb[1]), " et ", tex2(vsL[2]), " sur ", tex2(Wb[2]))],
- ["de", sconcat(__SELTYPE__, " Bilder des Vektors ", tex2(vecS), " unter der linearen Abbildung ", MapFRmRn, ", wobei der Vektor ", tex2(vsL[1]), " auf ", tex2(Wb[1]), " und ", tex2(vsL[2]), " auf ", tex2(Wb[2]), " abgebildet wird")],
- ["it", sconcat(__SELTYPE__, " immagini del vettore ", tex2(vecS), " mediante l’applicazione lineare ", MapFRmRn, ", in cui il vettore ", tex2(vsL[1]), " è mandato in ", tex2(Wb[1]), " e ", tex2(vsL[2]), " in ", tex2(Wb[2]))],
- ["ja", sconcat("線形写像", MapFRmRn, "は, ベクトル ", tex2(vsL[1]), " を ", tex2(Wb[1]), "に, ", tex2(vsL[2]), " を ", tex2(Wb[2]), " にそれぞれ写す. ベクトル", tex2(vecS), "の像を __SELTYPE__")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " images of the vector ", tex2(vecS), " under the linear map ", MapFRmRn, " where the vector ", tex2(vsL[1]), " is mapped to ", tex2(Wb[1]), "\\(=\\)", tex2(wbL[1]), " and ", tex2(vsL[2]), " is mapped to ", tex2(Wb[2]), "\\(=\\)", tex2(wbL[2]))],
+ ["fr", sconcat(__SELTYPE__, " images du vecteur ", tex2(vecS), " par l’application linéaire ", MapFRmRn, " où le vecteur ", tex2(vsL[1]), " est envoyé sur ", tex2(Wb[1]), "\\(=\\)", tex2(wbL[1]), " et ", tex2(vsL[2]), " sur ", tex2(Wb[2]), "\\(=\\)", tex2(wbL[2]))],
+ ["de", sconcat(__SELTYPE__, " Bilder des Vektors ", tex2(vecS), " unter der linearen Abbildung ", MapFRmRn, ", wobei der Vektor ", tex2(vsL[1]), " auf ", tex2(Wb[1]), "\\(=\\)", tex2(wbL[1]), " und ", tex2(vsL[2]), " auf ", tex2(Wb[2]), "\\(=\\)", tex2(wbL[2]), " abgebildet wird")],
+ ["it", sconcat(__SELTYPE__, " immagini del vettore ", tex2(vecS), " mediante l’applicazione lineare ", MapFRmRn, ", in cui il vettore ", tex2(vsL[1]), " è mandato in ", tex2(Wb[1]), "\\(=\\)", tex2(wbL[1]), " e ", tex2(vsL[2]), " in ", tex2(Wb[2]), "\\(=\\)", tex2(wbL[2]))],
+ ["ja", sconcat("線形写像", MapFRmRn, "は, ベクトル ", tex2(vsL[1]), " を ", tex2(Wb[1]), "\\(=\\)", tex2(wbL[1]), "に, ", tex2(vsL[2]), " を ", tex2(Wb[2]), "\\(=\\)", tex2(wbL[2]), " にそれぞれ写す. ベクトル", tex2(vecS), "の像を __SELTYPE__")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
