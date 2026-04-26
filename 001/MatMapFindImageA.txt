@@ -8,8 +8,6 @@ if %_MCQ_NUM_OPTS>7 then %_MCQ_NUM_OPTS:5;
 %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 
-/********* u.c. ************/
-
 /*** for 000.MCQ-rb.xml ***/
 /* key parameters(e.g. which control the only level of the question) here if required */
 /* The truth values of compound propositions. */
