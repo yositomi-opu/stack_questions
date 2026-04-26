@@ -25,7 +25,7 @@ matP:random_invertible_matrix(%_nr, aL);
 matA:matrix(makelist(Wa[k], k, %_nc));
 
 /* n x m matrix: Rm -> Rn */
-sL:%_rp(make_random_distribution_pm([[1, 12], [2, 4], [3, 2], [0, 1]]));
+sL:%_rp(make_random_distribution_pm([[1, 12], [2, 3], [3, 1], [0, 2]]));
 matS:random_invertible_matrix(%_nc, sL);
 vsL:makelist(col(matS, k), k, 1, 2);
 
