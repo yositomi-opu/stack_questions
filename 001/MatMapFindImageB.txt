@@ -1,0 +1,105 @@
+/******************** MatMapFindImageA (rb) ************/
+/* 001.MCB include file		                       */
+/* Objective: To learn/check image of linear map       */
+/*******************************************************/
+/* c:[1], w:[3, 3]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>7 then %_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* number of rows and cols */
+rcL:rand([[2, 3], [3, 2], [2, 4], [4, 2], [3, 4], [4, 3]]);
+num_rows:rcL[1];num_cols:rcL[2];
+%_nr:num_rows;
+%_nc:num_cols;
+aL:make_random_distribution_pm([[1, 8], [2, 3], [3, 1], [4, 1]]);
+matP:random_invertible_matrix(%_nr, aL);
+matA:matrix(makelist(Wa[k], k, %_nc));
+
+/* n x m matrix: Rm -> Rn */
+sL:%_rp(make_random_distribution_pm([[1, 12], [2, 4], [3, 2], [0, 1]]));
+matS:random_invertible_matrix(%_nc, sL);
+vsL:makelist(col(matS, k), k, 1, %_nc);
+
+/* source vector */
+aaL:make_random_distribution_pm([3, 1], [2, 4], [1, 8]);
+vcL:[];
+while (length(vcL)<8) do vcL:unique(cons([rand(aaL), rand(aaL)], vcL));
+vcL:map(lambda([v], transpose(matrix(v))), vcL);
+vc:vcL[1];
+vwL:makelist(vcL[k], k, 2, length(vcL));
+
+vecS:vsL.vc;
+matB:matrix(makelist(Wb[k], k, 1, 2));
+
+%_fmt(s):=sconcat("\\(", display_polynomial_varlist_tex1(s, [Wb[1], Wb[2]]), "\\)");
+
+/* ListAL1 */
+ListAL1:[matB.vc];
+    
+ListBL1:map(lambda([v], matB.v), vwL);
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2);*/
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+MapFRmRn:sconcat("\\(F:", tex1(WR), "^m\\to ", tex1(WR), "^n\\)");
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " images of the vector ", tex2(vecS), " under the linear map ", MapFRmRn, " where the vector ", tex2(vsL[1]), " is mapped to ", tex2(Wb[1]), " and ", tex2(vsL[2]), " is mapped to ", tex2(Wb[2]))],
+ ["fr", sconcat(__SELTYPE__, " images du vecteur ", tex2(vecS), " par l’application linéaire ", MapFRmRn, " où le vecteur ", tex2(vsL[1]), " est envoyé sur ", tex2(Wb[1]), " et ", tex2(vsL[2]), " sur ", tex2(Wb[2]))],
+ ["de", sconcat(__SELTYPE__, " Bilder des Vektors ", tex2(vecS), " unter der linearen Abbildung ", MapFRmRn, ", wobei der Vektor ", tex2(vsL[1]), " auf ", tex2(Wb[1]), " und ", tex2(vsL[2]), " auf ", tex2(Wb[2]), " abgebildet wird")],
+ ["it", sconcat(__SELTYPE__, " immagini del vettore ", tex2(vecS), " mediante l’applicazione lineare ", MapFRmRn, ", in cui il vettore ", tex2(vsL[1]), " è mandato in ", tex2(Wb[1]), " e ", tex2(vsL[2]), " in ", tex2(Wb[2]))],
+ ["ja", sconcat("線形写像", MapFRmRn, "は, ベクトル ", tex2(vsL[1]), " を ", tex2(Wb[1]), "に, ", tex2(vsL[2]), " を ", tex2(Wb[2]), " にそれぞれ写す. ベクトル", tex2(vecS), "の像を __SELTYPE__")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(%_fmt, ListAL1);
+%__Cmsg1L:[["en", "Correct. You seem to understand the principle of computing images using linearity. You have understood the property that linear combinations are preserved."],
+ ["fr", "Correct. Vous semblez comprendre le principe du calcul des images par linéarité. Vous avez compris la propriété selon laquelle les combinaisons linéaires sont préservées."],
+ ["de", "Richtig. Sie scheinen das Prinzip der Bildberechnung mithilfe der Linearität zu verstehen. Sie haben die Eigenschaft verstanden, dass Linearkombinationen erhalten bleiben."],
+ ["it", "Corretto. Sembra che tu abbia compreso il principio del calcolo delle immagini tramite la linearità. Hai capito la proprietà per cui le combinazioni lineari sono preservate."],
+ ["ja", "正解です. 線形性による像の計算の原理が理解できているようです. 1次結合を保つという性質が理解できましたね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(%_fmt, ListBL1);
+%__Wmsg1L:[["en", sconcat("Isn’t the vector ", tex2(vecS), " expressible as a linear combination of ", tex2(vsL[1]), " and ", tex2(vsL[2]), "?")],
+ ["fr", sconcat("Le vecteur ", tex2(vecS), " ne peut-il pas s’écrire comme une combinaison linéaire de ", tex2(vsL[1]), " et ", tex2(vsL[2]), " ?")],
+ ["de", sconcat("Lässt sich der Vektor ", tex2(vecS), " nicht als Linearkombination von ", tex2(vsL[1]), " und ", tex2(vsL[2]), " darstellen?")],
+ ["it", sconcat("Il vettore ", tex2(vecS), " non può essere espresso come combinazione lineare di ", tex2(vsL[1]), " e ", tex2(vsL[2]), "?")],
+ ["ja", sconcat("ベクトル",  tex2(vecS), "が", tex2(vsL[1]), "と", tex2(vsL[2]), "の1次結合で書けているのでは？")]];
+
+
+/********** EOF **********/
