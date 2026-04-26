@@ -30,7 +30,7 @@ matS:random_invertible_matrix(%_nc, sL);
 vsL:makelist(col(matS, k), k, 1, 2);
 
 /* source vector */
-aaL:make_random_distribution_pm([3, 1], [2, 4], [1, 8]);
+aaL:make_random_distribution_pm([[3, 1], [2, 4], [1, 8]]);
 vcL:[];
 while (length(vcL)<8) do vcL:unique(cons([rand(aaL), rand(aaL)], vcL));
 vcL:map(lambda([v], transpose(matrix(v))), vcL);
