@@ -1,0 +1,102 @@
+/******************** MatMapImageLineR2 (rb/cb) *********************/
+/* 001.MCB include file		                                 */
+/* Objective: To learn/check image of line in R2 by linear map   */
+/*****************************************************************/
+/* c:[2], w:[5, 6]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>7 then %_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+abL:%_rp([-4, -3, -2, -1, 1, 2, 3, 4]);
+aa:abL[1];
+bb:abL[2];
+normalVecR:matrix([aa, bb]);
+normalVecC:transpose(normalVecL);
+%_nullv:integer_vector(nullspace2(normalVecR)[1]);
+matA1:addcol(%_nullv, rand([-3, -2, -1, 1, 2, 3])*%_nullv);
+matA2:addcol(rand([-3, -2, -1, 2, 3])*%_nullv, %_nullv);
+matA3:addcol(0*%_nullv, rand([-2, -1, 1, 2])*%_nullv);
+ListAL1:unique([matA1, matA2, matA3]);
+
+/* number of rows and cols */
+ListBL1:[];
+while (length(ListBL1)<5) do ListBL1:cons(random_invertible_matrix(2, abL), ListBL1);
+
+ListBL2:[];
+while (length(ListBL2)<2) do ListBL2:cons(genmatrix(lambda([i, j], rand(abL)), 2, 3), ListBL2);
+while (length(ListBL2)<4) do ListBL2:cons(genmatrix(lambda([i, j], rand(abL)), 3, 2), ListBL2);
+while (length(ListBL2)<6) do ListBL2:cons(genmatrix(lambda([i, j], rand(abL)), 3, 3), ListBL2);
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2);*/
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+LineEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y, [x, y]), "=", tex1(rand(9)-4), "\\)");
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " matrices among the following that define a linear transformation of the plane and map the line ", LineEq, " to a single point")],
+ ["fr", sconcat(__SELTYPE__, " matrices parmi les suivantes qui définissent une transformation linéaire du plan et qui envoient la droite ", LineEq, " sur un point unique")],
+ ["de", sconcat(__SELTYPE__, " Matrizen unter den folgenden, die eine lineare Transformation der Ebene definieren und die Gerade ", LineEq, " auf einen einzigen Punkt abbilden")],
+ ["it", sconcat(__SELTYPE__, " matrici tra le seguenti che definiscono una trasformazione lineare del piano e che mandano la retta ", LineEq, " in un unico punto")],
+ ["ja", sconcat("次の行列のうち, 平面の1次変換を定め, かつ直線", LineEq, "が1点に写るようなものを __SELTYPE__ ")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(tex2, ListAL1);
+%__Cmsg1L:[["en", "Correct. Under a linear transformation, a line is mapped to a line, but if the direction vector collapses to the zero vector, it can be mapped to a single point."],
+ ["fr", "Correct. Par une transformation linéaire, une droite est envoyée sur une droite, mais si le vecteur directeur est réduit au vecteur nul, elle peut être envoyée sur un seul point."],
+ ["de", "Richtig. Unter einer linearen Transformation wird eine Gerade auf eine Gerade abgebildet, aber wenn der Richtungsvektor zum Nullvektor wird, kann sie auf einen einzigen Punkt abgebildet werden."],
+ ["it", "Corretto. Con una trasformazione lineare, una retta viene mandata su una retta, ma se il vettore direzione si annulla diventando il vettore nullo, può essere mandata in un unico punto."],
+ ["ja", "正解です. 線形変換によって基本直線は直線に写りますが, 方向ベクトルが零ベクトルに潰れてしまうことで1点に写ることもありますね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, ListBL1);
+%__Wmsg1L:[["en", "Under a linear transformation, a line is mapped to a line, but what happens if the image of the direction vector is the zero vector?"],
+ ["fr", "Par une transformation linéaire, une droite est envoyée sur une droite, mais que se passe-t-il si l’image du vecteur directeur est le vecteur nul ?"],
+ ["de", "Unter einer linearen Transformation wird eine Gerade auf eine Gerade abgebildet, aber was passiert, wenn das Bild des Richtungsvektors der Nullvektor ist?"],
+ ["it", "Con una trasformazione lineare, una retta viene mandata su una retta, ma cosa succede se l’immagine del vettore direzione è il vettore nullo?"],
+ ["ja", "線形変換によって基本直線は直線に写りますが, 方向ベクトルの写り先(像)が零ベクトルだとどうなりますか？"]];
+
+/* Wrong answer pattern 2 */
+%__WoptL2:map(tex2, ListBL2);
+%__Wmsg2L:[["en", "It seems you have selected matrices that do not define a linear transformation of the plane. Let’s review the definition of the mapping determined by a matrix."],
+ ["fr", "Il semble que vous ayez choisi des matrices qui ne définissent pas une transformation linéaire du plan. Vérifions la définition de l’application déterminée par une matrice."],
+ ["de", "Es scheint, dass Sie Matrizen ausgewählt haben, die keine lineare Transformation der Ebene definieren. Überprüfen wir die Definition der durch eine Matrix bestimmten Abbildung."],
+ ["it", "Sembra che tu abbia scelto matrici che non definiscono una trasformazione lineare del piano. Verifichiamo la definizione dell’applicazione determinata da una matrice."],
+ ["ja", "そもそも平面の1次変換を定めない行列を選んでいるようです. 行列の定める写像の定義から確認しよう."]];
+
+
+/********** EOF **********/
