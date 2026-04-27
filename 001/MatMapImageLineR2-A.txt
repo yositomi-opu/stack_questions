@@ -16,15 +16,18 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
+/* aa*x+bb*y=c */
+/* direction vector : [bb, -aa] */
 abL:%_rp([-4, -3, -2, -1, 1, 2, 3, 4]);
 aa:abL[1];
 bb:abL[2];
-normalVecR:matrix([aa, bb]);
-normalVecC:transpose(normalVecL);
-%_nullv:integer_vector(nullspace2(normalVecR)[1]);
-matA1:addcol(%_nullv, rand([-3, -2, -1, 1, 2, 3])*%_nullv);
-matA2:addcol(rand([-3, -2, -1, 2, 3])*%_nullv, %_nullv);
-matA3:addcol(0*%_nullv, rand([-2, -1, 1, 2])*%_nullv);
+direction_vectorR:matrix([bb, -aa]);
+direction_vectorC:matrix([bb], [-aa]);
+
+%_nullv:transpose(integer_vector(nullspace2(direction_vectorR)[1]));
+matA1:addrow(%_nullv, rand([-3, -2, -1, 1, 2, 3])*%_nullv);
+matA2:addrow(rand([-3, -2, -1, 2, 3])*%_nullv, %_nullv);
+matA3:addrow(0*%_nullv, rand([-2, -1, 1, 2])*%_nullv);
 ListAL1:unique([matA1, matA2, matA3]);
 
 /* number of rows and cols */
