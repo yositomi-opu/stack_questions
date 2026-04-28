@@ -62,7 +62,7 @@ chkBB12:intersection(SetBL1,SetBL2);
 allchk:[chkAB11,chkAB12,chkBB12];
 /* allchk:[chkAB11]; */
 
-PlanEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=", tex1(rand(9)-4), "\\)");
+PlaneEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=", tex1(rand(9)-4), "\\)");
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
