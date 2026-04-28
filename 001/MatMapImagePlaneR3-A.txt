@@ -16,7 +16,7 @@ tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(
 %_rp(L):=random_permutation(L);
 
 abL:%_rp([-4, -3, -2, -1, -1, 1, 1, 2, 3, 4]);
-aa:abL[1];
+aa:abs(abL[1]);
 bb:abL[2];
 cc:abL[3];
 normalVecR:matrix([aa, bb, cc]);
@@ -25,19 +25,11 @@ direction_vectors:nullspace2(normalVecR);
 %_dv1:integer_vector(direction_vectors[1]);
 %_dv2:integer_vector(direction_vectors[2]);
 
-matAL:[];
-while (length(matAL)<3) do (
-      matAL:cons(addrow(%_nvR, rand([-2, -1, 1, 2])*%_nvR, rand([-2, -1, 0, 1, 2])*%_nvR), matAL));
-ListAL1:matAL;
-
-normalVecR:matrix([aa, bb, cc]);
-normalVecC:transpose(normalVecR);
-%_nullv1:integer_vector(nullspace2(normalVecR)[1]);
-%_nullv2:integer_vector(nullspace2(normalVecR)[2]);
- matA1:addcol(%_nullv, rand([-3, -2, -1, 1, 2, 3])*%_nullv);
-matA2:addcol(rand([-3, -2, -1, 2, 3])*%_nullv, %_nullv);
-matA3:addcol(0*%_nullv, rand([-2, -1, 1, 2])*%_nullv);
-ListAL1:unique([matA1, matA2, matA3]);
+ListAL1:[];
+while (length(ListAL1)<3) do (
+      %_aa1:rand([-2, -1, -1, 1, 1, 2]),
+      %_aa2:rand([-3, -2, -1, 0, 1, 2, 3]),
+      ListAL1:unique(cons(addrow(%_nvR, %_aa1*%_nvR, %_aa2*%_nvR), ListAL1)));
 
 /* number of rows and cols */
 bL:make_random_distribution([[3, 1], [2, 2], [1, 20], [0, 5]]);
@@ -53,22 +45,22 @@ while (length(ListBL2)<6) do ListBL2:unique(cons(genmatrix(lambda([i, j], rand(a
 SetAL1:setify(ListAL1);
 /* SetAL2:setify(ListAL2); */
 SetBL1:setify(ListBL1);
-/* SetBL2:setify(ListBL2);*/
+SetBL2:setify(ListBL2);
 /* SetBL3:setify(ListBL3); */
 /* chkAA12:intersection(SetAL1,SetAL2); */
 chkAB11:intersection(SetAL1,SetBL1);
-/* chkAB12:intersection(SetAL1,SetBL2); */
+chkAB12:intersection(SetAL1,SetBL2);
 /* chkAB13:intersection(SetAL1,SetBL3); */
 /* chkAB21:intersection(SetAL2,SetBL1); */
 /* chkAB22:intersection(SetAL2,SetBL2); */
 /* chkAB23:intersection(SetAL2,SetBL3); */
-/* chkBB12:intersection(SetBL1,SetBL2); */
+chkBB12:intersection(SetBL1,SetBL2);
 /* chkBB13:intersection(SetBL1,SetBL3); */
 /* chkBB23:intersection(SetBL2,SetBL3);*/
 /* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
 /* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
-/* allchk:[chkAB11,chkAB12,chkBB12]; */
-allchk:[chkAB11];
+allchk:[chkAB11,chkAB12,chkBB12];
+/* allchk:[chkAB11]; */
 
 PlanEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=", tex1(rand(9)-4), "\\)");
 
@@ -93,7 +85,7 @@ PlanEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z])
  ["fr", "Correct. Par une transformation linéaire, un plan est envoyé sur un plan, mais si deux vecteurs parallèles au plan sont réduits au vecteur nul, il peut être envoyé sur un seul point."],
  ["de", "Richtig. Unter einer linearen Transformation wird eine Ebene auf eine Ebene abgebildet, aber wenn zwei zur Ebene parallele Vektoren zum Nullvektor werden, kann sie auf einen einzigen Punkt abgebildet werden."],
  ["it", "Corretto. Con una trasformazione lineare, un piano viene mandato su un piano, ma se due vettori paralleli al piano si annullano diventando il vettore nullo, può essere mandato in un unico punto."],
- ["ja", "正解です. 線形変換によって基本平面は平面に写りますが, 2つの平面に平行なベクトルが零ベクトルに潰れてしまうことで1点に写ることもありますね."]];
+ ["ja", "正解です. 空間の線形変換によって基本平面は平面に写りますが, 2つの平面に平行なベクトルが零ベクトルに潰れてしまうことで1点に写ることもありますね."]];
 
 /* Wrong answer pattern 1 */
 %__WoptL1:map(tex2, ListBL1);
