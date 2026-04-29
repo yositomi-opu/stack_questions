@@ -85,28 +85,20 @@ EqZ:"\\(={\\boldsymbol0}\\}";
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:map(tex2, ListAL1);
-%__Cmsg1L:[["en", "Correct. Under a linear transformation, a plane is mapped to a plane, but if two vectors parallel to the plane collapse to the zero vector, it can be mapped to a single point."],
- ["fr", "Correct. Par une transformation linéaire, un plan est envoyé sur un plan, mais si deux vecteurs parallèles au plan sont réduits au vecteur nul, il peut être envoyé sur un seul point."],
- ["de", "Richtig. Unter einer linearen Transformation wird eine Ebene auf eine Ebene abgebildet, aber wenn zwei zur Ebene parallele Vektoren zum Nullvektor werden, kann sie auf einen einzigen Punkt abgebildet werden."],
- ["it", "Corretto. Con una trasformazione lineare, un piano viene mandato su un piano, ma se due vettori paralleli al piano si annullano diventando il vettore nullo, può essere mandato in un unico punto."],
- ["ja", "正解です. 空間の線形変換によって基本平面は平面に写りますが, 2つの平面に平行なベクトルが零ベクトルに潰れてしまうことで1点に写ることもありますね."]];
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. Under a linear transformation of space, basic planes are mapped to planes; however, if vectors parallel to the two planes are mapped to parallel vectors or if one of them becomes zero, the image becomes a line."],
+ ["fr", "Correct. Sous une transformation linéaire de l’espace, les plans de base sont envoyés sur des plans ; cependant, si des vecteurs parallèles aux deux plans sont envoyés sur des vecteurs parallèles ou si l’un d’eux devient nul, l’image devient une droite."],
+ ["de", "Richtig. Unter einer linearen Abbildung des Raums werden grundlegende Ebenen auf Ebenen abgebildet; wenn jedoch zu zwei Ebenen parallele Vektoren auf parallele Vektoren abgebildet werden oder einer von ihnen null wird, wird das Bild zu einer Geraden."],
+ ["it", "Corretto. Sotto una trasformazione lineare dello spazio, i piani di base vengono mandati in piani; tuttavia, se vettori paralleli ai due piani vengono mandati in vettori paralleli oppure uno di essi diventa nullo, l’immagine diventa una retta."],
+ ["ja", "正解です. 空間の線形変換によって基本平面は平面に写りますが, 2つの平面に平行なベクトルが平行なベクトルに写ったり一方が零になると直線になるわけですね."]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:map(tex2, ListBL1);
-%__Wmsg1L:[["en", "Under a linear transformation, a plane is mapped to a plane, but what happens if the images of two vectors parallel to the plane are the zero vector?"],
- ["fr", "Par une transformation linéaire, un plan est envoyé sur un plan, mais que se passe-t-il si les images de deux vecteurs parallèles au plan sont le vecteur nul ?"],
- ["de", "Unter einer linearen Transformation wird eine Ebene auf eine Ebene abgebildet, aber was passiert, wenn die Bilder von zwei zur Ebene parallelen Vektoren der Nullvektor sind?"],
- ["it", "Con una trasformazione lineare, un piano viene mandato su un piano, ma cosa succede se le immagini di due vettori paralleli al piano sono il vettore nullo?"],
- ["ja", "線形変換によって基本平面は平面に写りますが, 2つの平面に平行なベクトルの写り先(像)が零ベクトルだとどうなりますか？"]];
-
-/* Wrong answer pattern 2 */
-%__WoptL2:map(tex2, ListBL2);
-%__Wmsg2L:[["en", "It seems you have selected matrices that do not define a linear transformation of space. Let’s review the definition of the mapping determined by a matrix."],
- ["fr", "Il semble que vous ayez choisi des matrices qui ne définissent pas une transformation linéaire de l’espace. Vérifions la définition de l’application déterminée par une matrice."],
- ["de", "Es scheint, dass Sie Matrizen ausgewählt haben, die keine lineare Transformation des Raums definieren. Überprüfen wir die Definition der durch eine Matrix bestimmten Abbildung."],
- ["it", "Sembra che tu abbia scelto matrici che non definiscono una trasformazione lineare dello spazio. Verifichiamo la definizione dell’applicazione determinata da una matrice."],
- ["ja", "そもそも空間の1次変換を定めない行列を選んでいるようです. 行列の定める写像の定義から確認しよう."]];
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "The given matrix maps only one direction to zero. If that direction is parallel to a plane, then one of the parameters in the parametric representation of that plane becomes zero, and it is mapped to a line."],
+ ["fr", "La matrice donnée n’envoie qu’une seule direction sur zéro. Si cette direction est parallèle à un plan, alors l’un des paramètres de la représentation paramétrique de ce plan devient nul et il est envoyé sur une droite."],
+ ["de", "Die gegebene Matrix bildet nur eine Richtung auf null ab. Wenn diese Richtung zu einer Ebene parallel ist, wird einer der Parameter in der Parameterdarstellung dieser Ebene null, und sie wird auf eine Gerade abgebildet."],
+ ["it", "La matrice data manda a zero una sola direzione. Se tale direzione è parallela a un piano, allora uno dei parametri nella rappresentazione parametrica di quel piano diventa nullo e l’immagine diventa una retta."],
+ ["ja", "与えられた行列は1方向だけを零に写します. その方向がある平面に平行だと, その平面のパラメータ表示のうち1つが零になり, 直線に写ることになります."]];
 
 
 /********** EOF **********/
