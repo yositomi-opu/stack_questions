@@ -1,8 +1,8 @@
-/******************** MatMapImagePlaneR3-A (rb/cb) *********************/
+/******************** MatMapImagePlaneR3-B (rb) ******************/
 /* 001.MCB include file		                                 */
-/* Objective: To learn/check image of line in R2 by linear map   */
+/* Objective: To learn/check image of plane in R3 by linear map  */
 /*****************************************************************/
-/* c:[3], w:[4, 6]; appropriate: 8/1 (or 2, 3)*/
+/* c:[3], w:[6]; appropriate: 5/1 */
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
 if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:8;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
@@ -15,31 +15,35 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
-abL:%_rp([-4, -3, -2, -1, -1, 1, 1, 2, 3, 4]);
-aa:abs(abL[1]);
-bb:abL[2];
-cc:abL[3];
-normalVecR:matrix([aa, bb, cc]);
-direction_vectors:nullspace2(normalVecR);
-%_nvR:normalVecR;
-%_dv1:integer_vector(direction_vectors[1]);
-%_dv2:integer_vector(direction_vectors[2]);
+pL:make_random_distribution_pm([[1, 10], [2, 3], [3, 1]]);
+matP:random_invertible_matrix(3, pL);
+%_f1:rand([-3, -2, -1, 1, 2, 3]);
+%_f2:rand([-3, -2, -1, 1, 2, 3]);
+matF:matrix([1, 0, %_f1], [0, 1, %_f2], [0, 0, 0]);
+matA:matP.matF;
+nullvec:transpose(matrix([-%_f1, -%_f2, 1]));
 
-ListAL1:[];
-while (length(ListAL1)<3) do (
-      %_aa1:rand([-2, -1, -1, 1, 1, 2]),
-      %_aa2:rand([-3, -2, -1, 0, 1, 2, 3]),
-      ListAL1:unique(cons(addrow(%_nvR, %_aa1*%_nvR, %_aa2*%_nvR), ListAL1)));
+dirvecL:[];
+while (length(dirvecL)<3) do (
+  %_tmpv:genmatrix(lambda([i, j], rand(pL)), 3, 1),
+  if rank(addcol(%_tmpv, nullvec))=2 then dirvecL:unique(cons(%_tmpv, dirvecL)));
+normalvecL:makelist(integer_vector(cross_product(nullvec, dirvecL[k])), k, 1, length(dirvecL));
 
-/* number of rows and cols */
-bL:make_random_distribution([[3, 1], [2, 2], [1, 20], [0, 5]]);
-ListBL1:[];
-while (length(ListBL1)<4) do ListBL1:unique(cons(random_invertible_matrix(3, bL), ListBL1));
+mkEq(v):=sconcat("\\(", display_polynomial_varlist_tex1(v.matrix([x], [y], [z]), [x, y, z]), "=", tex1(rand(9)-4), "\\)");
+ListAL1:map(mkEq, normalvecL);
 
-ListBL2:[];
-while (length(ListBL2)<2) do ListBL2:unique(cons(genmatrix(lambda([i, j], rand(abL)), 2, 3), ListBL2));
-while (length(ListBL2)<4) do ListBL2:unique(cons(genmatrix(lambda([i, j], rand(abL)), 3, 2), ListBL2));
-while (length(ListBL2)<6) do ListBL2:unique(cons(genmatrix(lambda([i, j], rand(abL)), 2, 2), ListBL2));
+
+/* direction vectors for plane to plane case */
+uvlist:[];
+%_tmpgen(M):=block([uv], uv:genmatrix(lambda([i, j], rand(pL)), 3, 2), while (rank(M.uv)<2) do (
+  uv:genmatrix(lambda([i, j], rand(pL)), 3, 2)), return(uv));
+while (length(uvlist)<6) do (
+  uvlist:unique(cons(%_tmpgen(matA), uvlist)));
+
+ListBL1:makelist(mkEq(integer_vector(cross_product(col(uvlist[k], 1), col(uvlist[k], 2)))),
+ k, 1, length(uvlist));
+ 
+
 
 /* security check */
 SetAL1:setify(ListAL1);
@@ -62,18 +66,19 @@ chkBB12:intersection(SetBL1,SetBL2);
 allchk:[chkAB11,chkAB12,chkBB12];
 /* allchk:[chkAB11]; */
 
-PlaneEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=", tex1(rand(9)-4), "\\)");
+EqZ:"\\(={\\boldsymbol0}\\}";
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " matrices among the following that define a linear transformation of space and map the plane ", PlaneEq, " to a single point")],
- ["fr", sconcat(__SELTYPE__, " matrices parmi les suivantes qui définissent une transformation linéaire de l’espace et qui envoient le plan ", PlaneEq, " sur un point unique")],
- ["de", sconcat(__SELTYPE__, " Matrizen unter den folgenden, die eine lineare Transformation des Raums definieren und die Ebene ", PlaneEq, " auf einen einzigen Punkt abbilden")],
- ["it", sconcat(__SELTYPE__, " matrici tra le seguenti che definiscono una trasformazione lineare dello spazio e che mandano il piano ", PlaneEq, " in un unico punto")],
- ["ja", sconcat("次の行列のうち, 空間の1次変換を定め, かつ平面 ", PlaneEq, " が1点に写るようなものを __SELTYPE__ ")]];
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " planes that are mapped to a line by the linear transformation defined by the matrix ", tex2(matA), ". Here, ", tex2(matA), tex2(nullvec), EqZ)],
+ ["fr", sconcat(__SELTYPE__, " plans qui sont envoyés sur une droite par la transformation linéaire définie par la matrice ", tex2(matA), ". Ici, ", tex2(matA), tex2(nullvec), EqZ)],
+ ["de", sconcat(__SELTYPE__, " Ebenen, die durch die durch die Matrix ", tex2(matA), " definierte lineare Abbildung auf eine Gerade abgebildet werden. Dabei gilt ", tex2(matA), tex2(nullvec), EqZ)],
+ ["it", sconcat(__SELTYPE__, " piani che vengono mandati su una retta dalla trasformazione lineare definita dalla matrice ", tex2(matA), ". Qui, ", tex2(matA), tex2(nullvec), EqZ)],
+ ["ja", sconcat("行列", tex2(matA), "の定める1次変換によって, 直線に写される平面を __SELTYPE__ ただし, ",
+   tex2(matA), tex2(nullvec), EqZ, "である.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
