@@ -37,11 +37,11 @@ ListAL1:map(mkEq, normalvecL);
 uvlist:[];
 %_tmpgen(M):=block([uv], uv:genmatrix(lambda([i, j], rand(pL)), 3, 2), while (rank(M.uv)<2) do (
   uv:genmatrix(lambda([i, j], rand(pL)), 3, 2)), return(uv));
-while (length(uvlist)<6) do (
+while (length(uvlist)<10) do (
   uvlist:unique(cons(%_tmpgen(matA), uvlist)));
 
-ListBL1:makelist(mkEq(integer_vector(cross_product(col(uvlist[k], 1), col(uvlist[k], 2)))),
- k, 1, length(uvlist));
+ListBL1:unique(makelist(mkEq(integer_vector(cross_product(col(uvlist[k], 1), col(uvlist[k], 2)))),
+ k, 1, length(uvlist)));
  
 
 
