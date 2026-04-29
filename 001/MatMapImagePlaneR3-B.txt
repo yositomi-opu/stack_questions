@@ -66,7 +66,8 @@ chkAB11:intersection(SetAL1,SetBL1);
 /* allchk:[chkAB11,chkAB12,chkBB12]; */
 allchk:[chkAB11];
 
-EqZ:"\\(={\\boldsymbol 0}\\)";
+vecZero:matrix([0], [0], [0]);
+EqZ:sconcat("\\(=", tex1(vecZero), "\\)");
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
