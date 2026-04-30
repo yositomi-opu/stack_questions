@@ -15,6 +15,9 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s);
+tex2rp(s):=remove_paren(tex2(s));
+
 /* tangent of line */
 tt:rand([1/4, 1/5, 1/3, 1/2, 2/5, 2/3])^(rand([1, -1]))*rand([-1, 1]);
 direction_vector:integer_vector(matrix([1], [tt]));
@@ -27,7 +30,7 @@ evL:[col(matE, 1), col(matE, 2)];
 
 /* map description for options */
 %_mkop(vL, wL):=block([s:"\\(", lc:lmxchar, ln:length(vL)], lmxchar:"(",
-  for k:1 thru ln do s:sconcat(s, tex1(vL[k]), "\\mapsto", tex1(wL[k]), if k<ln then ", " else ""),
+  for k:1 thru ln do s:sconcat(s, tex1(vL[k]), "\\mapsto", remove_paren(tex1(wL[k])), if k<ln then ", " else ""),
   s:sconcat(s, "\\)"), lmxchar:lc, return(s));
 
 ListAL1:[%_mkop([%_dv, %_nv], [%_dv, -%_nv])];
