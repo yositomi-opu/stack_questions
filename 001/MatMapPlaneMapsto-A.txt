@@ -1,0 +1,98 @@
+/******************** MatMapPlaneMapsto-A (rb) ******************/
+/* 001.MCB include file		                                */
+/* Objective: To learn/check linear trans(R2) "rotation"        */
+/****************************************************************/
+/* c:[1], w:[4]; appropriate: 5/1 */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:8;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* rotate angle */
+raL:%_rp([1/6, 1/4, 1/3, 2/3, 1/2, 3/4])*pi;
+%_ra:raL[1];
+
+matRtheta:matrix([cos(%_ra), -sin(%_ra)], [sin(%_ra), cos(%_ra)]);
+
+matE:genmatrix(lambda([i, j], if i=j then 1 else 0), 2, 2);
+evL:[col(matE, 1), col(matE, 2)];
+
+aL:make_random_distribution_pm([[1, 10], [2, 3], [3, 1]]);
+matA:genmatrix(lambda([i, j], rand(aL)), %_nr, %_nc);
+matB:matA.matP;
+pvL:makelist(col(matP, k), k, 1, %_nc);
+qvL:makelist(col(matPinv, k), k, 1, %_nc);
+bvL:makelist(col(matB, k), k, 1, %_nc);
+/* map description for options */
+%_mkop(ra):=block([s:"\\(", lc:lmxchar, k, m], lmxchar:"(",
+  m:matrix([cos(ra), -sin(ra)], [sin(ra), cos(ra)]),
+  for k:1 thru 2 do s:sconcat(s, tex1(evL[k]), "\\mapsto", tex1(m.evL[k]), if k<2 then ", " else ""),
+  s:sconcat(s, "\\)"), lmxchar:lc, return(s));
+
+ListAL1:[%_mkop(raL[1])];
+
+/* size ok, but all entries are different with A */
+ListBL1:makelist(%_mkop(raL[k]), k, 2, length(raL));
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2); */
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Choose the correct correspondences of vectors under the rotation ", tex2(%_ra))],
+ ["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la rotation ", tex2(%_ra))],
+ ["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Drehung ", tex2(%_ra))],
+ ["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la rotazione ", tex2(%_ra))],
+ ["ja", sconcat(tex2(%_ra), "回転によるベクトルの対応とし正しいものを選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. In the case of rotations, it is essentially the definition of trigonometric functions."],
+ ["fr", "Correct. Dans le cas des rotations, cela correspond essentiellement à la définition des fonctions trigonométriques."],
+ ["de", "Richtig. Im Fall von Drehungen entspricht dies im Wesentlichen der Definition der trigonometrischen Funktionen."],
+ ["it", "Corretto. Nel caso delle rotazioni, si tratta essenzialmente della definizione delle funzioni trigonometriche."],
+ ["ja", "正解です. 回転の場合は, ほぼ三角関数の定義ですね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "Incorrect. You only need to recall the definition of trigonometric functions. From that, you can obtain the matrix representing the rotation."],
+ ["fr", "Incorrect. Il suffit de rappeler la définition des fonctions trigonométriques. À partir de cela, on peut obtenir la matrice représentant la rotation."],
+ ["de", "Falsch. Man muss sich nur an die Definition der trigonometrischen Funktionen erinnern. Daraus kann man die Matrix bestimmen, die die Drehung darstellt."],
+ ["it", "Non è corretto. È sufficiente ricordare la definizione delle funzioni trigonometriche. Da ciò si può ottenere la matrice che rappresenta la rotazione."],
+ ["ja", "違います. 三角関数の定義を思い出すだけですね. それで回転を表す行列が求められます."]];
+
+
+/********** EOF **********/
