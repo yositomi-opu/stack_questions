@@ -76,7 +76,7 @@ allchk:[chkAB11];
  ["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la rotation ", tex2(%_ra))],
  ["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Drehung ", tex2(%_ra))],
  ["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la rotazione ", tex2(%_ra))],
- ["ja", sconcat("直線", LineEq, "に関する対称移動による元の対応として正しいものを選べ.")]];
+ ["ja", sconcat("直線 ", LineEq, " に関する対称移動による元の対応として正しいものを選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
