@@ -8,6 +8,7 @@ if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:6;
 %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 
+lmxchar:"(";
 /*** for 000.MCQ-rb.xml ***/
 /* key parameters(e.g. which control the only level of the question) here if required */
 /* The truth values of compound propositions. */
@@ -15,6 +16,9 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2d(m):=sconcat("\\(\\displaystyle", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
+
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{[0-9]+\\}\\{[0-9]+\\})\\\\right\\)", s);
+tex2rp(s):=remove_paren(tex2(s));
 
 /* tangent of line */
 tt:rand([1/4, 1/5, 1/3, 1/2, 2/5, 2/3])^(rand([1, -1]))*rand([-1, 1]);
@@ -83,7 +87,7 @@ allchk:[chkAB11];
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:map(tex2d, ListAL1);
+%__CoptL1:map(tex2rp, ListAL1);
 %__Cmsg1L:[["en", "Correct. You can determine it by considering the images of a direction vector and a normal vector."],
  ["fr", "Correct. Vous pouvez le déterminer en considérant les images d’un vecteur directeur et d’un vecteur normal."],
  ["de", "Richtig. Sie können es bestimmen, indem Sie die Bilder eines Richtungsvektors und eines Normalenvektors betrachten."],
@@ -91,7 +95,7 @@ allchk:[chkAB11];
  ["ja", "正解です. 方向ベクトルと法線ベクトルの像を考えれば選べますね."]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:map(tex2d, ListBL1);
+%__WoptL1:map(tex2rp, ListBL1);
 %__Wmsg1L:[["en", "Incorrect. Try considering the images of a direction vector and a normal vector."],
  ["fr", "Incorrect. Essayez de considérer les images d’un vecteur directeur et d’un vecteur normal."],
  ["de", "Falsch. Versuchen Sie, die Bilder eines Richtungsvektors und eines Normalenvektors zu betrachten."],
