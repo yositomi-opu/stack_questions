@@ -1,0 +1,118 @@
+/******************** MatMapPlaneMapsto-B (rb) ******************/
+/* 001.MCB include file		                                */
+/* Objective: To learn/check linear trans(R3) "symmetric trans" */
+/****************************************************************/
+/* c:[1], w:[5]; appropriate: 5/1 */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:6;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s);
+tex2rp(s):=remove_paren(tex2(s));
+
+/* tangent of line */
+aa:rand([2, 2, 2, 3, 3, 4]);
+bb:rand([-3, -2, -1, -1, 1, 1, 2, 3]);
+cc:rand_with_prohib(-5, 5, [-3, -2, 2, 3]);
+
+
+%_dvL:nullspace2(matrix([aa, bb, cc]));
+%_dv1:integer_vector(%_dvL[1]);
+%_dv2:integer_vector(%_dvL[2]);
+%_dv3:%_dv1+%_dv2;
+%_dv4:%_dv1-%_dv2;
+%_nv:transpose(matrix([aa, bb, cc]));
+matA:addcol(%_dv1, %_dv2, -%_nv).addcol(%_dv1, %_dv2, %_nv)^^(-1);
+
+matE:genmatrix(lambda([i, j], if i=j then 1 else 0), 2, 2);
+evL:[col(matE, 1), col(matE, 2)];
+
+/* map description for options */
+%_mkop(vL, wL):=block([s:"\\(", lc:lmxchar, ln:length(vL)], lmxchar:"(",
+  for k:1 thru ln do s:sconcat(s, tex1(vL[k]), "\\mapsto", remove_paren(tex1(wL[k])), if k<ln then ", " else ""),
+  s:sconcat(s, "\\)"), lmxchar:lc, return(s));
+
+/* source list and image list, list order */
+%_sL1:%_rp([%_dv1, %_dv2, %_nv]);
+%_sL2:%_rp([%_dv3, %_dv4, %_nv]);
+%_tL1:makelist(col(matA.map(addcol, %_sL1), k), k, 1, 3);
+%_tL2:makelist(col(matA.map(addcol, %_sL2), k), k, 1, 3);
+%_wL1:makelist(col(matA.map(addcol, %_sL1).kihonR(3, 1, -1), k), k, 1, 3);
+%_wL2:makelist(col(matA.map(addcol, %_sL1).kihonR(3, 2, -1), k), k, 1, 3);
+%_wL3:makelist(col(matA.map(addcol, %_sL1).kihonR(3, 3, -1), k), k, 1, 3);
+%_wL4:makelist(col(matA.map(addcol, %_sL2).kihonR(3, 1, -1), k), k, 1, 3);
+%_wL5:makelist(col(matA.map(addcol, %_sL2).kihonR(3, 2, -1), k), k, 1, 3);
+%_wL6:makelist(col(matA.map(addcol, %_sL2).kihonR(3, 3, -1), k), k, 1, 3);
+
+ListAL1:[%_mkop(%_sL1, %_tL1), %_mkop(%_sL2, %_tL2)];
+
+/* size ok, but all entries are different with A */
+ListBL1a:[%_mkop(%_sL1, %_wL1), %_mkop(%_sL1, %_wL2), %_mkop(%_sL1, %_wL3)];
+ListBL1b:[%_mkop(%_sL2, %_wL4), %_mkop(%_sL2, %_wL5), %_mkop(%_sL2, %_wL6)];
+ListBL1:append(ListBL1, ListBL2);
+
+PlaneEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=0\\)");
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2); */
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", "Incorrect. Try considering the images of a direction vector and a normal vector."],
+ ["fr", "Incorrect. Essayez de considérer les images d’un vecteur directeur et d’un vecteur normal."],
+ ["de", "Falsch. Versuchen Sie, die Bilder eines Richtungsvektors und eines Normalenvektors zu betrachten."],
+ ["it", "Non è corretto. Prova a considerare le immagini di un vettore direzione e di un vettore normale."],
+ ["ja", sconcat("平面 ", PlaneEq, " に関する対称移動(鏡映)による元の対応として正しいものを選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. It is obvious when considered geometrically."],
+ ["fr", "Correct. C’est évident si l’on raisonne géométriquement."],
+ ["de", "Richtig. Geometrisch betrachtet ist es offensichtlich."],
+ ["it", "Corretto. È ovvio se si considera geometricamente."],
+ ["ja", "正解です. 幾何的に考えれば当たり前ですね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "Incorrect. Consider how it is mapped geometrically."],
+ ["fr", "Incorrect. Réfléchissez à la manière dont cela se transforme géométriquement."],
+ ["de", "Falsch. Überlegen Sie, wie es geometrisch abgebildet wird."],
+ ["it", "Non è corretto. Considera come viene trasformato geometricamente."],
+ ["ja", "違います. 幾何的にどのように写るか考えましょう."]];
+
+
+/********** EOF **********/
