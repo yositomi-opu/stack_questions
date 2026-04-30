@@ -30,7 +30,7 @@ matB1:addcol(-%_dv, %_nv).addcol(%_dv, %_nv)^^(-1);
 matB2:addcol(rand([-1, 1])*2*%_dv, %_nv).addcol(%_dv, %_nv)^^(-1);
 matB3:addcol(%_dv, rand([-1, 1])*2*%_nv).addcol(%_dv, %_nv)^^(-1);
 matB4:matrix([1, 1], [1, -1]);
-matB5;matrix([1, -1], [1, 1]);
+matB5:matrix([1, -1], [1, 1]);
 
 /* map description for options */
 %_mkop(vL, wL):=block([s:"\\(", lc:lmxchar, ln:length(vL)], lmxchar:"(",
