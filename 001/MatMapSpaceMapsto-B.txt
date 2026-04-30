@@ -57,7 +57,7 @@ ListAL1:[%_mkop(%_sL1, %_tL1), %_mkop(%_sL2, %_tL2)];
 /* size ok, but all entries are different with A */
 ListBL1a:[%_mkop(%_sL1, %_wL1), %_mkop(%_sL1, %_wL2), %_mkop(%_sL1, %_wL3)];
 ListBL1b:[%_mkop(%_sL2, %_wL4), %_mkop(%_sL2, %_wL5), %_mkop(%_sL2, %_wL6)];
-ListBL1:append(ListBL1, ListBL2);
+ListBL1:append(ListBL1a, ListBL1b);
 
 PlaneEq:sconcat("\\(", display_polynomial_varlist_tex1(aa*x+bb*y+cc*z, [x, y, z]), "=0\\)");
 
