@@ -1,0 +1,101 @@
+/******************** MatMapPlaneMapsto-B (rb) ******************/
+/* 001.MCB include file		                                */
+/* Objective: To learn/check linear trans(R2) "symmetric trans" */
+/****************************************************************/
+/* c:[1], w:[5]; appropriate: 5/1 */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:6;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* tangent of line */
+tt:rand([1/4, 1/5, 1/3, 1/2, 2/5, 2/3])^(rand([1, -1]))*rand([-1, 1]);
+direction_vector:integer_vector(matrix([1], [tt]));
+normal_vector:integer_vector(nullspace2(transpose(direction_vector))[1]);
+%_dv:direction_vector;
+%_nv:normal_vector;
+
+matE:genmatrix(lambda([i, j], if i=j then 1 else 0), 2, 2);
+evL:[col(matE, 1), col(matE, 2)];
+
+matA:addcol(%_dv, -%_nv).addcol(%_dv, %_nv)^^(-1);
+matB1:addcol(-%_dv, %_nv).addcol(%_dv, %_nv)^^(-1);
+matB2:addcol(rand([-1, 1])*2*%_dv, %_nv).addcol(%_dv, %_nv)^^(-1);
+matB3:addcol(%_dv, rand([-1, 1])*2*%_nv).addcol(%_dv, %_nv)^^(-1);
+matB4:matrix([1, 1], [1, -1]);
+matB5;matrix([1, -1], [1, 1]);
+
+/* map description for options */
+%_mkop(vL, wL):=block([s:"\\(", lc:lmxchar, ln:length(vL)], lmxchar:"(",
+  for k:1 thru ln do s:sconcat(s, tex1(vL[k]), "\\mapsto", tex1(wL[k]), if k<ln then ", " else ""),
+  s:sconcat(s, "\\)"), lmxchar:lc, return(s));
+
+ListAL1:[matA];
+
+/* size ok, but all entries are different with A */
+ListBL1:[matB1, matB2, matB3, matB4, matB5];
+
+LineEq:sconcat("\\(\\displaystyle{}y=", if tt<0 then "-" else "", tex1(abs(tt)), "x\\)");
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2); */
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Choose the correct matrix representing the reflection with respect to the line ", LineEq)],
+ ["fr", sconcat("Choisissez la matrice correcte représentant la symétrie par rapport à la droite ", LineEq)],
+ ["de", sconcat("Wählen Sie die korrekte Matrix, die die Spiegelung an der Geraden ", LineEq, " darstellt")],
+ ["it", sconcat("Scegli la matrice corretta che rappresenta la riflessione rispetto alla retta ", LineEq)],
+ ["ja", sconcat("直線 ", LineEq, " に関する対称移動を表す行列として正しいものを選べ."]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(tex2, ListAL1);
+%__Cmsg1L:[["en", "Correct. You can determine it by considering the images of a direction vector and a normal vector."],
+ ["fr", "Correct. Vous pouvez le déterminer en considérant les images d’un vecteur directeur et d’un vecteur normal."],
+ ["de", "Richtig. Sie können es bestimmen, indem Sie die Bilder eines Richtungsvektors und eines Normalenvektors betrachten."],
+ ["it", "Corretto. Si può determinare considerando le immagini di un vettore direzione e di un vettore normale."],
+ ["ja", "正解です. 方向ベクトルと法線ベクトルの像を考えれば選べますね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:map(tex2, ListBL1);
+%__Wmsg1L:[["en", "Incorrect. Try considering the images of a direction vector and a normal vector."],
+ ["fr", "Incorrect. Essayez de considérer les images d’un vecteur directeur et d’un vecteur normal."],
+ ["de", "Falsch. Versuchen Sie, die Bilder eines Richtungsvektors und eines Normalenvektors zu betrachten."],
+ ["it", "Non è corretto. Prova a considerare le immagini di un vettore direzione e di un vettore normale."],
+ ["ja", "違います. 方向ベクトルと法線ベクトルの像を考えてみよう."]];
+
+
+/********** EOF **********/
