@@ -1,0 +1,108 @@
+/************************ MatMapFindRepMat-B (rb) *******************/
+/* 001.MCB include file		                                    */
+/* Objective: To learn/check representation matrix(standard basis)  */
+/********************************************************************/
+/* c:[1], w:[4]; appropriate: 5/1 */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:8;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+rcL:rand([[2, 3], [3, 2], [2, 4], [4, 2], [3, 4], [4, 3]]);
+%_nr:rcL[1];
+%_nc:rcL[2];
+
+pL:make_random_distribution_pm([[1, 10], [2, 2], [0, 1]]);
+matP:random_matrix_det_list(%_nc, pL, [-2, -1, 1, 2]);
+matPinv:matP^^(-1);
+matEcl:genmatrix(lambda([i, j], if i=j then 1 else 0), %_nc, %_nc);
+HintEq1:sconcat("\\(", tex1(matP), tex1(matPinv), "=", tex1(matEcl), "\\)");
+HintEq2:sconcat("\\(", tex1(matPinv), tex1(matP), "=", tex1(matEcl), "\\)");
+HintEq:rand([HintEq1, HintEq2]);
+
+aL:make_random_distribution_pm([[1, 10], [2, 3], [3, 1]]);
+matA:genmatrix(lambda([i, j], rand(aL)), %_nr, %_nc);
+matB:matA.matP;
+pvL:makelist(col(matP, k), k, 1, %_nc);
+qvL:makelist(col(matPinv, k), k, 1, %_nc);
+bvL:makelist(col(matB, k), k, 1, %_nc);
+/* map description for question text */
+%_mds:"\\(";lmxchar:"(";
+for %_k:1 thru %_nc do %_mds:sconcat(%_mds, tex1(pvL[%_k]), "\\mapsto", tex1(matA.pvL[%_k]), if %_k<%_nc then ", " else "");
+%_mds:sconcat(%_mds, "\\)");
+
+/* AP=B, A=BPinv, aj=BPinv[j] */
+qjL:%_rp(makelist(k, k, %_nc));
+qj:qjL[1];
+qj1:qjL[2];
+
+ListAL1:[tex2L([matB, qvL[qj]])];
+
+/* size ok, but all entries are different with A */
+ListBL1:[tex2L([matB, qvL[qj1]])];
+ListBL1:cons(tex2L([matP, bvL[qj]]), ListBL1);
+ListBL1:cons(tex2L([matPinv, pvL[qj]]), ListBL1);
+ListBL1:cons(tex2L([matP, qvL[qj]]), ListBL1);
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2); */
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("It is given that the mapping \\(F\\) defined by the matrix \\(A\\) maps to ", %_mds, ". Choose the correct expression for the computation of the ", tex2(qj), "-th column of \\(A\\). Here, ", HintEq, " holds.")],
+ ["fr", sconcat("On suppose que l’application \\(F\\) définie par la matrice \\(A\\) envoie sur ", %_mds, ". Choisissez l’expression correcte pour le calcul de la ", tex2(qj), "-ième colonne de \\(A\\). On suppose que ", HintEq, " est vérifiée.")],
+ ["de", sconcat("Es sei gegeben, dass die durch die Matrix \\(A\\) definierte Abbildung \\(F\\) auf ", %_mds, " abbildet. Wählen Sie den korrekten Ausdruck für die Berechnung der ", tex2(qj), "-ten Spalte von \\(A\\). Dabei gilt ", HintEq, ".")],
+ ["it", sconcat("Si supponga che l’applicazione \\(F\\) definita dalla matrice \\(A\\) mandi in ", %_mds, ". Scegli l’espressione corretta per il calcolo della ", tex2(qj), "-esima colonna di \\(A\\). Si assume che ", HintEq, " valga.")],
+ ["ja", sconcat("行列\\(A\\)の定める写像\\(F\\)によって, ", %_mds, "と写るという. \\(A\\)の第 ", tex2(qj), "列目の計算式として正しいものを選べ. ただし, ", HintEq, " が成り立っている.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. From \\(AP=B\\), we see that \\(A=BP^{-1}\\)."],
+ ["fr", "Correct. À partir de \\(AP=B\\), on voit que \\(A=BP^{-1}\\)."],
+ ["de", "Richtig. Aus \\(AP=B\\) folgt, dass \\(A=BP^{-1}\\) ist."],
+ ["it", "Corretto. Da \\(AP=B\\), si vede che \\(A=BP^{-1}\\)."],
+ ["ja", "正解です. \\(AP=B\\)より, \\(A=BP^{-1}\\)がわかりますね."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "If written as a single equation, it becomes \\(AP=B\\). From this, how can \\(A\\) be expressed?"],
+ ["fr", "Écrit sous la forme d’une seule équation, on obtient \\(AP=B\\). À partir de cela, comment peut-on exprimer \\(A\\) ?"],
+ ["de", "Als eine Gleichung geschrieben ergibt sich \\(AP=B\\). Wie kann man daraus \\(A\\) ausdrücken?"],
+ ["it", "Scrivendolo come un’unica equazione si ottiene \\(AP=B\\). Da ciò, come si può esprimere \\(A\\)?"],
+ ["ja", "1つの式で書くと, \\(AP=B\\)になります. このことから, \\(A\\)はどう表わせますか？"]];
+
+
+/********** EOF **********/
