@@ -75,7 +75,7 @@ allchk:[chkAB11];
  ["fr", sconcat("Choisissez la matrice correcte représentant la symétrie par rapport à la droite ", LineEq)],
  ["de", sconcat("Wählen Sie die korrekte Matrix, die die Spiegelung an der Geraden ", LineEq, " darstellt")],
  ["it", sconcat("Scegli la matrice corretta che rappresenta la riflessione rispetto alla retta ", LineEq)],
- ["ja", sconcat("直線 ", LineEq, " に関する対称移動を表す行列として正しいものを選べ."]];
+ ["ja", sconcat("直線 ", LineEq, " に関する対称移動を表す行列として正しいものを選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
