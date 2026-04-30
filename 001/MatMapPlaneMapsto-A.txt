@@ -16,7 +16,7 @@ tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(
 %_rp(L):=random_permutation(L);
 
 lmxchar:"(";
-remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{[0-9]+\\}\\{[0-9]+\\})\\\\right\\)", s);
+remove_paren2(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s);
 tex2rp(s):=remove_paren(tex2(s));
 
 /* rotate angle */
@@ -31,7 +31,7 @@ evL:[col(matE, 1), col(matE, 2)];
 /* map description for options */
 %_mkop(ra):=block([s:"\\(", lc:lmxchar, k, m], lmxchar:"(",
   m:matrix([cos(ra), -sin(ra)], [sin(ra), cos(ra)]),
-  for k:1 thru 2 do s:sconcat(s, tex1(evL[k]), "\\mapsto", remove_paren(tex1(m.evL[k])), if k<2 then ", " else ""),
+  for k:1 thru 2 do s:sconcat(s, tex1(evL[k]), "\\mapsto", remove_paren2(tex1(m.evL[k])), if k<2 then ", " else ""),
   s:sconcat(s, "\\)"), lmxchar:lc, return(s));
 
 ListAL1:[%_mkop(raL[1])];
