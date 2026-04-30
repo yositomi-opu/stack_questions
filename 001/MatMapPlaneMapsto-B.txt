@@ -39,7 +39,7 @@ ListBL1:cons(%_mkop([%_dv, %_nv], [-%_dv, %_nv]), ListBL1);
 ListBL1:cons(%_mkop(evL, [%_dv, %_nv]), ListBL1);
 ListBL1:cons(%_mkop([%_dv, %_nv], evL), ListBL1);
 
-LineEq:sconcat("\\(y=", tex1(tt), "x\\)");
+LineEq:sconcat("\\(\\displaystyle{}y=", if tt<0 then "-" else "", tex1(abs(tt)), "x\\)");
 
 /* security check */
 SetAL1:setify(ListAL1);
