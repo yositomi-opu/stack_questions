@@ -69,13 +69,9 @@ allchk:[chkAB11];
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
 %__mcq_qtextL:[["en", sconcat("Choose the correct correspondences of vectors under the reflection with respect to the line ", LineEq)],
-["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la symétrie par rapport à la droite ", LineEq)],
-["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Spiegelung an der Geraden ", LineEq)],
-["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la riflessione rispetto alla retta ", LineEq)],
-["en", sconcat("Choose the correct correspondences of vectors under the rotation ", tex2(%_ra))],
- ["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la rotation ", tex2(%_ra))],
- ["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Drehung ", tex2(%_ra))],
- ["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la rotazione ", tex2(%_ra))],
+ ["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la symétrie par rapport à la droite ", LineEq)],
+ ["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Spiegelung an der Geraden ", LineEq)],
+ ["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la riflessione rispetto alla retta ", LineEq)],
  ["ja", sconcat("直線 ", LineEq, " に関する対称移動による元の対応として正しいものを選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
