@@ -15,6 +15,9 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{[0-9]+\\}\\{[0-9]+\\})\\\\right\\)", s);
+tex2rp(s):=remove_paren(tex2(s));
+
 /* rotate angle */
 raL:%_rp([1/6, 1/4, 1/3, 2/3, 1/2, 3/4, 5/6])*pi;
 %_ra:raL[1];
@@ -66,7 +69,7 @@ allchk:[chkAB11];
  ["fr", sconcat("Choisissez les correspondances correctes des vecteurs par la rotation ", tex2(%_ra))],
  ["de", sconcat("Wählen Sie die korrekten Zuordnungen der Vektoren unter der Drehung ", tex2(%_ra))],
  ["it", sconcat("Scegli le corrispondenze corrette dei vettori sotto la rotazione ", tex2(%_ra))],
- ["ja", sconcat(tex2(%_ra), "回転によるベクトルの対応とし正しいものを選べ.")]];
+ ["ja", sconcat(tex2rp(%_ra), "回転によるベクトルの対応とし正しいものを選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
