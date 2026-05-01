@@ -1,0 +1,104 @@
+/********************* MatMapComposite-A (rb) **********************/
+/* 001.MCB include file		                                   */
+/* Objective: To learn/check matrix cor. to composite map(rotate)  */
+/*******************************************************************/
+/* c:[1], w:[5]; appropriate: 5/1 */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if %_MCQ_NUM_OPTS>8 then %_MCQ_NUM_OPTS:6;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s);
+tex2rp(s):=remove_paren(tex2(s));
+
+
+/* 平面における1次変換の合成と行列(回転) */
+th:rand([-1, 1])*rand([1/4, 3/4, 1/6, 5/6, 7/6, 11/6]);
+cth:cos(th*pi);
+sth:sin(th*pi);
+matR:matrix([cth,-sth],[sth,cth]);
+mm:rand(primes(40, 80));
+matRm:matR^^mm;
+
+ListAL1:[matRm];
+
+
+addwrg(M):=block([wL], if M=matRm then return([]) else return([M]));
+ListBL1:[];
+ListBL1:append(ListBL1, addwrg(matR));
+ListBL1:append(ListBL1, addwrg(matR^^2));
+ListBL1:append(ListBL1, addwrg(matR^^3));
+ListBL1:append(ListBL1, addwrg(matR^^4));
+ListBL1:append(ListBL1, addwrg(matR^^5));
+ListBL1:append(ListBL1, addwrg(matR^^6));
+ListBL1:unique(append(ListBL1, addwrg(matR^^7)));
+while (length(ListBL1)<6) do (
+  ListBL1:unique(append(ListBL1, addwrg(genmatrix(lambda([i, j], rand([-2, -1, 1, 2])), 2, 2)))));
+
+%_compo:sconcat("\\(", tex1(f1), "\\circ ", tex1(f2), "\\circ ", tex1(f3), "\\)");
+
+
+/* va2:[[1,true,"行列の積を計算した."],[2,true,"基本ベクトル\\({\\boldsymbol e}_1\\)または\\({\\boldsymbol e}_2\\)の像を計算した."]]; */
+
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+/* SetBL2:setify(ListBL2); */
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+/* chkAB12:intersection(SetAL1,SetBL2); */
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+allchk:[chkAB11];
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Suppose that the matrices representing the plane linear transformations \\(f, g, h\\) are respectively ", tex2L([matA, ", ", matB, ", ", matC]), ". Choose the correct matrices representing the composite transformations ", %_compo, ".")],
+ ["fr", sconcat("Supposons que les matrices représentant les transformations linéaires du plan \\(f, g, h\\) soient respectivement ", tex2L([matA, ", ", matB, ", ", matC]), ". Choisissez les matrices correctes représentant les transformations composées ", %_compo, ".")],
+ ["de", sconcat("Angenommen, die Matrizen, die die linearen Transformationen der Ebene \\(f, g, h\\) darstellen, sind jeweils ", tex2L([matA, ", ", matB, ", ", matC]), ". Wählen Sie die korrekten Matrizen, die die zusammengesetzten Transformationen ", %_compo, " darstellen.")],
+ ["it", sconcat("Supponiamo che le matrici che rappresentano le trasformazioni lineari del piano \\(f, g, h\\) siano rispettivamente ", tex2L([matA, ", ", matB, ", ", matC]), ". Scegli le matrici corrette che rappresentano le trasformazioni composte ", %_compo, ".")],
+ ["ja", sconcat("平面の1次変換\\(f, g, h\\)を表す行列がそれぞれ", tex2L([matA, ", ", matB, ", ", matC]), "であるとき, 合成変換", %_compo, "を表す行列として正しいものを選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. Did you compute the matrix product? That works, but it is faster to consider the images of the basis vectors."],
+ ["fr", "Correct. Avez-vous calculé le produit des matrices ? Cela fonctionne, mais il est plus rapide de considérer les images des vecteurs de base."],
+ ["de", "Richtig. Haben Sie das Matrixprodukt berechnet? Das funktioniert, aber es ist schneller, die Bilder der Basisvektoren zu betrachten."],
+ ["it", "Corretto. Hai calcolato il prodotto delle matrici? Funziona, ma è più veloce considerare le immagini dei vettori di base."],
+ ["en", "Correct. It is obvious when considered geometrically."],
+ ["ja", "正解です. 行列の積を計算しましたか？ それでもいいのですが, 基本ベクトルの像を考えると早いですよ."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "Incorrect. The matrix representing the composition of linear maps corresponds to the product of matrices. It is clear if you consider \\( f(g(x))=A(Bx)=(AB)x \\). Also, instead of computing the product, try considering the images of the basis vectors."],
+ ["fr", "Incorrect. La matrice représentant la composition des applications linéaires correspond au produit des matrices. Cela est clair si l’on considère \\( f(g(x))=A(Bx)=(AB)x \\). De plus, au lieu de calculer le produit, essayez de considérer les images des vecteurs de base."],
+ ["de", "Falsch. Die Matrix, die die Komposition linearer Abbildungen darstellt, entspricht dem Produkt der Matrizen. Das wird klar, wenn man \\( f(g(x))=A(Bx)=(AB)x \\) betrachtet. Versuchen Sie außerdem, statt das Produkt zu berechnen, die Bilder der Basisvektoren zu betrachten."],
+ ["it", "Non è corretto. La matrice che rappresenta la composizione di applicazioni lineari corrisponde al prodotto delle matrici. Ciò è chiaro considerando \\( f(g(x))=A(Bx)=(AB)x \\). Inoltre, invece di calcolare il prodotto, prova a considerare le immagini dei vettori di base."],
+ ["ja", "違います. 線形写像の合成を表す行列は行列の積に対応します. \\( f(g(x))=A(Bx)=(AB)x \\) で考えれば明らかですね. また, 積を計算する代わりに基本ベクトルの像を考えてみましょう."]];
+
+
+/********** EOF **********/
