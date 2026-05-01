@@ -77,7 +77,7 @@ allchk:[chkAB11];
  ["fr", sconcat("Soit \\(R=\\)", tex2(matR), ". Choisissez \\(R^", tex1(mm), "\\).")],
  ["de", sconcat("Sei \\(R=\\)", tex2(matR), ". Wählen Sie \\(R^", tex1(mm), "\\).")],
  ["it", sconcat("Sia \\(R=\\)", tex2(matR), ". Scegli \\(R^", tex1(mm), "\\).")],
- ["ja", sconcat("\\(R=\\)", tex2rp(matR), "とするとき, \\(R^", tex1(mm), "\\)を選べ.")]];
+ ["ja", sconcat("\\(R=\\)", tex2rp(matR), "とするとき, \\(R^{", tex1(mm), "}\\)を選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
