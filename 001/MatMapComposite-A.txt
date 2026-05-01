@@ -49,7 +49,7 @@ ListBL1:unique(append(ListBL1, addwrg(matA1-matA2+matA3)));
 while (length(ListBL1)<6) do (
   ListBL1:unique(append(ListBL1, addwrg(genmatrix(lambda([i, j], rand([-2, -1, 1, 2])), 2, 2)))));
 
-%_compo:sconcat("\\(", tex1(f1), "\\circ", tex1(f2), "\\circ", tex1(f3), "\\)");
+%_compo:sconcat("\\(", tex1(f1), "\\circ ", tex1(f2), "\\circ ", tex1(f3), "\\)");
 
 
 /* va2:[[1,true,"行列の積を計算した."],[2,true,"基本ベクトル\\({\\boldsymbol e}_1\\)または\\({\\boldsymbol e}_2\\)の像を計算した."]]; */
