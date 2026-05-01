@@ -73,11 +73,11 @@ allchk:[chkAB11];
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("Suppose that the matrices representing the plane linear transformations \\(f, g, h\\) are respectively ", tex2L([matA, ", ", matB, ", ", matC]), ". Choose the correct matrices representing the composite transformations ", %_compo, ".")],
- ["fr", sconcat("Supposons que les matrices représentant les transformations linéaires du plan \\(f, g, h\\) soient respectivement ", tex2L([matA, ", ", matB, ", ", matC]), ". Choisissez les matrices correctes représentant les transformations composées ", %_compo, ".")],
- ["de", sconcat("Angenommen, die Matrizen, die die linearen Transformationen der Ebene \\(f, g, h\\) darstellen, sind jeweils ", tex2L([matA, ", ", matB, ", ", matC]), ". Wählen Sie die korrekten Matrizen, die die zusammengesetzten Transformationen ", %_compo, " darstellen.")],
- ["it", sconcat("Supponiamo che le matrici che rappresentano le trasformazioni lineari del piano \\(f, g, h\\) siano rispettivamente ", tex2L([matA, ", ", matB, ", ", matC]), ". Scegli le matrici corrette che rappresentano le trasformazioni composte ", %_compo, ".")],
- ["ja", sconcat("平面の1次変換\\(f, g, h\\)を表す行列がそれぞれ", tex2L([matA, ", ", matB, ", ", matC]), "であるとき, 合成変換", %_compo, "を表す行列として正しいものを選べ.")]];
+%__mcq_qtextL:[["en", sconcat("Let \\(R=\\)", tex2(matR), ". Choose \\(R^", tex1(mm), "\\).")],
+ ["fr", sconcat("Soit \\(R=\\)", tex2(matR), ". Choisissez \\(R^", tex1(mm), "\\).")],
+ ["de", sconcat("Sei \\(R=\\)", tex2(matR), ". Wählen Sie \\(R^", tex1(mm), "\\).")],
+ ["it", sconcat("Sia \\(R=\\)", tex2(matR), ". Scegli \\(R^", tex1(mm), "\\).")],
+ ["ja", sconcat("\\(R=\\)", tex2(matR), "とするとき, \\(R^", tex1(mm), "\\)を選べ.")]];
 
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
@@ -85,20 +85,19 @@ allchk:[chkAB11];
 /*****************************************************************************************/
 /* Correct pattern 1 */
 %__CoptL1:ListAL1;
-%__Cmsg1L:[["en", "Correct. Did you compute the matrix product? That works, but it is faster to consider the images of the basis vectors."],
- ["fr", "Correct. Avez-vous calculé le produit des matrices ? Cela fonctionne, mais il est plus rapide de considérer les images des vecteurs de base."],
- ["de", "Richtig. Haben Sie das Matrixprodukt berechnet? Das funktioniert, aber es ist schneller, die Bilder der Basisvektoren zu betrachten."],
- ["it", "Corretto. Hai calcolato il prodotto delle matrici? Funziona, ma è più veloce considerare le immagini dei vettori di base."],
- ["en", "Correct. It is obvious when considered geometrically."],
- ["ja", "正解です. 行列の積を計算しましたか？ それでもいいのですが, 基本ベクトルの像を考えると早いですよ."]];
+%__Cmsg1L:[["en", "Correct. For matrices representing rotations, the key point is that raising them to a certain power yields the identity matrix."],
+ ["fr", "Correct. Pour les matrices représentant des rotations, le point essentiel est qu’en les élevant à une certaine puissance, on obtient la matrice identité."],
+ ["de", "Richtig. Bei Matrizen, die Drehungen darstellen, ist der entscheidende Punkt, dass sie bei einer bestimmten Potenz zur Einheitsmatrix werden."],
+ ["it", "Corretto. Per le matrici che rappresentano rotazioni, il punto chiave è che elevandole a una certa potenza si ottiene la matrice identità."],
+ ["ja", "正解です. 回転を表す行列で, 何乗かすると単位行列になるのがポイントですね."]];
 
 /* Wrong answer pattern 1 */
 %__WoptL1:ListBL1;
-%__Wmsg1L:[["en", "Incorrect. The matrix representing the composition of linear maps corresponds to the product of matrices. It is clear if you consider \\( f(g(x))=A(Bx)=(AB)x \\). Also, instead of computing the product, try considering the images of the basis vectors."],
- ["fr", "Incorrect. La matrice représentant la composition des applications linéaires correspond au produit des matrices. Cela est clair si l’on considère \\( f(g(x))=A(Bx)=(AB)x \\). De plus, au lieu de calculer le produit, essayez de considérer les images des vecteurs de base."],
- ["de", "Falsch. Die Matrix, die die Komposition linearer Abbildungen darstellt, entspricht dem Produkt der Matrizen. Das wird klar, wenn man \\( f(g(x))=A(Bx)=(AB)x \\) betrachtet. Versuchen Sie außerdem, statt das Produkt zu berechnen, die Bilder der Basisvektoren zu betrachten."],
- ["it", "Non è corretto. La matrice che rappresenta la composizione di applicazioni lineari corrisponde al prodotto delle matrici. Ciò è chiaro considerando \\( f(g(x))=A(Bx)=(AB)x \\). Inoltre, invece di calcolare il prodotto, prova a considerare le immagini dei vettori di base."],
- ["ja", "違います. 線形写像の合成を表す行列は行列の積に対応します. \\( f(g(x))=A(Bx)=(AB)x \\) で考えれば明らかですね. また, 積を計算する代わりに基本ベクトルの像を考えてみましょう."]];
+%__Wmsg1L:[["en", sconcat("Incorrect. Instead of computing the actual power, focus on the fact that this matrix represents a rotation by ", tex2(th/2), ".")],
+ ["fr", sconcat("Incorrect. Au lieu de calculer la puissance directement, concentrez-vous sur le fait que cette matrice représente une rotation de ", tex2(th/2), ".")],
+ ["de", sconcat("Falsch. Anstatt die Potenz direkt zu berechnen, achten Sie darauf, dass diese Matrix eine Drehung um ", tex2(th/2), " darstellt.")],
+ ["it", sconcat("Non è corretto. Invece di calcolare direttamente la potenza, concentrati sul fatto che questa matrice rappresenta una rotazione di ", tex2(th/2), ".")],
+ ["ja", sconcat("違います. 実際のべき乗を計算するのではなく, ", tex2(th/2), "回転を表す行列であることに注目しましょう.")]];
 
 
 /********** EOF **********/
