@@ -68,6 +68,27 @@ ListBL2:append(ListBL2, [sconcat("\\(", Ymat, TZmat, "\\)")]);
 ListBL2:append(ListBL2, [sconcat("\\(", TYmat, TXmat, Zmat, "\\)")]);
 ListBL2:unique(ListBL2);
 
+/* security check */
+SetAL1:setify(ListAL1);
+/* SetAL2:setify(ListAL2); */
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/* SetBL3:setify(ListBL3); */
+/* chkAA12:intersection(SetAL1,SetAL2); */
+chkAB11:intersection(SetAL1,SetBL1);
+chkAB12:intersection(SetAL1,SetBL2);
+/* chkAB13:intersection(SetAL1,SetBL3); */
+/* chkAB21:intersection(SetAL2,SetBL1); */
+/* chkAB22:intersection(SetAL2,SetBL2); */
+/* chkAB23:intersection(SetAL2,SetBL3); */
+/* chkBB12:intersection(SetBL1,SetBL2); */
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+allchk:[chkAB11,chkAB12,chkBB12];
+/* allchk:[chkAB11];*/
+
 
 %_TAtype:tex2L([TA[1], "\\times", TA[2]]);
 %_TBtype:tex2L([TB[1], "\\times", TB[2]]);
