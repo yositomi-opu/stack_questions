@@ -81,7 +81,7 @@ chkAB12:intersection(SetAL1,SetBL2);
 /* chkAB21:intersection(SetAL2,SetBL1); */
 /* chkAB22:intersection(SetAL2,SetBL2); */
 /* chkAB23:intersection(SetAL2,SetBL3); */
-/* chkBB12:intersection(SetBL1,SetBL2); */
+chkBB12:intersection(SetBL1,SetBL2);
 /* chkBB13:intersection(SetBL1,SetBL3); */
 /* chkBB23:intersection(SetBL2,SetBL3);*/
 /* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
