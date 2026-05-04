@@ -49,7 +49,7 @@ TtC:TpTpse(TC);
 /* --- ListAL1, ListAL2, ... has length more or equal than cn1, cn2, ... -- */
 ListAL1:[];
 ListAL1:cons(sconcat("\\(", Xmat, TXmat, Zmat, "\\)"), ListAL1);
-ListAL1:cons(sconcat("\\(", Xmat, Ymat, "\\)")), ListAL1);
+ListAL1:cons(sconcat("\\(", Xmat, Ymat, "\\)"), ListAL1);
 ListAL1:cons(sconcat("\\({}^t(", TYmat, TXmat, ")\\)"), ListAL1);
 ListAL1:cons(sconcat("\\({}^t(", TZmat, Xmat, TXmat, ")\\)"), ListAL1);
 ListAL1:unique(ListAL1);
