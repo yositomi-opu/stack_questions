@@ -90,7 +90,7 @@ ListBL2:unique(ListBL2);
 /*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
 /*****************************************************************************************/
 /* Correct pattern 1 */
-%__CoptL1:CL1;
+%__CoptL1:ListAL1;
 %__Cmsg1L:[["en", "Correct. You seem to understand how matrix multiplication behaves under transposition."],
  ["fr", "Correct. Vous semblez comprendre comment le produit matriciel se comporte sous la transposition."],
  ["de", "Richtig. Sie scheinen zu verstehen, wie sich das Matrixprodukt unter Transposition verhält."],
@@ -98,7 +98,7 @@ ListBL2:unique(ListBL2);
  ["ja", "正解です. 転置で行列の積がどうなるか理解できているようです."]];
 
 /* Wrong answer pattern 1 */
-%__WoptL1:WL1;
+%__WoptL1:ListBL1;
 %__Wmsg1L:[["en", "It seems you have selected expressions for which the product is not defined."],
  ["fr", "Il semble que vous ayez sélectionné des expressions pour lesquelles le produit n’est pas défini."],
  ["de", "Es scheint, dass Sie Ausdrücke ausgewählt haben, für die das Produkt nicht definiert ist."],
@@ -106,7 +106,7 @@ ListBL2:unique(ListBL2);
  ["ja", "積が定義されていないものを選んでいるようです."]];
 
 /* Wrong answer pattern 2 */
-%__WoptL2:WL2;
+%__WoptL2:ListBL2;
 %__Wmsg2L:[["en", "The product is defined, but it seems you have selected expressions that do not have the specified size (shape)."],
  ["fr", "Le produit est défini, mais il semble que vous ayez sélectionné des expressions qui n’ont pas la taille (forme) spécifiée."],
  ["de", "Das Produkt ist definiert, aber es scheint, dass Sie Ausdrücke ausgewählt haben, die nicht die angegebene Größe (Form) haben."],
