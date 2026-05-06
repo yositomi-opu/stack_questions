@@ -1,0 +1,57 @@
+/* For 010.GaussElimElemMatElemTrans */
+/* %_kaisetu: true or false */
+/* %_optype: 1,2,...,6 */
+/* stack_include("https://stack.mathedu.jp/sc/010/GaussLlimElemMatElemTrans.txt"); */
+
+if %_kaisetu then commentS:"" else commentS:"<!--";
+if %_kaisetu then commentE:"" else commentE:"-->";
+
+/* if false, explanation is omitted */
+%_rp(L):=random_permutation(L);
+/* for matrix copy and paste */
+%_tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_sprintf(len, x):=block([k, s, spc, l], l:slength(tex1(x)), 
+  if len>l then spc:apply(sconcat, makelist("&nbsp;", len-l)) else spc:"",
+  s:sconcat(spc, tex1(x)), return(s));
+%_mat2str(M):=block([s, i, j, r, c], [r, c]:matrix_size(M), s:"",
+  for i:1 thru r do (for j:1 thru c do s:sconcat(s, %_sprintf(4, M[i,j])), s:sconcat(s, "<br>")), return(s));
+%_count_diff(m1, m2):=block([ct:0, r, c, r1, c1], 
+  if not matrix_size(m1)=matrix_size(m2) then return(-1),
+  [r,c]:matrix_size(m1),
+  for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then ct:ct+1,return(ct));
+
+%_pmod(n, a):=if mod(n, a)=0 then a else mod(n, a);
+%_nr:rand([3, 3, 3, 3, 4, 5]);
+%_nc:if %_nr=3 then %_nr+rand([1, 1, 2]) else %_nr+rand([-1, 1]);
+aL:%_rp([-5, -4, -3, -2, -1, -1, 0, 1, 1, 2, 3, 4, 5]);
+matA:genmatrix(lambda([i ,j], aL[%_pmod(%_nc*(i-1)+j, length(aL))]), %_nr, %_nc);
+
+/* row-add, row-scale, row-swap, col-add, col-scale, col-swap */
+rwL:%_rp(makelist(k, k, %_nr));rw1a:rwL[1];rw1b:rwL[2];
+rwL:%_rp(makelist(k, k, %_nr));rw2:rwL[1];
+rwL:%_rp(makelist(k, k, %_nr));rw3a:rwL[1];rw3b:rwL[2];
+clL:%_rp(makelist(k, k, %_nc));cl1a:clL[1];cl1b:clL[2];
+clL:%_rp(makelist(k, k, %_nc));cl2:clL[1];
+clL:%_rp(makelist(k, k, %_nc));cl3a:clL[1];cl3b:clL[2];
+rc1:rand([-2, -1, 1, 2]);
+rc2:rand([-3, -2, -1, 2, 3]);
+cc1:rand([-2, -1, 1, 2]);
+cc2:rand([-3, -2, -1, 2, 3]);
+
+emL:[kihonP(%_nr, rw1a, rw1b, rc1), kihonQ(%_nr, rw2, rc2), kihonR(%_nr, rw3a, rw3b),
+     kihonP(%_nc, cl1a, cl1b, cc1), kihonQ(%_nc, cl2, cc2), kihonR(%_nc, cl3a, cl3b)];
+opL:[%_tex2L(["第", rw1b, "行の", rc1, "倍を", rw1a, "行に加える."]),
+     %_tex2L(["第", rw2, "行を", rc2, "倍する."]),
+     %_tex2L(["第", rw3a, "行と", rw3b, "行を入れかえる."]),
+     %_tex2L(["第", cl1a, "列の", cc1, "倍を", cl1b, "列に加える."]),
+     %_tex2L(["第", rw2, "列を", rc2, "倍する."]),
+     %_tex2L(["第", rw3a, "列と", rw3b, "列を入れかえる."])];
+opS:opL[%_optype];
+ta1:emL[%_optype];
+va2left:[[0, false, "--"], [1, true, "左"], [2, false, "右"]];
+va2right:[[0, false, "--"], [1, false, "左"], [2, true, "右"]];
+va2:if member(%_optype, [1, 2, 3]) then va2left else va2right;
+ta2:if member(%_optype, [1, 2, 3]) then 1 else 2;
+ta3:if member(%_optype, [1, 2, 3]) then ta1.matA else matA.ta1;
+
+AS:%_mat2str(matA);

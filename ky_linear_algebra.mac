@@ -169,14 +169,3 @@ cross_product(va, vb):=matrix(
   [va[2,1]*vb[3,1]-va[3,1]*vb[2,1]],
   [va[3,1]*vb[1,1]-va[1,1]*vb[3,1]],
   [va[1,1]*vb[2,1]-va[2,1]*vb[1,1]]);
-
-
-%_sprintf(len, x):=block([k, s, spc, l], l:slength(tex1(x)), 
-  if len>l then spc:apply(sconcat, makelist("&nbsp;", len-l)) else spc:"",
-  s:sconcat(spc, tex1(x)), return(s));
-%_mat2str(M):=block([s, i, j, r, c], [r, c]:matrix_size(M), s:"",
-  for i:1 thru r do (for j:1 thru c do s:sconcat(s, %_sprintf(4, M[i,j])), s:sconcat(s, "<br>")), return(s));
-%_count_diff(m1, m2):=block([ct:0, r, c, r1, c1], 
-  if not matrix_size(m1)=matrix_size(m2) then return(-1),
-  [r,c]:matrix_size(m1),
-  for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then ct:ct+1,return(ct));
