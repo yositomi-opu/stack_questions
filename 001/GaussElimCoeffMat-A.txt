@@ -2,8 +2,8 @@
 /* 001.MCB include file		                             */
 /* Objective: To learn/check coefficient matrix of lin eqs   */
 /*************************************************************/
-/* c:[1], w:[5]; */
-if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+/* c:[1], w:[4, 4]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
 %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
@@ -13,13 +13,13 @@ aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
 %_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
 nmL:[1, 2, 3, 4, 5];
 
-rw:rand([3, 4, 5]);
-cl:rand([3, 4, 5]);/* max 6, min 3 */
+rw:rand([3, 4]);
+cl:rand([3, 4]);/* max 6, min 3 */
 
 %_mkEq(A, b, xL):=block([s:"\\(\\begin{array}{ccc}", k, vx], vx:transpose(matrix(xL)),
   for k:1 thru length(A) do (
-    s:sconcat(s, display_polynomial_varlist_tex1(matA.xL[k, 1], xL), "&=&", tex1(b[1, 1])),
-    if k<length(A) then s:sconcat("\\\\")),
+    s:sconcat(s, display_polynomial_varlist_tex1((matA.vx)[k, 1], xL), "&=&", tex1(b[k, 1])),
+    if k<length(A) then s:sconcat(s, "\\\\")),
   s:sconcat(s, "\\end{array}\\)"), return(s));
 
 aL:%_rp(append(makelist(k, k, -9, 9), makelist(0, 2)));
@@ -45,14 +45,13 @@ matA5:kihonR(rw, rwL[1], rwL[3]);
 matA6:kihonR(rw, rwL[2], rwL[3]);
 
 
-ListBL1:[matA];
+ListBL1:[];
 ListBL1:cons(addcol(matA1, vB), ListBL1);
-ListBL1:cons(addcol(matA2, vB), ListBL1);
-ListBL1:cons(addcol(matA3, vB), ListBL1);
-ListBL1:cons(addcol(matA4, vB), ListBL1);
-ListBL1:cons(addcol(matA5, vB), ListBL1);
+ListBL1:cons(addcol(rand([matA2, matA3]), vB), ListBL1);
+ListBL1:cons(addcol(rand([matA4, matA5]), vB), ListBL1);
 ListBL1:cons(addcol(matA6, vB), ListBL1);
 
+ListBL2:[matA, matA1, matA2, matA3];
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
@@ -63,7 +62,7 @@ ListBL1:cons(addcol(matA6, vB), ListBL1);
  ["fr", sconcat("Le système d’équations linéaires à variables ", xLS, " est donné par ", QuestionEq, ". Choisissez la matrice augmentée.")],
  ["de", sconcat("Das lineare Gleichungssystem mit den Variablen ", xLS, " ist durch ", QuestionEq, " gegeben. Wählen Sie die erweiterte Koeffizientenmatrix.")],
  ["it", sconcat("Il sistema di equazioni lineari nelle variabili ", xLS, " è dato da ", QuestionEq, ". Scegli la matrice aumentata.")],
- ["ja", sconcat("変数", xLS, "に関する連立1次方程式の方程式が", QuestionEq, "であるという. 拡大係数行列を選べ.")]];
+ ["ja", sconcat("変数", xLS, "に関する連立1次方程式の方程式が", QuestionEq, "であるという. <b>拡大</b>係数行列を選べ.")]];
 
 
 /******************************** List of patterns/feedbacks *****************************/
@@ -80,11 +79,19 @@ ListBL1:cons(addcol(matA6, vB), ListBL1);
 
 /* Wrong answer pattern 1 */
 %__WoptL1:ListBL1;
-%__Wmsg1L:[["en", "You have selected ones for which the product is not defined."],
- ["fr", "Vous avez sélectionné des éléments pour lesquels le produit n’est pas défini."],
- ["de", "Sie haben solche ausgewählt, für die das Produkt nicht definiert ist."],
- ["it", "Hai selezionato elementi per cui il prodotto non è definito."],
- ["ja", "変数の順序は重要ですし, また, 定義としては, 行の入れかえたものは違うものです. 係数行列と拡大係数行列の違いもおさえておきましょう."]];
+%__Wmsg1L:[["en", "The order of the variables is important, and matrices obtained by exchanging rows are different by definition."],
+ ["fr", "L’ordre des variables est important, et les matrices obtenues en échangeant des lignes sont différentes par définition."],
+ ["de", "Die Reihenfolge der Variablen ist wichtig, und Matrizen, die durch Vertauschen von Zeilen entstehen, sind definitionsgemäß verschieden."],
+ ["it", "L’ordine delle variabili è importante, e le matrici ottenute scambiando le righe sono diverse per definizione."],
+ ["ja", "変数の順序は重要ですし, また, 定義としては, 行の入れかえたものは違うものです. "]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:ListBL2;
+%__Wmsg2L:[["en", "It seems that the distinction between the coefficient matrix and the augmented matrix is not yet clear."],
+ ["fr", "Il semble que la distinction entre la matrice des coefficients et la matrice augmentée ne soit pas encore claire."],
+ ["de", "Es scheint, dass der Unterschied zwischen der Koeffizientenmatrix und der erweiterten Koeffizientenmatrix noch nicht klar ist."],
+ ["it", "Sembra che la distinzione tra la matrice dei coefficienti e la matrice aumentata non sia ancora chiara."],
+ ["ja", "係数行列と拡大係数行列の区別ができていないようです."]];
 
 
 /********** EOF **********/
