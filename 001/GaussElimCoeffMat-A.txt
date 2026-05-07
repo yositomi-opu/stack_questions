@@ -1,0 +1,90 @@
+/***************** GaussElimCoeffMat-A (rb) ******************/
+/* 001.MCB include file		                             */
+/* Objective: To learn/check coefficient matrix of lin eqs   */
+/*************************************************************/
+/* c:[1], w:[5]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
+%_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
+%_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
+nmL:[1, 2, 3, 4, 5];
+
+rw:rand([3, 4, 5]);
+cl:rand([3, 4, 5]);/* max 6, min 3 */
+
+%_mkEq(A, b, xL):=block([s:"\\(\\begin{array}{ccc}", k, vx], vx:transpose(matrix(xL)),
+  for k:1 thru length(A) do (
+    s:sconcat(s, display_polynomial_varlist_tex1(matA.xL[k, 1], xL), "&=&", tex1(b[1, 1])),
+    if k<length(A) then s:sconcat("\\\\")),
+  s:sconcat(s, "\\end{array}\\)"), return(s));
+
+aL:%_rp(append(makelist(k, k, -9, 9), makelist(0, 2)));
+pmod(a, n):=if mod(a, n)=0 then n else mod(a, n);
+matA:genmatrix(lambda([i, j], aL[pmod(cl*(i-1)+j, length(aL))]), rw, cl);
+xyz:%_rp([u, v, w, x, y, z]);
+
+xL:rand([makelist(x[k], k, 1, cl), makelist(xyz[k], k, 1, cl)]);
+xLS:sequenceify(xL);
+vB:genmatrix(lambda([i, j], rand([-3, -2, -1, 1, 2, 3])), rw, 1);
+
+QuestionEq:%_mkERq(matA, vB, xL);
+ListAL1:[addcol(matA, vB)];
+
+clL:%_rp(makelist(k, k, cl));
+matA1:matA.kihonR(cl, clL[1], clL[2]);
+matA2:matA.kihonR(cl, clL[1], clL[3]);
+matA3:matA.kihonR(cl, clL[2], clL[3]);
+
+rwL:%_rp(makelist(k, k, rw));
+matA4:kihonR(rw, rwL[1], rwL[2]);
+matA5:kihonR(rw, rwL[1], rwL[3]);
+matA6:kihonR(rw, rwL[2], rwL[3]);
+
+
+ListBL1:[matA];
+ListBL1:cons(addcol(matA1, vB), ListBL1);
+ListBL1:cons(addcol(matA2, vB), ListBL1);
+ListBL1:cons(addcol(matA3, vB), ListBL1);
+ListBL1:cons(addcol(matA4, vB), ListBL1);
+ListBL1:cons(addcol(matA5, vB), ListBL1);
+ListBL1:cons(addcol(matA6, vB), ListBL1);
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("The system of linear equations with variables ", xLS, " is given by ", QuestionEq, ". Choose the augmented matrix.")],
+ ["fr", sconcat("Le système d’équations linéaires à variables ", xLS, " est donné par ", QuestionEq, ". Choisissez la matrice augmentée.")],
+ ["de", sconcat("Das lineare Gleichungssystem mit den Variablen ", xLS, " ist durch ", QuestionEq, " gegeben. Wählen Sie die erweiterte Koeffizientenmatrix.")],
+ ["it", sconcat("Il sistema di equazioni lineari nelle variabili ", xLS, " è dato da ", QuestionEq, ". Scegli la matrice aumentata.")],
+ ["ja", sconcat("変数", xLS, "に関する連立1次方程式の方程式が", QuestionEq, "であるという. 拡大係数行列を選べ.")]];
+
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. You seem to understand augmented matrices."],
+ ["fr", "Correct. Vous semblez comprendre les matrices augmentées."],
+ ["de", "Richtig. Sie scheinen erweiterte Koeffizientenmatrizen zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda le matrici aumentate."],
+ ["ja", "正解です. 拡大係数行列について理解しているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "You have selected ones for which the product is not defined."],
+ ["fr", "Vous avez sélectionné des éléments pour lesquels le produit n’est pas défini."],
+ ["de", "Sie haben solche ausgewählt, für die das Produkt nicht definiert ist."],
+ ["it", "Hai selezionato elementi per cui il prodotto non è definito."],
+ ["ja", "変数の順序は重要ですし, また, 定義としては, 行の入れかえたものは違うものです. 係数行列と拡大係数行列の違いもおさえておきましょう."]];
+
+
+/********** EOF **********/
