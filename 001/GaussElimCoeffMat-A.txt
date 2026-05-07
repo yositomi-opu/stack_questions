@@ -51,8 +51,8 @@ matA6:kihonR(rw, rwL[2], rwL[3]).matAb;
 ListBL1:[];
 ListBL1:cons(addcol(matA1, vB), ListBL1);
 ListBL1:cons(addcol(rand([matA2, matA3]), vB), ListBL1);
-ListBL1:cons(addcol(rand([matA4, matA5]), vB), ListBL1);
-ListBL1:cons(addcol(matA6, vB), ListBL1);
+ListBL1:cons(rand([matA4, matA5]), ListBL1);
+ListBL1:cons(matA6, ListBL1);
 
 ListBL2:[matA, matA1, matA2, matA3];
 
