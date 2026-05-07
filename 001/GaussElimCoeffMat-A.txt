@@ -32,7 +32,8 @@ xLS:tex2(sequenceify(xL));
 vB:genmatrix(lambda([i, j], rand([-3, -2, -1, 1, 2, 3])), rw, 1);
 
 QuestionEq:%_mkEq(matA, vB, xL);
-ListAL1:[addcol(matA, vB)];
+matAb:addcol(matA, vB);
+ListAL1:[matAb];
 
 clL:%_rp(makelist(k, k, cl));
 matA1:matA.kihonR(cl, clL[1], clL[2]);
@@ -40,9 +41,9 @@ matA2:matA.kihonR(cl, clL[1], clL[3]);
 matA3:matA.kihonR(cl, clL[2], clL[3]);
 
 rwL:%_rp(makelist(k, k, rw));
-matA4:kihonR(rw, rwL[1], rwL[2]);
-matA5:kihonR(rw, rwL[1], rwL[3]);
-matA6:kihonR(rw, rwL[2], rwL[3]);
+matA4:kihonR(rw, rwL[1], rwL[2]).matAb;
+matA5:kihonR(rw, rwL[1], rwL[3]).matAb;
+matA6:kihonR(rw, rwL[2], rwL[3]).matAb;
 
 
 ListBL1:[];
