@@ -28,10 +28,10 @@ matA:genmatrix(lambda([i, j], aL[pmod(cl*(i-1)+j, length(aL))]), rw, cl);
 xyz:%_rp([u, v, w, x, y, z]);
 
 xL:rand([makelist(x[k], k, 1, cl), makelist(xyz[k], k, 1, cl)]);
-xLS:sequenceify(xL);
+xLS:tex2(sequenceify(xL));
 vB:genmatrix(lambda([i, j], rand([-3, -2, -1, 1, 2, 3])), rw, 1);
 
-QuestionEq:%_mkERq(matA, vB, xL);
+QuestionEq:%_mkEq(matA, vB, xL);
 ListAL1:[addcol(matA, vB)];
 
 clL:%_rp(makelist(k, k, cl));
