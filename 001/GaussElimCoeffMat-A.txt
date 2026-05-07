@@ -23,8 +23,10 @@ cl:rand([3, 4]);/* max 6, min 3 */
   s:sconcat(s, "\\end{array}\\right.\\)"), return(s));
 
 aL:%_rp(append(makelist(k, k, -9, 9), makelist(0, 2)));
+zL:append([0], %_rp(append(makelist(0, cl-2), [1])));
 pmod(a, n):=if mod(a, n)=0 then n else mod(a, n);
-matA:genmatrix(lambda([i, j], aL[pmod(cl*(i-1)+j, length(aL))]), rw, cl);
+%_zi:rand(rw)+1;
+matA:genmatrix(lambda([i, j], if i=%_zi then zL[j] else aL[pmod(cl*(i-1)+j, length(aL))]), rw, cl);
 xyz:%_rp([u, v, w, x, y, z]);
 
 xL:rand([makelist(x[k], k, 1, cl), makelist(xyz[k], k, 1, cl)]);
