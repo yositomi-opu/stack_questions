@@ -16,11 +16,11 @@ nmL:[1, 2, 3, 4, 5];
 rw:rand([3, 4]);
 cl:rand([3, 4]);/* max 6, min 3 */
 
-%_mkEq(A, b, xL):=block([s:"\\(\\begin{array}{ccc}", k, vx], vx:transpose(matrix(xL)),
+%_mkEq(A, b, xL):=block([s:"\\(\\left\\{\\begin{array}{ccc}", k, vx], vx:transpose(matrix(xL)),
   for k:1 thru length(A) do (
     s:sconcat(s, display_polynomial_varlist_tex1((matA.vx)[k, 1], xL), "&=&", tex1(b[k, 1])),
     if k<length(A) then s:sconcat(s, "\\\\")),
-  s:sconcat(s, "\\end{array}\\)"), return(s));
+  s:sconcat(s, "\\end{array}\\right.\\)"), return(s));
 
 aL:%_rp(append(makelist(k, k, -9, 9), makelist(0, 2)));
 pmod(a, n):=if mod(a, n)=0 then n else mod(a, n);
@@ -58,11 +58,11 @@ ListBL2:[matA, matA1, matA2, matA3];
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("The system of linear equations with variables ", xLS, " is given by ", QuestionEq, ". Choose the augmented matrix.")],
- ["fr", sconcat("Le système d’équations linéaires à variables ", xLS, " est donné par ", QuestionEq, ". Choisissez la matrice augmentée.")],
- ["de", sconcat("Das lineare Gleichungssystem mit den Variablen ", xLS, " ist durch ", QuestionEq, " gegeben. Wählen Sie die erweiterte Koeffizientenmatrix.")],
- ["it", sconcat("Il sistema di equazioni lineari nelle variabili ", xLS, " è dato da ", QuestionEq, ". Scegli la matrice aumentata.")],
- ["ja", sconcat("変数", xLS, "に関する連立1次方程式の方程式が", QuestionEq, "であるという. <b>拡大</b>係数行列を選べ.")]];
+%__mcq_qtextL:[["en", sconcat("The system of linear equations with variables ", xLS, " is given by<br>", QuestionEq, "<br>. Choose the <b>augmented</b> matrix.")],
+ ["fr", sconcat("Le système d’équations linéaires à variables ", xLS, " est donné par<br>", QuestionEq, "<br>. Choisissez la matrice <b>augmentée</b>.")],
+ ["de", sconcat("Das lineare Gleichungssystem mit den Variablen ", xLS, " ist durch<br>", QuestionEq, "<br> gegeben. Wählen Sie die <b>erweiterte</b> Koeffizientenmatrix.")],
+ ["it", sconcat("Il sistema di equazioni lineari nelle variabili ", xLS, " è dato da<br>", QuestionEq, "<br>. Scegli la matrice <b>aumentata</b>.")],
+ ["ja", sconcat("変数", xLS, "に関する連立1次方程式の方程式が<br>", QuestionEq, "<br>であるという. <b>拡大</b>係数行列を選べ.")]];
 
 
 /******************************** List of patterns/feedbacks *****************************/
