@@ -18,7 +18,7 @@ tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(
 rcL:rand([[3, 4], [4, 3], [3, 5], [5, 3], [4, 5], [5, 4]]);
 %_nr:rcL[1];
 %_nc:rcL[2];
-aL:%_rp(makelist(k, k, -9, 9));
+aL:make_random_distribution([[5, 1], [4, 1], [3, 2], [2, 3], [1, 7], [0, 1]]);
 pmod(a, n):=if mod(a, n)=0 then n else mod(a, n);
 /* matA:genmatrix(lambda([i, j], aL[pmod(%_nc*(i-1)+j, length(aL))]), %_nr, %_nc); */
 matP:random_invertible_matrix(%_nr, aL);
