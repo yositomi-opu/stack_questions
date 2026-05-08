@@ -1,0 +1,167 @@
+/******************** MatMapDef-A (cb) ****************/
+/* 001.MCB include file		                      */
+/* Objective: To learn/check dfn of map def by matrix */
+/******************************************************/
+/* c:[1, 3], w:[2, 3] */
+%_MCQ_NUM_OPTS:8;
+%_MCQ_NUM_COPTS:rand([3, 4]);
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* number of rows and cols */
+rcL:rand([[3, 4], [4, 3], [3, 5], [5, 3], [4, 5], [5, 4]]);
+%_nr:rcL[1];
+%_nc:rcL[2];
+aL:%_rp(makelist(k, k, -9, 9));
+pmod(a, n):=if mod(a, n)=0 then n else mod(a, n);
+/* matA:genmatrix(lambda([i, j], aL[pmod(%_nc*(i-1)+j, length(aL))]), %_nr, %_nc); */
+matP:random_invertible_matrix(%_nr, aL);
+matF:randechelon(%_nr, %_nc, [1, 2], [-2, -1, 1, 2]);
+nvL:nullspace2(matF);
+matA:matP.matF;
+nv1:nvL[1];
+nv2:nv1+genmatrix(lambda([i, j], rand([1, -1])), %_nc, 1);
+zerovr:genmatrix(lambda([i, j], 0), %_nr, 1);
+while (matA.nv2=zerovr) do nv2:nv1+genmatrix(lambda([i, j], rand([1, -1])), %_nc, 1);
+
+
+/* start domain and end domain */
+optA1aL:[["en", sconcat("It is a mapping from ", tex2(WR^%_nc), " to ", tex2(WR^%_nr), ".")],
+ ["fr", sconcat("C’est une application de ", tex2(WR^%_nc), " vers ", tex2(WR^%_nr), ".")],
+ ["de", sconcat("Es ist eine Abbildung von ", tex2(WR^%_nc), " nach ", tex2(WR^%_nr), ".")],
+ ["it", sconcat("È un’applicazione da ", tex2(WR^%_nc), " a ", tex2(WR^%_nr), ".")],
+ ["ja", sconcat(tex2(WR^%_nc), "から", tex2(WR^%_nr), "への写像である.")]];
+optA1a:%__mcq_lang(optA1aL, %_STACK_LANG);
+optB1aL:[["en", sconcat("It is a mapping from ", tex2(WR^%_nr), " to ", tex2(WR^%_nc), ".")],
+ ["fr", sconcat("C’est une application de ", tex2(WR^%_nr), " vers ", tex2(WR^%_nc), ".")],
+ ["de", sconcat("Es ist eine Abbildung von ", tex2(WR^%_nr), " nach ", tex2(WR^%_nc), ".")],
+ ["it", sconcat("È un’applicazione da ", tex2(WR^%_nr), " a ", tex2(WR^%_nc), ".")],
+ ["ja", sconcat(tex2(WR^%_nr), "から", tex2(WR^%_nc), "への写像である.")]];
+optB1a:%__mcq_lang(optB1aL, %_STACK_LANG);
+optB1bL:[["en", sconcat("It is a mapping from ", tex2(WR^%_nr), " to ", tex2(WR), ".")],
+ ["fr", sconcat("C’est une application de ", tex2(WR^%_nr), " vers ", tex2(WR), ".")],
+ ["de", sconcat("Es ist eine Abbildung von ", tex2(WR^%_nr), " nach ", tex2(WR), ".")],
+ ["it", sconcat("È un’applicazione da ", tex2(WR^%_nr), " a ", tex2(WR), ".")],
+ ["ja", sconcat(tex2(WR^%_nr), "から", tex2(WR), "への写像である.")]];
+optB1b:%__mcq_lang(optB1bL, %_STACK_LANG);
+
+/* mapsto list */
+optA2aL:[["en", sconcat("It maps the basis vector ", tex2(We[1]), " to ", tex2(col(matA, 1)), ".")],
+ ["fr", sconcat("Elle envoie le vecteur de base ", tex2(We[1]), " sur ", tex2(col(matA, 1)), ".")],
+ ["de", sconcat("Sie bildet den Basisvektor ", tex2(We[1]), " auf ", tex2(col(matA, 1)), " ab.")],
+ ["it", sconcat("Manda il vettore di base ", tex2(We[1]), " in ", tex2(col(matA, 1)), ".")],
+ ["ja", sconcat("基本ベクトル", tex2(We[1]), "を", tex2(col(matA, 1)), "写す.")]];
+optA2a: %__mcq_lang(optA2aL, %_STACK_LANG);
+optA2bL:[["en", sconcat("It maps the basis vector ", tex2(We[2]), " to ", tex2(col(matA, 2)), ".")],
+ ["fr", sconcat("Elle envoie le vecteur de base ", tex2(We[2]), " sur ", tex2(col(matA, 2)), ".")],
+ ["de", sconcat("Sie bildet den Basisvektor ", tex2(We[2]), " auf ", tex2(col(matA, 2)), " ab.")],
+ ["it", sconcat("Manda il vettore di base ", tex2(We[2]), " in ", tex2(col(matA, 2)), ".")],
+ ["ja", sconcat("基本ベクトル", tex2(We[2]), "を", tex2(col(matA, 2)), "写す.")]];
+optA2b: %__mcq_lang(optA2bL, %_STACK_LANG);
+optA2cL:[["en", sconcat("It maps the vector ", tex2(nv1), " to the zero vector.")],
+ ["fr", sconcat("Elle envoie le vecteur ", tex2(nv1), " sur le vecteur nul.")],
+ ["de", sconcat("Sie bildet den Vektor ", tex2(nv1), " auf den Nullvektor ab.")],
+ ["it", sconcat("Manda il vettore ", tex2(nv1), " nel vettore nullo.")],
+ ["ja", sconcat("ベクトル", tex2(nv1), "を零ベクトルに写す.")]];
+optA2c: %__mcq_lang(optA2cL, %_STACK_LANG);
+
+optB2aL:[["en", sconcat("It maps the basis vector ", tex2(We[1]), " to ", tex2(row(matA, 1)), ".")],
+ ["fr", sconcat("Elle envoie le vecteur de base ", tex2(We[1]), " sur ", tex2(row(matA, 1)), ".")],
+ ["de", sconcat("Sie bildet den Basisvektor ", tex2(We[1]), " auf ", tex2(row(matA, 1)), " ab.")],
+ ["it", sconcat("Manda il vettore di base ", tex2(We[1]), " in ", tex2(row(matA, 1)), ".")],
+ ["ja", sconcat("基本ベクトル", tex2(We[1]), "を", tex2(row(matA, 1)), "写す.")]];
+optB2a: %__mcq_lang(optB2aL, %_STACK_LANG);
+optB2bL:[["en", sconcat("It maps the basis vector ", tex2(We[2]), " to ", tex2(col(matA, 1)), ".")],
+ ["fr", sconcat("Elle envoie le vecteur de base ", tex2(We[2]), " sur ", tex2(col(matA, 1)), ".")],
+ ["de", sconcat("Sie bildet den Basisvektor ", tex2(We[2]), " auf ", tex2(col(matA, 1)), " ab.")],
+ ["it", sconcat("Manda il vettore di base ", tex2(We[2]), " in ", tex2(col(matA, 1)), ".")],
+ ["ja", sconcat("基本ベクトル", tex2(We[2]), "を", tex2(col(matA, 1)), "写す.")]];
+optB2b: %__mcq_lang(optB2bL, %_STACK_LANG);
+optB2cL:[["en", sconcat("It maps the vector ", tex2(nv2), " to the zero vector.")],
+ ["fr", sconcat("Elle envoie le vecteur ", tex2(nv2), " sur le vecteur nul.")],
+ ["de", sconcat("Sie bildet den Vektor ", tex2(nv2), " auf den Nullvektor ab.")],
+ ["it", sconcat("Manda il vettore ", tex2(nv2), " nel vettore nullo.")],
+ ["ja", sconcat("ベクトル", tex2(nv2), "を零ベクトルに写す.")]];
+optB2c: %__mcq_lang(optB2cL, %_STACK_LANG);
+
+
+ListAL1:[optA1a];
+ListAL2:[optA2a, optA2b, optA2c];
+ListBL1:[optB1a, optB1b];
+ListBL2:[optB2a, optB2b, optB2c];
+
+/* security check */
+SetAL1:setify(ListAL1);
+SetAL2:setify(ListAL2);
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/* SetBL3:setify(ListBL3); */
+chkAA12:intersection(SetAL1,SetAL2);
+chkAB11:intersection(SetAL1,SetBL1);
+chkAB12:intersection(SetAL1,SetBL2);
+/* chkAB13:intersection(SetAL1,SetBL3); */
+chkAB21:intersection(SetAL2,SetBL1);
+chkAB22:intersection(SetAL2,SetBL2);
+/* chkAB23:intersection(SetAL2,SetBL3); */
+chkBB12:intersection(SetBL1,SetBL2);
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+/* allchk:[chkAB11]; */
+allchk:[chkAA12, chkAB11, chkAB12, chkAB21, chkAB22, chkBB12];
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Select all correct statements about the mapping defined by the matrix ", tex2(matA), ".")],
+ ["fr", sconcat("Sélectionnez toutes les affirmations correctes concernant l’application définie par la matrice ", tex2(matA), ".")],
+ ["de", sconcat("Wählen Sie alle richtigen Aussagen über die durch die Matrix ", tex2(matA), " definierte Abbildung aus.")],
+ ["it", sconcat("Seleziona tutte le affermazioni corrette riguardanti l’applicazione definita dalla matrice ", tex2(matA), ".")],
+ ["ja", sconcat("行列", tex2(matA), "の定める写像について正しいものをすべて選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "You seem to understand the domain and codomain of the mapping defined by a matrix."],
+ ["fr", "Vous semblez comprendre le domaine de départ et le domaine d’arrivée de l’application définie par une matrice."],
+ ["de", "Sie scheinen den Definitionsbereich und den Zielbereich der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Sembra che tu comprenda il dominio e il codominio dell’applicazione definita da una matrice."],
+ ["ja", "行列の定める写像の始域と終域が理解できているようです."]];
+
+/* Correct answer pattern 2 */
+%__CoptL2:ListAL2;
+%__Cmsg1L:[["en", "You seem to understand that, in the mapping defined by a matrix, the basis vectors correspond to the column vectors of the matrix."],
+ ["fr", "Vous semblez comprendre que, dans l’application définie par une matrice, les vecteurs de base correspondent aux vecteurs colonnes de la matrice."],
+ ["de", "Sie scheinen zu verstehen, dass bei der durch eine Matrix definierten Abbildung die Basisvektoren den Spaltenvektoren der Matrix entsprechen."],
+ ["it", "Sembra che tu comprenda che, nell’applicazione definita da una matrice, i vettori di base corrispondono ai vettori colonna della matrice."],
+ ["ja", "行列の定める写像では, 基本ベクトルが行列の各列ベクトルに対応することが理解できているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "A mapping defined by a matrix is the vector version of the proportional function \\(y=ax\\), where \\(x\\) and \\(y\\) are vectors. Since an \\(m\\)-dimensional number vector is an \\(m\\times 1\\) matrix, the product \\(Ax\\) is defined only when \\(A\\) has \\(m\\) columns. Then the image vector \\(y\\) has the same number of components as the number of rows of \\(A\\). If this explanation is not yet clear, please repeat it until it becomes understandable."],
+ ["fr", "Une application définie par une matrice est la version vectorielle de la fonction proportionnelle \\(y=ax\\), où \\(x\\) et \\(y\\) sont des vecteurs. Comme un vecteur numérique de dimension \\(m\\) est une matrice \\(m\\times 1\\), le produit \\(Ax\\) n’est défini que lorsque \\(A\\) possède \\(m\\) colonnes. Le vecteur image \\(y\\) possède alors autant de composantes que le nombre de lignes de \\(A\\). Si cette explication n’est pas encore claire, répétez-la jusqu’à ce qu’elle le devienne."],
+ ["de", "Eine durch eine Matrix definierte Abbildung ist die Vektorversion der proportionalen Funktion \\(y=ax\\), wobei \\(x\\) und \\(y\\) Vektoren sind. Da ein \\(m\\)-dimensionaler Zahlenvektor eine \\(m\\times 1\\)-Matrix ist, ist das Produkt \\(Ax\\) nur definiert, wenn \\(A\\) \\(m\\) Spalten besitzt. Dann hat der Bildvektor \\(y\\) genauso viele Komponenten wie \\(A\\) Zeilen hat. Wenn diese Erklärung noch nicht verständlich ist, wiederholen Sie sie bitte, bis sie verständlich wird."],
+ ["it", "Un’applicazione definita da una matrice è la versione vettoriale della funzione proporzionale \\(y=ax\\), dove \\(x\\) e \\(y\\) sono vettori. Poiché un vettore numerico di dimensione \\(m\\) è una matrice \\(m\\times 1\\), il prodotto \\(Ax\\) è definito solo quando \\(A\\) ha \\(m\\) colonne. Il vettore immagine \\(y\\) ha quindi lo stesso numero di componenti del numero di righe di \\(A\\). Se questa spiegazione non è ancora chiara, ripetila finché non diventa comprensibile."],
+ ["ja", "行列の定める写像というは, 比例関数\\(y=ax\\)の\\(x, y\\)がベクトルの場合です. \\(m\\)次元数ベクトルは, \\(m\\times 1 \\)行列なので, 積 \\( Ax \\)が定義されているのは, \\( A \\)が\\(m\\) 列, そして, 写り先 \\(y\\)は\\(A\\)の行数と同じになります. この説明でわからないときは, わかるまで繰り返して下さい."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:ListBL2;
+%__Wmsg2L:[["en", "How a mapping defined by a matrix (a matrix map) sends elements of the domain is determined by computing the product. In particular, since the product with basis vectors simply gives the column vectors of the matrix, their images can be found easily."],
+ ["fr", "La manière dont une application définie par une matrice (application matricielle) envoie les éléments du domaine se détermine en calculant le produit. En particulier, comme le produit avec les vecteurs de base donne simplement les vecteurs colonnes de la matrice, leurs images peuvent être trouvées facilement."],
+ ["de", "Wie eine durch eine Matrix definierte Abbildung (Matrixabbildung) Elemente des Definitionsbereichs abbildet, erkennt man durch Berechnung des Produkts. Insbesondere liefert das Produkt mit Basisvektoren einfach die Spaltenvektoren der Matrix, sodass ihre Bilder leicht bestimmt werden können."],
+ ["it", "Il modo in cui un’applicazione definita da una matrice (applicazione matriciale) manda gli elementi del dominio si determina calcolando il prodotto. In particolare, poiché il prodotto con i vettori di base restituisce semplicemente i vettori colonna della matrice, le loro immagini si trovano facilmente."],
+ ["ja", "行列の定める写像(行列写像)が定義域(始域)の元をどのように写すかは積を計算すればわかるのです. 特に, 基本ベクトルとの積は行列の列ベクトルが出てくるだけなので, 容易に像がわかります."]];
+/********** EOF **********/
