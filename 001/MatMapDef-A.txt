@@ -143,7 +143,7 @@ allchk:[chkAA12, chkAB11, chkAB12, chkAB21, chkAB22, chkBB12];
 
 /* Correct answer pattern 2 */
 %__CoptL2:ListAL2;
-%__Cmsg1L:[["en", "You seem to understand that, in the mapping defined by a matrix, the basis vectors correspond to the column vectors of the matrix."],
+%__Cmsg2L:[["en", "You seem to understand that, in the mapping defined by a matrix, the basis vectors correspond to the column vectors of the matrix."],
  ["fr", "Vous semblez comprendre que, dans l’application définie par une matrice, les vecteurs de base correspondent aux vecteurs colonnes de la matrice."],
  ["de", "Sie scheinen zu verstehen, dass bei der durch eine Matrix definierten Abbildung die Basisvektoren den Spaltenvektoren der Matrix entsprechen."],
  ["it", "Sembra che tu comprenda che, nell’applicazione definita da una matrice, i vettori di base corrispondono ai vettori colonna della matrice."],
