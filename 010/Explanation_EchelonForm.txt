@@ -1,4 +1,4 @@
-%_KAISETU:[["en", sconcat("<h2>Echelon Matrices</h2>",
+%_KAISETU_Lang:[["en", sconcat("<h2>Echelon Matrices</h2>",
 "<p>A matrix is called an echelon matrix if it satisfies the following conditions.</p>",
 "<ul>",
 "<li>All zero rows, if any, are placed below the nonzero rows.</li>",
