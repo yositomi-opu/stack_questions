@@ -1,0 +1,145 @@
+%_rp(L):=random_permutation(L);
+%__gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+%__lang(L):=block([m], m:%__gaa(L, %_STACK_LANG), if m="" then m:%__gaa(L, "en"), return (m));
+
+%_nr:rand([4, 5]);
+%_nc:%_nr+rand([1, 1, 2]);
+pv1:[1, 2, 3, 4];
+pv2:[1, rand([2, 3]), 4];
+pv3:[2, rand([3, 4])];
+matF1:randechelon(%_nr, %_nc, pv1, [-2, -1, 1, 2]);
+matF2:randechelon(%_nr, %_nc, pv2, [-2, -1, 1, 2]);
+matF3:randechelon(%_nr, %_nc, pv3, [-2, -1, 1, 2]);
+pL:make_random_distribution_pm([[3, 1], [2, 2], [1, 10], [0, 3]]);
+matP:random_matrix_det_list(%_nr, pL, [-1, 1]);
+matA1:matP.matF1;
+matA2:matP.matF2;
+matA3:matP.matF3;
+eL:[-2, -1, 1, 2];
+matEC1:kihonP(%_nr, 1, 2, rand(eL)).kihonP(%_nr, 2, 3, rand(eL)).matF1;
+matEC2:kihonP(%_nr, 1, 2, rand(eL)).kihonP(%_nr, 2, 3, rand(eL)).matF2;
+matEC3:kihonP(%_nr, 1, 2, rand(eL)).kihonP(%_nr, 2, 3, rand(eL)).matF3;
+matEC4:echelon(genmatrix(lambda([i, j], rand(pL)), %_nr, %_nc));
+matNE1:kihonP(%_nr, 2, 1, rand(eL)).matEC1;
+matNE2:kihonP(%_nr, 3, rand([1, 2]), rand(eL)).matEC2;
+matNE3:kihonP(%_nr, rand([2, 3]), 1, rand(eL)).matEC3;
+matNE4:kihonR(%_nr, 1, 2).rand([matEC1, matEC2, matEC3, matEC4]);
+matNE5:kihonR(%_nr, 2, 3).rand([matEC1, matEC2, matEC3, matEC4]);
+
+TFS:[
+%__lang([["en", "It is an echelon matrix."],
+ ["fr", "C’est une matrice échelonnée."],
+ ["de", "Es ist eine Stufenmatrix."],
+ ["it", "È una matrice a scala."],
+ ["ja", "階段行列である."]]),
+%__lang([["en", "It is not an echelon matrix."],
+ ["fr", "Ce n’est pas une matrice échelonnée."],
+ ["de", "Es ist keine Stufenmatrix."],
+ ["it", "Non è una matrice a scala."],
+ ["ja", "階段行列ではない."]])];
+
+%_mkva(c):=makelist([k, if k=c then true else false, if k=0 then "--" else TFS[k]], k, 0, 2);
+matAL:[genmatrix(lambda([i, j], 0), %_nr, %_nc)];
+matAL:append(matAL, %_rp([matEC1, matEC2, matEC3, matEC4, matNE1, matNE2, matNE3, matNE4, matNE5]));
+taL:makelist(if isechelon(matAL[k]) then 1 else 2, k, 1, 10);
+vaL:map(%_mkva, taL);
+
+KAISETU:%__lang(%_KAISETU_Lang);
+question_text:%__lang([["en", "Determine whether each of the following matrices is an echelon matrix."],
+ ["fr", "Déterminez si chacune des matrices suivantes est une matrice échelonnée."],
+ ["de", "Bestimmen Sie, ob jede der folgenden Matrizen eine Stufenmatrix ist."],
+ ["it", "Stabilisci se ciascuna delle seguenti matrici è una matrice a scala."],
+ ["ja", "以下の各行列について, 階段行列であるかどうか判定してみよう."]]);
+
+REIDAI:%__lang([["en", "<h3>Examples</h3>"],
+["fr", "<h3>Exemples</h3>"],
+["de", "<h3>Beispiele</h3>"],
+["it", "<h3>Esempi</h3>"],
+["ja", "<h3>例題</h3>"]]);
+
+%_KAISETU_Lang:[["en", sconcat("<h2>Echelon Matrices</h2>",
+"<p>A matrix is called an echelon matrix if it satisfies the following conditions.</p>",
+"<ul>",
+"<li>If there are zero rows, they are placed below all nonzero rows.</li>",
+"<li>If there are nonzero rows, then for each row, the first nonzero entry appears strictly to the right of the first nonzero entry in the row above.</li>",
+"</ul>",
+"<p>In other words, all zero rows are at the bottom, and in the nonzero rows, the nonzero entries form a staircase pattern from top to bottom.<br></p>",
+"<p>In a nonzero row, the first nonzero entry from the left is called the <b>pivot</b>.</p>",
+"<p>That is, if the pivot columns of each row are \\(j_1, j_2, j_3, \\dots\\), then they satisfy \\(j_1&lt;j_2&lt;j_3&lt;\\cdots\\).</p>",
+"<p>By the way, the zero matrix is an echelon matrix. Also, the first column may be a zero column.</p>",
+"<h3>Examples of echelon matrices:</h3>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\0&0&3\\\\0&0&0\\end{pmatrix}\\), \\(\\begin{pmatrix}0&0&0\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>In the first example, the pivot columns are the second and third columns, which increase monotonically. In the second example, since it is the zero matrix and has no nonzero rows, it is an echelon matrix.</p><p></p>",
+"<h4>Examples that are not echelon matrices:</h4>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\1&0&3\\end{pmatrix}\\), \\(\\begin{pmatrix}1&2&0\\\\0&0&0\\\\0&3&4\\end{pmatrix}\\)</p>",
+"<p>In the first example, the pivot columns appear in the order second column then first column, so they decrease. In the second example, there is a zero row in the second row, but there is a nonzero row below it, so it is not an echelon matrix.</p>")],
+
+ ["fr", sconcat("<h2>Matrices échelonnées</h2>",
+"<p>Une matrice est appelée matrice échelonnée si elle satisfait les conditions suivantes.</p>",
+"<ul>",
+"<li>S’il existe des lignes nulles, elles sont placées sous toutes les lignes non nulles.</li>",
+"<li>S’il existe des lignes non nulles, alors pour chaque ligne, le premier élément non nul apparaît strictement à droite du premier élément non nul de la ligne précédente.</li>",
+"</ul>",
+"<p>Autrement dit, toutes les lignes nulles sont placées en bas, et dans les lignes non nulles, les éléments non nuls forment un motif en escalier de haut en bas.<br></p>",
+"<p>Dans une ligne non nulle, le premier élément non nul à partir de la gauche est appelé <b>pivot</b>.</p>",
+"<p>Ainsi, si les colonnes des pivots sont \\(j_1, j_2, j_3, \\dots\\), alors elles vérifient \\(j_1&lt;j_2&lt;j_3&lt;\\cdots\\).</p>",
+"<p>Par ailleurs, la matrice nulle est une matrice échelonnée. De plus, la première colonne peut être une colonne nulle.</p>",
+"<h3>Exemples de matrices échelonnées :</h3>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\0&0&3\\\\0&0&0\\end{pmatrix}\\), \\(\\begin{pmatrix}0&0&0\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>Dans le premier exemple, les colonnes des pivots sont la deuxième et la troisième colonne, et elles augmentent de manière monotone. Dans le second exemple, comme il s’agit de la matrice nulle sans ligne non nulle, c’est une matrice échelonnée.</p><p></p>",
+"<h4>Exemples qui ne sont pas des matrices échelonnées :</h4>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\1&0&3\\end{pmatrix}\\), \\(\\begin{pmatrix}1&2&0\\\\0&0&0\\\\0&3&4\\end{pmatrix}\\)</p>",
+"<p>Dans le premier exemple, les colonnes des pivots apparaissent dans l’ordre deuxième puis première colonne, donc elles diminuent. Dans le second exemple, il y a une ligne nulle à la deuxième ligne, mais une ligne non nulle en dessous, donc ce n’est pas une matrice échelonnée.</p>")],
+
+ ["de", sconcat("<h2>Stufenmatrizen</h2>",
+"<p>Eine Matrix heißt Stufenmatrix, wenn sie die folgenden Bedingungen erfüllt.</p>",
+"<ul>",
+"<li>Falls Nullzeilen vorhanden sind, stehen sie unter allen Nichtnullzeilen.</li>",
+"<li>Falls Nichtnullzeilen vorhanden sind, liegt in jeder Zeile der erste von null verschiedene Eintrag streng rechts vom ersten von null verschiedenen Eintrag der darüberliegenden Zeile.</li>",
+"</ul>",
+"<p>Mit anderen Worten: Alle Nullzeilen stehen unten, und in den Nichtnullzeilen bilden die von null verschiedenen Einträge von oben nach unten ein Treppenmuster.<br></p>",
+"<p>Der erste von null verschiedene Eintrag einer Nichtnullzeile heißt <b>Pivot</b>.</p>",
+"<p>Wenn also die Pivotspalten \\(j_1, j_2, j_3, \\dots\\) sind, gilt \\(j_1&lt;j_2&lt;j_3&lt;\\cdots\\).</p>",
+"<p>Die Nullmatrix ist ebenfalls eine Stufenmatrix. Außerdem darf die erste Spalte eine Nullspalte sein.</p>",
+"<h3>Beispiele für Stufenmatrizen:</h3>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\0&0&3\\\\0&0&0\\end{pmatrix}\\), \\(\\begin{pmatrix}0&0&0\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>Im ersten Beispiel sind die Pivotspalten die zweite und dritte Spalte, also monoton wachsend. Im zweiten Beispiel handelt es sich um die Nullmatrix ohne Nichtnullzeilen, daher ist sie eine Stufenmatrix.</p><p></p>",
+"<h4>Beispiele, die keine Stufenmatrizen sind:</h4>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\1&0&3\\end{pmatrix}\\), \\(\\begin{pmatrix}1&2&0\\\\0&0&0\\\\0&3&4\\end{pmatrix}\\)</p>",
+"<p>Im ersten Beispiel erscheinen die Pivotspalten in der Reihenfolge zweite Spalte, dann erste Spalte, also abnehmend. Im zweiten Beispiel gibt es in der zweiten Zeile eine Nullzeile, darunter jedoch eine Nichtnullzeile, daher ist die Matrix keine Stufenmatrix.</p>")],
+
+ ["it", sconcat("<h2>Matrici a scala</h2>",
+"<p>Una matrice si chiama matrice a scala se soddisfa le seguenti condizioni.</p>",
+"<ul>",
+"<li>Se esistono righe nulle, esse si trovano sotto tutte le righe non nulle.</li>",
+"<li>Se esistono righe non nulle, allora in ogni riga il primo elemento non nullo compare strettamente a destra del primo elemento non nullo della riga precedente.</li>",
+"</ul>",
+"<p>In altre parole, tutte le righe nulle si trovano in basso, e nelle righe non nulle gli elementi non nulli formano una struttura a scala dall’alto verso il basso.<br></p>",
+"<p>In una riga non nulla, il primo elemento non nullo da sinistra si chiama <b>pivot</b>.</p>",
+"<p>Cioè, se le colonne dei pivot sono \\(j_1, j_2, j_3, \\dots\\), allora vale \\(j_1&lt;j_2&lt;j_3&lt;\\cdots\\).</p>",
+"<p>Inoltre, la matrice nulla è una matrice a scala. Anche la prima colonna può essere una colonna nulla.</p>",
+"<h3>Esempi di matrici a scala:</h3>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\0&0&3\\\\0&0&0\\end{pmatrix}\\), \\(\\begin{pmatrix}0&0&0\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>Nel primo esempio, le colonne dei pivot sono la seconda e la terza colonna e crescono monotonamente. Nel secondo esempio, essendo la matrice nulla senza righe non nulle, è una matrice a scala.</p><p></p>",
+"<h4>Esempi che non sono matrici a scala:</h4>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\1&0&3\\end{pmatrix}\\), \\(\\begin{pmatrix}1&2&0\\\\0&0&0\\\\0&3&4\\end{pmatrix}\\)</p>",
+"<p>Nel primo esempio, le colonne dei pivot compaiono nell’ordine seconda colonna poi prima colonna, quindi diminuiscono. Nel secondo esempio, c’è una riga nulla nella seconda riga ma sotto di essa compare una riga non nulla, quindi non è una matrice a scala.</p>")],
+
+ ["ja", sconcat("<h2>階段行列</h2>",
+"<p>行列が次の条件を満たすとき, 階段行列といいます.</p>",
+"<ul>",
+"<li>零行がある場合，それらは零でない行よりも下にある.</li>",
+"<li>零でない行がある場合は, 各行について，その行で最初に現れる\\(0\\)でない成分は, 1つ上の行で最初に現れる\\(0\\)でない成分よりも真に右にある.</li>",
+"</ul>",
+"<p>つまり, 零行ベクトルは全部下側にあり, そうでない行は, 零でない成分が上から階段上に右にならんでいる, ということです.<br></p>",
+"<p>零行ベクトルでない行において, 左から見て最初の\\(0\\)でない成分のことを<b>主成分(pivot)</b>と言います.</p>",
+"<p>つまり, 各行の pivot のある列を\\(j_1, j_2, j_3, \\dots\\)とすると, \\(j_1&lt; j_2&lt; j_3 &lt;\\cdots\\)となっているということです.</p>",
+"<p>ちなみに, 零行列は階段行列です. また, 先頭の列が零列であっても構いません.</p>",
+"<h3>階段行列である例：</h3>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\0&0&3\\\\0&0&0\\end{pmatrix}\\), \\(\\begin{pmatrix}0&0&0\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>1つ目の例では，pivot の列が, 2列目, 3列目で単調増加しています. また, 2つ目の例は零行列で非零行がないので, 階段行列です.</p><p></p>",
+"<h4>階段行列でない例：</h4>",
+"<p>\\(\\begin{pmatrix}0&1&2\\\\1&0&3\\end{pmatrix}\\), \\(\\begin{pmatrix}1&2&0\\\\0&0&0\\\\0&3&4\\end{pmatrix}\\)</p>",
+"<p>1つ目の例では，pivot の列が, 2列目, 1列目で減少しています. また, 2つ目の例では，2行目に零行があり, その下に零でない行があるので, 階段行列ではありません.</p>")]
+];
+
