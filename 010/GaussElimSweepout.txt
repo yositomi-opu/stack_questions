@@ -1,0 +1,212 @@
+/******* GaussElimSweepout *********/
+/* require: ky_linear_algebra.mac  */
+/***********************************/
+
+%_rp(L):=random_permutation(L);
+%__gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+%__lang(L):=block([m], m:%__gaa(L, %_STACK_LANG), if m="" then m:%__gaa(L, "en"), return (m));
+
+%_nr1:rand([3, 4]);
+%_nc1:%_nr1+rand([0, 1, 1, 2]);
+%_nr2:rand([4, 5]);
+%_nc2:%_nr1+rand([0, 1, 1, 2]);
+%_nr3:4;
+%_nc3:%_nr1+rand([2, 2, 3, 4]);
+pv1:[1, 2, 3];
+pv2:[1, 3, 4];
+pv3:[1, 2, 4];
+matF1:randechelon(%_nr1, %_nc1, pv1, [-2, -1, 1, 2]);
+matF2:randechelon(%_nr2, %_nc2, pv2, [-2, -1, 1, 2]);
+matF3:randechelon(%_nr3, %_nc3, pv3, [-2, -1, 1, 2]);
+aL:%_rp([-4, -3, -2, -1, -1, 1, 1, 2, 3, 4]);
+qL:%_rp([-3, -2, -2, -1, 2, 2, 3, 4]);
+matA1:kihonP(%_nr1, 2, 1, aL[1]).kihonP(%_nr1, 3, 1, aL[2]).kihonP(%_nr1, 1, 2, aL[3]).kihonP(%_nr1, 1, 3, aL[4]).matF1;
+matA2:kihonQ(%_nr, 1, qL[3]).kihonQ(%_nr2, 2, qL[2]).kihonQ(%_nr2, %_nr2, qL[1]).matF2;
+matA2:kihonP(%_nr2, 1, 2, aL[5]).kihonP(%_nr2, 1, %_nr2, aL[4]).matA2;
+matA3:kihonP(%_nr3, 2, 1, aL[6]).kihonP(%_nr3, 3, 1, aL[7]).kihonP(%_nr3, 4, 1, aL[8]).matF3;
+matA3:kihonP(%_nr3, 1, 2, 3).matA3;
+
+%_KAISETU_Lang:[["en", sconcat("<h2>Elimination Method and Rank</h2>",
+"<p>The number of nonzero rows in an echelon matrix is called the <b>rank</b> of the matrix.</p>",
+"<p>For example, the matrix</p>",
+"<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>is an echelon matrix. Since it has two nonzero rows, its rank is \\(2\\).</p><p></p>",
+"<p>A general matrix is not necessarily an echelon matrix from the beginning. However, by repeatedly applying <b>elementary row operations</b>, any matrix can be transformed into an echelon matrix.</p>",
+"<p>The basic computational method for doing this is called the <b>elimination method</b>.</p>",
+"<p>In the elimination method, we use a pivot in each column and make the entries below it equal to \\(0\\). By proceeding from the upper left, we can transform the matrix into an echelon matrix.</p>",
+"<p>For example, consider the matrix</p>",
+"<p>\\(\\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&1&0\\end{pmatrix}\\)</p>",
+"<p>If we subtract \\(2\\) times the first row from the second row, and subtract \\(1\\) times the first row from the third row, then</p>",
+"<p>\\(\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\1&1&0\\end{pmatrix}\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\0&-1&-3\\end{pmatrix}\\)</p>",
+"<p>is obtained. Then, by swapping the second and third rows, we obtain an echelon matrix.</p>",
+"<p>The number of nonzero rows in the echelon matrix obtained in this way is defined as the rank of the original matrix \\(A\\), and is denoted by \\(\\rank A\\).</p>",
+"<p>At first glance, it may seem that different echelon matrices could be obtained depending on the way the matrix is transformed. However, as will be shown later, <b>the number of nonzero rows is the same no matter how the transformation is performed</b>. Therefore, the rank is consistently defined as a value intrinsic to the matrix; in other words, it is well-defined.</p>",
+"<p>Now, the elimination method is the following inductive procedure.</p>",
+"<p></p>",
+"<ol><li>Starting from the leftmost column, consider the first column that is not a zero vector; suppose, for example, that it is the second column.</li>",
+"<li>Since it is not the zero vector, it has a nonzero entry. If necessary, swap rows so that the top entry is nonzero.</li>",
+"<li>Using this nonzero entry, apply elementary row operations so that all entries below it become \\(0\\).</li></ol>",
+"<p>By this operation, the matrix takes a form such as \\(\\begin{pmatrix}0&*&*&\\cdots\\\\0&0&*&\\cdots\\\\0&0&*&\\cdots\\end{pmatrix}\\). In other words, it can be written in a form like \\(\\begin{pmatrix}0&*&*&\\cdots&*\\\\0&0&A_1\\end{pmatrix}\\). Repeating the same operation on this \\(A_1\\) from the beginning gives an echelon matrix.</p>",
+"<h3>Example of the elimination method</h3>",
+"<p>Consider the following \\(4\\times 6\\) matrix.</p>",
+"<p>\\(A=\\begin{pmatrix}0&1&2&1&0&3\\\\0&2&4&3&1&7\\\\0&1&3&4&2&8\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>The first column is a zero column, so the pivot in the first row is in the second column and is \\(1\\). We use this to eliminate the entries below it.</p>",
+"<p>First, add \\(-2\\) times the first row to the second row, and add \\(-1\\) times the first row to the third row.</p>",
+"<p>Then we obtain</p>",
+"<p>\\(\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&0&1&1&1\\\\0&0&1&3&2&5\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>Now focus on the part below the first row and to the right of the third column. The first column of this part is \\(\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}\\), which is not the zero vector.</p>",
+"<p>However, its top entry is \\(0\\), so we swap the first and second rows of this part.</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>At this stage, the entries below the pivot are already all \\(0\\), so no elimination is needed here. Finally, we focus on \\(\\begin{pmatrix}1&1&1\\\\1&1&2\\end{pmatrix}\\). Using its \\((1,1)\\) entry, that is, the original \\((3,4)\\) entry, we eliminate the entry below it by adding \\(-1\\) times the third row to the fourth row.</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&0&0&1\\end{pmatrix}\\)</p>",
+"<p>Thus, an echelon matrix is obtained. Therefore, the rank of the original matrix is \\(4\\).</p>",
+"<h3>Summary</h3>",
+"<ul>",
+"<li>The number of nonzero rows in an echelon matrix is called the rank.</li>",
+"<li>Any matrix can be transformed into an echelon matrix by elementary row operations.</li>",
+"<li>The basic computational method for this is the elimination method.</li>",
+"<li>The rank of any matrix is defined as the number of nonzero rows after transforming it into an echelon matrix.</li>",
+"<li>It will be shown later that the rank does not depend on the way the matrix is transformed.</li>",
+"</ul>")],
+
+ ["fr", sconcat("<h2>Élimination de Gauss et rang</h2>",
+"<p>Le nombre de lignes non nulles d’une matrice échelonnée est appelé le <b>rang (rank)</b> de la matrice.</p>",
+"<p>Par exemple, la matrice</p>",
+"<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>est une matrice échelonnée. Comme elle possède deux lignes non nulles, son rang est \\(2\\).</p><p></p>",
+"<p>Une matrice générale n’est pas nécessairement échelonnée dès le départ. Cependant, en répétant des <b>opérations élémentaires sur les lignes</b>, toute matrice peut être transformée en matrice échelonnée.</p>",
+"<p>La méthode fondamentale utilisée pour cela s’appelle l’<b>élimination de Gauss</b>.</p>",
+"<p>Dans cette méthode, on utilise le pivot de chaque colonne afin de rendre progressivement égaux à \\(0\\) les éléments situés en dessous. En répétant cela depuis le coin supérieur gauche, on peut transformer la matrice en matrice échelonnée.</p>",
+"<p>Par exemple, considérons la matrice</p>",
+"<p>\\(\\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&1&0\\end{pmatrix}\\)</p>",
+"<p>Si l’on soustrait \\(2\\) fois la première ligne à la deuxième ligne, puis \\(1\\) fois la première ligne à la troisième ligne, alors</p>",
+"<p>\\(\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\1&1&0\\end{pmatrix}\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\0&-1&-3\\end{pmatrix}\\)</p>",
+"<p>est obtenu. Ensuite, en échangeant les deuxième et troisième lignes, on obtient une matrice échelonnée.</p>",
+"<p>Le nombre de lignes non nulles de cette matrice échelonnée est défini comme le rang de la matrice originale \\(A\\), noté \\(\\rank A\\).</p>",
+"<p>À première vue, il pourrait sembler que différentes matrices échelonnées puissent être obtenues selon la manière de transformer la matrice. Cependant, comme on le verra plus tard, <b>le nombre de lignes non nulles est le même quelle que soit la méthode de transformation</b>. Ainsi, le rang est défini sans ambiguïté comme une valeur propre à la matrice (on dit alors qu’il est well-defined).</p>",
+"<p>L’élimination de Gauss est alors la procédure inductive suivante.</p>",
+"<p></p>",
+"<ol><li>En partant de la colonne la plus à gauche, on considère la première colonne qui n’est pas le vecteur nul (supposons par exemple qu’il s’agisse de la deuxième colonne).</li>",
+"<li>Comme cette colonne n’est pas le vecteur nul, elle contient un élément non nul. Si nécessaire, on échange des lignes afin que l’élément supérieur soit non nul.</li>",
+"<li>En utilisant cet élément non nul, on applique des opérations élémentaires sur les lignes afin que tous les éléments situés en dessous deviennent \\(0\\).</li></ol>",
+"<p>Par cette opération, la matrice prend une forme telle que \\(\\begin{pmatrix}0&*&*&\\cdots\\\\0&0&*&\\cdots\\\\0&0&*&\\cdots\\end{pmatrix}\\). Autrement dit, elle peut s’écrire sous la forme \\(\\begin{pmatrix}0&*&*&\\cdots&*\\\\0&0&A_1\\end{pmatrix}\\). En répétant la même procédure sur ce bloc \\(A_1\\), on obtient finalement une matrice échelonnée.</p>",
+"<h3>Exemple d’élimination de Gauss</h3>",
+"<p>Considérons la matrice \\(4\\times 6\\) suivante.</p>",
+"<p>\\(A=\\begin{pmatrix}0&1&2&1&0&3\\\\0&2&4&3&1&7\\\\0&1&3&4&2&8\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>La première colonne est une colonne nulle, donc le pivot de la première ligne se trouve dans la deuxième colonne et vaut \\(1\\). Nous l’utilisons pour éliminer les éléments situés en dessous.</p>",
+"<p>D’abord, on ajoute \\(-2\\) fois la première ligne à la deuxième ligne, puis \\(-1\\) fois la première ligne à la troisième ligne.</p>",
+"<p>On obtient alors</p>",
+"<p>\\(\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&0&1&1&1\\\\0&0&1&3&2&5\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>En regardant la partie située sous la première ligne et à partir de la troisième colonne, la première colonne de cette sous-matrice est \\(\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}\\), qui n’est pas le vecteur nul.</p>",
+"<p>Cependant, comme son premier élément est \\(0\\), on échange les deux premières lignes de cette sous-matrice.</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>À cette étape, tous les éléments sous le pivot sont déjà nuls, donc aucune élimination supplémentaire n’est nécessaire ici. Enfin, on considère \\(\\begin{pmatrix}1&1&1\\\\1&1&2\\end{pmatrix}\\). En utilisant son élément \\((1,1)\\), c’est-à-dire l’élément original \\((3,4)\\), on élimine l’élément situé en dessous en ajoutant \\(-1\\) fois la troisième ligne à la quatrième ligne.</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&0&0&1\\end{pmatrix}\\)</p>",
+"<p>On obtient ainsi une matrice échelonnée. Par conséquent, le rang de la matrice originale est \\(4\\).</p>")],
+
+ ["de", sconcat("<h2>Gaußsches Eliminationsverfahren und Rang</h2>",
+"<p>Die Anzahl der Nichtnullzeilen einer Stufenmatrix nennt man den <b>Rang (rank)</b> der Matrix.</p>",
+"<p>Zum Beispiel ist die Matrix</p>",
+"<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>eine Stufenmatrix. Da sie zwei Nichtnullzeilen besitzt, ist ihr Rang \\(2\\).</p><p></p>",
+"<p>Eine allgemeine Matrix ist anfangs nicht unbedingt eine Stufenmatrix. Durch wiederholte Anwendung von <b>elementaren Zeilenumformungen</b> kann jedoch jede Matrix in eine Stufenmatrix umgewandelt werden.</p>",
+"<p>Die grundlegende Rechenmethode dafür nennt man das <b>Gaußsche Eliminationsverfahren</b>.</p>",
+"<p>Dabei verwendet man den Pivot jeder Spalte und macht die darunterliegenden Einträge schrittweise zu \\(0\\). Führt man dies von links oben beginnend aus, so erhält man eine Stufenmatrix.</p>",
+"<p>Betrachten wir zum Beispiel die Matrix</p>",
+"<p>\\(\\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&1&0\\end{pmatrix}\\)</p>",
+"<p>Zieht man von der zweiten Zeile das \\(2\\)-fache der ersten Zeile ab und von der dritten Zeile das \\(1\\)-fache der ersten Zeile, so erhält man</p>",
+"<p>\\(\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\1&1&0\\end{pmatrix}\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\0&-1&-3\\end{pmatrix}\\)</p>",
+"<p>. Vertauscht man anschließend die zweite und dritte Zeile, so erhält man eine Stufenmatrix.</p>",
+"<p>Die Anzahl der Nichtnullzeilen dieser Stufenmatrix definiert man als den Rang der ursprünglichen Matrix \\(A\\), geschrieben als \\(\\rank A\\).</p>",
+"<p>Auf den ersten Blick könnte es so erscheinen, als ob je nach Umformung unterschiedliche Stufenmatrizen entstehen könnten. Später wird jedoch gezeigt, dass <b>die Anzahl der Nichtnullzeilen unabhängig von der gewählten Umformung gleich bleibt</b>. Daher ist der Rang als matrixeigene Größe wohldefiniert.</p>",
+"<p>Das Gaußsche Eliminationsverfahren ist nun das folgende rekursive Verfahren.</p>",
+"<p></p>",
+"<ol><li>Man beginnt mit der linken Spalte und betrachtet die erste Spalte, die nicht der Nullvektor ist (nehmen wir beispielsweise an, es sei die zweite Spalte).</li>",
+"<li>Da diese Spalte nicht der Nullvektor ist, enthält sie einen von null verschiedenen Eintrag. Falls nötig, vertauscht man Zeilen, damit der oberste Eintrag nicht null ist.</li>",
+"<li>Mit Hilfe dieses von null verschiedenen Eintrags führt man elementare Zeilenumformungen aus, sodass alle darunterliegenden Einträge zu \\(0\\) werden.</li></ol>",
+"<p>Dadurch erhält die Matrix eine Form wie \\(\\begin{pmatrix}0&*&*&\\cdots\\\\0&0&*&\\cdots\\\\0&0&*&\\cdots\\end{pmatrix}\\). Anders gesagt kann sie in der Form \\(\\begin{pmatrix}0&*&*&\\cdots&*\\\\0&0&A_1\\end{pmatrix}\\) geschrieben werden. Führt man dasselbe Verfahren anschließend auf dem Block \\(A_1\\) aus, so erhält man schließlich eine Stufenmatrix.</p>")],
+
+ ["it", sconcat("<h2>Metodo di eliminazione e rango</h2>",
+"<p>Il numero di righe non nulle di una matrice a scala si chiama <b>rango (rank)</b> della matrice.</p>",
+"<p>Per esempio, la matrice</p>",
+"<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>è una matrice a scala. Poiché ha due righe non nulle, il suo rango è \\(2\\).</p><p></p>",
+"<p>Una matrice generica non è necessariamente una matrice a scala fin dall’inizio. Tuttavia, ripetendo le <b>operazioni elementari di riga</b>, ogni matrice può essere trasformata in una matrice a scala.</p>",
+"<p>Il metodo fondamentale di calcolo per farlo si chiama <b>metodo di eliminazione</b>.</p>",
+"<p>Nel metodo di eliminazione si usa il pivot di ciascuna colonna per rendere progressivamente uguali a \\(0\\) gli elementi sottostanti. Ripetendo questo procedimento dall’angolo superiore sinistro, si ottiene una matrice a scala.</p>",
+"<p>Per esempio, consideriamo la matrice</p>",
+"<p>\\(\\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&1&0\\end{pmatrix}\\)</p>",
+"<p>Se sottraiamo \\(2\\) volte la prima riga dalla seconda riga e \\(1\\) volta la prima riga dalla terza riga, otteniamo</p>",
+"<p>\\(\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\1&1&0\\end{pmatrix}\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\0&-1&-3\\end{pmatrix}\\)</p>",
+"<p>. Scambiando poi la seconda e la terza riga si ottiene una matrice a scala.</p>",
+"<p>Il numero di righe non nulle della matrice a scala ottenuta viene definito come il rango della matrice originale \\(A\\), e si indica con \\(\\rank A\\).</p>",
+"<p>A prima vista potrebbe sembrare che matrici a scala diverse possano essere ottenute a seconda del modo in cui si effettuano le trasformazioni. Tuttavia, come si vedrà più avanti, <b>il numero di righe non nulle coincide indipendentemente dal metodo di trasformazione</b>. Perciò il rango è definito senza ambiguità come valore intrinseco della matrice (si dice che è well-defined).</p>",
+"<p>Il metodo di eliminazione è dunque la seguente procedura ricorsiva.</p>",
+"<p></p>",
+"<ol><li>Partendo dalla colonna più a sinistra, si considera la prima colonna che non è il vettore nullo (supponiamo, per esempio, che sia la seconda colonna).</li>",
+"<li>Poiché questa colonna non è il vettore nullo, contiene un elemento non nullo. Se necessario, si scambiano le righe affinché l’elemento superiore non sia nullo.</li>",
+"<li>Usando questo elemento non nullo, si applicano operazioni elementari di riga in modo che tutti gli elementi sottostanti diventino \\(0\\).</li></ol>",
+"<p>Con questa operazione, la matrice assume una forma del tipo \\(\\begin{pmatrix}0&*&*&\\cdots\\\\0&0&*&\\cdots\\\\0&0&*&\\cdots\\end{pmatrix}\\). In altre parole, può essere scritta nella forma \\(\\begin{pmatrix}0&*&*&\\cdots&*\\\\0&0&A_1\\end{pmatrix}\\). Ripetendo lo stesso procedimento sul blocco \\(A_1\\), si ottiene infine una matrice a scala.</p>")],
+
+ ["ja", sconcat("<h2>掃き出し法と階数</h2>",
+"<p>階段行列の零でない行の数を, その行列の<b>階数(rank)</b>といいます.</p>",
+"<p>例えば, 行列</p>",
+"<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
+"<p>は階段行列であり, 零でない行が2本あるので, 階数は\\(2\\)です.</p><p></p>",
+"<p>一般の行列は, 最初から階段行列になっているとは限りません. しかし, <b>行基本変形</b>を繰り返すことで, どんな行列も階段行列に変形できることがわかります.</p>",
+"<p>そのための基本的な計算方法を<b>掃き出し法</b>といいます.</p>",
+"<p>掃き出し法では, 各列の pivot を基準にして, その下側の成分を順に\\(0\\)にしていきます. これを左上から順に行っていくことで, 行列を階段行列へ変形できます.</p>",
+"<p>例えば, 行列</p>",
+"<p>\\(\\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&1&0\\end{pmatrix}\\)</p>",
+"<p>に対して, 第2行から第1行の\\(2\\)倍を引き, 第3行から第1行の\\(1\\)倍を引くと,</p>",
+"<p>\\(\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\1&1&0\\end{pmatrix}\\to\\begin{pmatrix}1&2&3\\\\0&0&0\\\\0&-1&-3\\end{pmatrix}\\)</p>",
+"<p>となります. 次に第2行と第3行を入れかえると階段行列になります.</p>",
+"<p>このようにして得られた階段行列の零でない行の本数を元の行列\\(A\\)の階数と定義して, \\(\\rank A\\)と表記します.</p>",
+"<p>一見すると, 変形の仕方によって異なる階段行列が得られるように見えるかもしれません. しかし, 後で学ぶように, <b>どのように変形しても零でない行の本数は一致する</b>ことが示されます. したがって, 階数は行列に固有の値として矛盾なく定義されます(このようなことを well-definedであると言います).</p>",
+"<p>さて, 掃き出し法は, 次のような帰納的な手順のことです.</p>",
+"<p></p>",
+"<ol><li>左の列から始めて, 零ベクトルでない最初の列を考えます(仮に2列目とします).</li>",
+"<li>零ベクトルではないので, 零でない成分があります. 必要なら行の入替によって, 一番上が0でないようにします.</li>",
+"<li>この零でない成分を使って, 行基本変形によって, その成分の下がすべて0になるように変形します.</li></ol>",
+"<p>この操作により行列は \\(\\begin{pmatrix}0&*&*&\\cdots\\\\0&0&*&\\cdots\\\\0&0&*&\\cdots\\end{pmatrix}\\) のような形になります. つまり, \\(\\begin{pmatrix}0&*&*&\\cdots&*\\\\0&0&A_1\\end{pmatrix}\\) とおける形です. この \\(A_1\\)に対して, 同じ操作を最初から続けると, 階段行列になるというわけです.</p>",
+"<h3>掃き出し法の例</h3>",
+"<p>例えば, 次の \\(4\\times 6\\) 行列を考えます.</p>",
+"<p>\\(A=\\begin{pmatrix}0&1&2&1&0&3\\\\0&2&4&3&1&7\\\\0&1&3&4&2&8\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>1列目は零列なので, 1行目の pivot は2列目にあり \\(1\\)です. これをつかって, 下を掃き出します.</p>",
+"<p>まず, 第1行の\\(-2\\)倍を第2行に加え, 第1行の\\(-1\\)倍を第3行に加えます.</p>",
+"<p>すると</p>",
+"<p>\\(\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&0&1&1&1\\\\0&0&1&3&2&5\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>が得られます. 2行目以下, 3列目以降に注目すると, 1列目は \\(\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}\\) であり, 零ベクトルではありません.</p>",
+"<p>しかし, 一番上が\\(0\\)なので, この部分の1行目と2行目を入れかえます.</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&1&1&2\\end{pmatrix}\\)</p>",
+"<p>この段階で pivot の下はすべて\\(0\\)なので, ここでは掃き出しは不要です. そして, 最後に \\(\\begin{pmatrix}1&1&1\\\\1&1&2\\end{pmatrix}\\) に注目します. これの\\((1,1)\\)成分, つまり, 元の \\((3,4)\\)成分を使って, 下を掃き出します. すなわち, 3行目の\\(-1\\)倍を4行目に加えると,</p>",
+"<p>\\(\\to\\begin{pmatrix}0&1&2&1&0&3\\\\0&0&1&3&2&5\\\\0&0&0&1&1&1\\\\0&0&0&0&0&1\\end{pmatrix}\\)</p>",
+"<p>となって, 階段行列が得られました. したがって, 元の行列のrank は \\(4\\)であることがわかります.</p>",
+"<h3>まとめ</h3>",
+"<ul>",
+"<li>階段行列の零でない行の本数を階数という.</li>",
+"<li>どんな行列も行基本変形によって階段行列に変形できる.</li>",
+"<li>その基本的な計算方法が掃き出し法である.</li>",
+"<li>任意の行列の階数は, 階段行列に変形したときの零でない行の本数で定義する.</li>",
+"<li>階数は変形の仕方によらないことが後で示される.</li>",
+"</ul>")]];
+
+
+KAISETU:%__lang(%_KAISETU_Lang);
+question_text:%__lang([["en", "Determine whether each of the following matrices is an echelon matrix."],
+ ["fr", "Déterminez si chacune des matrices suivantes est une matrice échelonnée."],
+ ["de", "Bestimmen Sie, ob jede der folgenden Matrizen eine Stufenmatrix ist."],
+ ["it", "Stabilisci se ciascuna delle seguenti matrici è una matrice a scala."],
+ ["ja", "以下の各行列について, 階段行列であるかどうか判定してみよう."]]);
+
+REIDAI:%__lang([["en", "<h3>Examples</h3>"],
+["fr", "<h3>Exemples</h3>"],
+["de", "<h3>Beispiele</h3>"],
+["it", "<h3>Esempi</h3>"],
+["ja", "<h3>例題</h3>"]]);
+
+%_getpvL(m):=makelist(get_first_non_zero_column(m, k), k, 1, length(m));
+%_tex2(s):=sconcat("\\(", tex1(s), "\\)");
+
+
+  
