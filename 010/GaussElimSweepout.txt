@@ -28,7 +28,7 @@ matA1:kihonP(%_nr1, 2, 1, aL[1]).kihonP(%_nr1, 3, 1, aL[2]).kihonP(%_nr1, 1, 2, 
  ["ja", "\\((1, 1)\\)成分をつかって第1列をはきだす."]];
 %_q1_text:%__lang(%_q1_Lang);
 
-matA2:kihonQ(%_nr, 1, qL[3]).kihonQ(%_nr2, 2, qL[2]).kihonQ(%_nr2, %_nr2, qL[1]).matF2;
+matA2:kihonQ(%_nr2, 1, qL[3]).kihonQ(%_nr2, 2, qL[2]).kihonQ(%_nr2, %_nr2, qL[1]).matF2;
 matA2:kihonP(%_nr2, 1, 2, aL[5]).kihonP(%_nr2, 1, %_nr2, aL[4]).matA2;
 %_q2_Lang:[["en", "Use the \\((2,3)\\) entry to eliminate the third column."],
  ["fr", "Utilisez l’élément \\((2,3)\\) pour éliminer la troisième colonne."],
