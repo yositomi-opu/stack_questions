@@ -49,7 +49,8 @@ FindNZcol(M,j,s):=block([r,i],r:-1,for i:s thru matrix_size(M)[1] do if not M[i,
 
 
 
-get_first_non_zero_column(M, r):=block([t,p,q],[p,q]:matrix_size(M),if M[r]=makelist(0,q) then return(q+1) else for t: 1 thru q do (if not M[r,t]=0 then return(t)));
+get_first_non_zero_column(M, r):=block([t, p, q], [p, q]:matrix_size(M),
+  if M[r]=makelist(0, q) then return(q+1) else for t: 1 thru q do (if not M[r,t]=0 then return(t)));
 getFirstNZ(M, i):=get_first_non_zero_column(M, i);
 
 
@@ -59,7 +60,10 @@ redeche(M):=block([p,q,r,i,j,t],[p,q]:matrix_size(M),M:echelon(M),r:rank(M),if r
 randechelon(i1, j1, pv, rL):=block([i, j, ret],
   genmatrix(lambda([i, j], if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 elseif member(j,pv) then 0 else rand(rL)), i1, j1));
 
-isechelon(M):=block([p,i,rw,cl,rt],[rw,cl]:matrix_size(M),p:makelist(getFirstNZ(M,i),i,1,rw),rt:true,for i:2 thru rw do (rt:rt and (is(p[i-1]<p[i]) or p[i]>cl)),return(rt));
+isechelon(M):=block([pv, i, rw, cl, rt:true], [rw, cl]:matrix_size(M),
+  pv:makelist(getFirstNZ(M, i), i, 1, rw),
+  if not sort(pv)=pv then return(false),
+  for i:2 thru rank(M) do (rt:rt and is(pv[i-1]<pv[i])), return(rt));
 
 
 
@@ -169,3 +173,14 @@ cross_product(va, vb):=matrix(
   [va[2,1]*vb[3,1]-va[3,1]*vb[2,1]],
   [va[3,1]*vb[1,1]-va[1,1]*vb[3,1]],
   [va[1,1]*vb[2,1]-va[2,1]*vb[1,1]]);
+
+
+%_sprintf(len, x):=block([k, s, spc, l], l:slength(tex1(x)), 
+  if len>l then spc:apply(sconcat, makelist("&nbsp;", len-l)) else spc:"",
+  s:sconcat(spc, tex1(x)), return(s));
+%_mat2str(M):=block([s, i, j, r, c], [r, c]:matrix_size(M), s:"",
+  for i:1 thru r do (for j:1 thru c do s:sconcat(s, %_sprintf(4, M[i,j])), s:sconcat(s, "<br>")), return(s));
+%_count_diff(m1, m2):=block([ct:0, r, c, r1, c1], 
+  if not matrix_size(m1)=matrix_size(m2) then return(-1),
+  [r,c]:matrix_size(m1),
+  for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then ct:ct+1,return(ct));
