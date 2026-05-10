@@ -21,10 +21,39 @@ matF3:randechelon(%_nr3, %_nc3, pv3, [-2, -1, 1, 2]);
 aL:%_rp([-4, -3, -2, -1, -1, 1, 1, 2, 3, 4]);
 qL:%_rp([-3, -2, -2, -1, 2, 2, 3, 4]);
 matA1:kihonP(%_nr1, 2, 1, aL[1]).kihonP(%_nr1, 3, 1, aL[2]).kihonP(%_nr1, 1, 2, aL[3]).kihonP(%_nr1, 1, 3, aL[4]).matF1;
+%_q1_Lang:[["en", "Use the \\((1,1)\\) entry to eliminate the first column."],
+ ["fr", "Utilisez l’élément \\((1,1)\\) pour éliminer la première colonne."],
+ ["de", "Verwenden Sie den Eintrag \\((1,1)\\), um die erste Spalte zu eliminieren."],
+ ["it", "Usa l’elemento \\((1,1)\\) per eliminare la prima colonna."],
+ ["ja", "\\((1, 1)\\)成分をつかって第1列をはきだす."]];
+%_q1_text:%__lang(%_q1_Lang);
+
 matA2:kihonQ(%_nr, 1, qL[3]).kihonQ(%_nr2, 2, qL[2]).kihonQ(%_nr2, %_nr2, qL[1]).matF2;
 matA2:kihonP(%_nr2, 1, 2, aL[5]).kihonP(%_nr2, 1, %_nr2, aL[4]).matA2;
+%_q2_Lang:[["en", "Use the \\((2,3)\\) entry to eliminate the third column."],
+ ["fr", "Utilisez l’élément \\((2,3)\\) pour éliminer la troisième colonne."],
+ ["de", "Verwenden Sie den Eintrag \\((2,3)\\), um die dritte Spalte zu eliminieren."],
+ ["it", "Usa l’elemento \\((2,3)\\) per eliminare la terza colonna."],
+ ["ja", "\\((2, 3)\\)成分を使って第3列をはきだす."]];
+%_q2_text:%__lang(%_q2_Lang);
+
 matA3:kihonP(%_nr3, 2, 1, aL[6]).kihonP(%_nr3, 3, 1, aL[7]).kihonP(%_nr3, 4, 1, aL[8]).matF3;
-matA3:kihonP(%_nr3, 1, 2, 3).matA3;
+matA3:kihonP(%_nr3, 1, 2, 1).matA3;
+%_q3_Lang:[["en", "First, add \\(-1\\) times the second row to the first row to make the \\((1,1)\\) entry equal to \\(1\\). Then use the \\((1,1)\\) entry to eliminate the first column."],
+ ["fr", "Commencez par ajouter \\(-1\\) fois la deuxième ligne à la première ligne afin que l’élément \\((1,1)\\) devienne égal à \\(1\\). Ensuite, utilisez l’élément \\((1,1)\\) pour éliminer la première colonne."],
+ ["de", "Addieren Sie zunächst das \\(-1\\)-Fache der zweiten Zeile zur ersten Zeile, damit der Eintrag \\((1,1)\\) gleich \\(1\\) wird. Verwenden Sie anschließend den Eintrag \\((1,1)\\), um die erste Spalte zu eliminieren."],
+["it", "Per prima cosa, aggiungi \\(-1\\) volte la seconda riga alla prima riga in modo che l’elemento \\((1,1)\\) diventi \\(1\\). Successivamente, usa l’elemento \\((1,1)\\) per eliminare la prima colonna."],
+ ["ja", "まず, 1行目に2行目の\\(-1\\)倍を加えて, \\((1, 1)\\)成分を1にしてから, \\((1, 1)\\)成分をつかって第1列をはきだそう."]];
+%_q3_text:%__lang(%_q3_Lang);
+
+matA4:transpose(matA1);
+%_q4_Lang:[["en", "Row elimination by column operations is defined similarly. Try using the \\((1,1)\\) entry to eliminate the first row."],
+ ["fr", "L’élimination des lignes par opérations sur les colonnes se définit de manière analogue. Essayez d’utiliser l’élément \\((1,1)\\) pour éliminer la première ligne."],
+ ["de", "Die Zeilenelimination durch Spaltenumformungen wird auf ähnliche Weise definiert. Versuchen Sie, den Eintrag \\((1,1)\\) zu verwenden, um die erste Zeile zu eliminieren."],
+ ["it", "L’eliminazione delle righe tramite operazioni sulle colonne si definisce in modo analogo. Prova a usare l’elemento \\((1,1)\\) per eliminare la prima riga."],
+ ["ja", "列変形による行の掃き出しも同様に定義されます. \\((1, 1)\\)成分をつかって第1行をはきだしてみよう. "]];
+%_q4_text:%__lang(%_q4_Lang);
+
 
 %_KAISETU_Lang:[["en", sconcat("<h2>Elimination Method and Rank</h2>",
 "<p>The number of nonzero rows in an echelon matrix is called the <b>rank</b> of the matrix.</p>",
@@ -208,5 +237,10 @@ REIDAI:%__lang([["en", "<h3>Examples</h3>"],
 %_getpvL(m):=makelist(get_first_non_zero_column(m, k), k, 1, length(m));
 %_tex2(s):=sconcat("\\(", tex1(s), "\\)");
 
+%_Qtext_Lang:[["en", "For each of the following matrices, perform the indicated elimination step."],
+ ["fr", "Pour chacune des matrices suivantes, effectuez l’étape d’élimination indiquée."],
+ ["de", "Führen Sie für jede der folgenden Matrizen den angegebenen Eliminationsschritt aus."],
+ ["it", "Per ciascuna delle seguenti matrici, esegui il passo di eliminazione indicato."],
+ ["ja", "次の各行列に対し, 指示された掃き出しをしてみよう."]];
+question_text:%__lang(%_Qtext_Lang);
 
-  
