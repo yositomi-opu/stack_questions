@@ -144,3 +144,18 @@ REIDAI:%__lang([["en", "<h3>Examples</h3>"],
 ["de", "<h3>Beispiele</h3>"],
 ["it", "<h3>Esempi</h3>"],
 ["ja", "<h3>例題</h3>"]]);
+
+%_getpvL(m):=makelist(get_first_non_zero_column(m, k), k, 1, length(m));
+%_tex2(s):=sconcat("\\(", s, "\\)");
+
+%_msg_Lang:[["en", sconcat("If we regard the pivot of a zero row as the number of columns of the matrix plus \\(1\\), then the pivots of this matrix are, in order, __PV__.")],
+ ["fr", sconcat("Si l’on considère que le pivot d’une ligne nulle est égal au nombre de colonnes de la matrice plus \\(1\\), alors les pivots de cette matrice sont, dans l’ordre, __PV__.")],
+ ["de", sconcat("Wenn man den Pivot einer Nullzeile als die Anzahl der Spalten der Matrix plus \\(1\\) betrachtet, dann sind die Pivots dieser Matrix der Reihe nach __PV__.")],
+ ["it", sconcat("Se si considera il pivot di una riga nulla come il numero di colonne della matrice più \\(1\\), allora i pivot di questa matrice sono, nell’ordine, __PV__.")],
+ ["ja", sconcat("ゼロ行の pivot は行列の列数\\(+1\\) であるとしておくと, この行列のピボットは順に __PV__ となります.")]];
+
+%_mkmsg(m):=ssubst(%_tex2(sequenceify(%_getpvL(m))), "__PV__", %__lang(%_msg_Lang));
+
+MsgL:map(%_mkmsg, matAL);
+
+  
