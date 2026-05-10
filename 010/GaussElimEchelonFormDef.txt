@@ -146,7 +146,7 @@ REIDAI:%__lang([["en", "<h3>Examples</h3>"],
 ["ja", "<h3>例題</h3>"]]);
 
 %_getpvL(m):=makelist(get_first_non_zero_column(m, k), k, 1, length(m));
-%_tex2(s):=sconcat("\\(", s, "\\)");
+%_tex2(s):=sconcat("\\(", tex1(s), "\\)");
 
 %_msg_Lang:[["en", sconcat("If we regard the pivot of a zero row as the number of columns of the matrix plus \\(1\\), then the pivots of this matrix are, in order, __PV__.")],
  ["fr", sconcat("Si l’on considère que le pivot d’une ligne nulle est égal au nombre de colonnes de la matrice plus \\(1\\), alors les pivots de cette matrice sont, dans l’ordre, __PV__.")],
