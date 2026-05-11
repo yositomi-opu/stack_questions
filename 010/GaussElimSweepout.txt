@@ -63,7 +63,8 @@ AS4:%_mat2str(matA4);
 ta4:transpose(ta1);
 
 
-%_KAISETU_Lang:[["en", sconcat("<h2>Elimination Method and Rank</h2>",
+KAISETU:%__lang(
+[["en", sconcat("<h2>Elimination Method and Rank</h2>",
 "<p>The number of nonzero rows in an echelon matrix is called the <b>rank</b> of the matrix.</p>",
 "<p>For example, the matrix</p>",
 "<p>\\(\\begin{pmatrix}1&2&0\\\\0&3&1\\\\0&0&0\\end{pmatrix}\\)</p>",
@@ -226,15 +227,10 @@ ta4:transpose(ta1);
 "<li>その基本的な計算方法が掃き出し法である.</li>",
 "<li>任意の行列の階数は, 階段行列に変形したときの零でない行の本数で定義する.</li>",
 "<li>階数は変形の仕方によらないことが後で示される.</li>",
-"</ul>")]];
+"</ul>")]]);
 
 
-KAISETU:%__lang(%_KAISETU_Lang);
-question_text:%__lang([["en", "Determine whether each of the following matrices is an echelon matrix."],
- ["fr", "Déterminez si chacune des matrices suivantes est une matrice échelonnée."],
- ["de", "Bestimmen Sie, ob jede der folgenden Matrizen eine Stufenmatrix ist."],
- ["it", "Stabilisci se ciascuna delle seguenti matrici è una matrice a scala."],
- ["ja", "以下の各行列について, 階段行列であるかどうか判定してみよう."]]);
+
 
 REIDAI:%__lang([["en", "<h3>Examples</h3>"],
 ["fr", "<h3>Exemples</h3>"],
@@ -245,10 +241,9 @@ REIDAI:%__lang([["en", "<h3>Examples</h3>"],
 %_getpvL(m):=makelist(get_first_non_zero_column(m, k), k, 1, length(m));
 %_tex2(s):=sconcat("\\(", tex1(s), "\\)");
 
-%_Qtext_Lang:[["en", "For each of the following matrices, perform the indicated elimination step."],
- ["fr", "Pour chacune des matrices suivantes, effectuez l’étape d’élimination indiquée."],
- ["de", "Führen Sie für jede der folgenden Matrizen den angegebenen Eliminationsschritt aus."],
- ["it", "Per ciascuna delle seguenti matrici, esegui il passo di eliminazione indicato."],
- ["ja", "次の各行列に対し, 指示された掃き出しをしてみよう."]];
-question_text:%__lang(%_Qtext_Lang);
+question_text:%__lang([["en", "For each of the following matrices, perform the indicated elimination step. Also check what happens to the rank."],
+ ["fr", "Pour chacune des matrices suivantes, effectuez l’étape d’élimination indiquée. Vérifiez également ce qui arrive au rang."],
+ ["de", "Führen Sie für jede der folgenden Matrizen den angegebenen Eliminationsschritt aus. Überprüfen Sie außerdem, wie sich der Rang verändert."],
+ ["it", "Per ciascuna delle seguenti matrici, esegui il passo di eliminazione indicato. Verifica anche cosa accade al rango."],
+ ["ja", "次の各行列に対し, 指示された掃き出しをしてみよう. 階数がどうなるかも確認しておくこと."]]);
 
