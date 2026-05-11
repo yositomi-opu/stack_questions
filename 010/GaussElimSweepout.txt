@@ -20,8 +20,10 @@ matF2:randechelon(%_nr2, %_nc2, pv2, [-2, -1, 1, 2]);
 matF3:randechelon(%_nr3, %_nc3, pv3, [-2, -1, 1, 2]);
 aL:%_rp([-4, -3, -2, -1, -1, 1, 1, 2, 3, 4]);
 qL:%_rp([-3, -2, -2, 2, 2, 3, 4]);
-matA1:kihonP(%_nr1, 2, 1, aL[1]).kihonP(%_nr1, 3, 1, aL[2]).kihonP(%_nr1, 1, 2, aL[3]).kihonP(%_nr1, 1, 3, aL[4]).matF1;
-ta1:matF1;
+ta1:kihonP(%_nr1, 1, 2, aL[3]).kihonP(%_nr1, 1, 3, aL[4]).matF1;
+matA1:kihonP(%_nr1, 2, 1, aL[1]).kihonP(%_nr1, 3, 1, aL[2]).ta1;
+if %_nr1=4 then matA1:kihonP(%_nr1, 4, 1, aL[5]).matA1;
+
 %_q1_Lang:[["en", "Use the \\((1,1)\\) entry to eliminate the first column."],
  ["fr", "Utilisez l’élément \\((1,1)\\) pour éliminer la première colonne."],
  ["de", "Verwenden Sie den Eintrag \\((1,1)\\), um die erste Spalte zu eliminieren."],
