@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 116219  -->
+  <question type="stack">
+    <name>
+      <text>010.MatMapFindImageGeneral-B</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<div>行列\(A\)の定める写像\(f=T_A\)が</div>
+<p style="text-align:center;"> \(f({@v1@})={@w1@}\), \(f({@v2@})={@w2@}\)</p>
+<div>を満たすとき, 以下の問に答えよ.</div>
+<div>(1) 行列の\(A\)の行数と列数を答えよ. &nbsp;
+行数:[[input:ans1]][[validation:ans1]]&nbsp; 列数 [[input:ans2]][[validation:ans2]]</div>
+<p><br></p>
+<div>(2) {@vv@}\(=\)[[input:ans3]]{@v1@}\(+\)[[input:ans4]]{@v2@}が成り立つように空欄にあてはまる数を答えよ.</div>
+<p>[[validation:ans3]][[validation:ans4]]</p>
+<table>
+    <tbody>
+        <tr>
+            <td>(3) \(f({@svv@})\)を答えよ. </td>
+            <td>[[input:ans5]]</td>
+        </tr>
+    </tbody>
+</table>
+<div>[[validation:ans5]]</div>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+  }
+</script>
+<div>半角数値記号: -+/*1234567890</div>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 1次写像による1次結合の像の計算 */
+/* v003: 問題名修正 (2023.4.19) */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+nmL:random_permutation([2,3,4]);
+%_nr:nmL[1];%_nc:nmL[2];
+va1:makelist([k, if k=%_nr then true else false, if k=0 then "--" else k], k, 0, 5);
+va2:makelist([k, if k=%_nc then true else false, if k=0 then "--" else k], k, 0, 5);
+ta1:%_nr;ta2:%_nc;/* mcq_correct(va1/va2) */
+matA:genmatrix(lambda([i, j],rand([-3, -2, -2, -1, -1, 0, 1, 1, 2, 2, 3])), %_nr, %_nc);
+v12:random_invertible_matrix(%_nc, [-4, -3, -2, -1, 1, 2, 3, 4]);
+v1:col(v12, 1);
+v2:col(v12, 2);
+c12:rand([3, 5, 5, 5, 5, 7, 7, 9]);
+c1:rand([-1,1])*rand([1, 2, 2, 2, 4, 4]);c2:rand([-1, 1])*(c12-abs(c1));
+vv:c1*v1+c2*v2;
+ta3:c1;ta4:c2;
+wL:make_random_distribution_pm([[5, 1], [4, 1], [3, 1], [2, 2], [1, 5], [0, 1]]);
+w1:genmatrix(lambda([i,j], rand(wL)), %_nr, 1);
+w2:genmatrix(lambda([i,j], rand(wL)), %_nr, 1);
+ta5:c1*w1+c2*w2;
+svv:tex2(vv);]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@v1@},{@v2@},{@w1@},{@w2@},{@[c1,c2]@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>dropdown</type>
+      <tans>va1</tans>
+      <boxsize>3</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>dropdown</type>
+      <tans>va2</tans>
+      <boxsize>3</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered</options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>numerical</type>
+      <tans>Cans3</tans>
+      <boxsize>3</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans4</name>
+      <type>numerical</type>
+      <tans>Cans4</tans>
+      <boxsize>3</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans5</name>
+      <type>varmatrix</type>
+      <tans>Cans5</tans>
+      <boxsize>8</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>[ans1,ans2]</sans>
+        <tans>[Cans1,Cans2]</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>0.4</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(1) 正解</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(1) 違います. 行列の定める写像の理解を深めよう.</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>[ans3,ans4]</sans>
+        <tans>[Cans3,Cans4]</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(2) 正解. 連立1次方程式を解けばよいですね.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>2</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(2) 違います. 連立1次方程式を解けばよいので再度やってみよう.</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans5</sans>
+        <tans>Cans5</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(3) 正解です.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">(3) 違います. 行列の定める写像は線形性を持つことに注意しよう. 行列がわからなくても与えられた情報で答が得られます.</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>1408951373</deployedseed>
+    <deployedseed>1986124710</deployedseed>
+    <deployedseed>1127408406</deployedseed>
+    <deployedseed>2144149146</deployedseed>
+    <deployedseed>1258839796</deployedseed>
+    <deployedseed>1142632603</deployedseed>
+    <deployedseed>1717394413</deployedseed>
+    <deployedseed>2098656929</deployedseed>
+    <deployedseed>1570931990</deployedseed>
+    <deployedseed>980787219</deployedseed>
+    <deployedseed>189807413</deployedseed>
+    <deployedseed>354948050</deployedseed>
+    <deployedseed>1301805558</deployedseed>
+    <deployedseed>520031295</deployedseed>
+    <deployedseed>1872671475</deployedseed>
+    <deployedseed>1423160191</deployedseed>
+    <deployedseed>370517111</deployedseed>
+    <deployedseed>250379107</deployedseed>
+    <deployedseed>1935704504</deployedseed>
+    <deployedseed>1741214295</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>Cans1</value>
+      </testinput>
+      <testinput>
+        <name>ans2</name>
+        <value>Cans2</value>
+      </testinput>
+      <testinput>
+        <name>ans3</name>
+        <value>Cans3</value>
+      </testinput>
+      <testinput>
+        <name>ans4</name>
+        <value>Cans4</value>
+      </testinput>
+      <testinput>
+        <name>ans5</name>
+        <value>Cans5</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-3-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>

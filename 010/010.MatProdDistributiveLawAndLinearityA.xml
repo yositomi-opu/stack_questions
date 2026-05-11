@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 115993  -->
+  <question type="stack">
+    <name>
+      <text>010.MatProdDistributiveLawAndLinearityA</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>行列\(A\)と2つのベクトル {@Wu@} と {@Wv@} について, 次の2つのことがわかっているという.</p>
+<p>
+  \(A{@Qs1@}={@vecB1@}\)<br>
+  \(A{@Qs2@}={@vecB2@}\)
+</p>
+<table><tr><td>このとき, 分配法則を用いて, \(A({@Qpq@}) \)を求めなさい.</td><td>[[input:ans1]]</td><td>[[validation:ans1]]</td></tr></table>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '100px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/**************** 010.MatProdDistributiveLawAndLinearity *******************/
+/* Objective: Understand that linearity follows from the distributive law. */ 
+/*            Note that we do not yet use the concept of a map.            */
+/***************************************************************************/
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.txt");
+cL:make_random_distribution_pm([[3, 1], [2, 1], [1, 4], [0, 1]])
+cdM:random_matrix_det_list(2, cL, [-3, -2, -1, 1, 2, 3]);
+/* c1:cdM[1,1];c2:cdM[1,2]; */
+/* d1:cdM[2,1];d2:cdM[2,2]; */
+c1:1;c2:0;
+d1:0;d2:1;
+ctosH(c,v):=if c=0 then "" elseif c=1 then v elseif c=-1 then sconcat("-",v) else sconcat(c,v);
+ctosS(c,v):=if c=0 then "" elseif c>1 then sconcat("+",c,v) elseif c=1 then sconcat("+",v) elseif c=-1 then sconcat("-",v) else sconcat(c,v);
+
+n:rand([2, 2, 2, 3, 3]);
+aL:make_random_distribution_pm([[3, 1], [2, 3], [1, 4]])
+vecu:genmatrix(lambda([i,j],rand(cL)),n,1);
+vecv:genmatrix(lambda([i,j],rand(cL)),n,1);
+vecB1:c1*vecu+d1*vecv;
+vecB2:c2*vecu+d2*vecv;
+p:rand_with_prohib(-4, 4, [-1, 0, 1]);
+q:rand_with_prohib(-3, 3, [p, -1, 0, 1]);
+ta1:p*vecu+q*vecv;
+Cans1:ta1;
+Qs1:display_polynomial_varlist_tex1(c1*Wu+d1*Wv, [Wu, Wv]);
+Qs2:display_polynomial_varlist_tex1(c2*Wu+d2*Wv, [Wu, Wv]);
+Qp:ctosH(p,"{\\mathbf u}");
+Qq:if p=0 then ctosH(q,"{\\mathbf v}") else ctosS(q,"{\\mathbf v}");
+Qpq:display_polynomial_varlist_tex1(p*Wu+q*Wv, [Wu, Wv]);
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@vecu@},{@vecv@},{@cdM@},{@p@},{@q@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>ta1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>Cans1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>42689631</deployedseed>
+    <deployedseed>2144621387</deployedseed>
+    <deployedseed>68837195</deployedseed>
+    <deployedseed>1439759757</deployedseed>
+    <deployedseed>166242868</deployedseed>
+    <deployedseed>1241178605</deployedseed>
+    <deployedseed>2038216807</deployedseed>
+    <deployedseed>355243433</deployedseed>
+    <deployedseed>1627292762</deployedseed>
+    <deployedseed>665944192</deployedseed>
+    <deployedseed>1928800521</deployedseed>
+    <deployedseed>763711866</deployedseed>
+    <deployedseed>379014591</deployedseed>
+    <deployedseed>1676347469</deployedseed>
+    <deployedseed>1614618945</deployedseed>
+    <deployedseed>1580037286</deployedseed>
+    <deployedseed>850467722</deployedseed>
+    <deployedseed>1602354972</deployedseed>
+    <deployedseed>1135079837</deployedseed>
+    <deployedseed>419770224</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>Cans1</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-1-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>

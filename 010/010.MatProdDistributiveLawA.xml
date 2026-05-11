@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 115986  -->
+  <question type="stack">
+    <name>
+      <text>010.MatProdDistributiveLawA</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+\(A={@matA@},B_1={@matB1@},B_2={@matB2@}\)について, 以下の計算をしなさい.
+<table>
+<tr><td>(1) \(AB_1=\)</td><td>[[input:ans1]] [[validation:ans1]]</td></tr>
+<tr><td>(2) \(AB_2=\)</td><td>[[input:ans2]] [[validation:ans2]]</td></tr>
+<tr><td>(3) \(B_1+B_2=\)</td><td>[[input:ans3]] [[validation:ans3]]</td></tr>
+<tr><td>(4) \(A(B_1+B_2)=\)</td><td>[[input:ans4]] [[validation:ans4]]</td></tr>
+<tr><td>(5) \(AB_1+AB_2=\)</td><td>[[input:ans5]] [[validation:ans5]]</td></tr>
+</table>
+<div>(5) は (1)+(2)で計算し, (4)は(3)を使って計算しよう.</div>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '80px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text>一般に行列の積について, \(A(B_1+B_2)=AB_1+AB_2,(A_1+A_2)B=A_1B+A_2B\)が成り立ちます.
+また, スカラー倍については,\((cA)B=A(cB)=c(AB)\)のようにどこで\(c\)をかけても同じであることがわかります.
+したがって, 一般に \(A(c_1B_1+c_2B_2)=c_1AB_1+c_2AB_2\)のような式が成り立つことがわかります.
+これは積の分配法則と呼ばれます.</text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text>/***************** 010.MatProdDistrubutibeLaw *************/
+/* Object: To understand how the distributive law holds   */
+/*         using numerical examples                       */
+/**********************************************************/
+nn:2;mm:2;kk:2;
+aL:[-3,-2,-2,-1,-1,-1,-1,0,0,1,1,1,1,2,2,3];
+bL:[-2,-1,-1,0,1,1,2];
+matA:genmatrix(lambda([i,j],rand(aL)), nn, mm);
+matB1:genmatrix(lambda([i,j],rand(bL)), mm, kk);
+matB2:genmatrix(lambda([i,j],rand(bL)), mm, kk);
+ta1:matA.matB1;
+ta2:matA.matB2;
+ta3:matB1+matB2;
+ta4:matA.ta3;
+ta5:ta1+ta2
+</text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matA@},{@matB1@},{@matB2@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>ta1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>ta2</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>varmatrix</type>
+      <tans>ta3</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans4</name>
+      <type>varmatrix</type>
+      <tans>ta4</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <input>
+      <name>ans5</name>
+      <type>varmatrix</type>
+      <tans>ta5</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>ta1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(1) OK</text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(1) Hmmm...</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans2</sans>
+        <tans>ta2</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(2) OK</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>2</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(2) are you sure?</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans3</sans>
+        <tans>ta3</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>3</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(3) OK</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(3) NG</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans4</sans>
+        <tans>ta4</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(4) OK</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>4</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(4) Failed</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans5</sans>
+        <tans>ta5</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(5) OK</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(5) too bad</text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>2063355140</deployedseed>
+    <deployedseed>1037807016</deployedseed>
+    <deployedseed>1103657021</deployedseed>
+    <deployedseed>1734711881</deployedseed>
+    <deployedseed>1294743216</deployedseed>
+    <deployedseed>2056196131</deployedseed>
+    <deployedseed>2010279304</deployedseed>
+    <deployedseed>1036428648</deployedseed>
+    <deployedseed>1645164510</deployedseed>
+    <deployedseed>1892510863</deployedseed>
+    <deployedseed>523417412</deployedseed>
+    <deployedseed>1084112034</deployedseed>
+    <deployedseed>1002858836</deployedseed>
+    <deployedseed>1062669405</deployedseed>
+    <deployedseed>1366266010</deployedseed>
+    <deployedseed>202911787</deployedseed>
+    <deployedseed>1131837918</deployedseed>
+    <deployedseed>1981112265</deployedseed>
+    <deployedseed>1971534148</deployedseed>
+    <deployedseed>492735475</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>Cans1</value>
+      </testinput>
+      <testinput>
+        <name>ans2</name>
+        <value>Cans2</value>
+      </testinput>
+      <testinput>
+        <name>ans3</name>
+        <value>Cans3</value>
+      </testinput>
+      <testinput>
+        <name>ans4</name>
+        <value>Cans4</value>
+      </testinput>
+      <testinput>
+        <name>ans5</name>
+        <value>Cans5</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-5-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>

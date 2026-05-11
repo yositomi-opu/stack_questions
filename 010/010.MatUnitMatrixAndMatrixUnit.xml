@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 116005  -->
+  <question type="stack">
+    <name>
+      <text>010.MatUnitMatrixAndMatrixUnit</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p></p>
+<p>次の行列の計算式が計算できるとき, この計算をして答えなさい. ただし, \(E_{ij}\)は行列単位,\(E_n\)は\(n\)次単位行列である.</p>
+<p>\(E_{@num_rows@}({@a1@}E_{{@ij1[1]@}{@ij1[2]@}}-{@a2@}E_{{@ij2[1]@}{@ij2[2]@}}+{@a3@}E_{{@ij3[1]@}{@ij3[2]@}})+({@a4@}E_{{@ij4[1]@}{@ij4[2]@}}-{@a5@}E_{{@ij5[1]@}{@ij5[2]@}}-{@a6@}E_{{@ij6[1]@}{@ij6[2]@}})E_{@num_cols@}\)</p>
+<p>
+</p>
+<p></p>
+<p>[[input:ans1]] [[validation:ans1]]</p>
+<p>ヒント: 左側の項の和, 右側の項の和, および左右の項が計算できることから, 行列単位はすべてサイズが等しいことがわかります. さらに, 左からかけてる単位行列と右からかけている単位行列のサイズによって, 行または列の情報が得られます. これをヒントに考えてみましょう.</p>
+<p><br></p>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text>/****************** 010.MatUnitMatrixAndMatrixUnit ****************/
+/* Objective: To understand the definition of a matrix unit,      */
+/*              multiplication by a matrix, and the difference    */
+/*              from the identity matrix                          */
+/******************************************************************/
+nmL:random_permutation([3, 4, 5]);
+num_rows:nmL[1];num_cols:nmL[2];
+matA:genmatrix(lambda([i,j], 0), num_rows, num_cols);
+ijAll:makelist([floor(i/num_cols)+1, mod(i, num_cols)+1], i, 0, num_rows*num_cols-1);
+ijL:random_permutation(ijAll);
+ij1:ijL[1];ij2:ijL[2];ij3:ijL[3];ij4:ijL[4];ij5:ijL[5];ij6:ijL[6];
+aij:random_permutation(makelist(i, i, 2, 9));
+a1:aij[1];a2:aij[2];a3:aij[3];a4:aij[4];a5:aij[5];a6:aij[6];
+matA[ij1[1],ij1[2]]:a1;
+matA[ij2[1],ij2[2]]:-a2;
+matA[ij3[1],ij3[2]]:a3;
+matA[ij4[1],ij4[2]]:a4;
+matA[ij5[1],ij5[2]]:-a5;
+matA[ij6[1],ij6[2]]:-a6;
+ta1:matA;
+</text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>({@n@},{@m@}),({@a1@},{@a2@},{@a3@},{@a4@}),{@ijL@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>ta1</tans>
+      <boxsize>30</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>1</mustverify>
+      <showvalidation>1</showvalidation>
+      <options></options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>ta1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>15735851</deployedseed>
+    <deployedseed>1361656531</deployedseed>
+    <deployedseed>333152111</deployedseed>
+    <deployedseed>477845273</deployedseed>
+    <deployedseed>1750460257</deployedseed>
+    <deployedseed>1788651752</deployedseed>
+    <deployedseed>432265611</deployedseed>
+    <deployedseed>1803828850</deployedseed>
+    <deployedseed>131626966</deployedseed>
+    <deployedseed>419926719</deployedseed>
+    <deployedseed>751835530</deployedseed>
+    <deployedseed>1679096576</deployedseed>
+    <deployedseed>1999209523</deployedseed>
+    <deployedseed>2059467371</deployedseed>
+    <deployedseed>1258351544</deployedseed>
+    <deployedseed>34747349</deployedseed>
+    <deployedseed>390297512</deployedseed>
+    <deployedseed>992446155</deployedseed>
+    <deployedseed>9421410</deployedseed>
+    <deployedseed>915883263</deployedseed>
+  </question>
+
+</quiz>
