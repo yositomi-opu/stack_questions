@@ -9,6 +9,11 @@
 %_rp(L):=random_permutation(L);
 tex2(s):=sconcat("\\(", tex1(s), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s);
+tex1rp(s):=remove_paren(tex1(s));
+tex2rp(s):=remove_paren(tex2(s));
+tex2rpL(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1rp(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+
 aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
 %_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
 %_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
@@ -54,12 +59,12 @@ qL:%_rp([-4, -3, -2, 2, 3, 4]);
 /* Question String */
 QS:tex2L(%_emL1);
 
-ListAL1:[tex2L(reverse(map(lambda([m], m^^(-1)), %_emL1)))];
-ListBL1:[tex2L(reverse(%_emL1))];
-ListBL1:endcons(tex2L(map(lambda([m], m^^(-1)), %_emL1)), ListBL1);
-ListBL1:endcons(tex2L(reverse(map(lambda([m], -m), %_emL1))), ListBL1);
-ListBL1:endcons(tex2L(reverse(%_exL1)), ListBL1);
-ListBL1:endcons(tex2(exL1), ListBL1);
+ListAL1:[tex2rpL(reverse(map(lambda([m], m^^(-1)), %_emL1)))];
+ListBL1:[tex2rpL(reverse(%_emL1))];
+ListBL1:endcons(tex2rpL(map(lambda([m], m^^(-1)), %_emL1)), ListBL1);
+ListBL1:endcons(tex2rpL(reverse(map(lambda([m], -m), %_emL1))), ListBL1);
+ListBL1:endcons(tex2rpL(reverse(%_exL1)), ListBL1);
+ListBL1:endcons(tex2rp(exL1), ListBL1);
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
