@@ -60,10 +60,6 @@ ListBL1:endcons(tex2L(map(lambda([m], m^^(-1)), %_emL1)), ListBL1);
 ListBL1:endcons(tex2L(reverse(map(lambda([m], -m), %_emL1))), ListBL1);
 ListBL1:endcons(tex2L(reverse(%_exL1)), ListBL1);
 ListBL1:endcons(tex2(exL1), ListBL1);
- 
-/* wrong multiplication */
-ListBL1:map(%_mkop, %_badL);
-ListBL2:map(%_mkop, makelist(%_opL[k], k, 2, length(%_opL)));
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
@@ -71,10 +67,10 @@ ListBL2:map(%_mkop, makelist(%_opL[k], k, 2, length(%_opL)));
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
 %__mcq_qtextL:[["en", sconcat("Suppose that the matrix \\(A\\) is expressed as the product of elementary matrices ", QS, ". Choose the correct expression for \\(A^{-1}\\).")],
-["fr", sconcat("Supposons que la matrice \\(A\\) soit exprimée comme le produit de matrices élémentaires ", QS, ". Choisissez l’expression correcte de \\(A^{-1}\\).")],
-["de", sconcat("Sei die Matrix \\(A\\) als Produkt elementarer Matrizen ", QS, " dargestellt. Wählen Sie den richtigen Ausdruck für \\(A^{-1}\\).")],
-["it", sconcat("Supponiamo che la matrice \\(A\\) sia espressa come prodotto di matrici elementari ", QS, ". Scegli l’espressione corretta di \\(A^{-1}\\).")],
-["ja", sconcat("行列\\(A\\)が基本行列の積", QS, "で表わされているとき, \\(A^{-1}\\)として正しいものを選べ.")]];
+ ["fr", sconcat("Supposons que la matrice \\(A\\) soit exprimée comme le produit de matrices élémentaires ", QS, ". Choisissez l’expression correcte de \\(A^{-1}\\).")],
+ ["de", sconcat("Sei die Matrix \\(A\\) als Produkt elementarer Matrizen ", QS, " dargestellt. Wählen Sie den richtigen Ausdruck für \\(A^{-1}\\).")],
+ ["it", sconcat("Supponiamo che la matrice \\(A\\) sia espressa come prodotto di matrici elementari ", QS, ". Scegli l’espressione corretta di \\(A^{-1}\\).")],
+ ["ja", sconcat("行列\\(A\\)が基本行列の積", QS, "で表わされているとき, \\(A^{-1}\\)として正しいものを選べ.")]];
 
 
 /******************************** List of patterns/feedbacks *****************************/
@@ -88,7 +84,7 @@ ListBL2:map(%_mkop, makelist(%_opL[k], k, 2, length(%_opL)));
  ["de", "Richtig. Sie scheinen die inversen Matrizen elementarer Matrizen sowie die Inverse eines Produkts zu verstehen."],
  ["it", "Corretto. Sembra che tu comprenda le matrici inverse delle matrici elementari e l’inversa di un prodotto."],
  ["ja", "正解です. 基本行列の逆行列, 積の逆行列について理解しているようです."]];
- ["en", "Correct. You seem to understand the relationship between elementary matrices and elementary transformations."],
+
 
 /* Wrong answer pattern 1 */
 %__WoptL1:ListBL1;
