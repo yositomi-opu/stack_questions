@@ -64,7 +64,7 @@ ListBL1:[tex2rpL(reverse(%_emL1))];
 ListBL1:endcons(tex2rpL(map(lambda([m], m^^(-1)), %_emL1)), ListBL1);
 ListBL1:endcons(tex2rpL(reverse(map(lambda([m], -m), %_emL1))), ListBL1);
 ListBL1:endcons(tex2rpL(reverse(%_exL1)), ListBL1);
-ListBL1:endcons(tex2rp(exL1), ListBL1);
+ListBL1:endcons(tex2rp(%_exL1), ListBL1);
 
 /********************************** Question text ****************************************/
 /* %__mcq_qtextL : question text language list                                           */
