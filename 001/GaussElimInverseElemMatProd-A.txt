@@ -88,11 +88,7 @@ ListBL1:endcons(tex2(exL1), ListBL1);
 
 /* Wrong answer pattern 1 */
 %__WoptL1:ListBL1;
-%__Wmsg1L:[
- ["ja", "
-/* Wrong answer pattern 1 */
-%__WoptL2:ListBL2;
-%__Wmsg2L:[["en", "There seems to be a misunderstanding about the inverse matrix of an elementary matrix. If you think about the meaning of the elementary transformation, the inverse matrix should become clear. Alternatively, you may not yet understand the inverse of a product."],
+%__Wmsg1L:[["en", "There seems to be a misunderstanding about the inverse matrix of an elementary matrix. If you think about the meaning of the elementary transformation, the inverse matrix should become clear. Alternatively, you may not yet understand the inverse of a product."],
  ["fr", "Il semble y avoir une incompréhension concernant la matrice inverse d’une matrice élémentaire. Si vous réfléchissez au sens de la transformation élémentaire, la matrice inverse devrait devenir claire. Il est aussi possible que l’inverse d’un produit ne soit pas encore bien compris."],
  ["de", "Es scheint ein Missverständnis bezüglich der inversen Matrix einer elementaren Matrix zu geben. Wenn Sie über die Bedeutung der elementaren Umformung nachdenken, sollte die inverse Matrix klar werden. Möglicherweise ist auch die Inverse eines Produkts noch nicht vollständig verstanden."],
  ["it", "Sembra esserci un malinteso riguardo alla matrice inversa di una matrice elementare. Se si considera il significato della trasformazione elementare, la matrice inversa dovrebbe risultare chiara. Oppure potrebbe non essere ancora chiara l’inversa di un prodotto."],
