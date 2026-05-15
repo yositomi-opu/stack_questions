@@ -1,0 +1,101 @@
+/************** GaussElimRowReducedCheck-A (rb) ***************/
+/* 001.MCB include file		                              */
+/* Objective: To learn/check how to check row reduced echelon */
+/*            rank:3                                          */
+/**************************************************************/
+/* c:[1], w:[4, 4, 4]; */
+if not numberp(%_MCQ_NUM_OPTS) or %_MCQ_NUM_OPTS>13 then %_MCQ_NUM_OPTS:7;
+%_MCQ_NUM_COPTS:1;
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
+%_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
+%_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
+nmL:[1, 2, 3, 4, 5];
+%__lang(L):=%__mcq_lang(L, %_STACK_LANG);
+
+%_nr:4;
+%_nc:5;
+pv:rand([[1, 2, 3], [1, 3, 4], [1, 2, 4]]);
+pvC:listify(setdifference(setify(makelist(k, k, %_nc)), setify(pv)));
+
+matF:randechelon(%_nr, %_nc, pv, [-3, -2, -1, 1, 2, 3]);
+pL:make_random_distribution_pm([[3, 1], [2, 3], [1, 10], [0, 3]]);
+matP:random_matrix_det_list(%_nr, pL, [-1, 1]);
+matA:matP.matF;
+pp:matF[2, pvC[2]];
+qq:matF[1, pvC[1]];
+
+matFq:genmatrix(lambda([i, j], if [i, j]=[1, pvC[1]] then q else matF[i, j]), %_nr, %_nc);
+matAp:genmatrix(lambda([i, j], if [i, j]=[2, pvC[2]] then p else matA[i, j]), %_nr, %_nc);
+
+%_mkop(p, q):=sconcat("\\(p= ", p, ", q= ", q, "\\)");
+ListAL1:[%_mkop(pp, qq)];
+
+/* wrong multiplication */
+ListBL1:[%_mkop(pp+1, qq)];
+ListBL1:endcons(%_mkop(pp-1, qq), ListBL1);
+ListBL1:endcons(%_mkop(pp-2, qq), ListBL1);
+ListBL1:endcons(%_mkop(pp+2, qq), ListBL1);
+
+ListBL2:[%_mkop(pp, qq+1)];
+ListBL2:endcons(%_mkop(pp, qq-1), ListBL2);
+ListBL2:endcons(%_mkop(pp, qq+2), ListBL2);
+ListBL2:endcons(%_mkop(pp, qq-2), ListBL2);
+
+ListBL3:[%_mkop(pp+1, qq-1)];
+ListBL3:endcons(%_mkop(pp-1, qq+1), ListBL3);
+ListBL3:endcons(%_mkop(pp-2, qq+rand([1, 2])), ListBL3);
+ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("The ", tex2L([%_nr, "\\times", %_nc]), " matrix \\(A=\\)", tex2(matA), " is transformed into ", tex2(matFQ), " by elementary row operations. Choose the correct pair of values of \\(p, q\\).")],
+ ["fr", sconcat("La matrice ", tex2L([%_nr, "\\times", %_nc]), " \\(A=\\)", tex2(matA), " est transformée en ", tex2(matFQ), " par des opérations élémentaires sur les lignes. Choisissez le couple correct de valeurs de \\(p, q\\).")],
+ ["de", sconcat("Die ", tex2L([%_nr, "\\times", %_nc]), "-Matrix \\(A=\\)", tex2(matA), " wird durch elementare Zeilenumformungen in ", tex2(matFQ), " umgeformt. Wählen Sie das richtige Wertepaar für \\(p, q\\).")],
+ ["it", sconcat("La matrice ", tex2L([%_nr, "\\times", %_nc]), " \\(A=\\)", tex2(matA), " viene trasformata in ", tex2(matFQ), " mediante operazioni elementari di riga. Scegli la coppia corretta di valori di \\(p, q\\).")],
+ ["ja", sconcat(tex2L([%_nr, "\\times", %_nc]), "行列\\(A=\\)", tex2(matAp), " を行に関して基本変形すると, ", tex2(matFq), " になる. このとき, \\(p, q\\)の値の組として正しいものを選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. You seem to understand the properties of reduced echelon matrices."],
+ ["fr", "Correct. Vous semblez comprendre les propriétés des matrices échelonnées réduites."],
+ ["de", "Richtig. Sie scheinen die Eigenschaften reduzierter Stufenmatrizen zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda le proprietà delle matrici ridotte a scala."],
+ ["ja", "正解です. 被約階段行列(行簡約行列)の性質を理解しているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "One of the values is correct, but the other seems to be incorrect."],
+ ["fr", "L’une des valeurs est correcte, mais l’autre semble être incorrecte."],
+ ["de", "Einer der Werte ist korrekt, aber der andere scheint falsch zu sein."],
+ ["it", "Uno dei valori è corretto, ma l’altro sembra essere sbagliato."],
+ ["ja", "一方の値は正しいのですが, もう一方が違うようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:ListBL2;
+%__Wmsg2L:[["en", "One of the values is correct, but the other seems to be incorrect."],
+ ["fr", "L’une des valeurs est correcte, mais l’autre semble être incorrecte."],
+ ["de", "Einer der Werte ist korrekt, aber der andere scheint falsch zu sein."],
+ ["it", "Uno dei valori è corretto, ma l’altro sembra essere sbagliato."],
+ ["ja", "一方の値は正しいのですが, もう一方が違うようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL3:ListBL3;
+%__Wmsg3L:[["en", "Both values seem to be incorrect."],
+ ["fr", "Les deux valeurs semblent être incorrectes."],
+ ["de", "Beide Werte scheinen falsch zu sein."],
+ ["it", "Entrambi i valori sembrano essere sbagliati."],
+ ["ja", "どちらの値も違うようです."]];
+
+
+/********** EOF **********/
