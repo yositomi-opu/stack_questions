@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115537  -->
+<!-- question: 116123  -->
   <question type="stack">
     <name>
-      <text>001.SpacePlaneParaPt-rb</text>
+      <text>001.SpaceLineParaPerpToPlane-rb</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -45,21 +45,20 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
 
-stack_include("https://stack.mathedu.jp/sc/001/SpacePlaneParaPt.txt");
+stack_include("https://stack.mathedu.jp/sc/001/SpaceLineParaPerpToPlane.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
-/*****************************************************************************************/
-]]></text>
+/*****************************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@}<br>{@vecA@}, {@[pvA, pvB, pvC]@}</text>
+      <text>{@matA@}, {@matF@}, {@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -116,8 +115,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");
-]]></text>
+        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -526,7 +524,20 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
         </falsefeedback>
       </node>
     </prt>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>first(mcq_correct(ta1))</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-16-F</expectedanswernote>
+      </expected>
+    </qtest>
   </question>
 
 </quiz>
-

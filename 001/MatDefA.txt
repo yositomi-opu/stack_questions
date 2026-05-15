@@ -1,11 +1,13 @@
-/********************** MatProdStdBasisVecA (rb) ********************/
-/* 001.MCB include file		                                    */
-/* Objective: To learn/check matrix x (ei+/-ej)                     */
-/********************************************************************/
-/* c:[1], w:[3]; */
-if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:4;
+/************************** MatDefA (rb) ************************/
+/* 001.MCB include file		                                */
+/* Objective: To learn/check matrix definition (size/element    */
+/****************************************************************/
+/* c:[1], w:[5]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /********************************************************************/
+
+/********* u.c. ************/
 
 /*** for 000.MCQ-rb.xml ***/
 /* key parameters(e.g. which control the only level of the question) here if required */
@@ -15,10 +17,15 @@ tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(
 %_rp(L):=random_permutation(L);
 
 rcL:%_rp([2, 3, 4, 5, 6]);
-if not numberp(num_rows) then num_rows:rcL[1];
+nn:rand([3, 4, 5]);
+if not nubmerp(num_rows) then num_rows:rcL[1];
 if not numberp(num_cols) then num_cols:rcL[2];
-aL:%_mk_rand_dist_pm([[5, 1], [4, 1], [3, 2], [2, 3], [1, 8]]);
-matA:genmatrix(lambda([i,j], rand(aL)), num_rows, num_cols);
+aL:%_rp(append(makelist(k, k, 9), makelist(-k, k, 9), [0]));
+
+num_rows:3;
+num_cols:4;
+matA:genmatrix(lambda([i, j], aL[num_cols*(i-1)+j]), num_rows, num_cols);
+
 matEr:genmatrix(lambda([i,j], if i=j then 1 else 0), num_rows, num_rows);
 matEc:genmatrix(lambda([i,j], if i=j then 1 else 0), num_cols, num_cols);
 eLr:makelist(col(matEr, k), k, 1, num_rows);

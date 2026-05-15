@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115537  -->
+<!-- question: 115582  -->
   <question type="stack">
     <name>
-      <text>001.SpacePlaneParaPt-rb</text>
+      <text>001.SetDescribe-rb</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -26,6 +26,7 @@ stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
 %__mcq_rb_cb:"rb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
+/* stack_incluide("https://stack.mathedu.jp/sc/tex_library.mac");*/
 %_rp(L):=random_permutation(L);
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 /*********************************** Settings ***********************************/
@@ -40,26 +41,27 @@ stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 /*       and adjust the following constants. */
 %__mcq_max_cp:5;
 %__mcq_max_wp:9;
+
 /********************************* DO NOT EDIT HERE **************************************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
+/*****************************************************************************************/
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
 
-stack_include("https://stack.mathedu.jp/sc/001/SpacePlaneParaPt.txt");
+stack_include("https://stack.mathedu.jp/sc/001/SetDescribe.txt")
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
-/*****************************************************************************************/
-]]></text>
+/*****************************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@}<br>{@vecA@}, {@[pvA, pvB, pvC]@}</text>
+      <text>{@matA@}, {@matF@}, {@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -116,8 +118,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");
-]]></text>
+        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -529,4 +530,3 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
   </question>
 
 </quiz>
-

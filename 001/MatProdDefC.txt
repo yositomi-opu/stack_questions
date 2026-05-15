@@ -1,0 +1,83 @@
+/********************** MatProdDefB (cb/rb) ******************/
+/* 001.MCB include file		                             */
+/* Objective: To learn/check matrix x matrix product         */
+/*              by checking requested size/element           */
+/*************************************************************/
+/* c:[4], w:[4, 4]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3, 4]);
+/********************************************************************/
+
+/********** u.c. *************/
+
+%_rp(L):=random_permutation(L);
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+TargetSize:[rand([2, 3, 4, 5]), rand([2, 3, 4, 5])];
+TSr:TargetSize[1];
+TSc:TargetSize[2];
+TSqS:tex2L([TSr, "\\times", TSc]);
+
+aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
+%_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
+%_rc_all1:%_rp(listify(cartesian_product(setdifference({1, 2, 3, 4, 5}, {TSr}), setdifference({1, 2, 3, 4, 5}, {TSc}))));
+%_rc_all2:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
+%_mkpair(A, B):=sconcat(tex2(A), tex2(B));
+
+nmL:%_rp([1, 2, 3, 4, 5]);
+CL1:[];
+for k:1 thru 4 do (aa:nmL[k],
+    CL1:cons(%_mkpair(%_mkmat(TSr, aa), %_mkmat(aa, TSc)), CL1));
+
+nmL:%_rp([1, 2, 3, 4, 5]);
+WL1:[];
+for k:1 thru 4 do (aa:nmL[k],
+    WL1:cons(%_mkpair(%_mkmat(%_rc_all1[k][1], aa), %_mkmat(aa, %_rc_all1[k][2])), WL1));
+
+nmL:%_rp([1, 2, 3, 4, 5]);
+WL2:[];
+for k:1 thru 4 do (aa:nmL[k], bb:rand_with_prohib(1, 5, [aa]),
+    WL2:cons(%_mkpair(%_mkmat(%_rc_all2[k][1], aa), %_mkmat(bb, %_rc_all2[k][2])), WL2));
+
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("__SELTYPE__", "expressions of matrix products among the following for which the product is defined and equals ", TSqS)],
+ ["fr", sconcat("__SELTYPE__ expressions de produits de matrices parmi les suivantes pour lesquelles le produit est défini et est égal à ", TSqS)],
+ ["de", sconcat("__SELTYPE__ Ausdrücke von Matrixprodukten unter den folgenden, für die das Produkt definiert ist und gleich ", TSqS, " ist")],
+ ["it", sconcat("__SELTYPE__ espressioni di prodotti di matrici tra le seguenti per cui il prodotto è definito ed è uguale a ", TSqS)],
+ ["ja", sconcat("次の行列の積の式のうち, 行列の積が定義されて, 積が", TSqS, "となるものを __SELTYPE__")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:CL1;
+%__Cmsg1L:[["en", "Correct. You seem to understand the domain and image of the map defined by a matrix."],
+ ["fr", "Correct. Vous semblez comprendre le domaine et l’image de l’application définie par une matrice."],
+ ["de", "Richtig. Sie scheinen den Definitionsbereich und das Bild der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Corretto. Sembra che tu comprenda il dominio e l’immagine dell’applicazione definita da una matrice."],
+ ["ja", "積が定義されている行列式の積が選択されています."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:WL1;
+%__Wmsg1L:[["en", "The product is defined, but you have selected those for which the result of the product does not match the specified one."],
+ ["fr", "Le produit est défini, mais vous avez sélectionné des cas où le résultat du produit ne correspond pas à celui qui est spécifié."],
+ ["de", "Das Produkt ist definiert, aber Sie haben diejenigen ausgewählt, bei denen das Ergebnis nicht dem angegebenen entspricht."],
+ ["it", "Il prodotto è definito, ma sono stati selezionati casi in cui il risultato non corrisponde a quello specificato."],
+ ["ja", "積は定義されていますが, 積の結果が指定されたものにならないものを選んでいます."]];
+
+/* Wrong answer pattern 2 */
+%__WoptL2:WL2;
+%__Wmsg2L:[["en", "You have selected ones for which the product is not defined."],
+ ["fr", "Vous avez sélectionné des éléments pour lesquels le produit n’est pas défini."],
+ ["de", "Sie haben solche ausgewählt, für die das Produkt nicht definiert ist."],
+ ["it", "Hai selezionato elementi per cui il prodotto non è definito."],
+ ["ja", "積が定義されていないものを選んでいます."]];
+
+
+/********** EOF **********/

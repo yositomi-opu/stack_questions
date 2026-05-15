@@ -1,8 +1,11 @@
 /******************** Sample include file for 001.MCQ-cb/rb ********************/
 /* en: The total number of options and the number of correct answers (random is acceptable) */
 /* ja: 選択肢の総数と正解選択肢の数(random でもよい) */
-%_MCQ_NUM_OPTS:5;
-%_MCQ_NUM_COPTS:2;
+/*******************************************************************************/
+/* c: [1, 1], w: [1, 1, 1] */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:2;
+/*******************************************************************************/
 /* key parameters(e.g. which control the only level of the question) here if required */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);

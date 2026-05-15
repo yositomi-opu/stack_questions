@@ -3,8 +3,8 @@
 /* Objective: To learn, basic logic                                 */
 /********************************************************************/
 /* c:[1], w:[3]; */
-%_MCQ_NUM_OPTS:4;
-%_MCQ_NUM_COPTS:1;
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:4;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*******************************************/
 
 /********** PropCompound2(rb) **********/

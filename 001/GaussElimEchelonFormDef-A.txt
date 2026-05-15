@@ -1,0 +1,152 @@
+/**************** GaussElimEchelonFormDef-A (cb) **************/
+/* 001.MCB include file		                              */
+/* Objective: To learn/check dfn of map def by matrix         */
+/**************************************************************/
+/* c:[1, 2, 3], w:[5, 6] */
+%_MCQ_NUM_OPTS:8;
+%_MCQ_NUM_COPTS:rand([3, 4, 4, 4, 5, 5, 6]);
+/********************************************************************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+
+/* --- presetting --- */
+rw:3;cl:rand([4, 5]);
+nzL:[-3, -2, -1, 1, 2, 3];
+nzL1:[-3, -2, -1, 2, 3];
+L1:[-1, -1, 0, 0, 0, 0, 0, 1, 1];
+L2:[-2, -1, -1, -1, -1, 1, 1, 1, 1, 1, 2];
+L3:[-2, -1, -1, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2];
+L4:[2, 2, 2, 3, 3, 4, 5, 6];
+diagM(L):=block([M, n], n:length(L), M:genmatrix(lambda([i, j], if i=j then L[i] else 0), n, n), return(M));
+/* --- CAUTION: ListALi and ListBLj should not have no intersection mutually -- */
+/* --- ListAL1, ListAL2, ... has length more than or equal than cn1, cn2, ... -- */
+ListAL1:[genmatrix(lambda([i, j], 0), rw, cl)];
+matF21:randechelon(rw, cl, [2, 3], L2);
+matP21:getDetL(rw, L3, [-2, -1, 1, 2]);
+matA21:echelon(matP21.matF21);
+matF22:randechelon(rw, cl, [2, 3, 4], L2);
+matP22:getDetL(rw, L3, [-2, -1, 1, 2]);
+matA22:echelon(matP22.matF22);
+ListAL2:[matA21, matA22];
+matF31:randechelon(rw, cl, [1, 2], L2);
+matP31:getDetL(rw, L3, [-2, -1, 1, 2]);
+matA31:echelon(matP31.matF31);
+matF32:randechelon(rw, cl, [1, 3], L2);
+matP32:getDetL(rw, L3, [-2, -1, 1, 2]);
+matA32:echelon(matP32.matF32);
+matF33:randechelon(rw, cl, [1, 2, 3], L2);
+matP33:getDetL(rw, L3, [-2, -1, 1, 2]);
+matF33:randechelon(rw, cl, [1, 2, 4], L2);
+matP33:getDetL(rw, L3, [-2, -1, 1, 2]);
+matA33:echelon(matP33.matF33);
+ListAL3:[matA31, matA32, matA33];
+/* --- Wrong List --- */
+/* REMARK: Wrong List never contains Correct answer (of course) */
+addwrgL(A, L):=block([sz], if not(equal(echelon(A), A)) then return(append(L, [A])) else return(L));
+/* --- ListBL1 --- */
+matB11:kihonR(rw, 1, 2).matA31;
+matB12:kihonR(rw, 2, 3).matA32;
+matB13:kihonR(rw, 1, 3).matA33;
+matB14:kihonR(rw, 1, 2).matA32;
+matB15:kihonR(rw, 1, 2).matA33;
+ListBL1:[];
+ListBL1:addwrgL(matB11, ListBL1);
+ListBL1:addwrgL(matB12, ListBL1);
+ListBL1:addwrgL(matB13, ListBL1);
+ListBL1:addwrgL(matB14, ListBL1);
+ListBL1:addwrgL(matB15, ListBL1);
+ListBL1:unique(ListBL1);
+/* --- ListBL2 --- */
+ListBL2:[];
+matB21:kihonP(rw, 3, 1, rand(nzL)).matA31;
+matB22:kihonP(rw, 3, 1, rand(nzL)).matA32;
+matB23:kihonP(rw, 3, 1, rand(nzL)).matA33;
+matB24:kihonP(rw, 3, 2, rand(nzL)).matA33;
+matB25:kihonP(rw, 3, 1, rand(nzL)).matA21;
+matB26:kihonP(rw, 3, 2, rand(nzL)).matA22;
+ListBL2:addwrgL(matB21, ListBL2);
+ListBL2:addwrgL(matB22, ListBL2);
+ListBL2:addwrgL(matB23, ListBL2);
+ListBL2:addwrgL(matB24, ListBL2);
+ListBL2:addwrgL(matB25, ListBL2);
+ListBL2:addwrgL(matB26, ListBL2);
+ListBL2:unique(ListBL2);
+
+/* security check */
+SetAL1:setify(ListAL1);
+SetAL2:setify(ListAL2);
+SetAL3:setify(ListAL3);
+SetBL1:setify(ListBL1);
+SetBL2:setify(ListBL2);
+/* SetBL3:setify(ListBL3); */
+chkAA12:intersection(SetAL1,SetAL2);
+chkAA13:intersection(SetAL1,SetAL3);
+chkAA23:intersection(SetAL2,SetAL3);
+chkAB11:intersection(SetAL1,SetBL1);
+chkAB12:intersection(SetAL1,SetBL2);
+chkAB21:intersection(SetAL2,SetBL1);
+chkAB22:intersection(SetAL2,SetBL2);
+chkAB31:intersection(SetAL3,SetBL1);
+chkAB32:intersection(SetAL3,SetBL2);
+chkBB12:intersection(SetBL1,SetBL2);
+/* chkBB13:intersection(SetBL1,SetBL3); */
+/* chkBB23:intersection(SetBL2,SetBL3);*/
+/* allchk:[chkAA12,chkAB11,chkAB12,chkAB13,chkAB21]; */
+/* allchk:append(allchk,[chkAB22,chkAB23,chkBB12,chkBB13,chkBB23]);*/
+/* allchk:[chkAB11,chkAB12,chkBB12]; */
+/* allchk:[chkAB11]; */
+allchk:[chkAA12, chkAA13, chkAA23, chkAB11, chkAB12, chkAB21, chkAB22, chkAB31, chkAB32, chkBB12];
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("Select all correct statements about the mapping defined by the matrix ", tex2(matA), ".")],
+ ["fr", sconcat("Sélectionnez toutes les affirmations correctes concernant l’application définie par la matrice ", tex2(matA), ".")],
+ ["de", sconcat("Wählen Sie alle richtigen Aussagen über die durch die Matrix ", tex2(matA), " definierte Abbildung aus.")],
+ ["it", sconcat("Seleziona tutte le affermazioni corrette riguardanti l’applicazione definita dalla matrice ", tex2(matA), ".")],
+ ["ja", sconcat("行列", tex2(matA), "の定める写像について正しいものをすべて選べ.")]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "You seem to understand the domain and codomain of the mapping defined by a matrix."],
+ ["fr", "Vous semblez comprendre le domaine de départ et le domaine d’arrivée de l’application définie par une matrice."],
+ ["de", "Sie scheinen den Definitionsbereich und den Zielbereich der durch eine Matrix definierten Abbildung zu verstehen."],
+ ["it", "Sembra che tu comprenda il dominio e il codominio dell’applicazione definita da una matrice."],
+ ["ja", "行列の定める写像の始域と終域が理解できているようです."]];
+
+/* Correct answer pattern 2 */
+%__CoptL2:ListAL2;
+%__Cmsg2L:[["en", "You seem to understand that, in the mapping defined by a matrix, the basis vectors correspond to the column vectors of the matrix."],
+ ["fr", "Vous semblez comprendre que, dans l’application définie par une matrice, les vecteurs de base correspondent aux vecteurs colonnes de la matrice."],
+ ["de", "Sie scheinen zu verstehen, dass bei der durch eine Matrix definierten Abbildung die Basisvektoren den Spaltenvektoren der Matrix entsprechen."],
+ ["it", "Sembra che tu comprenda che, nell’applicazione definita da una matrice, i vettori di base corrispondono ai vettori colonna della matrice."],
+ ["ja", "行列の定める写像では, 基本ベクトルが行列の各列ベクトルに対応することが理解できているようです."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "A mapping defined by a matrix is the vector version of the proportional function \\(y=ax\\), where \\(x\\) and \\(y\\) are vectors. Since an \\(m\\)-dimensional number vector is an \\(m\\times 1\\) matrix, the product \\(Ax\\) is defined only when \\(A\\) has \\(m\\) columns. Then the image vector \\(y\\) has the same number of components as the number of rows of \\(A\\). If this explanation is not yet clear, please repeat it until it becomes understandable."],
+ ["fr", "Une application définie par une matrice est la version vectorielle de la fonction proportionnelle \\(y=ax\\), où \\(x\\) et \\(y\\) sont des vecteurs. Comme un vecteur numérique de dimension \\(m\\) est une matrice \\(m\\times 1\\), le produit \\(Ax\\) n’est défini que lorsque \\(A\\) possède \\(m\\) colonnes. Le vecteur image \\(y\\) possède alors autant de composantes que le nombre de lignes de \\(A\\). Si cette explication n’est pas encore claire, répétez-la jusqu’à ce qu’elle le devienne."],
+ ["de", "Eine durch eine Matrix definierte Abbildung ist die Vektorversion der proportionalen Funktion \\(y=ax\\), wobei \\(x\\) und \\(y\\) Vektoren sind. Da ein \\(m\\)-dimensionaler Zahlenvektor eine \\(m\\times 1\\)-Matrix ist, ist das Produkt \\(Ax\\) nur definiert, wenn \\(A\\) \\(m\\) Spalten besitzt. Dann hat der Bildvektor \\(y\\) genauso viele Komponenten wie \\(A\\) Zeilen hat. Wenn diese Erklärung noch nicht verständlich ist, wiederholen Sie sie bitte, bis sie verständlich wird."],
+ ["it", "Un’applicazione definita da una matrice è la versione vettoriale della funzione proporzionale \\(y=ax\\), dove \\(x\\) e \\(y\\) sono vettori. Poiché un vettore numerico di dimensione \\(m\\) è una matrice \\(m\\times 1\\), il prodotto \\(Ax\\) è definito solo quando \\(A\\) ha \\(m\\) colonne. Il vettore immagine \\(y\\) ha quindi lo stesso numero di componenti del numero di righe di \\(A\\). Se questa spiegazione non è ancora chiara, ripetila finché non diventa comprensibile."],
+ ["ja", "行列の定める写像というは, 比例関数\\(y=ax\\)の\\(x, y\\)がベクトルの場合です. \\(m\\)次元数ベクトルは, \\(m\\times 1 \\)行列なので, 積 \\( Ax \\)が定義されているのは, \\( A \\)が\\(m\\) 列, そして, 写り先 \\(y\\)は\\(A\\)の行数と同じになります. この説明でわからないときは, わかるまで繰り返して下さい."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL2:ListBL2;
+%__Wmsg2L:[["en", "How a mapping defined by a matrix (a matrix map) sends elements of the domain is determined by computing the product. In particular, since the product with basis vectors simply gives the column vectors of the matrix, their images can be found easily."],
+ ["fr", "La manière dont une application définie par une matrice (application matricielle) envoie les éléments du domaine se détermine en calculant le produit. En particulier, comme le produit avec les vecteurs de base donne simplement les vecteurs colonnes de la matrice, leurs images peuvent être trouvées facilement."],
+ ["de", "Wie eine durch eine Matrix definierte Abbildung (Matrixabbildung) Elemente des Definitionsbereichs abbildet, erkennt man durch Berechnung des Produkts. Insbesondere liefert das Produkt mit Basisvektoren einfach die Spaltenvektoren der Matrix, sodass ihre Bilder leicht bestimmt werden können."],
+ ["it", "Il modo in cui un’applicazione definita da una matrice (applicazione matriciale) manda gli elementi del dominio si determina calcolando il prodotto. In particolare, poiché il prodotto con i vettori di base restituisce semplicemente i vettori colonna della matrice, le loro immagini si trovano facilmente."],
+ ["ja", "行列の定める写像(行列写像)が定義域(始域)の元をどのように写すかは積を計算すればわかるのです. 特に, 基本ベクトルとの積は行列の列ベクトルが出てくるだけなので, 容易に像がわかります."]];
+/********** EOF **********/

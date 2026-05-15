@@ -3,8 +3,8 @@
 /* Objective: To learn paratrization of line given equation       */
 /******************************************************************/
 /* c:[2], w:[1, 1, 1]; */
-%_MCQ_NUM_OPTS:4;
-%_MCQ_NUM_COPTS:1;
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:4;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 /*******************************************/
 tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));

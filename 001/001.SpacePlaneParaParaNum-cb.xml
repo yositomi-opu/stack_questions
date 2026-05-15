@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115537  -->
+<!-- question: 116040  -->
   <question type="stack">
     <name>
-      <text>001.SpacePlaneParaPt-rb</text>
+      <text>001.SpacePlaneParaParaNum-cb (Dep10a)</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
@@ -24,7 +24,7 @@
       <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
 stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
-%__mcq_rb_cb:"rb";
+%__mcq_rb_cb:"cb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
 %_rp(L):=random_permutation(L);
 stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
@@ -44,22 +44,23 @@ stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
-
-stack_include("https://stack.mathedu.jp/sc/001/SpacePlaneParaPt.txt");
+/* c:[5], w:[5, 5, 4, 4]; */
+%_MCQ_NUM_OPTS:8;
+%_MCQ_NUM_COPTS:rand([1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4]);
+stack_include("https://stack.mathedu.jp/sc/001/SpacePlaneParaParaNum.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
-/*****************************************************************************************/
-]]></text>
+/*****************************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@}<br>{@vecA@}, {@[pvA, pvB, pvC]@}</text>
+      <text>{@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -94,7 +95,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
     <variantsselectionseed></variantsselectionseed>
     <input>
       <name>ans1</name>
-      <type>radio</type>
+      <type>checkbox</type>
       <tans>ta1</tans>
       <boxsize>10</boxsize>
       <strictsyntax>1</strictsyntax>
@@ -116,8 +117,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");
-]]></text>
+        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -526,7 +526,20 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
         </falsefeedback>
       </node>
     </prt>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>mcq_correct(ta1)</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-16-F</expectedanswernote>
+      </expected>
+    </qtest>
   </question>
 
 </quiz>
-
