@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 116592  -->
+<!-- question: 116612  -->
   <question type="stack">
     <name>
       <text>001.MatMapFindImageB-rb</text>
@@ -65,7 +65,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@map(first,ta1)@}:{@ta1@}</text>
+      <text>{@matS@}, {@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -538,7 +538,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <description>管理者のインプットを想定したテストケースは満点です。</description>
       <testinput>
         <name>ans1</name>
-        <value>mcq_correct(ta1)</value>
+        <value>first(mcq_correct(ta1))</value>
       </testinput>
       <expected>
         <name>prt1</name>
