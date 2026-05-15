@@ -16,20 +16,21 @@ aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
 nmL:[1, 2, 3, 4, 5];
 %__lang(L):=%__mcq_lang(L, %_STACK_LANG);
 
-%_nr:4;
-%_nc:5;
-pv:rand([[1, 2, 3], [1, 3, 4], [1, 2, 4]]);
-pvC:listify(setdifference(setify(makelist(k, k, %_nc)), setify(pv)));
+if not numberp(%_nr) then %_nr:4;
+if not numberp(%_nc) then %_nc:5;
+if not listp(%_pv) then %_pv:rand([[1, 2, 3], [1, 3, 4], [1, 2, 4]]);
 
-matF:randechelon(%_nr, %_nc, pv, [-3, -2, -1, 1, 2, 3]);
+%_pvC:listify(setdifference(setify(makelist(k, k, %_nc)), setify(%_pv)));
+
+matF:randechelon(%_nr, %_nc, %_pv, [-3, -2, -1, 1, 2, 3]);
 pL:make_random_distribution_pm([[3, 1], [2, 3], [1, 10], [0, 3]]);
 matP:random_matrix_det_list(%_nr, pL, [-1, 1]);
 matA:matP.matF;
-pp:matA[2, pvC[2]];
-qq:matF[1, pvC[1]];
+pp:matA[2, %_pvC[2]];
+qq:matF[1, %_pvC[1]];
 
-matFq:genmatrix(lambda([i, j], if [i, j]=[1, pvC[1]] then q else matF[i, j]), %_nr, %_nc);
-matAp:genmatrix(lambda([i, j], if [i, j]=[2, pvC[2]] then p else matA[i, j]), %_nr, %_nc);
+matFq:genmatrix(lambda([i, j], if [i, j]=[1, %_pvC[1]] then q else matF[i, j]), %_nr, %_nc);
+matAp:genmatrix(lambda([i, j], if [i, j]=[2, %_pvC[2]] then p else matA[i, j]), %_nr, %_nc);
 
 %_mkop(p, q):=sconcat("\\(p= ", p, ", q= ", q, "\\)");
 ListAL1:[%_mkop(pp, qq)];
