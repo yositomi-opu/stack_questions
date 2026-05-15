@@ -25,7 +25,7 @@ matF:randechelon(%_nr, %_nc, pv, [-3, -2, -1, 1, 2, 3]);
 pL:make_random_distribution_pm([[3, 1], [2, 3], [1, 10], [0, 3]]);
 matP:random_matrix_det_list(%_nr, pL, [-1, 1]);
 matA:matP.matF;
-pp:matF[2, pvC[2]];
+pp:matA[2, pvC[2]];
 qq:matF[1, pvC[1]];
 
 matFq:genmatrix(lambda([i, j], if [i, j]=[1, pvC[1]] then q else matF[i, j]), %_nr, %_nc);
