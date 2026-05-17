@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 117605  -->
+  <question type="stack">
+    <name>
+      <text>005.LinEqVecAns-vm</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p><br></p>
+<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+<p>{@qtext@}</p>
+<div>\({@[QF, QA, eqS][qt]@}\)</div>
+<table>
+    <tbody>
+        <tr>
+            <td>\({@transpose(matrix(vars))@}=\)</td>
+            <td>[[input:ans1]]</td>
+        </tr>
+    </tbody>
+</table>
+<div>[[validation:ans1]]</div>
+<p></p>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+ var divs = document.getElementsByID('mytextarea');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@AllFmsg@}]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+/*************** parameters *********************/
+qt:3;  /* qt: 1,2,3 : row reduced echelon, generic ext coeff, equations */
+homo:1;  /* homo: homogeneous = 0, inhomogeneous = 1 */
+vn:5;rw:4;  /* vn: number of variables , 3,4, or 5 , rw: number of rows */
+pvL:[[1],[1,2],[1,2,3],[1,2,4],[1,3],[1,3,4]]; /* pivot list, rk = length(pv) */
+pv:rand(pvL);
+Xflag:homo*rand([0,0,1]); /* Xflag = 0: have sol, 1: do not have sol. fix 0 or 1 if you want */
+/* vflag=1 -> vars:[v,w,x,y,z] =2 -> vars:[x1,x2,..] (qt=3 case only) */
+vflag:2;  /* or rand([1,2]); */
+stack_include("https://stack.mathedu.jp/sc/005/LinEqVecAns-vm.txt");
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>vn={@vn@},rw={@rw@},pv={@pv@},Xflag={@Xflag@},matF={@matF@},matP={@matP@},matExtA={@matExtA@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span>&nbsp;よくできました.正解です!]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>&nbsp;惜しい! 部分的に正解です.]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>&nbsp;残念ながら不正解です.]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>CansVX</tans>
+      <boxsize>30</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[/* 解答変数 (max 6 variables) */
+ansV:if ans1=matrix([X]) or ans1='ans1 then IansV else ans1;/* パラ分離解答の場合は調整 */
+chk0:is(matrix_size(ansV)=[vn, 1]);
+ansL:if chk0 then map(expand, makelist(ansV[i, 1], i, 1, vn)) else makelist(0, vn);
+chkX:chk0 and ((equal(Xflag, 1) and equal(ansV, IansV)) or (equal(Xflag, 0) and not member(X, ansL)));
+zer[i, j]:=0;
+cvZRrw:genmatrix(zer, rw, 1);
+cvZRvn:genmatrix(zer, vn, 1);
+chkz(cv):=block([], if equal(cv, cvZRrw) then return(0) else return(1));
+chkZ(cv):=block([], if equal(cv, cvZRvn) then return(0) else return(1));
+cvC:subst(makelist(pars[i]=0, i, 1, length(pars)), ansV);
+/* include parameter only ? */
+chkP:if chk0 then apply("and", makelist(numberp(cvC[i, 1]), i, 1, vn));
+/* include vars ? */
+chkxyz:apply("and", makelist(equal(coeff(ansV, vars[i]), cvZRvn), i, 1, vn));
+cvxyz:sum(chkZ(coeff(ansV, vars[i])), i, 1, vn);
+cvM:apply(addcol, makelist(coeff(ansV, pars[i]), i, 1, length(pars)));
+/* formal number of parameters */
+cvr1:apply("+", makelist(chkZ(coeff(ansV, pars[i])), i, 1, length(pars)));
+/* essential num of pars */
+cvr2:rank(cvM);
+/* const part satisfy Av=b ? */
+chk1:chk0 and ((rw>1 and is(equal(matFh.cvC, matF1))) or (rw=1 and is(matFh.cvC=matF1[1, 1])));
+/* coeff vector of pars satisfy Av=0 ? */
+chk2:chk0 and is(equal(matFh.cvM, genmatrix(lambda([i, j], 0), rw, length(pars))));
+Kans1:%_mat2str(ans1);
+KansV:%_mat2str(ansV);
+if chk1 and chk2 then msg:MsgC else msg:"";
+
+]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chkX</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+<br>Your  input(for copy and paste to retry):
+{@Kans1@}
+<br></p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg1@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>Xflag</sans>
+        <tans>0</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg2@}]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>1</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg3@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chkP</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg4@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chkxyz</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg5@}]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg6@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>cvr1</sans>
+        <tans>CansPN</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>5</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg7@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>5</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>cvr2</sans>
+        <tans>CansPN</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>6</truenextnode>
+        <trueanswernote>prt1-6-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-6-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg8@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>6</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>7</truenextnode>
+        <trueanswernote>prt1-7-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>7</falsenextnode>
+        <falseanswernote>prt1-7-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg9@}]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>7</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk2</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-8-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+<p>{@msg@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-8-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg10@}]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>1532095073</deployedseed>
+    <deployedseed>178438517</deployedseed>
+    <deployedseed>455833898</deployedseed>
+    <deployedseed>304371404</deployedseed>
+    <deployedseed>1186579767</deployedseed>
+    <deployedseed>735912944</deployedseed>
+    <deployedseed>949065816</deployedseed>
+    <deployedseed>1472548237</deployedseed>
+    <deployedseed>17969400</deployedseed>
+    <deployedseed>353437452</deployedseed>
+    <deployedseed>1944488301</deployedseed>
+    <deployedseed>1615140338</deployedseed>
+    <deployedseed>1650294388</deployedseed>
+    <deployedseed>212052078</deployedseed>
+    <deployedseed>551963071</deployedseed>
+    <deployedseed>1139343767</deployedseed>
+    <deployedseed>193645244</deployedseed>
+    <deployedseed>869800577</deployedseed>
+    <deployedseed>1189438052</deployedseed>
+    <deployedseed>342690232</deployedseed>
+  </question>
+
+</quiz>
