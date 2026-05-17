@@ -199,5 +199,6 @@ Msg10:%__lang(%_Msg10L);
 ]];
 AllFmsg:%__lang(%_AllFmsgL);
 
+if qt=1 then AS:%_mat2str(QF) else if qt=2 then AS:%_mat2str(QA) else AS:"";
 
 /************* EOF ******************/
