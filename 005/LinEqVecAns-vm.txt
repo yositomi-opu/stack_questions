@@ -112,4 +112,22 @@ qtext3:%__lang(%_qtext3L);
 qtext:[qtext1, qtext2, qtext3][qt];
 
 
+/*********** for feedback messages *************/
+%_MsgCL:[["en", "The equations are satisfied, and the number of parameters is also appropriate. Correct."],
+ ["fr", "Les équations sont satisfaites, et le nombre de paramètres est également approprié. Correct."],
+ ["de", "Die Gleichungen sind erfüllt, und die Anzahl der Parameter ist ebenfalls angemessen. Richtig."],
+ ["it", "Le equazioni sono soddisfatte e anche il numero di parametri è appropriato. Corretto."],
+ ["ja", "方程式も満たし,  パラメータの数も適正です. 正解です."]];
+
+MsgC:%__lang(%_MsgCL);
+
+%_Msg1L:[["en", "<p>The determination of whether a solution exists is incorrect, or the size of the answer vector is invalid.</p>"],
+ ["fr", "<p>La détermination de l’existence d’une solution est incorrecte, ou la taille du vecteur réponse est invalide.</p>"],
+ ["de", "<p>Die Entscheidung darüber, ob eine Lösung existiert, ist falsch, oder die Größe des Antwortvektors ist ungültig.</p>"],
+ ["it", "<p>La determinazione dell’esistenza di una soluzione è errata, oppure la dimensione del vettore risposta non è valida.</p>"],
+ ["ja", "<p>解の有無の判定が違います. もしくは, 解答ベクトルサイズが不正です.</p>"]];
+Msg1:%__lang(%_Msg1L);
+
+
+
 /************* EOF ******************/
