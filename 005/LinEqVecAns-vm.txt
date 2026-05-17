@@ -11,7 +11,7 @@ vars:[vars1, vars2][vflag];
 vS:sequenceify(vars);
 if not listp(pv) then pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
 rk:length(pv);
-if Xflag=1 then rw:min(rw, rk);
+if Xflag=1 then rw:max(rw, rk);
 /* pars : permitted parameters list */
 pars:[p, q, r, s, t];
 pS:sequenceify(pars);
@@ -64,7 +64,7 @@ eqS:if rw>4 then sconcat(eqS, "\\\\", eqSL[5], "&=&", rhs[5, 1]) else eqS;
 eqS:if rw>5 then sconcat(eqS, "\\\\", eqSL[6], "&=&", rhs[6, 1]) else eqS;
 eqS:if rw>6 then sconcat(eqS, "\\\\", eqSL[7], "&=&", rhs[7, 1]) else eqS;
 eqS:if rw>1 then sconcat(eqS, "\\end{array}\\right.") else eqS;
-eqS:ssubst("", "*", eqS);
+/* eqS:ssubst("", "*", eqS); */
 eqS:ssubst("", "(", eqS);
 eqS:ssubst("", ")", eqS);
 
@@ -118,7 +118,6 @@ qtext:[qtext1, qtext2, qtext3][qt];
  ["de", "Die Gleichungen sind erfüllt, und die Anzahl der Parameter ist ebenfalls angemessen. Richtig."],
  ["it", "Le equazioni sono soddisfatte e anche il numero di parametri è appropriato. Corretto."],
  ["ja", "方程式も満たし,  パラメータの数も適正です. 正解です."]];
-
 MsgC:%__lang(%_MsgCL);
 
 %_Msg1L:[["en", "<p>The determination of whether a solution exists is incorrect, or the size of the answer vector is invalid.</p>"],
@@ -128,6 +127,77 @@ MsgC:%__lang(%_MsgCL);
  ["ja", "<p>解の有無の判定が違います. もしくは, 解答ベクトルサイズが不正です.</p>"]];
 Msg1:%__lang(%_Msg1L);
 
+%_Msg2L:[["en", "<p>The determination of whether a solution exists is correct.</p>"],
+ ["fr", "<p>La détermination de l’existence d’une solution est correcte.</p>"],
+ ["de", "<p>Die Entscheidung darüber, ob eine Lösung existiert, ist richtig.</p>"],
+ ["it", "<p>La determinazione dell’esistenza di una soluzione è corretta.</p>"],
+ ["ja", "<p>解の有無の判定:正解です.</p>"]];
+Msg2:%__lang(%_Msg2L);
+
+%_Msg3L:[["en", "Correct. There is no solution."],
+ ["fr", "Correct. Il n’existe pas de solution."],
+ ["de", "Richtig. Es gibt keine Lösung."],
+ ["it", "Corretto. Non esiste soluzione."],
+ ["ja", "正解です. 解はありません."]];
+Msg3:%__lang(%_Msg3L);
+
+%_Msg4L:[["en", "<p>Characters other than the parameters are included.</p>"],
+ ["fr", "<p>Des caractères autres que les paramètres sont inclus.</p>"],
+ ["de", "<p>Es sind Zeichen enthalten, die keine Parameter sind.</p>"],
+ ["it", "<p>Sono inclusi caratteri diversi dai parametri.</p>"],
+ ["ja", "<p>パラメータ以外の文字が含まれています.</p>"]];
+Msg4:%__lang(%_Msg4L);
+
+%_Msg5L:[["en", sconcat("<p>You may be using parameters other than the specified ones. The only parameters that may be used are ", tex2(pS), ".</p>")],
+ ["fr", sconcat("<p>Vous utilisez peut-être des paramètres autres que ceux spécifiés. Les seuls paramètres autorisés sont ", tex2(pS), ".</p>")],
+ ["de", sconcat("<p>Möglicherweise verwenden Sie andere als die angegebenen Parameter. Die einzigen zulässigen Parameter sind ", tex2(pS), ".</p>")],
+ ["it", sconcat("<p>Potresti utilizzare parametri diversi da quelli specificati. Gli unici parametri che possono essere usati sono ", tex2(pS), ".</p>")],
+ ["ja", sconcat("<p>指定した文字以外のパラメータを使用している可能性があります. 使用できるパラメータは", tex2(pS), "のみです.</p>")]];
+Msg5:%__lang(%_Msg5L);
+
+%_Msg6L:[["en", sconcat("You must not leave the variables ", tex2(vS), " in your answer.")],
+ ["fr", sconcat("Vous ne devez pas laisser les variables ", tex2(vS), " dans votre réponse.")],
+ ["de", sconcat("Die Variablen ", tex2(vS), " dürfen in der Antwort nicht verbleiben.")],
+ ["it", sconcat("Non devi lasciare le variabili ", tex2(vS), " nella risposta.")],
+ ["ja", sconcat("変数", tex2(vS), "を残してはいけません.")]];
+Msg6:%__lang(%_Msg6L);
+
+%_Msg7L:[["en", "<p>The number of parameters is incorrect.</p>"],
+ ["fr", "<p>Le nombre de paramètres est incorrect.</p>"],
+ ["de", "<p>Die Anzahl der Parameter ist falsch.</p>"],
+ ["it", "<p>Il numero di parametri è errato.</p>"],
+ ["ja", "<p>パラメータの数が正しくありません.</p>"]];
+Msg7:%__lang(%_Msg7L);
+
+%_Msg8L:[["en", "<p>The number of parameters appeared to be correct, but some unnecessary parameters seem to be included or some necessary ones seem to be missing.</p>"],
+ ["fr", "<p>Le nombre de paramètres semblait correct, mais certains paramètres inutiles semblent être inclus ou certains paramètres nécessaires semblent manquer.</p>"],
+ ["de", "<p>Die Anzahl der Parameter schien korrekt zu sein, aber es scheinen unnötige Parameter enthalten zu sein oder notwendige Parameter zu fehlen.</p>"],
+ ["it", "<p>Il numero di parametri sembrava corretto, ma sembrano essere inclusi parametri inutili oppure mancano parametri necessari.</p>"],
+ ["ja", "<p>パラメータの数は見かけ上あっていましたが, 不要なものが含まれたり必要なものが欠けているようです.</p>"]];
+Msg8:%__lang(%_Msg8L);
+
+%_Msg9L:[["en", sconcat("<p>The solution obtained by substituting 0 for all parameters (a particular solution) does not satisfy the equation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). We have \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
+ ["fr", sconcat("<p>La solution obtenue en substituant 0 à tous les paramètres (une solution particulière) ne satisfait pas l’équation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). On a \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
+ ["de", sconcat("<p>Die Lösung, die man erhält, wenn man für alle Parameter 0 einsetzt (eine spezielle Lösung), erfüllt die Gleichung \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) nicht. Es gilt \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
+ ["it", sconcat("<p>La soluzione ottenuta sostituendo 0 a tutti i parametri (una soluzione particolare) non soddisfa l’equazione \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). Si ha \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
+ ["ja", sconcat("<p>すべてのパラメータに0を代入したときの解(特殊解)が方程式 \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) を満たしていません. \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\) です.</p>")]];
+Msg9:%__lang(%_Msg9L);
+
+%_Msg10L:[["en", "<p>There are expressions in which parameters remain after substitution into the equations.<br> This means that, for example, when writing \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) by separating the parameters, there exists a vector \\({\\boldsymbol u}\\) such that \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\). In terms of the parametric representation of a plane, this corresponds to using a vector that is not parallel to the plane.</p>"],
+ ["fr", "<p>Il existe des expressions dans lesquelles des paramètres restent après substitution dans les équations.<br> Cela signifie que, par exemple, lorsqu’on écrit \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) en séparant les paramètres, il existe un vecteur \\({\\boldsymbol u}\\) tel que \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\). Dans le contexte de la représentation paramétrique d’un plan, cela correspond à l’utilisation d’un vecteur qui n’est pas parallèle au plan.</p>"],
+ ["de", "<p>Es gibt Ausdrücke, bei denen nach dem Einsetzen in die Gleichungen noch Parameter übrig bleiben.<br> Das bedeutet zum Beispiel, dass beim Schreiben von \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) mit getrennten Parametern ein Vektor \\({\\boldsymbol u}\\) existiert, für den \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\) gilt. In der parametrischen Darstellung einer Ebene entspricht dies der Verwendung eines Vektors, der nicht parallel zur Ebene ist.</p>"],
+ ["it", "<p>Ci sono espressioni in cui rimangono parametri dopo la sostituzione nelle equazioni.<br> Questo significa che, per esempio, scrivendo \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) separando i parametri, esiste un vettore \\({\\boldsymbol u}\\) tale che \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\). Nel linguaggio della rappresentazione parametrica di un piano, ciò corrisponde all’utilizzo di un vettore che non è parallelo al piano.</p>"],
+ ["ja", "<p>方程式に代入するとパラメータが残ってしまう式があります. <br> これは, たとえば, \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+...\\)とパラメータを分離して書いたときに, \\(A{\\boldsymbol u}={\\boldsymbol 0}\\)が成り立っていないような \\({\\boldsymbol u}\\)があるということを意味します. 平面のパラメータ表示でいうと, 平面に平行でないベクトルを使っている, ということに相当します.</p>"]];
+Msg10:%__lang(%_Msg10L);
+
+%_AllFmsgL:[[
+["en", "<p>The parametric representation of solutions of systems of linear equations is an important application of matrices. It often appears under the name Gaussian elimination. Here, we consider how to determine whether a nonhomogeneous system has a solution when the augmented coefficient matrix is in reduced echelon form (reduced row echelon form) or in a general form, and if a solution exists and is not unique, how to obtain its parametric representation. In the reduced echelon case, a parametric representation is obtained by assigning parameters to the variables corresponding to non-pivot columns. Note that if the rank of the coefficient matrix differs from the rank of the augmented coefficient matrix, then no solution exists (the system is inconsistent).</p><p>Furthermore, when the parametric representation of the solution is written in separated form such as \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+q{\\boldsymbol v}+\\cdots\\), the particular solution \\({\\boldsymbol x}_0\\) satisfies \\(A{\\boldsymbol x}_0={\\boldsymbol b}\\), while \\({\\boldsymbol u},{\\boldsymbol v},\\dots\\) satisfy \\(A{\\boldsymbol u}=A{\\boldsymbol v}=\\cdots={\\boldsymbol 0}\\). Compare this with the parametric representation of a plane.</p>"],
+ ["fr", "<p>La représentation paramétrique des solutions des systèmes d’équations linéaires est une application importante des matrices. Elle apparaît souvent sous le nom d’élimination de Gauss. Ici, nous considérons, dans le cas où la matrice augmentée des coefficients est sous forme échelonnée réduite (forme échelonnée réduite par lignes) ou sous une forme générale, comment déterminer si un système non homogène possède une solution et, si la solution n’est pas unique, comment obtenir sa représentation paramétrique. Dans le cas échelonné réduit, on obtient une représentation paramétrique en prenant comme paramètres les variables correspondant aux colonnes non pivot.</p><p>Notons que lorsque le rang de la matrice des coefficients est différent du rang de la matrice augmentée, il n’existe pas de solution (le système est incompatible).</p><p>De plus, lorsque la représentation paramétrique de la solution est écrite sous forme séparée, par exemple \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+q{\\boldsymbol v}+\\cdots\\), la solution particulière \\({\\boldsymbol x}_0\\) satisfait \\(A{\\boldsymbol x}_0={\\boldsymbol b}\\), tandis que \\({\\boldsymbol u},{\\boldsymbol v},\\dots\\) satisfont \\(A{\\boldsymbol u}=A{\\boldsymbol v}=\\cdots={\\boldsymbol 0}\\). Essayez de comparer cela avec la représentation paramétrique d’un plan.</p>"],
+ ["de", "<p>Die Parameterdarstellung von Lösungen linearer Gleichungssysteme ist eine wichtige Anwendung von Matrizen. Sie erscheint häufig unter dem Namen Gauß-Elimination. Hier betrachten wir im Fall, dass die erweiterte Koeffizientenmatrix eine reduzierte Stufenmatrix (reduced row echelon form) oder eine allgemeine Form besitzt, wie man entscheidet, ob ein inhomogenes Gleichungssystem Lösungen besitzt, und wie man — falls die Lösung nicht eindeutig ist — eine Parameterdarstellung bestimmt. Im Fall der reduzierten Stufenmatrix erhält man eine Parameterdarstellung, indem man den Variablen, die nicht zu Pivotspalten gehören, Parameter zuordnet. Wenn der Rang der Koeffizientenmatrix vom Rang der erweiterten Koeffizientenmatrix verschieden ist, existiert keine Lösung (das System ist widersprüchlich).</p><p>Wenn man außerdem die Parameterdarstellung der Lösung in getrennter Form wie \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+q{\\boldsymbol v}+\\cdots\\) schreibt, dann erfüllt die spezielle Lösung \\({\\boldsymbol x}_0\\) die Gleichung \\(A{\\boldsymbol x}_0={\\boldsymbol b}\\), während \\({\\boldsymbol u},{\\boldsymbol v},\\dots\\) die Gleichungen \\(A{\\boldsymbol u}=A{\\boldsymbol v}=\\cdots={\\boldsymbol 0}\\) erfüllen. Vergleichen Sie dies mit der Parameterdarstellung einer Ebene.</p>"],
+ ["it", "<p>La rappresentazione parametrica delle soluzioni dei sistemi di equazioni lineari è un’importante applicazione delle matrici. Essa compare spesso con il nome di eliminazione di Gauss. Qui consideriamo, nel caso in cui la matrice aumentata dei coefficienti sia in forma ridotta a scala (reduced row echelon form) oppure in forma generale, come determinare se un sistema non omogeneo possiede soluzioni e, nel caso in cui la soluzione non sia unica, come ottenere la sua rappresentazione parametrica. Nel caso della forma ridotta a scala, la rappresentazione parametrica si ottiene assegnando parametri alle variabili corrispondenti alle colonne non pivot. Si noti che, quando il rango della matrice dei coefficienti è diverso dal rango della matrice aumentata, non esiste soluzione (il sistema è incompatibile).</p><p>Inoltre, quando la rappresentazione parametrica della soluzione viene scritta in forma separata, ad esempio \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+q{\\boldsymbol v}+\\cdots\\), la soluzione particolare \\({\\boldsymbol x}_0\\) soddisfa \\(A{\\boldsymbol x}_0={\\boldsymbol b}\\), mentre \\({\\boldsymbol u},{\\boldsymbol v},\\dots\\) soddisfano \\(A{\\boldsymbol u}=A{\\boldsymbol v}=\\cdots={\\boldsymbol 0}\\). Prova a confrontare questo con la rappresentazione parametrica di un piano.</p>"],
+ ["ja", "<p>連立1次方程式の解のパラメータ表示は重要な行列の応用例です. ガウス消去法という言葉でよく登場します. ここでは, 拡大係数行列が被約階段行列(行簡約行列)の場合や一般の場合に, 非斉次の場合は, 解を持つかどうかの判定, 解を持つ場合は, 一意解でなければパラメータ表示を求めることを考えます. 被約階段行列の場合は, ピボットの列以外に対応する変数をパラメータに置くことでパラメータ表示が得られます. なお, 係数行列と拡大係数行列の階数が異なるときは, 解が存在しない(不能)となります.</p><p>なお, 解のパラメータ表示を分離表示 \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+q{\\boldsymbol v}+\\cdots\\)のように書いた場合, 特殊解 \\({\\boldsymbol x}_0\\) は \\(A{\\boldsymbol x}_0={\\boldsymbol b}\\)を満たし, \\({\\boldsymbol u}, {\\boldsymbol v},...\\) は\\(A{\\boldsymbol u}=A{\\boldsymbol v}=\\cdots={\\boldsymbol 0}\\) を満たします. 平面のパラメータ表示と対比して考えてみましょう.</p>"]
+]];
+AllFmsg:%__lang(%_AllFmsgL);
 
 
 /************* EOF ******************/
