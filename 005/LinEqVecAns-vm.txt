@@ -1,0 +1,115 @@
+/************************************************************************/
+/* 005.LinEqVecAns-vm: three type questions of linear equations         */
+/*          check pametric representation of the answer                 */
+/************************************************************************/
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+if vn>6 then vflag:2;
+if vn<7 then vars1:[[x,y,z],[w,x,y,z],[v,w,x,y,z],[u,v,w,x,y,z]][vn-2];
+vars2:makelist(x[i], i, vn);
+vars:[vars1, vars2][vflag];
+/* vars:random_permutation(vars); */
+vS:sequenceify(vars);
+if not listp(pv) then pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
+rk:length(pv);
+if Xflag=1 then rw:min(rw, rk);
+/* pars : permitted parameters list */
+pars:[p, q, r, s, t];
+pS:sequenceify(pars);
+%__gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
+%__lang(L):=block([m], m:%__gaa(L, %_STACK_LANG), if m="" then m:%__gaa(L, "en"), return (m));
+
+/* remove 0 if necessary */
+reL:make_random_distribution_pm([[3, 2], [2, 2], [1, 8], [0, 1]]);
+matFh:randechelon(rw, vn, pv, reL);
+/* matFh[1, rand([2, 3, 4])]:0; */ /* 係数 0を入れるときは強制的に 0 */
+chkXflag(xf, r1, r2):=block([], if r1=r2 then return(0) else return(xf));
+Xflag:chkXflag(Xflag, rk, rw);/* for safe */
+vb:genmatrix(lambda([i, j], if i<=rk then rand([-3, -2, -1, 1, 2, 3, 4]) else 0), rw, 1);
+chkVB(vb):=block([k, v], v:vb, if Xflag=1 then v[rk+1, 1]:rand_with_prohib(-5, 5, [0]), return(v));
+matF1:homo*chkVB(vb);
+matF:addcol(matFh, matF1);
+cV0:genmatrix(lambda([i, j], 0), vn, 1);
+chkConst(cv, pv, rv):=block([k, v], v:cv, for k:1 while (k<=length(pv)) do (v[pv[k], 1]:rv[k, 1]), return(v));
+constV:chkConst(cV0, pv, vb);
+nspL:nullspace2(matFh);
+CansV0:if vn-rk > 0 then homo*constV+makelist(pars[i], i, 1, vn-rk).nspL else homo*constV;
+IansV:transpose(matrix(makelist(X, vn)));
+mkCans(Xflag):=block(if Xflag=1 then return(IansV) else return(CansV0));
+CansV:mkCans(Xflag);
+CansVX:transpose(matrix(makelist(if i<=vn then CansV[i, 1] else 0, i, 1, vn)));
+Cans1:CansVX;
+CansPN:vn-rk;
+/****************************/
+pL:make_random_distribution([[4, 1], [3, 1], [2, 2], [1, 5], [0, 1]]);
+matP:if rw>1 then random_invertible_matrix(rw, pL) else matrix([rand([-4, -3, -2, -1, 2, 3, 4])]);
+matExtA:matP.matF;
+matA:submatrix(matExtA, vn+1);
+rhs:col(matExtA, vn+1);
+matFsize:matrix_size(matF);
+QF:if homo=0 then matFh else matF;
+QA:if homo=0 then matA else matExtA;
+
+powerdisp:true;
+eqsys:if rw>1 then matA.vars else matrix([matA.vars]);
+rhs:col(matExtA, vn+1);
+/* eqSL:if vflag=2 then makelist(ssubst("x_", "x", string(eqsys[i, 1])), i, 1, rw) else makelist(eqsys[i, 1], i, 1, rw); */
+eqSL:makelist(display_polynomial_varlist_tex1(eqsys[i, 1], vars), i, 1, rw);
+
+eqS:if rw=1 then sconcat(eqSL[1], "=", rhs[1, 1]) else "\\left\\{\\begin{array}{ccc}";
+eqS:if rw>1 then sconcat(eqS, eqSL[1], "&=&", rhs[1, 1]) else eqS;
+eqS:if rw>1 then sconcat(eqS, "\\\\", eqSL[2], "&=&", rhs[2, 1]) else eqS;
+eqS:if rw>2 then sconcat(eqS, "\\\\", eqSL[3], "&=&", rhs[3, 1]) else eqS;
+eqS:if rw>3 then sconcat(eqS, "\\\\", eqSL[4], "&=&", rhs[4, 1]) else eqS;
+eqS:if rw>4 then sconcat(eqS, "\\\\", eqSL[5], "&=&", rhs[5, 1]) else eqS;
+eqS:if rw>5 then sconcat(eqS, "\\\\", eqSL[6], "&=&", rhs[6, 1]) else eqS;
+eqS:if rw>6 then sconcat(eqS, "\\\\", eqSL[7], "&=&", rhs[7, 1]) else eqS;
+eqS:if rw>1 then sconcat(eqS, "\\end{array}\\right.") else eqS;
+eqS:ssubst("", "*", eqS);
+eqS:ssubst("", "(", eqS);
+eqS:ssubst("", ")", eqS);
+
+%_qtext1L_homo:[["en", sconcat("<p>The coefficient matrix of a homogeneous system of linear equations in the variables ", tex2(vS), " was transformed by elementary row operations as shown below. Give the solution of this system in parametric form. ",
+  "Choose the parameters from <u><strong>", tex2(ps), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
+ ["fr", sconcat("<p>La matrice des coefficients d’un système homogène d’équations linéaires en les variables ", tex2(vS), " a été transformée par des opérations élémentaires sur les lignes comme indiqué ci-dessous. Donnez la solution de ce système sous forme paramétrique. ",
+  "Choisissez les paramètres parmi <u><strong>", tex2(ps), "</strong> et saisissez votre réponse sous la forme 2-3*p+5/2*s</u>. L’ordre d’utilisation des paramètres n’a pas d’importance.</p>")],
+ ["de", sconcat("<p>Die Koeffizientenmatrix eines homogenen linearen Gleichungssystems in den Variablen ", tex2(vS), " wurde durch elementare Zeilenumformungen wie unten angegeben umgeformt. Geben Sie die Lösung dieses Gleichungssystems in Parameterform an. ",
+  "Wählen Sie die Parameter aus <u><strong>", tex2(ps), "</strong> und geben Sie Ihre Antwort in der Form 2-3*p+5/2*s ein</u>. Die Reihenfolge, in der die Parameter verwendet werden, spielt keine Rolle.</p>")],
+ ["it", sconcat("<p>La matrice dei coefficienti di un sistema omogeneo di equazioni lineari nelle variabili ", tex2(vS), " è stata trasformata mediante operazioni elementari di riga come indicato sotto. Dai la soluzione di questo sistema in forma parametrica. ",
+  "Scegli i parametri da <u><strong>", tex2(ps), "</strong> e inserisci la risposta nella forma 2-3*p+5/2*s</u>. L’ordine in cui vengono usati i parametri non è importante.</p>")],
+ ["ja", sconcat("<p>変数", tex2(vS), "に関する斉次連立1次方程式の係数行列を行に関する基本変形で変形したところ, 下のようになった. この方程式の解(パラメータ表示)を答えよ.",
+  "パラメータは<u><strong>", tex2(ps), "</strong>から選んで 2-3*p+5/2*s のように答えること</u>. パラメータの使用順序は問わない.</p>")]];
+
+
+%_qtext1L_inhomo:[["en", sconcat("<p>The augmented coefficient matrix of a nonhomogeneous system of linear equations in the variables ", tex2(vS), " was transformed by elementary row operations as shown below. Give the solution of this system in parametric form. If no solution exists, leave the answer blank. If a solution exists, write it in parametric form. Choose the parameters from <u><strong>", tex2(ps), "</strong> and enter your answer in the form 2-3*p+5/2*s (the form 2-3p+5s/2 is also accepted)</u>. The order in which the parameters are used does not matter.</p>")],
+ ["fr", sconcat("<p>La matrice augmentée des coefficients d’un système non homogène d’équations linéaires en les variables ", tex2(vS), " a été transformée par des opérations élémentaires sur les lignes comme indiqué ci-dessous. Donnez la solution de ce système sous forme paramétrique. S’il n’existe pas de solution, laissez la zone de réponse vide. S’il existe une solution, écrivez-la sous forme paramétrique. Choisissez les paramètres parmi <u><strong>", tex2(ps), "</strong> et saisissez votre réponse sous la forme 2-3*p+5/2*s (la forme 2-3p+5s/2 est également acceptée)</u>. L’ordre d’utilisation des paramètres n’a pas d’importance.</p>")],
+ ["de", sconcat("<p>Die erweiterte Koeffizientenmatrix eines inhomogenen linearen Gleichungssystems in den Variablen ", tex2(vS), " wurde durch elementare Zeilenumformungen wie unten angegeben umgeformt. Geben Sie die Lösung dieses Gleichungssystems in Parameterform an. Falls keine Lösung existiert, lassen Sie das Antwortfeld leer. Falls eine Lösung existiert, schreiben Sie sie in Parameterform. Wählen Sie die Parameter aus <u><strong>", tex2(ps), "</strong> und geben Sie Ihre Antwort in der Form 2-3*p+5/2*s ein (die Form 2-3p+5s/2 wird ebenfalls akzeptiert)</u>. Die Reihenfolge der verwendeten Parameter spielt keine Rolle.</p>")],
+ ["it", sconcat("<p>La matrice aumentata dei coefficienti di un sistema non omogeneo di equazioni lineari nelle variabili ", tex2(vS), " è stata trasformata mediante operazioni elementari di riga come mostrato sotto. Dai la soluzione di questo sistema in forma parametrica. Se non esiste soluzione, lascia vuoto il campo della risposta. Se esiste una soluzione, scrivila in forma parametrica. Scegli i parametri da <u><strong>", tex2(ps), "</strong> e inserisci la risposta nella forma 2-3*p+5/2*s (è accettata anche la forma 2-3p+5s/2)</u>. L’ordine in cui vengono usati i parametri non è importante.</p>")],
+ ["ja", sconcat("<p>変数", tex2(vS), "に関する非斉次連立1次方程式の拡大係数行列を行に関する基本変形で変形したところ下のようになった. この方程式の解(パラメータ表示)を答えよ. ただし, 解が存在しない場合は解答欄を空欄にして解答し, 解が存在する場合はパラメータ表示を記述すること. パラメータは<u><strong>", tex2(ps), "</strong>から選んで 2-3*p+5/2*s のように答えること(2-3p+5s/2でも一応可)</u>. パラメータの使用順序は問わない.</p>")]];
+
+if homo=0 then qtext1:%__lang(%_qtext1L_homo) else qtext1:%__lang(%_qtext1L_inhomo);
+
+%_qtext2L_homo:[["en", sconcat("<p>The coefficient matrix of the following homogeneous system of linear equations in the variables ", tex2(vS), " is given below. Give the solution of this system in parametric form. Choose the parameters from <u><strong>", tex2(pS), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
+ ["fr", sconcat("<p>La matrice des coefficients du système homogène d’équations linéaires suivant en les variables ", tex2(vS), " est donnée ci-dessous. Donnez la solution de ce système sous forme paramétrique. Choisissez les paramètres parmi <u><strong>", tex2(pS), "</strong> et saisissez votre réponse sous la forme 2-3*p+5/2*s</u>. L’ordre d’utilisation des paramètres n’a pas d’importance.</p>")],
+ ["de", sconcat("<p>Die Koeffizientenmatrix des folgenden homogenen linearen Gleichungssystems in den Variablen ", tex2(vS), " ist unten angegeben. Geben Sie die Lösung dieses Gleichungssystems in Parameterform an. Wählen Sie die Parameter aus <u><strong>", tex2(pS), "</strong> und geben Sie Ihre Antwort in der Form 2-3*p+5/2*s ein</u>. Die Reihenfolge der verwendeten Parameter spielt keine Rolle.</p>")],
+ ["it", sconcat("<p>La matrice dei coefficienti del seguente sistema omogeneo di equazioni lineari nelle variabili ", tex2(vS), " è riportata sotto. Dai la soluzione di questo sistema in forma parametrica. Scegli i parametri da <u><strong>", tex2(pS), "</strong> e inserisci la risposta nella forma 2-3*p+5/2*s</u>. L’ordine in cui vengono usati i parametri non è importante.</p>")],
+ ["ja", sconcat("<p>変数", tex2(vS), "に関する斉次連立1次方程式の係数行列は以下の通りである. この方程式の解(パラメータ表示)を答えよ. パラメータは<u><strong>", tex2(pS), "</strong>から選んで 2-3*p+5/2*s のように答えること</u>. パラメータの使用順序は問わない.</p>")]];
+
+%_qtext2L_inhomo:[["en", sconcat("<p>The coefficient matrix of the following homogeneous system of linear equations in the variables ", tex2(vS), " is given below. Give the solution of this system in parametric form. If no solution exists, leave the answer field blank. Choose the parameters from <u><strong>", tex2(pS), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
+ ["fr", sconcat("<p>La matrice des coefficients du système homogène d’équations linéaires suivant en les variables ", tex2(vS), " est donnée ci-dessous. Donnez la solution de ce système sous forme paramétrique. S’il n’existe pas de solution, laissez la zone de réponse vide. Choisissez les paramètres parmi <u><strong>", tex2(pS), "</strong> et saisissez votre réponse sous la forme 2-3*p+5/2*s</u>. L’ordre d’utilisation des paramètres n’a pas d’importance.</p>")],
+ ["de", sconcat("<p>Die Koeffizientenmatrix des folgenden homogenen linearen Gleichungssystems in den Variablen ", tex2(vS), " ist unten angegeben. Geben Sie die Lösung dieses Gleichungssystems in Parameterform an. Falls keine Lösung existiert, lassen Sie das Antwortfeld leer. Wählen Sie die Parameter aus <u><strong>", tex2(pS), "</strong> und geben Sie Ihre Antwort in der Form 2-3*p+5/2*s ein</u>. Die Reihenfolge der verwendeten Parameter spielt keine Rolle.</p>")],
+ ["it", sconcat("<p>La matrice dei coefficienti del seguente sistema omogeneo di equazioni lineari nelle variabili ", tex2(vS), " è riportata sotto. Dai la soluzione di questo sistema in forma parametrica. Se non esiste soluzione, lascia vuoto il campo della risposta. Scegli i parametri da <u><strong>", tex2(pS), "</strong> e inserisci la risposta nella forma 2-3*p+5/2*s</u>. L’ordine in cui vengono usati i parametri non è importante.</p>")],
+ ["ja", sconcat("<p>変数", tex2(vS), "に関する斉次連立1次方程式の係数行列は以下の通りである. この方程式の解(パラメータ表示)を答えよ. ただし, 解が存在しない場合は解答欄は空欄のままにして解答すること. パラメータは<u><strong>", tex2(pS), "</strong>から選んで 2-3*p+5/2*s のように答えること</u>. パラメータの使用順序は問わない.</p>")]];
+
+if homo=0 then qtext2:%__lang(%_qtext2L_homo) else qtext2:%__lang(%_qtext2L_inhomo);
+
+%_qtext3L:[["en", sconcat("<p>Give the solution (in parametric form) of the following system of linear equations in the variables ", tex2(vS), ". If no solution exists, leave the answer fields blank. Choose the parameters from <u><strong>", tex2(pS), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
+ ["fr", sconcat("<p>Donnez la solution (sous forme paramétrique) du système d’équations linéaires suivant en les variables ", tex2(vS), ". S’il n’existe pas de solution, laissez les zones de réponse vides. Choisissez les paramètres parmi <u><strong>", tex2(pS), "</strong> et saisissez votre réponse sous la forme 2-3*p+5/2*s</u>. L’ordre d’utilisation des paramètres n’a pas d’importance.</p>")],
+ ["de", sconcat("<p>Geben Sie die Lösung (in Parameterform) des folgenden linearen Gleichungssystems in den Variablen ", tex2(vS), " an. Falls keine Lösung existiert, lassen Sie die Antwortfelder leer. Wählen Sie die Parameter aus <u><strong>", tex2(pS), "</strong> und geben Sie Ihre Antwort in der Form 2-3*p+5/2*s ein</u>. Die Reihenfolge der verwendeten Parameter spielt keine Rolle.</p>")],
+ ["it", sconcat("<p>Dai la soluzione (in forma parametrica) del seguente sistema di equazioni lineari nelle variabili ", tex2(vS), ". Se non esiste soluzione, lascia vuoti i campi di risposta. Scegli i parametri da <u><strong>", tex2(pS), "</strong> e inserisci la risposta nella forma 2-3*p+5/2*s</u>. L’ordine in cui vengono usati i parametri non è importante.</p>")],
+ ["ja", sconcat("<p>変数", tex2(vS), " に関する以下の連立1次方程式の解(パラメータ表示)を答えよ. ただし, 解が存在しない場合は解答欄を空欄にして解答すること. パラメータは<u><strong>", tex2(pS), "</strong>から選んで 2-3*p+5/2*s のように答えること</u>. パラメータの使用順序は問わない.</p>")]];
+
+qtext3:%__lang(%_qtext3L);
+qtext:[qtext1, qtext2, qtext3][qt];
+
+
+/************* EOF ******************/
