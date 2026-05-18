@@ -245,7 +245,7 @@ vmsg2:%__lang([["en", "You must not include the variables of the equation."],
  ["ja", "指定されたパラメータ以外は使用できません."]]);
 validate_ansvec(ex):=block([chkVars, vecz, vC],
   if not matrixp(ex) or not matrix_size(ex)=[vn, 1] then return(castext(vmsg1)),
-  vecz:genmatrix(lambda([i, j], 0), vn, 0),
+  vecz:genmatrix(lambda([i, j], 0), vn, 1),
   chkVars:apply("and", makelist(is(coeff(ex, vars[i])=vecz), i, 1, vn)),
   if not chkVars then return(castext(vmsg2)),
   vC:subst(makelist(pars[i]=0, i, 1, length(pars)), a1),
