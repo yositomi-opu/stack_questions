@@ -303,4 +303,7 @@ validate_ansvec2(ex):=block([],
   if not bit_onep(Flag, 3) then s:sconcat(s, MsgS2),
   return(s));
 
+if qt=1 then (AS_CommentS:"<!--", AS_CommentE:"-->")
+else (AS_CommentS:"", AS_CommentE:"");
+
 /************* EOF ******************/
