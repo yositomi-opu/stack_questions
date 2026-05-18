@@ -243,16 +243,21 @@ vmsg2:%__lang([["en", "You must not include the variables of the equation."],
  ["de", "Es dürfen keine anderen als die angegebenen Parameter verwendet werden."],
  ["it", "Non è possibile usare parametri diversi da quelli specificati."],
  ["ja", "指定されたパラメータ以外は使用できません."]]);
-validate_ansvec(ex):=block([chkVars, vecz, vC, chkPars, k], simp:true,
+/* in validation: simp is false and the below does not work */
+validate_ansvec(ex):=block([chkVars, vecz, vC, chkPars, k, pn],
   if not matrix_size(ex)=[vn, 1] then return(castext(vmsg1)),
   vecz:genmatrix(lambda([i, j], 0), vn, 1),
-  chkVars:apply("and", (makelist(is(coeff(ex, vars[k])=vecz), k, 1, vn), simp)),
+  chkVars:apply("and", makelist(is(coeff(ex, vars[k])=vecz), k, 1, vn)),
   if not chkVars then return(castext(vmsg2)),
-  vC:subst((makelist(pars[k]=0, k, 1, length(pars)), simp), ex),
+  pn:length(pars),
+  vC:subst(makelist(pars[k]=0, k, 1, pn), ex),
   chkPars:apply("and", map(numberp, list_matrix_entries(vC))),
   if not chkPars then return(castext(vmsg3)),
   "");
-
+validate_ansvec2(ex):=block([],
+  if not matrix_size(ex)=[vn, 1] then return(vmsg1),
+  "");
+  
 /***************** chkans *********************************
  ret=-1: 解を持たない場合で不正解
  ret=0: 解を持たない場合で正解
