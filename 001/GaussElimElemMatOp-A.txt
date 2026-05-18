@@ -2,7 +2,7 @@
 /* 001.MCB include file		                              */
 /* Objective: To learn/check elementary matrix and operations */
 /**************************************************************/
-/* c:[1], w:[7, 8]; */
+/* c:[1], w:[5, 6]; */
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
 %_MCQ_NUM_COPTS:1;
 /********************************************************************/
@@ -49,7 +49,8 @@ MIGI(m):=%__lang([
 %_mkop(L):=if L[2]=1 then HIDARI(L[1]) else MIGI(L[1]);
 
 /* 1: from Left, 2: from Right */
-%_opL:%_rp([
+%_ord:%_rp(makelist(k, k, 10));
+%_opL:makelist([
  [kihonP(rw, ijL1[1], ijL1[2], cc1), 1],
  [kihonP(rw, ijL1[2], ijL1[1], cc1), 1],
  [kihonQ(rw, ijL1[1], cc2), 1],
@@ -60,8 +61,8 @@ MIGI(m):=%__lang([
  [kihonQ(cl, ijL1[1], cc2), 2],
  [kihonQ(cl, ijL1[2], cc2), 2],
  [kihonR(cl, ijL1[1], ijL1[2]), 2]
-]);
-%_badL:%_rp([
+][%_ord[k]], k, 1, 6);
+%_badL:makelist([
  [kihonP(rw, ijL1[1], ijL1[2], cc1), 2],
  [kihonP(rw, ijL1[2], ijL1[1], cc1), 2],
  [kihonQ(rw, ijL1[1], cc2), 2],
@@ -72,7 +73,7 @@ MIGI(m):=%__lang([
  [kihonQ(cl, ijL1[1], cc2), 1],
  [kihonQ(cl, ijL1[2], cc2), 1],
  [kihonR(cl, ijL1[1], ijL1[2]), 1]
-]);
+][%_ord[k]], k, 1, 6);
 
 matAc:matrix(makelist(Wa[k], k, cl));
 matAr:transpose(matrix(makelist([Wb1, Wb2, Wb3, Wb4, Wb5, Wb6, Wb7, Wb8][k], k, rw)));
