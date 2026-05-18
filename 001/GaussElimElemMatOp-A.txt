@@ -18,8 +18,17 @@ nmL:[1, 2, 3, 4, 5];
 rw:rand([4, 5]);
 cl:9-rw;/* max 6, min 4 */
 
+texput(Xb1, "\\boldsymbol{b}^1");
+texput(Xb2, "\\boldsymbol{b}^2");
+texput(Xb3, "\\boldsymbol{b}^3");
+texput(Xb4, "\\boldsymbol{b}^4");
+texput(Xb5, "\\boldsymbol{b}^5");
+texput(Xb6, "\\boldsymbol{b}^6");
+texput(Xb7, "\\boldsymbol{b}^7");
+texput(Xb8, "\\boldsymbol{b}^8");
+
 matAc:matrix(makelist(Wa[j], j, 1, cl));
-matAr:matrix(makelist(Wa^i, i, 1, rw));
+matAr:matrix(makelist([Xb1, Xb2, Xb3, Xb4, Xb5, Xb6, Xb7, Xb8][i], i, 1, rw));
 
 ijL1:%_rp(rand([[1, 4], [2, 3], [1, 3], [2, 4]]));
 ijL2:rand([[1, 4], [2, 3], [1, 3], [2, 4]]);
@@ -66,7 +75,7 @@ MIGI(m):=%__lang([
 ]);
 
 matAc:matrix(makelist(Wa[k], k, cl));
-matAr:transpose(matrix(makelist(Wa^k, k, rw)));
+matAr:transpose(matrix(makelist([Wb1, Wb2, Wb3, Wb4, Wb5, Wb6, Wb7, Wb8][k], k, rw)));
 op1:%_opL[1];
 if op1[2]=1 then opS:tex2L([matAr, " \\to ", op1[1].matAr])
 else opS:tex2L([matAc, " \\to ", matAc.op1[1]]);
