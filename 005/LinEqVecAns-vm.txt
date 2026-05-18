@@ -260,11 +260,11 @@ validate_ansvec(ex):=block([chkVars, vecz, vC],
 ***********************************************************/
 
 /***** chk answer *****/
-%_chkans(aX, a1):=block([aV, aL, chX, vZrw, vZvn, chkz, chkZ, vC, vM, cr1, cr2, chk1, chk2, Flag],
+%_chkans(aX, a1):=block([aV, aL, vZrw, vZvn, chkz, chkZ, vC, vM, Flag],
   if taX=2 and not aX=taX then return(-1),
   if taX=2 and aX=taX then return(0),
   Flg:1,
-  aL:map(expand, list_matrix_entries(a1));
+  aL:map(expand, list_matrix_entries(a1)),
   vZrw:genmatrix(lambda([i, j], 0), rw, 1),
   vZvn:genmatrix(lambda([i, j], 0), vn, 1),
   chkz(cv):=if cv=vZrw then 0 else 1,
@@ -290,5 +290,6 @@ validate_ansvec(ex):=block([chkVars, vecz, vC],
   if bit_and(Flag, 1) and not bit_and(Flag, 2) then return(MsgP4),
   if bit_and(Flag, 4) then s:sconcat(s, MsgS1),
   if bit_and(Flag, 8) then s:sconcat(s, MsgS2),
+  return(s));
 
 /************* EOF ******************/
