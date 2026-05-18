@@ -204,11 +204,11 @@ MsgP5:%__lang([["en", "<p>The number of parameters is incorrect.</p>"],
  ["it", "<p>Il numero di parametri è errato.</p>"],
  ["ja", "<p>パラメータの数は正しいです. </p>"]]);
 
-MsgS1:%__lang([["en", sconcat("<p>The solution obtained by substituting 0 for all parameters (a particular solution) does not satisfy the equation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). We have \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
- ["fr", sconcat("<p>La solution obtenue en substituant 0 à tous les paramètres (une solution particulière) ne satisfait pas l’équation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). On a \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
- ["de", sconcat("<p>Die Lösung, die man erhält, wenn man für alle Parameter 0 einsetzt (eine spezielle Lösung), erfüllt die Gleichung \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) nicht. Es gilt \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
- ["it", sconcat("<p>La soluzione ottenuta sostituendo 0 a tutti i parametri (una soluzione particolare) non soddisfa l’equazione \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). Si ha \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\).</p>")],
- ["ja", sconcat("<p>すべてのパラメータに0を代入したときの解(特殊解)が方程式 \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) を満たしていません. \\(A", tex2(cvC), "\\ne {\\boldsymbol b}\\) です.</p>")]]);
+MsgS1:%__lang([["en", sconcat("<p>The solution obtained by substituting 0 for all parameters (a particular solution) does not satisfy the equation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\). </p>")],
+ ["fr", sconcat("<p>La solution obtenue en substituant 0 à tous les paramètres (une solution particulière) ne satisfait pas l’équation \\(A\\boldsymbol{x}=\\boldsymbol{b}\\).</p>")],
+ ["de", sconcat("<p>Die Lösung, die man erhält, wenn man für alle Parameter 0 einsetzt (eine spezielle Lösung), erfüllt die Gleichung \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) nicht.</p>")],
+ ["it", sconcat("<p>La soluzione ottenuta sostituendo 0 a tutti i parametri (una soluzione particolare) non soddisfa l’equazione \\(A\\boldsymbol{x}=\\boldsymbol{b}\\).</p>")],
+ ["ja", sconcat("<p>すべてのパラメータに0を代入したときの解(特殊解)が方程式 \\(A\\boldsymbol{x}=\\boldsymbol{b}\\) を満たしていません.</p>")]]);
 
 MsgS2:%__lang([["en", "<p>There are expressions in which parameters remain after substitution into the equations.<br> This means that, for example, when writing \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) by separating the parameters, there exists a vector \\({\\boldsymbol u}\\) such that \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\). In terms of the parametric representation of a plane, this corresponds to using a vector that is not parallel to the plane.</p>"],
  ["fr", "<p>Il existe des expressions dans lesquelles des paramètres restent après substitution dans les équations.<br> Cela signifie que, par exemple, lorsqu’on écrit \\({\\boldsymbol x}={\\boldsymbol x}_0+p{\\boldsymbol u}+\\cdots\\) en séparant les paramètres, il existe un vecteur \\({\\boldsymbol u}\\) tel que \\(A{\\boldsymbol u}\\neq {\\boldsymbol 0}\\). Dans le contexte de la représentation paramétrique d’un plan, cela correspond à l’utilisation d’un vecteur qui n’est pas parallèle au plan.</p>"],
