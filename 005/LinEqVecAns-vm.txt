@@ -11,7 +11,10 @@ vars:[vars1, vars2][vflag];
 vS:sequenceify(vars);
 if not listp(pv) then pv:rand([[1, 2], [1, 3], [1, 2, 3]]);
 rk:length(pv);
-if Xflag=1 then rw:max(rw, rk);
+if not numberp(homo) then homo:1;/* default : inhomogeneous */
+/* Xflag = 0: have sol, 1: have NO sol. fix 0 or 1 if you want */
+if not numberp(Xflag) then Xflag:homo*rand([0, 0, 1]);
+if Xflag=1 then rw:max(rw, rk+1) else rw:max(rw, rk);
 /* pars : permitted parameters list */
 pars:[p, q, r, s, t];
 pS:sequenceify(pars);
@@ -53,8 +56,10 @@ powerdisp:true;
 eqsys:if rw>1 then matA.vars else matrix([matA.vars]);
 rhs:col(matExtA, vn+1);
 /* eqSL:if vflag=2 then makelist(ssubst("x_", "x", string(eqsys[i, 1])), i, 1, rw) else makelist(eqsys[i, 1], i, 1, rw); */
-eqSL:makelist(display_polynomial_varlist_tex1(eqsys[i, 1], vars), i, 1, rw);
-
+/* eqSL:makelist(display_polynomial_varlist_tex1(eqsys[i, 1], vars), i, 1, rw); */
+/* use matrix.mac function */
+eqS:disp_eqn(makelist(eqsys[i]=rhs[i, 1], i, 1, rw), vars);
+/*
 eqS:if rw=1 then sconcat(eqSL[1], "=", rhs[1, 1]) else "\\left\\{\\begin{array}{ccc}";
 eqS:if rw>1 then sconcat(eqS, eqSL[1], "&=&", rhs[1, 1]) else eqS;
 eqS:if rw>1 then sconcat(eqS, "\\\\", eqSL[2], "&=&", rhs[2, 1]) else eqS;
@@ -64,9 +69,17 @@ eqS:if rw>4 then sconcat(eqS, "\\\\", eqSL[5], "&=&", rhs[5, 1]) else eqS;
 eqS:if rw>5 then sconcat(eqS, "\\\\", eqSL[6], "&=&", rhs[6, 1]) else eqS;
 eqS:if rw>6 then sconcat(eqS, "\\\\", eqSL[7], "&=&", rhs[7, 1]) else eqS;
 eqS:if rw>1 then sconcat(eqS, "\\end{array}\\right.") else eqS;
-/* eqS:ssubst("", "*", eqS); */
 eqS:ssubst("", "(", eqS);
 eqS:ssubst("", ")", eqS);
+*/
+HAVE_SOL:%__lang([["en", "has a solution"], ["fr", "admet une solution"],
+ ["de", "hat eine Lösung"], ["it", "ha una soluzione"], ["ja", "解を持つ"]]);
+NO_SOL:%__lang([["en", "has no solution."], ["fr", "n’admet pas de solution."],
+ ["de", "hat keine Lösung."], ["it", "non ha soluzione."], ["ja", "解を持たない."]];
+vaX:[[0, false, "--"],
+     [1, if Xflag=0 then true else false, HAVE_SOL],
+     [2, if Xflag=1 then true else false, NO_SOL]];
+taX:Xflag+1;
 
 %_qtext1L_homo:[["en", sconcat("<p>The coefficient matrix of a homogeneous system of linear equations in the variables ", tex2(vS), " was transformed by elementary row operations as shown below. Give the solution of this system in parametric form. ",
   "Choose the parameters from <u><strong>", tex2(ps), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
@@ -117,7 +130,7 @@ qtext:[qtext1, qtext2, qtext3][qt];
  ["fr", "Les équations sont satisfaites, et le nombre de paramètres est également approprié. Correct."],
  ["de", "Die Gleichungen sind erfüllt, und die Anzahl der Parameter ist ebenfalls angemessen. Richtig."],
  ["it", "Le equazioni sono soddisfatte e anche il numero di parametri è appropriato. Corretto."],
- ["ja", "方程式も満たし,  パラメータの数も適正です. 正解です."]];
+ ["ja", "方程式も満たし, パラメータの数も適正です. 正解です."]];
 MsgC:%__lang(%_MsgCL);
 
 %_Msg1L:[["en", "<p>The determination of whether a solution exists is incorrect, or the size of the answer vector is invalid.</p>"],
@@ -200,5 +213,45 @@ Msg10:%__lang(%_Msg10L);
 AllFmsg:%__lang(%_AllFmsgL);
 
 if qt=1 then AS:%_mat2str(QF) else if qt=2 then AS:%_mat2str(QA) else AS:"";
+
+/******* for PRT functions **********/
+/* 解答変数 (max 6 variables) */
+chkL:
+%_chkans(a1):=block([aV, ch0, aL, chX, vZrw, vZvn, chz, chZ, vC, chxyz, cvxyz, cvM, cr1, cr2, chk1, chk2, Flag],
+  aV:if a1=matrix([X]) or a1='ans1 or a1=IansV or a1=EMPTYANSWER then IansV else a1,
+  chk0:is(matrix_size(ansV)=[vn, 1]),
+  ansL:if chk0 then map(expand, makelist(ansV[i, 1], i, 1, vn)) else makelist(0, vn),
+  chkX:chk0 and ((is(Xflag=1) and is(ansV=IansV)) or (is(Xflag=0) and not member(X, ansL))),
+  cvZRrw:genmatrix(lambda([i, j], 0), rw, 1),
+  cvZRvn:genmatrix(lambda([i, j], 0), vn, 1),
+  chkz(cv):=if cv=cvZRrw then 0 else 1,
+  chkZ(cv):=if cv=cvZRvn then 0 else 1,
+  cvC:subst(makelist(pars[i]=0, i, 1, length(pars)), ansV),
+  /* include parameter only ? */
+  chkP:if chk0 then apply("and", makelist(numberp(cvC[i, 1]), i, 1, vn)),
+  /* include vars ? */
+  chkxyz:apply("and", makelist(equal(coeff(ansV, vars[i]), cvZRvn), i, 1, vn)),
+  cvxyz:sum(chkZ(coeff(ansV, vars[i])), i, 1, vn),
+  cvM:apply(addcol, makelist(coeff(ansV, pars[i]), i, 1, length(pars))),
+  /* formal number of parameters */
+  cr1:apply("+", makelist(chkZ(coeff(ansV, pars[i])), i, 1, length(pars))),
+  /* essential num of pars */
+  cr2:rank(cvM),
+  /* const part satisfy Av=b ? */
+  chk1:chk0 and ((rw>1 and is(equal(matFh.cvC, matF1))) or (rw=1 and is(matFh.cvC=matF1[1, 1]))),
+  /* coeff vector of pars satisfy Av=0 ? */
+  chk2:chk0 and is(equal(matFh.cvM, genmatrix(lambda([i, j], 0), rw, length(pars)))),
+  if chk1 and chk2 then msg:MsgC else msg:"",
+
+/*
+1.	ATAlgEquiv(chkX,true)		prt1-1-T	prt1-1-F
+2.	ATAlgEquiv(Xflag,1)		prt1-2-T	prt1-2-F
+3.	ATAlgEquiv(chkP,true)		prt1-3-T	prt1-3-F
+4.	ATAlgEquiv(chkxyz,true)		prt1-4-T	prt1-4-F
+5.	ATAlgEquiv(cr1,CansPN)		prt1-5-T	prt1-5-F
+6.	ATAlgEquiv(cr2,CansPN)		prt1-6-T	prt1-6-F
+7.	ATAlgEquiv(chk1,true)		prt1-7-T	prt1-7-F
+8.	ATAlgEquiv(chk2,true)		prt1-8-T	prt1-8-F
+*/
 
 /************* EOF ******************/
