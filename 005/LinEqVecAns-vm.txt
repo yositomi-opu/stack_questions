@@ -257,8 +257,8 @@ validate_ansvec2(ex):=block([chkVars, vecz, vC, chkPars, k],
   vecz:genmatrix(lambda([i, j], 0), vn, 1),
   chkVars:apply("and", makelist(is(coeff(ex, vars[k])=vecz), k, 1, 5)),
   if not chkVars then return(castext(vmsg2)),
-  vC:subst(makelist(pars[k]=0, k, 1, length(pars)), ex),
-  chkPars:apply("and", map(numberp, makelist(vC[i, 1], i, 1, 5)));
+  vC:subst(makelist(pars[k]=0, k, 1, 5), ex),
+  chkPars:apply("and", map(numberp, makelist(vC[i, 1], i, 1, 5))),
   if not chkPars then return(castext(vmsg3)),
   "");
 
