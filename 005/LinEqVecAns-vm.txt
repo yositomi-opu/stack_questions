@@ -296,10 +296,11 @@ validate_ansvec2(ex):=block([],
 %_makemsg(Flag):=block([s], s:"",
   if Flag<0 then return(MsgX2),
   if Flag=0 then return(MsgX1),
-  if not bit_and(Flag, 1) then return(MsgP3),
-  if bit_and(Flag, 1) and not bit_and(Flag, 2) then return(MsgP4),
-  if bit_and(Flag, 4) then s:sconcat(s, MsgS1),
-  if bit_and(Flag, 8) then s:sconcat(s, MsgS2),
+  if bit_onep(Flag, 1) and bit_onep(Flag, 2) and bit_onep(Flag, 3) then return(MsgC),
+  if not bit_onep(Flag, 0) then return(MsgP3),
+  if not bit_onep(Flag, 1) then return(MsgP4),
+  if not bit_onep(Flag, 2) then s:sconcat(s, MsgS1),
+  if not bit_onep(Flag, 3) then s:sconcat(s, MsgS2),
   return(s));
 
 /************* EOF ******************/
