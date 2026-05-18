@@ -47,7 +47,7 @@ cV0:genmatrix(lambda([i, j], 0), vn, 1);
 chkConst(cv, pv, rv):=block([k, v], v:cv, for k:1 while (k<=length(pv)) do (v[pv[k], 1]:rv[k, 1]), return(v));
 constV:chkConst(cV0, pv, vb);
 nspL:nullspace2(matFh);
-CansV0:if vn-rk > 0 then expand(homo*constV+makelist(pars[i], i, 1, vn-rk).nspL) else homo*constV;
+CansV0:if vn-rk > 0 then homo*constV+apply(addcol, nspL).transpose(makelist(pars[i], i, 1, vn-rk)) else homo*constV;
 IansV:transpose(matrix(makelist(X, vn)));
 mkCans(Xflag):=block(if Xflag=1 then return(IansV) else return(CansV0));
 CansV:mkCans(Xflag);
