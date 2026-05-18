@@ -58,7 +58,7 @@ rhs:col(matExtA, vn+1);
 /* eqSL:if vflag=2 then makelist(ssubst("x_", "x", string(eqsys[i, 1])), i, 1, rw) else makelist(eqsys[i, 1], i, 1, rw); */
 /* eqSL:makelist(display_polynomial_varlist_tex1(eqsys[i, 1], vars), i, 1, rw); */
 /* use matrix.mac function */
-eqS:disp_eqn(makelist(eqsys[i]=rhs[i, 1], i, 1, rw), vars);
+eqS:disp_eqns(makelist(eqsys[i, 1]=rhs[i, 1], i, 1, rw), vars);
 /*
 eqS:if rw=1 then sconcat(eqSL[1], "=", rhs[1, 1]) else "\\left\\{\\begin{array}{ccc}";
 eqS:if rw>1 then sconcat(eqS, eqSL[1], "&=&", rhs[1, 1]) else eqS;
@@ -214,8 +214,8 @@ AllFmsg:%__lang(%_AllFmsgL);
 
 if qt=1 then AS:%_mat2str(QF) else if qt=2 then AS:%_mat2str(QA) else AS:"";
 
-/******************** for PRT functions ******************
-  解答変数 (max 6 variables)                             */
+/******************** for PRT functions *******************
+ 解答変数 (max 6 variables)                             
  Flag=-1: 解を持たない場合で不正解
  Flag=0: 解を持たない場合で正解
  Flag>0: 解を持つ場合で判定は OK.
@@ -224,7 +224,7 @@ if qt=1 then AS:%_mat2str(QF) else if qt=2 then AS:%_mat2str(QA) else AS:"";
  Flag&4: 解のパラメータの個数が実際にOK.
  Flag&8: 特殊解(pars=0の場合)が解.
  Flag&16: 
-*********************************************************/
+***********************************************************/
 vmsg1:%__lang([["en", "The size (shape) of the variable vector is incorrect."],
  ["fr", "La taille (forme) du vecteur des variables est incorrecte."],
  ["de", "Die Größe (Form) des Variablenvektors ist falsch."],
@@ -243,6 +243,7 @@ validate_ansvec(ex):=block([chkVars, vecz],
   if not chkVars then return(castext(vmsg2)),
   ""
 );
+
 %_chkans(aX, a1):=block([aV, ch0, aL, chX, vZrw, vZvn, chz, chZ, vC, chxyz, cvxyz, cvM, cr1, cr2, chk1, chk2, Flag],
   if aX=taX and taX=2 then return 
   aV:if a1=matrix([X]) or a1='ans1 or a1=IansV or a1=EMPTYANSWER then IansV else a1,
@@ -270,7 +271,6 @@ validate_ansvec(ex):=block([chkVars, vecz],
   chk2:chk0 and is(equal(matFh.cvM, genmatrix(lambda([i, j], 0), rw, length(pars)))),
   if chk1 and chk2 then msg:MsgC else msg:"",
 );
-
 /*
 1.	ATAlgEquiv(chkX,true)		prt1-1-T	prt1-1-F
 2.	ATAlgEquiv(Xflag,1)		prt1-2-T	prt1-2-F
