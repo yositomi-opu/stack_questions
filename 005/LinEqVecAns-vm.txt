@@ -75,7 +75,7 @@ eqS:ssubst("", ")", eqS);
 HAVE_SOL:%__lang([["en", "has a solution"], ["fr", "admet une solution"],
  ["de", "hat eine Lösung"], ["it", "ha una soluzione"], ["ja", "解を持つ"]]);
 NO_SOL:%__lang([["en", "has no solution."], ["fr", "n’admet pas de solution."],
- ["de", "hat keine Lösung."], ["it", "non ha soluzione."], ["ja", "解を持たない."]];
+ ["de", "hat keine Lösung."], ["it", "non ha soluzione."], ["ja", "解を持たない."]]);
 vaX:[[0, false, "--"],
      [1, if Xflag=0 then true else false, HAVE_SOL],
      [2, if Xflag=1 then true else false, NO_SOL]];
