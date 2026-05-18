@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 117891  -->
+<!-- question: 117906  -->
   <question type="stack">
     <name>
-      <text>005.LinEqSolChkVecAnsEqIH</text>
+      <text>005.LinEqSolChkVecAnsEq-IH</text>
     </name>
     <questiontext format="html">
       <text><![CDATA[<p><br></p>
