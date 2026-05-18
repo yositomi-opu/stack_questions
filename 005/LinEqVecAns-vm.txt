@@ -214,10 +214,37 @@ AllFmsg:%__lang(%_AllFmsgL);
 
 if qt=1 then AS:%_mat2str(QF) else if qt=2 then AS:%_mat2str(QA) else AS:"";
 
-/******* for PRT functions **********/
-/* 解答変数 (max 6 variables) */
-chkL:
-%_chkans(a1):=block([aV, ch0, aL, chX, vZrw, vZvn, chz, chZ, vC, chxyz, cvxyz, cvM, cr1, cr2, chk1, chk2, Flag],
+/******************** for PRT functions ******************
+  解答変数 (max 6 variables)                             */
+ Flag=-1: 解を持たない場合で不正解
+ Flag=0: 解を持たない場合で正解
+ Flag>0: 解を持つ場合で判定は OK.
+ Flag&1: 解に変数が残っていないか? は OK.
+ Flag&2: 解のパラメータの個数はフォーマルにはOKだが実際にはNG.
+ Flag&4: 解のパラメータの個数が実際にOK.
+ Flag&8: 特殊解(pars=0の場合)が解.
+ Flag&16: 
+*********************************************************/
+vmsg1:%__lang([["en", "The size (shape) of the variable vector is incorrect."],
+ ["fr", "La taille (forme) du vecteur des variables est incorrecte."],
+ ["de", "Die Größe (Form) des Variablenvektors ist falsch."],
+ ["it", "La dimensione (forma) del vettore delle variabili è errata."],
+ ["ja", "変数ベクトルのサイズ(型)が違います."]]);
+vmsg2:%__lang([["en", "You must not include the variables of the equation."],
+ ["fr", "Vous ne devez pas inclure les variables de l’équation."],
+ ["de", "Die Variablen der Gleichung dürfen nicht enthalten sein."],
+ ["it", "Non devi includere le variabili dell’equazione."],
+ ["ja", "方程式の変数を含んではいけません."]]);
+
+validate_ansvec(ex):=block([chkVars, vecz],
+  if not matrixp(ex) or not matrix_size(ex)=[vn, 1] then return(castext(vmsg1)),
+  vecz:genmatrix(lambda([i, j], 0), vn, 0),
+  chkVars:apply("and", makelist(is(coeff(ex, vars[i])=vecz), i, 1, vn)),
+  if not chkVars then return(castext(vmsg2)),
+  ""
+);
+%_chkans(aX, a1):=block([aV, ch0, aL, chX, vZrw, vZvn, chz, chZ, vC, chxyz, cvxyz, cvM, cr1, cr2, chk1, chk2, Flag],
+  if aX=taX and taX=2 then return 
   aV:if a1=matrix([X]) or a1='ans1 or a1=IansV or a1=EMPTYANSWER then IansV else a1,
   chk0:is(matrix_size(ansV)=[vn, 1]),
   ansL:if chk0 then map(expand, makelist(ansV[i, 1], i, 1, vn)) else makelist(0, vn),
@@ -242,6 +269,7 @@ chkL:
   /* coeff vector of pars satisfy Av=0 ? */
   chk2:chk0 and is(equal(matFh.cvM, genmatrix(lambda([i, j], 0), rw, length(pars)))),
   if chk1 and chk2 then msg:MsgC else msg:"",
+);
 
 /*
 1.	ATAlgEquiv(chkX,true)		prt1-1-T	prt1-1-F
