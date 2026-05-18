@@ -93,6 +93,12 @@ vaX:[[0, false, "--"],
      [2, if Xflag=1 then true else false, NO_SOL]];
 taX:Xflag+1;
 
+KEISAN:%__lang([["en", "Workspace for calculations. This is not an answer field. You may use it for computations involving elementary transformations."],
+["fr", "Zone de calcul. Ce n’est pas une zone de réponse. Elle peut être utilisée pour les calculs d’opérations élémentaires."],
+["de", "Berechnungsbereich. Dies ist kein Antwortfeld. Er kann für Berechnungen mit elementaren Umformungen verwendet werden."],
+["it", "Area di calcolo. Non è un campo di risposta. Può essere utilizzata per i calcoli delle trasformazioni elementari."],
+["ja", "計算用エリア. 解答欄ではありません. 基本変形の計算に利用可能."]]);
+
 %_qtext1L_homo:[["en", sconcat("<p>The coefficient matrix of a homogeneous system of linear equations in the variables ", vS, " was transformed by elementary row operations as shown below. Give the solution of this system in parametric form. ",
   "Choose the parameters from <u><strong>", tex2(ps), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
  ["fr", sconcat("<p>La matrice des coefficients d’un système homogène d’équations linéaires en les variables ", vS, " a été transformée par des opérations élémentaires sur les lignes comme indiqué ci-dessous. Donnez la solution de ce système sous forme paramétrique. ",
