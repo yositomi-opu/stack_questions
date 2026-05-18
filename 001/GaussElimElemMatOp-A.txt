@@ -91,11 +91,11 @@ ListBL2:map(%_mkop, makelist(%_opL[k], k, 2, length(%_opL)));
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("Let \\({\\mathbb a}_j\\) be the \\(j\\)-th column vector of the matrix \\(A\\), and \\({\\mathbb a}^i\\) the \\(i\\)-th row vector. Determine which elementary matrix and how it is multiplied to obtain the following elementary transformation.<br>", opS)],
-["fr", sconcat("Soit \\({\\mathbb a}_j\\) le \\(j\\)-ième vecteur colonne de la matrice \\(A\\), et \\({\\mathbb a}^i\\) le \\(i\\)-ième vecteur ligne. Déterminez quelle matrice élémentaire et quelle multiplication permettent d’obtenir la transformation élémentaire suivante.<br>", opS)],
-["de", sconcat("Sei \\({\\mathbb a}_j\\) der \\(j\\)-te Spaltenvektor der Matrix \\(A\\) und \\({\\mathbb a}^i\\) der \\(i\\)-te Zeilenvektor. Bestimmen Sie, durch welche elementare Matrix und auf welche Weise multipliziert wird, um die folgende elementare Umformung zu erhalten.<br>", opS)],
-["it", sconcat("Sia \\({\\mathbb a}_j\\) il \\(j\\)-esimo vettore colonna della matrice \\(A\\), e \\({\\mathbb a}^i\\) il \\(i\\)-esimo vettore riga. Determina quale matrice elementare e quale moltiplicazione producono la seguente trasformazione elementare.<br>", opS)],
- ["ja", sconcat("行列\\(A\\)の第\\(j\\)列ベクトルを", tex2(Wa[j]), ", 第\\(i\\)行ベクトルを", tex2(Wa^i), "とするとき, 次の変形はどのような基本行列をどのようにかけることによって得られる基本変形か.<br>", opS)]];
+%__mcq_qtextL:[["en", sconcat("Let \\({\\mathbb a}_j\\) be the \\(j\\)-th column vector of the matrix \\(A\\), and \\({\\mathbb b}^i\\) the \\(i\\)-th row vector. Determine which elementary matrix and how it is multiplied to obtain the following elementary transformation.<br>", opS)],
+["fr", sconcat("Soit \\({\\mathbb a}_j\\) le \\(j\\)-ième vecteur colonne de la matrice \\(A\\), et \\({\\mathbb b}^i\\) le \\(i\\)-ième vecteur ligne. Déterminez quelle matrice élémentaire et quelle multiplication permettent d’obtenir la transformation élémentaire suivante.<br>", opS)],
+["de", sconcat("Sei \\({\\mathbb a}_j\\) der \\(j\\)-te Spaltenvektor der Matrix \\(A\\) und \\({\\mathbb b}^i\\) der \\(i\\)-te Zeilenvektor. Bestimmen Sie, durch welche elementare Matrix und auf welche Weise multipliziert wird, um die folgende elementare Umformung zu erhalten.<br>", opS)],
+["it", sconcat("Sia \\({\\mathbb a}_j\\) il \\(j\\)-esimo vettore colonna della matrice \\(A\\), e \\({\\mathbb b}^i\\) il \\(i\\)-esimo vettore riga. Determina quale matrice elementare e quale moltiplicazione producono la seguente trasformazione elementare.<br>", opS)],
+ ["ja", sconcat("行列\\(A\\)の第\\(j\\)列ベクトルを", tex2(Wa[j]), ", 第\\(i\\)行ベクトルを", tex2(Wb^i), "とするとき, 次の変形はどのような基本行列をどのようにかけることによって得られる基本変形か.<br>", opS)]];
 
 
 /******************************** List of patterns/feedbacks *****************************/
