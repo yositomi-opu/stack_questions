@@ -271,7 +271,7 @@ validate_ansvec2(ex):=block([],
 
 /***** chk answer *****/
 %_chkans(aX, a1):=block([aV, aL, vZrw, vZvn, chkz, chkZ, vC, vM, Flag],
-  if taX=2 and not aX=taX then return(-1),
+  if not aX=taX then return(-1),
   if taX=2 and aX=taX then return(0),
   Flag:1,
   aL:map(expand, list_matrix_entries(a1)),
