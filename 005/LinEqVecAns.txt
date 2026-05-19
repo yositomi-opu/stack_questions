@@ -95,11 +95,11 @@ vaX:[[0, false, "--"],
      [2, if Xflag=1 then true else false, NO_SOL]];
 taX:Xflag+1;
 
-KEISAN:%__lang([["en", "Workspace for calculations. This is not an answer field (if you select \"has a solution\", answer fields will appear). <br>Please use this area for computations involving elementary transformations."],
- ["fr", "Zone de calcul. Ce n’est pas une zone de réponse (si vous sélectionnez « admet une solution », les zones de réponse apparaîtront). <br>Veuillez utiliser cette zone pour les calculs d’opérations élémentaires."],
- ["de", "Berechnungsbereich. Dies ist kein Antwortfeld (wenn Sie „hat eine Lösung“ auswählen, erscheinen Antwortfelder). <br>Bitte verwenden Sie diesen Bereich für Berechnungen mit elementaren Umformungen."],
- ["it", "Area di calcolo. Non è un campo di risposta (se selezioni « ha una soluzione », compariranno i campi di risposta). <br>Usa quest’area per i calcoli delle trasformazioni elementari."],
- ["ja", "計算用エリア. 解答欄ではありません(「解を持つ」を選択すると解答欄が現れます). <br>基本変形の計算に利用して下さい."]]);
+KEISAN:%__lang([["en", "Workspace for calculations. This is not an answer field (if solution checking is required, answer fields will appear when you select \"has a solution\"). <br>Please use this area for computations involving elementary transformations."],
+ ["fr", "Zone de calcul. Ce n’est pas une zone de réponse (si la vérification de l’existence d’une solution est nécessaire, les zones de réponse apparaîtront lorsque vous sélectionnez « admet une solution »). <br>Veuillez utiliser cette zone pour les calculs d’opérations élémentaires."],
+ ["de", "Berechnungsbereich. Dies ist kein Antwortfeld (wenn eine Lösungsprüfung erforderlich ist, erscheinen Antwortfelder, sobald Sie „hat eine Lösung“ auswählen). <br>Bitte verwenden Sie diesen Bereich für Berechnungen mit elementaren Umformungen."],
+ ["it", "Area di calcolo. Non è un campo di risposta (se è necessario verificare l’esistenza di una soluzione, i campi di risposta compariranno quando selezioni « ha una soluzione »). <br>Usa quest’area per i calcoli delle trasformazioni elementari."],
+ ["ja", "計算用エリア. 解答欄ではありません(解の判定が必要な場合「解を持つ」を選択すると解答欄が現れます). <br>基本変形の計算に利用して下さい."]]);
 
 qtext1_h:%__lang([["en", sconcat("<p>The coefficient matrix of a homogeneous system of linear equations in the variables ", vS, " was transformed by elementary row operations as shown below. Give the solution of this system in parametric form. ",
   "Choose the parameters from <u><strong>", tex2(pS), "</strong> and enter your answer in the form 2-3*p+5/2*s</u>. The order in which the parameters are used does not matter.</p>")],
