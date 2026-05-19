@@ -60,7 +60,7 @@ CansVX:transpose(matrix(makelist(if i<=vn then CansV[i, 1] else 0, i, 1, vn)));
 Cans1:CansVX;
 CansPN:vn-rk;
 /****************************/
-pL:make_random_distribution([[4, 1], [3, 1], [2, 2], [1, 5], [0, 1]]);
+if listp(%_pL) then pL:%_pL else pL:make_random_distribution([[4, 1], [3, 1], [2, 2], [1, 5], [0, 1]]);
 matP:if rw>1 then random_invertible_matrix(rw, pL) else matrix([rand([-4, -3, -2, -1, 2, 3, 4])]);
 matExtA:matP.matF;
 matA:submatrix(matExtA, vn+1);
