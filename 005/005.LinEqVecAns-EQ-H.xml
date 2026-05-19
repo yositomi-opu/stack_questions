@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 117966  -->
+  <question type="stack">
+    <name>
+      <text>005.LinEqVecAns-EQ-H</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+<p>{@qtext@}</p>
+<div>\({@[QF, QA, eqS][qt]@}\)</div>
+<table>
+    <tbody>
+        <tr>
+            <td>\({@transpose(matrix(vars))@}=\)</td>
+            <td>[[input:ans1]]</td>
+        </tr>
+    </tbody>
+</table>
+<div>[[validation:ans1]]</div>
+{@AS_CommentS@}
+<p>{@KEISAN@}</p>
+<p>[[input:ans2]][[validation:ans2]]</p>
+<p>{@AS@}</p>
+{@AS_CommentE@}
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '150px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+ var divs = document.getElementsByID('mytextarea');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '150px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@AllFmsg@}]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[stack_include_contrib("matrix.mac");
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+/*************** parameters *********************/
+qt:3;  /* qt: 1,2,3 : row reduced echelon, generic ext coeff, equations */
+homo:0;  /* homo: homogeneous = 0, inhomogeneous = 1 */
+vn:5;rw:4;  /* vn: number of variables , 3,4, or 5 , rw: number of rows */
+pvL:[[1, 2], [1, 2, 3], [1, 2, 4], [1, 3], [1, 3, 4]]; /* pivot list, rk = length(pv) */
+pv:rand(pvL);
+Xflag:homo*rand([0, 0, 1]); /* Xflag = 0: have sol, 1: do not have sol. fix 0 or 1 if you want */
+/* vflag=1 -> vars:[v,w,x,y,z] =2 -> vars:[x1,x2,..] (qt=3 case only) */
+vflag:2;  /* or rand([1,2]); */
+%_solcheck:false;
+stack_include("https://stack.mathedu.jp/sc/005/LinEqVecAns.txt");
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>vn={@vn@},rw={@rw@},pv={@pv@},Xflag={@Xflag@},matF={@matF@},matP={@matP@},matExtA={@matExtA@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span>&nbsp;よくできました.正解です!]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>&nbsp;惜しい! 部分的に正解です.]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>&nbsp;残念ながら不正解です.]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>CansVX</tans>
+      <boxsize>30</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords>p, q, r, s, t</allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>matFh</tans>
+      <boxsize>20</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[ansX:1;
+if ansX=1 then Vmsg:validate_ansvec(ans1) else Vmsg:"";
+if ansX=2 or (ansX=1 and Vmsg="") then Flag:%_chkans(ansX, ans1) else Flag:-2;
+if not Flag=-2 then Msg:%_makemsgH(Flag);
+if Flag>0 then HaveSol:true else HaveSol:false;
+if Flag>0 then F1:bit_onep(Flag, 0);
+if Flag>0 then F2:bit_onep(Flag, 1);
+if Flag>0 then F3:bit_onep(Flag, 2);
+if Flag>0 then F4:bit_onep(Flag, 3);]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description>Validation</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>Flag</sans>
+        <tans>-2</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Vmsg@}]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description>Have sol(always)</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>HaveSol</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg@}]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>1</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>6</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
+{@Msg3@}
+<!-- This area not used : homegeneous case -->]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description>形式的なパラの数OK?</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>F1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>3</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description>実際のパラの数OK?</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>F2</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description>特殊解(Special Sol) OK ?</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>F3</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>5</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>5</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>5</name>
+        <description>pu+qv の u, v が Au=Av=0?</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>F4</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-6-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-6-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>6</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>Flag</sans>
+        <tans>0</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-7-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-7-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>215500550</deployedseed>
+    <deployedseed>77192198</deployedseed>
+    <deployedseed>793242736</deployedseed>
+    <deployedseed>640758680</deployedseed>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>CansVX</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-2-F</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>
