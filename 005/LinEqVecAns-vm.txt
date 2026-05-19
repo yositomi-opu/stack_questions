@@ -293,7 +293,18 @@ validate_ansvec2(ex):=block([],
   return(Flag));
 
 /***** Flag to message *****/
-%_makemsg(Flag):=block([s], s:"",
+%_makemsg(Flag):=block([s], 
+  if Flag<0 then return(MsgX2),
+  if Flag=0 then return(MsgX1),
+  s:MsgX1,
+  if bit_onep(Flag, 1) and bit_onep(Flag, 2) and bit_onep(Flag, 3) then return(sconcat(s, MsgC)),
+  if not bit_onep(Flag, 0) then return(sconcat(s, MsgP3)),
+  if not bit_onep(Flag, 1) then return(sconcat(s, MsgP4)),
+  if not bit_onep(Flag, 2) then s:sconcat(s, MsgS1),
+  if not bit_onep(Flag, 3) then s:sconcat(s, MsgS2),
+  return(s));
+/* always have sol(homogeneous case) */
+%_makemsgH(Flag):=block([s], s:"",
   if Flag<0 then return(MsgX2),
   if Flag=0 then return(MsgX1),
   if bit_onep(Flag, 1) and bit_onep(Flag, 2) and bit_onep(Flag, 3) then return(MsgC),
