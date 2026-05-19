@@ -6,8 +6,8 @@
 /*********************************************************************/
 tex2(s):=sconcat("\\(", tex1(s), "\\)");
 %_rp(L):=random_permutation(L);
-is_boolean(expr) := member(expr, [true, false]);
-if is_boolean(%_solcheck) then %_solcheck:false;
+is_boolean(expr):=member(expr, [true, false]);
+if not is_boolean(%_solcheck) then %_solcheck:false;
 
 /* qt: 1,2,3 : row reduced echelon, generic ext coeff, equations */
 if not numberp(qt) then qt:3;
