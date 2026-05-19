@@ -80,7 +80,7 @@ eqS1:sconcat("\\left\\{", disp_eqns(makelist(eqsys[i, 1]=rhs[i, 1], i, 1, rw), v
 eqSL:makelist(display_polynomial_varlist_tex1(eqsys[i, 1], vars), i, 1, rw);
 if rw=1 then eqS2:sconcat(eqSL[1], "=", rhs[1, 1])
 else (eqS2:"\\left\\{\\begin{array}{ccc}",
-      for %_k:1 thru rw do eqS2:sconcat(eqS2, if k>1 then "\\\\" else "", eqSL[k], "&=&", rhs[k, 1]),
+      for k:1 thru rw do eqS2:sconcat(eqS2, if k>1 then "\\\\" else "", eqSL[k], "&=&", rhs[k, 1]),
       eqS2:sconcat(eqS2, "\\end{array}\\right."));
 eqS2:ssubst("", "(", eqS2);
 eqS2:ssubst("", ")", eqS2);
