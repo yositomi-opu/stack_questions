@@ -7,33 +7,33 @@ if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:6;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([1, 2, 2, 3, 4]);
 /********************************************************************/
 %_rp(L):=random_permutation(L);
-chkRank(pp,rr):=is(rank(apply(addcol,makelist(col(matF,pp[i]),i,1,length(pp))))=rr);
-rnz0(n):=rand_with_prohib(-n,n,[]);
-rnz1(n):=rand_with_prohib(-n,n,[0]);
-rnz2(n):=rand(makelist(k,k,-n,n)/2);
+chkRank(pp, rr):=is(rank(apply(addcol, makelist(col(matF, pp[i]), i, 1, length(pp))))=rr);
+rnz0(n):=rand_with_prohib(-n, n, []);
+rnz1(n):=rand_with_prohib(-n, n, [0]);
+rnz2(n):=rand(append(makelist(k, k, n), makelist(-k, k, n))/2);
 
 /* ListAL1 */
-ListAL1:[[rnz1(5)*pi,exp(rnz2(6))]];
-ListAL1:append(ListAL1,[[exp(rnz2(6)),rnz1(5)*pi]]);
-ListAL1:append(ListAL1,[makelist(rnz1(9),k,1,2)]);
-ListAL1:append(ListAL1,[makelist(rnz0(9)/rand([1,2,3]),k,1,3)]);
-ListAL1:append(ListAL1,[makelist(rnz0(9)/rand([1,5,7]),k,1,4)]);
-ListAL1:append(ListAL1,[makelist(rnz1(9),k,1,5)]);
-ListAL1:append(ListAL1,[[0,0]]);
-ListAL1:append(ListAL1,[[0,0,0]]);
+ListAL1:[[rnz1(5)*pi, exp(rnz2(6))]];
+ListAL1:append(ListAL1, [[exp(rnz2(6)), rnz1(5)*pi]]);
+ListAL1:append(ListAL1, [makelist(rnz1(9), k, 1, 2)]);
+ListAL1:append(ListAL1, [makelist(rnz0(9)/rand([1, 2, 3]), k, 1, 3)]);
+ListAL1:append(ListAL1, [makelist(rnz0(9)/rand([1, 5, 7]), k, 1, 4)]);
+ListAL1:append(ListAL1, [makelist(rnz1(9), k, 1, 5)]);
+ListAL1:append(ListAL1, [[0, 0]]);
+ListAL1:append(ListAL1, [[0, 0, 0]]);
 ListAL1:unique(ListAL1);
 /* ListBL1: */
-ListBL1:[makelist(rnz1(9),k,1,2)];
-ListBL1:append(ListBL1,[makelist(rnz1(9)+i*rnz1(9),k,1,3)]);
-ListBL1:append(ListBL1,[makelist(rnz1(9)+i*rnz1(9),k,1,4)]);
-ListBL1:append(ListBL1,[makelist(rnz1(9)+i*rnz2(6),k,1,5)]);
-ListBL1:append(ListBL1,[makelist(exp(rnz2(5))*i+rnz0(4)*pi,k,1,rand([2,3,4]))]);
-ListBL1:append(ListBL1,[makelist(exp(rnz1(9))*i+rnz1(4)*pi,k,1,rand([2,3,4]))]);
-ListBL1:append(ListBL1,[makelist(exp(rnz1(9))*i+rnz1(4)*pi,k,1,rand([2,3,4]))]);
-ListBL1:append(ListBL1,[makelist(rnz2(5)*i+rnz2(3)*pi,k,1,rand([3,4,5]))]);
-ListBL1:append(ListBL1,[makelist(rnz2(5)*i+rnz2(3)*pi,k,1,rand([3,4,5]))]);
-ListBL1:append(ListBL1,[makelist(rnz2(5)*i+rnz2(3)*pi,k,1,rand([3,4,5]))]);
-ListBL1:append(ListBL1,[makelist(rnz2(5)*i+rnz2(3)*pi,k,1,rand([3,4,5]))]);
+ListBL1:[makelist(rnz1(9)*%i, k, 1, 2)];
+ListBL1:append(ListBL1, [makelist(rnz1(9)+%i*rnz1(9), k, 1, 3)]);
+ListBL1:append(ListBL1, [makelist(rnz1(9)+%i*rnz1(9), k, 1, 4)]);
+ListBL1:append(ListBL1, [makelist(rnz1(9)+%i*rnz2(6), k, 1, 5)]);
+ListBL1:append(ListBL1, [makelist(exp(rnz2(5))*%i+rnz0(4)*pi, k, 1, rand([2, 3, 4]))]);
+ListBL1:append(ListBL1, [makelist(exp(rnz1(9))*%i+rnz1(4)*pi, k, 1, rand([2, 3, 4]))]);
+ListBL1:append(ListBL1, [makelist(exp(rnz1(9))*%i+rnz1(4)*pi, k, 1, rand([2, 3, 4]))]);
+ListBL1:append(ListBL1, [makelist(rnz1(5)*%i+rnz2(3)*pi, k, 1, rand([3, 4, 5]))]);
+ListBL1:append(ListBL1, [makelist(rnz1(5)*%i+rnz2(3)*pi, k, 1, rand([3, 4, 5]))]);
+ListBL1:append(ListBL1, [makelist(rnz1(5)*%i+rnz2(3)*pi, k, 1, rand([3, 4, 5]))]);
+ListBL1:append(ListBL1, [makelist(rnz1(5)*%i+rnz2(3)*pi, k, 1, rand([3, 4, 5]))]);
 ListBL1:unique(ListBL1);
 
 /********************************** Question text ****************************************/
@@ -41,9 +41,9 @@ ListBL1:unique(ListBL1);
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " real vectors (elements of a real vector space) among the following choices. Here, \\(i=\\sqrt{-1}\\) is the imaginary unit")],
- ["fr", sconcat(__SELTYPE__, " vecteurs réels (éléments d’un espace vectoriel réel) parmi les choix suivants. Ici, \\(i=\\sqrt{-1}\\) est l’unité imaginaire")],
- ["de", sconcat(__SELTYPE__, " reelle Vektoren (Elemente eines reellen Vektorraums) aus den folgenden Auswahlmöglichkeiten. Dabei ist \\(i=\\sqrt{-1}\\) die imaginäre Einheit")],
+%__mcq_qtextL:[["en", sconcat(__SELTYPE__, " real vectors (elements of a real vector space) among the following choices. Here, \\(i=\\sqrt{-1}\\) is the imaginary unit")], 
+ ["fr", sconcat(__SELTYPE__, " vecteurs réels (éléments d’un espace vectoriel réel) parmi les choix suivants. Ici, \\(i=\\sqrt{-1}\\) est l’unité imaginaire")], 
+ ["de", sconcat(__SELTYPE__, " reelle Vektoren (Elemente eines reellen Vektorraums) aus den folgenden Auswahlmöglichkeiten. Dabei ist \\(i=\\sqrt{-1}\\) die imaginäre Einheit")], 
  ["ja", "次の選択肢のうち, 実数ベクトル(実数ベクトル空間の元(要素))を__SELTYPE__ ただし, \(i=\sqrt{-1}\)は虚数単位である."]];
 /******************************** List of patterns/feedbacks *****************************/
 /*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
@@ -51,14 +51,14 @@ ListBL1:unique(ListBL1);
 /*****************************************************************************************/
 /* Correct pattern 1 */
 %__CoptL1:map(lambda([ll], transpose(matrix(ll))), ListAL1);
-%__Cmsg1L:[["en", "Correct. "],
- ["fr", "Correct. "],
- ["de", "Richtig. "],
+%__Cmsg1L:[["en", "Correct. "], 
+ ["fr", "Correct. "], 
+ ["de", "Richtig. "], 
  ["ja", "正解です. "]];
 %__WoptL1:map(lambda([ll], transpose(matrix(ll))), ListBL1);
-%__Wmsg1L:[["en", "Any components are acceptable as long as they are real numbers. If any component is a complex number that is not real, then it is not a real vector."],
-["fr", "Les composantes peuvent être quelconques tant qu’elles sont réelles. Si l’une des composantes est un nombre complexe non réel, alors ce n’est pas un vecteur réel."],
-["de", "Die Komponenten können beliebig sein, solange sie reelle Zahlen sind. Wenn eine Komponente eine komplexe Zahl ist, die nicht reell ist, dann ist es kein reeller Vektor."],
+%__Wmsg1L:[["en", "Any components are acceptable as long as they are real numbers. If any component is a complex number that is not real, then it is not a real vector."], 
+["fr", "Les composantes peuvent être quelconques tant qu’elles sont réelles. Si l’une des composantes est un nombre complexe non réel, alors ce n’est pas un vecteur réel."], 
+["de", "Die Komponenten können beliebig sein, solange sie reelle Zahlen sind. Wenn eine Komponente eine komplexe Zahl ist, die nicht reell ist, dann ist es kein reeller Vektor."], 
  ["ja", "成分が実数であれば, 何でも構いません. 成分が実数でない複素数のものを含めば, 実数ベクトルではありません."]];
 
 /********** EOF ***********/
