@@ -5,7 +5,7 @@
 /***************************************************************/
 /* c:[3-5], w:[12]; */
 if not numberp(%_MCQ_NUM_OPTS) or %_MCQ_NUM_OPTS>13 then %_MCQ_NUM_OPTS:8;
-if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([3, 4, 4, 5]);
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([2, 3, 4, 4]);
 if not numberp(%_rk) then %_rk:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
