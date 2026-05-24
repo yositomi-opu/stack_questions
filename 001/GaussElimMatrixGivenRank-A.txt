@@ -1,0 +1,116 @@
+/************** GaussElimMatrixGivenRank-A (cb) ****************/
+/* 001.MCB include file		                               */
+/* Objective: To learn/check concept of rank (can easily find) */
+/*               %_rk=1 : fixed                                */
+/***************************************************************/
+/* c:[3-5], w:[12]; */
+if not numberp(%_MCQ_NUM_OPTS) or %_MCQ_NUM_OPTS>13 then %_MCQ_NUM_OPTS:8;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:rand([3, 4, 4, 5]);
+if not numberp(%_rk) then %_rk:1;
+/********************************************************************/
+%_rp(L):=random_permutation(L);
+tex2(s):=sconcat("\\(", tex1(s), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
+%_mkmat(r, c):=genmatrix(lambda([i, j], rand(aL)), r, c);
+%_nmk_all:%_rp(listify(cartesian_product({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5})));
+nmL:[1, 2, 3, 4, 5];
+%__lang(L):=%__mcq_lang(L, %_STACK_LANG);
+
+/* matrix of rank 1 */
+a0a:rand([3, 4, 5]);
+matA0a:genmatrix(lambda([i, j], 0), 1, a0a);
+a0b:rand([2, 3, 4]);
+matA0b:genmatrix(lambda([i, j], 0), 3, a0b);
+a0c:rand_with_prohib(2, 5, [a0b]);
+matA0c:genmatrix(lambda([i, j], 0), rand([3, 4]), a0c);
+matA0d:genmatrix(lambda([i, j], 0), rand([4, 5]), 2);
+
+matA0L:[matA0a, matA0b, matA0c, matA0d];
+
+/* matrices of rank 1 */
+aL1a:%_rp([-4, -3, -2, -1, 0, 1, 2, 3, 4]);
+matA1a:genmatrix(lambda([i, j], if i=1 then aL1a[j] else 0), rand([1, 2, 3]), rand([3, 4, 5]));
+aL1b:%_rp([-4, -3, -2, -1, 0, 1, 2, 3, 4]);
+matA1b:genmatrix(lambda([i, j], aL1b[j]*i), rand([3, 4]), rand([2, 3, 4]));
+aL1c:%_rp([-4, -3, -2, -1, 0, 1, 2, 3, 4]);
+r1c:rand([2, 3]);
+matA1c:genmatrix(lambda([i, j], if i=r1c then aL1c[j] else 0), 3, rand([3, 4]));
+ij1d:[rand([2, 3]), rand([1, 2, 3])];
+matA1d:genmatrix(lambda([i, j], if [i, j]=ij1d then 1 else 0), 3, rand([3, 4, 5]));
+
+matA1L:[matA1a, matA1b, matA1c, matA1d];
+
+/* matrices of rank 2 */
+matF2a:randechelon(3, rand([3, 4]), [1, 2], [-3, -2, -1, 1, 2, 3]);
+matF2b:randechelon(3, 4, [1, rand([2, 3])], [-3, -2, -1, 1, 2, 3]);
+rw2c:rand([3, 4]);
+matF2c:randechelon(rw2c, 4, [1, 4], [-3, -2, -1, 1, 2, 3]);
+matF2d:randechelon(4, 5, [1, 5], [-3, -2, -1, 1, 2, 3]);
+matA2a:kihonP(3, 2, 1, 1).matF2a;
+ij2a:rand([[1, 2], [1, 3], [2, 3]]);
+matA2b:kihonR(3, ij2a[1], ij2a[2]).matF2b;
+a2b1:rand([1, 2, 3]);a2b2:rand([1, 2, 3]);
+matA2c:kihonP(rw2c, 3, 2, a2b1).kihonP(rw2c, 1, 2, a2b2).matF2c;
+if rw2c>3 then matA2c:kihonP(rw2c, 4, 2, a2b1).matA2c;
+ij2d:rand([[1, 2], [1, 3], [2, 3]]);
+matA2d:kihonR(4, ij2d[1], ij2d[2]).kihonP(4, 1, 2, a2b1).matF2d;
+matA2e:genmatrix(lambda([i, j], if not [i, j]=[3, 4] then i*j else i*j+1), rand([3, 4]), 4);
+
+matA2L:%_rp([matA2a, matA2b, matA2c, matA2d, matA2e]);
+
+/* matrices of rank 3 */
+
+matF3a:randechelon(4, 4, [1, 2, 3], [-3, -2, -1, 1, 2, 3]);
+matF3b:randechelon(4, 5, [1, 2, 4], [-3, -2, -1, 1, 2, 3]);
+rw3c:rand([3, 4]);
+matF3c:randechelon(rw3c, 4, [1, 3, 4], [-3, -2, -1, 1, 2, 3]);
+rw3d:rand([3, 4]);
+matF3d:randechelon(rw3d, 5, [1, rand([2, 3]), 5], [-3, -2, -1, 1, 2, 3]);
+matA3a:kihonP(4, 4, 1, rand([1, 2])).matF3a;
+matA3b:kihonP(4, 3, 1, rand([-1, 1])).matF3b;
+matA3c:kihonR(rw3c, 1, 3).matF3c;
+a3d:rand([-2, -1, 1, 2]);
+matA3d:kihonR(rw3d, 1, 2).kihonP(rw3d, 1, 3, a3d).matF3d;
+
+matA3L:[matA3a, matA3b, matA3c, matA3d];
+
+if %_rk=0 then (ListAL1:matA0L, ListBL1:append(matA1L, matA2L, matA3L));
+if %_rk=1 then (ListAL1:matA1L, ListBL1:append(matA0L, matA2L, matA3L));
+if %_rk=2 then (ListAL1:matA2L, ListBL1:append(matA0L, matA1L, matA3L));
+if %_rk=3 then (ListAL1:matA3L, ListBL1:append(matA0L, matA1L, matA2L));
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", sconcat("__SELTYPE__ the matrices whose rank is ", tex2(%_rk), ".")],
+ ["fr", sconcat("__SELTYPE__ les matrices dont le rang est ", tex2(%_rk), ".")],
+ ["de", sconcat("__SELTYPE__ die Matrizen, deren Rang ", tex2(%_rk), " ist.")],
+ ["it", sconcat("__SELTYPE__ le matrici il cui rango è ", tex2(%_rk), ".")],
+ ["ja", sconcat("次の行列のうち, rank(階数)が, ", tex2(%_rk), "である行列を __SELTYPE__")]];
+ 
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:ListAL1;
+%__Cmsg1L:[["en", "Correct. Make sure you develop a solid intuition for rank."],
+ ["fr", "Correct. Assurez-vous de bien développer une intuition solide du rang."],
+ ["de", "Richtig. Entwickeln Sie ein gutes Verständnis für den Rang."],
+ ["it", "Corretto. Cerca di acquisire una solida intuizione del rango."],
+ ["ja", "正解です. rank のイメージをしっかりつかもう."]];
+
+/* Wrong answer pattern 1 */
+%__WoptL1:ListBL1;
+%__Wmsg1L:[["en", "You have selected matrices with ranks other than the specified rank. Each can be determined with only a few elementary transformations. Also review the definition of an echelon matrix carefully."],
+["fr", "Vous avez sélectionné des matrices dont le rang est différent du rang spécifié. Chacune peut être déterminée avec seulement quelques opérations élémentaires. Revoyez également attentivement la définition d’une matrice échelonnée."],
+["de", "Sie haben Matrizen ausgewählt, deren Rang nicht dem angegebenen Rang entspricht. Jede davon lässt sich mit wenigen elementaren Umformungen bestimmen. Überprüfen Sie außerdem noch einmal sorgfältig die Definition einer Stufenmatrix."],
+["it", "Hai selezionato matrici con rango diverso da quello specificato. Ciascuna può essere determinata con poche trasformazioni elementari. Rivedi attentamente anche la definizione di matrice a scala."],
+["ja", "指定されたrank以外の行列を選択しています. 少し基本変形するだけでわかるものばかりです. 階段行列の定義もよく確認しよう."]];
+
+
+/********** EOF **********/
