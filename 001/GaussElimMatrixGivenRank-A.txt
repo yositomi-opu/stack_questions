@@ -89,7 +89,7 @@ if %_rk=3 then (ListAL1:matA3L, ListBL1:append(matA0L, matA1L, matA2L));
  ["fr", sconcat("__SELTYPE__ les matrices dont le rang est ", tex2(%_rk), ".")],
  ["de", sconcat("__SELTYPE__ die Matrizen, deren Rang ", tex2(%_rk), " ist.")],
  ["it", sconcat("__SELTYPE__ le matrici il cui rango è ", tex2(%_rk), ".")],
- ["ja", sconcat("次の行列のうち, rank(階数)が, ", tex2(%_rk), "である行列を __SELTYPE__")]];
+ ["ja", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")]];
  
 
 /******************************** List of patterns/feedbacks *****************************/
