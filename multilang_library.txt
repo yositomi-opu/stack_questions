@@ -2,4 +2,5 @@
 /* same as ky_linear_algebra */
 get_assoc_array(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 put_assoc_array(L, s, c):=block([k, lgL, mL, rt:[]], if length(L)=0 then return ([[s, c]]), lgL:map(first, L), mL:map(second, L), if not member(s, lgL) then return(append(L, [[s, c]])) else for k:1 thru length(lgL) do  rt:append(rt, if lgL[k]=s then [[s, c]] else [L[k]]), return(rt));
-get_lang_string(sL, lng):=block([m], m:%__mcq_gaa(sL, lng), if m="" then m:%__mcq_gaa(sL, "en"), return (m));
+get_lang_string(sL, lng):=block([m], m:get_assoc_array(sL, lng), if m="" then m:get_assoc_array(sL, "en"), return (m));
+%__lang(L):=get_lang_string(L, %_STACK_LANG);
