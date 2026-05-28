@@ -100,7 +100,7 @@ if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
 Cans1:mcq_correct(ta1);
 
 %__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
-%__mcq_SELL:[["en", "Choose."], ["fr", "Choisissez."], ["de", "Wählen Sie."], ["it", "Scegli."], ["ja", "選べ."]];
+%__mcq_SELL:[["en", "Choose "], ["fr", "Choisissez "], ["de", "Wählen Sie "], ["it", "Scegli "], ["ja", "選べ."]];
 %__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
 %__mcq_SELALLL:[
  ["en", "Select all correct answers "],
