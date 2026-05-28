@@ -8,6 +8,22 @@ if not numberp(%_MCQ_NUM_OPTS) or %_MCQ_NUM_OPTS>13 then %_MCQ_NUM_OPTS:7;
 %_MCQ_NUM_COPTS:1;
 /********************************************************************/
 %_rp(L):=random_permutation(L);
+/* remove_paren(s):=regex_subst("\\1", "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)", s); */
+remove_paren(s):=block([s1],
+  /* \left(\frac{...}{...}\right) → \frac{...}{...} */
+  s1 : regex_subst(
+    "\\1",
+    "\\\\left\\((\\\\frac\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\}\\{(?:[0-9]+|\\\\sqrt\\{[0-9]+\\})\\})\\\\right\\)",
+    s),
+  /* -\left(2 \boldsymbol{a}\right) → -2 \boldsymbol{a} */
+  regex_subst(
+    "-\\1",
+    "-\\\\left\\(([^()]*)\\\\right\\)",
+    s1));
+tex1rp(s):=remove_paren(tex1(s));
+tex2rp(s):=remove_paren(tex2(s));
+tex2rpL(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1rp(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+
 tex2(s):=sconcat("\\(", tex1(s), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 aL:make_random_distribution_pm([[1, 4], [2, 3], [3, 2], [4, 1], [5, 1]]);
@@ -49,8 +65,8 @@ matF2a:randechelon(%_nr, %_nc, %_pv1, [-2, -1, 1, 2]);
 matF2b:randechelon(%_nr, %_nc, %_pv2, [-2, -1, 1, 2]);
 
 matErv:genmatrix(lambda([i, j], if i=j then 1 else 0), %_nr, %_vn);
-matAF:tex2(matP.matF);
-matQS:tex2(matAw.matF);
+matAF:tex2rp(matP.matF);
+matQS:tex2rp(matAw.matF);
 
 ListAL1:[matF];
 ListBL1:matF1L;
