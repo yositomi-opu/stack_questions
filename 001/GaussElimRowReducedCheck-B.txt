@@ -77,10 +77,10 @@ ListBL2:[matF2a, matF2b];
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("The matrix \\(A=\\)", tex2(matAw), "=", tex2(matA), " is transformed into ", tex2(matErc), " by elementary row operations. When ", matQS, " is transformed into a reduced echelon matrix by elementary row operations, which of the following is obtained?")],
- ["fr", sconcat("La matrice \\(A=\\)", tex2(matAw), "=", tex2(matA), " est transformée en ", tex2(matErc), " par des opérations élémentaires sur les lignes. Lorsque ", matQS, " est transformée en matrice échelonnée réduite par des opérations élémentaires sur les lignes, lequel des résultats suivants obtient-on ?")],
- ["de", sconcat("Die Matrix \\(A=\\)", tex2(matAw), "=", tex2(matA), " wird durch elementare Zeilenumformungen in ", tex2(matErc), " umgeformt. Welche der folgenden Matrizen erhält man, wenn ", matQS, " durch elementare Zeilenumformungen in eine reduzierte Stufenmatrix umgeformt wird?")],
- ["it", sconcat("La matrice \\(A=\\)", tex2(matAw), "=", tex2(matA), " viene trasformata in ", tex2(matErc), " mediante operazioni elementari di riga. Quando ", matQS, " viene trasformata in una matrice ridotta a scala mediante operazioni elementari di riga, quale delle seguenti si ottiene?")],
+%__mcq_qtextL:[["en", sconcat("The matrix \\(A=\\)", tex2(matAw), "=", tex2(matA), " is transformed into ", tex2(matErv), " by elementary row operations. When ", matQS, " is transformed into a reduced echelon matrix by elementary row operations, which of the following is obtained?")],
+ ["fr", sconcat("La matrice \\(A=\\)", tex2(matAw), "=", tex2(matA), " est transformée en ", tex2(matErv), " par des opérations élémentaires sur les lignes. Lorsque ", matQS, " est transformée en matrice échelonnée réduite par des opérations élémentaires sur les lignes, lequel des résultats suivants obtient-on ?")],
+ ["de", sconcat("Die Matrix \\(A=\\)", tex2(matAw), "=", tex2(matA), " wird durch elementare Zeilenumformungen in ", tex2(matErv), " umgeformt. Welche der folgenden Matrizen erhält man, wenn ", matQS, " durch elementare Zeilenumformungen in eine reduzierte Stufenmatrix umgeformt wird?")],
+ ["it", sconcat("La matrice \\(A=\\)", tex2(matAw), "=", tex2(matA), " viene trasformata in ", tex2(matErv), " mediante operazioni elementari di riga. Quando ", matQS, " viene trasformata in una matrice ridotta a scala mediante operazioni elementari di riga, quale delle seguenti si ottiene?")],
  ["ja", sconcat("行列\\(A=\\)", tex2(matAv), "=", tex2(matA), "は行基本変形で, ", tex2(matErv), "に変形される. ", matQS, "を行に関して被約階段行列に変形すると次のいずれになるか選べ. ")]];
 
 /******************************** List of patterns/feedbacks *****************************/
