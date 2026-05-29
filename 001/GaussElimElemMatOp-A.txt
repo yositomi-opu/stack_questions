@@ -76,7 +76,8 @@ MIGI(m):=%__lang([
 ][%_ord[k]], k, 1, 6);
 
 matAc:matrix(makelist(Wa[k], k, cl));
-matAr:transpose(matrix(makelist([Wb1, Wb2, Wb3, Wb4, Wb5, Wb6, Wb7, Wb8][k], k, rw)));
+matAr:transpose(matrix(makelist([Xb1, Xb2, Xb3, Xb4, Xb5, Xb6, Xb7, Xb8][i], i, 1, rw)));
+/* matAr:transpose(matrix(makelist([Wb1, Wb2, Wb3, Wb4, Wb5, Wb6, Wb7, Wb8][k], k, rw))); */
 op1:%_opL[1];
 if op1[2]=1 then opS:tex2L([matAr, " \\to ", op1[1].matAr])
 else opS:tex2L([matAc, " \\to ", matAc.op1[1]]);
