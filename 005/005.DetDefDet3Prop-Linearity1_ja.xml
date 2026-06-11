@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 118203  -->
+  <question type="stack">
+    <name>
+      <text>005.DetDefDet3Prop-Linearity1_ja</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>両辺にある各行列式において, 第{@jX2[1]@}列と{@jX2[2]@}列が等しいことを用いて, 次の等式が成り立つようにベクトル{@matrix([p], [q], [r])@}を答えよ.</p>
+<p>\({@dA@}={@dA1@}+{@dA2@}\)</p>
+<table><tbody><tr><td>{@matrix([p],[q],[r])@}\(=\)</td><td>[[input:ans1]] [[validation:ans1]]</td></tr></tbody></table>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p dir="ltr">3次行列式は, どの列の成分についても 定数項のない1次式であるので, どの列についても線形性があります. 実際, 以下のように書けるので線形性があることがわかります.</p>
+<div>\(\begin{vmatrix} a &amp; p &amp; x \\ b &amp; q &amp; y \\ c &amp; r &amp; z \end{vmatrix}\)</div>
+<div>\(=aqz+brx+cpy-cqx-bpz-ary\)</div>
+<div>\(=(qz-ry)a+(rx-pz)b+(py-qx)c=\begin{pmatrix} qz-ry &amp; rx-pz &amp; py-qx \end{pmatrix}\begin{pmatrix} a \\ b\\ c \end{pmatrix} \)</div>
+<div>\(=(cy-bz)p+(az-cx)q+(bx-ay)r=\begin{pmatrix} cy-bz &amp; az-cx &amp; bx-ay \end{pmatrix}\begin{pmatrix} p \\ q\\ r \end{pmatrix} \)</div>
+<div>\(=(br-cq)x+(cp-ar)y+(aq-bp)z=\begin{pmatrix} br-cq &amp; cp-ar &amp; aq-bp \end{pmatrix}\begin{pmatrix} x \\ y \\ z \end{pmatrix} \)</div>
+<p></p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 3次行列式の線形性1 */
+/* v004 : 可変行列解答 (2023.8.5) */
+/* v003 : 説明と全体フィードバック (2023.6.11) */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+sz:3;
+n:sz;
+matE3:genmatrix(lambda([i, j],  if i=j then 1 else 0), 3, 3);
+aL1:append(makelist(-i, i, 2), makelist(i, i, 2));
+aL2:append(makelist(-i, i, 5), makelist(i, i, 5));
+matA1:genmatrix(lambda([i, j], rand(aL2)), n, n);
+a:rand_with_prohib(-4, 4, [0, 1]);
+j2:rand([1, 2, 3]);
+jX2:listify(setdifference({1, 2, 3}, {j2}));
+matA2:genmatrix(lambda([i, j], if j=j2 then rand(aL2) else matA1[i, j]), n, n);
+matA:genmatrix(lambda([i, j], if j=j2 then matA1[i, j]+matA2[i, j] else matA1[i, j]), n, n);
+dt:determinant(matA);
+dt1:determinant(matA1);
+dt2:determinant(matA2);
+ta1:transpose(matrix(makelist(matA2[i, j2], i, 1, 3)));
+Cans1:ta1;
+matA2[1, j2]:p;matA2[2, j2]:q;matA2[3, j2]:r;
+MtoTeX(M):=block([m, n, i, j, s], s:"\\begin{vmatrix}", [m, n]:matrix_size(M), for i:1 thru m do (for j:1 thru n do (s:sconcat(s, M[i, j]), if j<n then s:sconcat(s, "&")), if i<m then s:sconcat(s, "\\\\")), return(sconcat(s, "\\end{vmatrix}")));
+vmat(M):=block([_lc:lmxchar, s], lmxchar:"|", s:tex1(M), lmxchar:_lc, return(s));
+dA:vmat(matA);
+dA1:vmat(matA1);
+dA2:vmat(matA2);
+
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matA@},{@matA1@},{@matA2@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>ta1</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint>[]</syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[matB2:genmatrix(lambda([i,j], if j=j2 then ans1[i,1] else matA2[i,j]),n,n);
+chk1:is(determinant(matA)=determinant(matA1)+determinant(matB2));
+dt1S:sconcat("",dt1,"");
+dt2S:if dt2 < 0 then sconcat("(",dt2,")") else sconcat("",dt2,"");
+]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>Cans1</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>正解です. 実際,左辺の行列式は{@dt@},右辺は\({@dt1S@}+{@dt2S@}\)となっています.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.8</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">確かに等式は成り立つのですが， 何か特別なことをしましたか? 線形性を使ってみて下さい. もう一度考えてみましょう.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p dir="ltr" style="text-align: left;">線形性を使って考えてみましょう.</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>1972054647</deployedseed>
+    <deployedseed>759690544</deployedseed>
+    <deployedseed>1370777406</deployedseed>
+    <deployedseed>1769050160</deployedseed>
+    <deployedseed>2006264762</deployedseed>
+    <deployedseed>1911522844</deployedseed>
+    <deployedseed>532767264</deployedseed>
+    <deployedseed>1294818293</deployedseed>
+    <deployedseed>1604140708</deployedseed>
+    <deployedseed>2056060793</deployedseed>
+    <deployedseed>1891468442</deployedseed>
+    <deployedseed>1001773977</deployedseed>
+    <deployedseed>1928283512</deployedseed>
+    <deployedseed>291766881</deployedseed>
+    <deployedseed>1368667889</deployedseed>
+    <deployedseed>1834368005</deployedseed>
+    <deployedseed>1210516224</deployedseed>
+    <deployedseed>1043345601</deployedseed>
+    <deployedseed>1555307190</deployedseed>
+    <deployedseed>265690474</deployedseed>
+    <deployedseed>1639195233</deployedseed>
+    <deployedseed>496744647</deployedseed>
+    <deployedseed>1814972355</deployedseed>
+    <deployedseed>1451772214</deployedseed>
+    <deployedseed>188187321</deployedseed>
+    <deployedseed>675348019</deployedseed>
+    <deployedseed>863007666</deployedseed>
+    <deployedseed>1340124477</deployedseed>
+    <deployedseed>47607391</deployedseed>
+    <deployedseed>1623937106</deployedseed>
+  </question>
+
+</quiz>

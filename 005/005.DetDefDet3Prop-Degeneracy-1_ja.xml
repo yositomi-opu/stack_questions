@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 118223  -->
+  <question type="stack">
+    <name>
+      <text>005.DetDefDet3Prop-Degeneracy-1_ja</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>次の等式が成り立つような ベクトル {@matrix([p],[q],[r])@}を3組答えよ.</p>
+<div>&nbsp; &nbsp; &nbsp;\({@detA2@}=0\)</div>
+<p><span style="font-size: 0.9375rem; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;, &quot;Noto Color Emoji&quot;;"></span></p>
+<p>※ ただし, どの2つも一方が一方の定数倍にならないこと.<br></p>
+<p>→ ダメな例 {@matrix([1],[2],[3])@},{@matrix([2],[4],[6])@},{@matrix([3],[1],[5])@}の場合, 最初の2つが比例関係(2つ目が1つ目の2倍)であるので, 不適.</p>
+<table>
+  <tbody><tr><td>答1</td><td>[[input:ans1]] [[validation:ans1]]</td></tr>
+  <tr><td>答2</td><td>[[input:ans2]] [[validation:ans2]]</td></tr>
+  <tr><td>答3</td><td>[[input:ans3]] [[validation:ans3]]</td></tr>
+</tbody></table>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 3次行列式の性質 */
+/* v002 : ベクトル解答に変更 (2023.6.13) */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+sz:3;
+n:3;
+%_n:sz;
+matE3:genmatrix(lambda([i, j],  if i=j then 1 else 0), %_n, %_n);
+j123:random_permutation(makelist(k, k, %_n));
+j1:j123[1];j2:j123[2];
+R:kihonR(%_n, j1, j2);
+aL1:append(makelist(-i, i, 2), makelist(i, i, 2));
+aL2:append(makelist(-i, i, 5), makelist(i, i, 5));
+matA2:getDetL(n, aL2, [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]);
+/* a:rand_with_prohib(-4, 4, [0, 1]); */
+/* j2:rand([1, 2, 3]); */
+/* matA2:genmatrix(lambda([i, j], if j=j2 then matA1[i, j2]/a else matA1[i, j]), %_n, %-n); */
+/* dt2:determinant(matA2); */
+ta1:transpose(matrix(makelist(matA2[i, j1], i, 1, %_n)));
+ta2:transpose(matrix(makelist(matA2[i, 6-j1-j2], i, 1, %_n)));
+ta3:ta1+ta2;
+Cans1:ta1;
+Cans2:ta2;
+Cans3:ta3;
+matA2[1, j2]:p;matA2[2, j2]:q;matA2[3, j2]:r;
+/* MtoTeX(M):=block([m, n, i, j, s], s:"\\begin{vmatrix}", [m, n]:matrix_size(M), for i:1 thru m do (for j:1 thru n do (s:sconcat(s, M[i, j]), if j<n then s:sconcat(s, "&")), if i<m then s:sconcat(s, "\\\\")), return(sconcat(s, "\\end{vmatrix}")));*/
+vmat(m):=block([_lc:lmxchar, s], lmxchar:"|", s:tex1(m), lmxchar:_lc, return(s));
+detA2:vmat(matA2);
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matA2@}, {@ta1@}, {@ta2@}, {@ta3@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>Cans1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint>[]</syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>Cans2</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint>[]</syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>varmatrix</type>
+      <tans>Cans3</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint>[]</syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text>matChk1:matA2;matChk2:matA2;matChk3:matA2;
+matChk1[1, j2]:ans1[1, 1];matChk1[2, j2]:ans1[2, 1];matChk1[3, j2]:ans1[3, 1];
+matChk2[1, j2]:ans2[1, 1];matChk2[2, j2]:ans2[2, 1];matChk2[3, j2]:ans2[3, 1];
+matChk3[1, j2]:ans3[1, 1];matChk3[2, j2]:ans3[2, 1];matChk3[3, j2]:ans3[3, 1];
+chk1:determinant(matChk1);
+chk2:determinant(matChk2);
+chk3:determinant(matChk3);
+chk:[chk1, chk2, chk3];
+z3:[0, 0, 0];
+r12:rank(addcol(ans1, ans2));
+r13:rank(addcol(ans1, ans3));
+r23:rank(addcol(ans2, ans3));
+chkR1:is(r12=1) and is(r13=1) and is(r23=1);
+chkR2:is(r12=1) or is(r13=1) or is(r23=1);
+</text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk</sans>
+        <tans>z3</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>行列式は \(0\)になります.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chkR2</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>-</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>ただし,問題の条件を満たしていない組があるので減点します．</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>条件を満たしています. よくできました.</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chkR1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>-</truescoremode>
+        <truescore>0.3</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>すべて比例しているので, さらに減点です.<br></p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1</name>
+        <value>Cans1</value>
+      </testinput>
+      <testinput>
+        <name>ans2</name>
+        <value>Cans2</value>
+      </testinput>
+      <testinput>
+        <name>ans3</name>
+        <value>Cans3</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-2-F</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>
