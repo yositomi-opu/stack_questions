@@ -184,3 +184,9 @@ cross_product(va, vb):=matrix(
   if not matrix_size(m1)=matrix_size(m2) then return(-1),
   [r,c]:matrix_size(m1),
   for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then ct:ct+1,return(ct));
+
+
+
+
+
+find_inversion_number(L):=apply("+", makelist(apply("+", makelist(if L[i]>L[k] then 1 else 0, i, 1, k-1)), k, 2, length(L)));
