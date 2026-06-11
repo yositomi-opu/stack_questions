@@ -189,4 +189,4 @@ cross_product(va, vb):=matrix(
 
 
 
-find_inversion_number(L):=apply("+", makelist(apply("+", makelist(if L[i]>L[k] then 1 else 0, i, 1, k-1)), k, 2, length(L)));
+inversion_number(L):=apply("+", makelist(apply("+", makelist(if L[i]>L[k] then 1 else 0, i, 1, k-1)), k, 2, length(L)));

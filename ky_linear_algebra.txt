@@ -186,9 +186,9 @@ cross_product(va, vb):=matrix(
   for r1:1 thru r do for c1:1 thru c do if not m1[r1,c1]=m2[r1,c1] then ct:ct+1,return(ct));
 
 /* for determinants */
-/* find_inversion_number: */
+/* inversion_number: */
 /* cf. https://en.wikiversity.org/wiki/Inversion_(discrete_mathematics) */
 
-find_inversion_number(L):=apply("+", makelist(apply("+", makelist(if L[i]>L[k] then 1 else 0, i, 1, k-1)), k, 2, length(L)));
+inversion_number(L):=apply("+", makelist(apply("+", makelist(if L[i]>L[k] then 1 else 0, i, 1, k-1)), k, 2, length(L)));
 
 /********* EOF *********/
