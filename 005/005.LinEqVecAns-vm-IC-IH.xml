@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 117612  -->
+<!-- question: 117621  -->
   <question type="stack">
     <name>
-      <text>005.LinEqVecAns-vm (Eq/IH/4x5)</text>
+      <text>005.LinEqVecAns-vm (EC/IH/4x5)</text>
     </name>
     <questiontext format="html">
       <text><![CDATA[<p><br></p>
@@ -20,7 +20,7 @@
     </tbody>
 </table>
 <div>[[validation:ans1]]</div>
-<p></p>
+<p>{@AS@}</p>
 <script>
   var divs = document.getElementsByClassName('varmatrixinput');
   for(var i=0; i < divs.length; i++) { 
@@ -48,7 +48,7 @@
     <questionvariables>
       <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
 /*************** parameters *********************/
-qt:3;  /* qt: 1,2,3 : row reduced echelon, generic ext coeff, equations */
+qt:2;  /* qt: 1,2,3 : row reduced echelon, generic ext coeff, equations */
 homo:1;  /* homo: homogeneous = 0, inhomogeneous = 1 */
 vn:5;rw:4;  /* vn: number of variables , 3,4, or 5 , rw: number of rows */
 pvL:[[1], [1, 2], [1, 2, 3], [1, 2, 4], [1, 3], [1, 3, 4]]; /* pivot list, rk = length(pv) */
@@ -160,7 +160,7 @@ if chk1 and chk2 then msg:MsgC else msg:"";
         <trueanswernote>prt1-1-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[<div>[[lang code="en"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]][[lang code="it"]][[/lang]][[lang code="ja"]][[/lang]]</div>
-<br>Your  input(for copy and paste to retry):<br>
+<br>Your  input(for copy and paste to retry):
 {@Kans1@}
 <br></p>]]></text>
         </truefeedback>

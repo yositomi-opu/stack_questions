@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 116625  -->
+  <question type="stack">
+    <name>
+      <text>005.MatProdFromProdB-vm</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>等式 \(A\){@matP@}\(=\){@matRHS@} が成り立っているとき, 以下の問いに答えよ.</p>
+<div>(1) \(A\)の行数と列数を答えよ.  [[input:ans1r]] [[validation:ans1r]] 行 [[input:ans1c]] [[validation:ans1c]] 列 </div>
+<p><br></p>
+<table><tr><td>(2) \(A\)の第{@%_p2@}列を答えよ. </td><td>[[input:ans2]]</td><td>[[validation:ans2]]</td></tr>
+</table>
+<p><br></p>
+<div>(3) \( p, q \)の値を答えよ. \(p =\) [[input:ans3p]] [[validation:ans3p]], \(q =\) [[input:ans3q]][[validation:ans3q]]</div>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+ var divs = document.getElementsByID('mytextarea');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text>行列と行列の積の定義は非常に線形代数において基本的であり, 多くの色々な「見方」をすることでさまざまな性質が見えてきます.
+その中でも, 行列と基本ベクトルの積で行列の列ベクトルが得られることは非常に重要です. 
+この考え方を確実に身に付けましょう.</text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* Based on 小テスト LA1-10s16 [3] */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+%_rp(L):=random_permutation(L);
+%_Anr:rand([3, 4]);
+%_Anc:rand([3, 4]);
+aL:%_rp([-5, -4, -3, -2, -2, -1, 0, 1, 2, 2, 3, 3, 4, 5]);
+aln:length(aL);
+nzmod(a, p):=if mod(a, p)=0 then p else mod(a, p);
+matA:genmatrix(lambda([i, j], aL[nzmod(%_Anc*(i-1)+j, aln)]), %_Anr, %_Anc);
+matEc:genmatrix(lambda([i, j], if i=j then 1 else 0), %_Anc, %_Anc);
+ecL:makelist(col(matEc, k), k, 1, %_Anc);
+%_pordL:%_rp(makelist(k, k, %_Anc));
+%_p1:%_pordL[1];
+%_p2:%_pordL[2];
+matP:addcol(ecL[%_p1], ecL[%_p2], p*ecL[%_p2]+ecL[%_p1]);
+pval:rand([-4, -3, -2, -1, 1, 2, 3, 4]);
+matAP:subst(p=pval, matA.matP);
+matRHS:genmatrix(lambda([i, j], if [i, j]=[%_Anr, 3] then q else matAP[i, j]), %_Anr, 3);
+va1r:makelist([k, if k=%_Anr then true else false, if k=0 then "--" else k], k, 0, 9);
+va1c:makelist([k, if k=%_Anc then true else false, if k=0 then "--" else k], k, 0, 9);
+ta1r:%_Anr;
+ta1c:%_Anc;
+ta2:col(matA, %_p2);
+ta3p:pval;
+ta3q:matAP[%_Anr, 3];
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="html">
+      <text>{@matA@}, {@matP@}, {@matAP@}, {@[ta1r, ta1c]@}, {@ta2@}, {@ta3p@}, {@ta3q@}</text>
+    </questionnote>
+    <questiondescription format="html">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span> 
+<span lang="ja" class="multilang">よくできました。正解です！</span>
+<span lang="en" class="multilang">Well done! Spot on!</span>]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
+<span lang="ja" class="multilang">部分的に正解です。</span>
+<span lang="en" class="multilang">Partially correct!</span>]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
+<span lang="ja" class="multilang">間違いです。</span>
+<span lang="en" class="multilang">Incorrect!</span>]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1c</name>
+      <type>dropdown</type>
+      <tans>va1c</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <input>
+      <name>ans1r</name>
+      <type>dropdown</type>
+      <tans>va1r</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>ta2</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>1</mustverify>
+      <showvalidation>3</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <input>
+      <name>ans3p</name>
+      <type>numerical</type>
+      <tans>ta3p</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>1</mustverify>
+      <showvalidation>3</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <input>
+      <name>ans3q</name>
+      <type>numerical</type>
+      <tans>ta3q</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>1</mustverify>
+      <showvalidation>3</showvalidation>
+      <options>allowempty,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description>(1) </description>
+        <answertest>AlgEquiv</answertest>
+        <sans>[ans1r, ans1c]</sans>
+        <tans>[ta1r, ta1c]</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>0.2</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(1) 正解.</text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(1) 違います. 行列の積の定義においてサイズ(型/行数と列数)がどのようになっていましたか? まずそこを確認しよう. (2),(3)は採点しません.</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description>(2)</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans2</sans>
+        <tans>ta2</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.4</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(2) 正解です.</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(2) 行列と基本ベクトルの積では, 行列の列ベクトルが得られることを確認しよう. (3)は採点しません.</text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description>(3)</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>[ans3p, ans3q]</sans>
+        <tans>[ta3p, ta3q]</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.4</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text>(3) 正解です.</text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text>(3) \(p, q\)のいずれかが間違っています. \(A\) と {@matP@}の3列目から右辺の何列目が得られるか, \(A\)の何列目と何列目の\(p\)倍の和が得られるかを考えましょう.</text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <qtest>
+      <testcase>1</testcase>
+      <description>管理者のインプットを想定したテストケースは満点です。</description>
+      <testinput>
+        <name>ans1c</name>
+        <value>first(mcq_correct(va1c))</value>
+      </testinput>
+      <testinput>
+        <name>ans1r</name>
+        <value>first(mcq_correct(va1r))</value>
+      </testinput>
+      <testinput>
+        <name>ans2</name>
+        <value>ta2</value>
+      </testinput>
+      <testinput>
+        <name>ans3p</name>
+        <value>ta3p</value>
+      </testinput>
+      <testinput>
+        <name>ans3q</name>
+        <value>ta3q</value>
+      </testinput>
+      <expected>
+        <name>prt1</name>
+        <expectedscore>1.0000000</expectedscore>
+        <expectedpenalty>0.0000000</expectedpenalty>
+        <expectedanswernote>prt1-3-T</expectedanswernote>
+      </expected>
+    </qtest>
+  </question>
+
+</quiz>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 117939  -->
+  <question type="stack">
+    <name>
+      <text>005.GaussElimRowReducedCheckEx-1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>
+<p>
+行列{@mondai@}を行に関して基本変形したところ, {@matF@}となった. 
+{@pa@}, {@pb@}, {@pc@}を答えよ.
+</p>
+<table><tbody>
+<tr>
+<th>{@pa@}\(=\)</th><td>[[input:ans1]]</td><td>[[validation:ans1]]</td>
+<th>,</th>
+<th>{@pb@}\(=\)</th><td>[[input:ans2]]</td><td>[[validation:ans2]]</td>
+<th>,</th>
+<th>{@pc@}\(=\)</th><td>[[input:ans3]]</td><td>[[validation:ans3]]</td>
+</tr>
+</tbody></table>
+
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+ var divs = document.getElementsByID('mytextarea');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+</script>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text><![CDATA[<p dir="ltr" style="text-align: left;"></p><p dir="ltr">被約階段行列は, 元の行列の列ベクトル同士の1次関係式を表わしています. このことは,\(A\)の列ベクトルの 1次関係式が \(A{\boldsymbol x}={\boldsymbol 0}\)の形で表わせることとからわかります.</p><p dir="ltr">\(A\)が行に関する基本変形によって被約階段行列(行簡約行列) \(F=PA\) (\(P\)は基本行列の積で, 正則行列です) に変形されたとすると, \(A{\boldsymbol x}={\boldsymbol 0}\leftrightarrow PA(=F){\boldsymbol x}={\boldsymbol 0}\)となるからです.&nbsp;</p><p dir="ltr">ここで, 例えば, \(F=\begin{pmatrix} 1 &amp; 0 &amp; 2 &amp; -1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 1 &amp; 3 &amp; 0 &amp; 2 \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; -1 \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \end{pmatrix}\)だったとしましょう. そうすると, \(F\)に関しては,&nbsp;</p><p dir="ltr">3列目\(=\)1列目の2倍\(+\)2列目の1倍,4列目\(=\)1列目の\(-1\)倍+2列目の3倍というような関係が明らかなので, \(A\)についても, 同じことがなりたっているとわかるのです. この場合, さらに, 6列目は1列目の1倍+2列目の2倍+5列目の\(-1\)倍となることがわかります.</p><p dir="ltr">このことは, 次の連立1次方程式で使われる原理となります.</p><br><p></p>]]></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 被約階段行列の検算原理 */
+/* v003: 解答を可変行列形に (2023.5.6) */
+/* v002: 問題文の修正のみ */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+
+n:4;m:6;
+%_nr:n;%_nc:m;
+pv:rand([[1,2,4],[1,2,5],[1,3,4],[1,3,5],[2,3,5]]);
+matF:randechelon(%_nr, %_nc, pv, [-3, -2, -1, 1, 2, 3]);
+aL:make_random_distribution_pm([[2, 1], [1, 4]]);
+dtL:[-4, -3, -2, -1, 1, 2, 3, 4, 5];
+matP:random_matrix_det_list(%_nr, aL, dtL);
+matA:matP.matF;
+j12:listify(setdifference(setify(makelist(i, i, m)), setify(pv)));
+j1:j12[1];j2:j12[2];j3:j12[3];
+colset(M, j, v):=block([R, i, rw], 
+   rw:(matrix_size(M))[1], R:M, 
+   for i:1 while (i<=rw) do (R[i, j]:v[i, 1]), return(R));
+pa:genmatrix(lambda([i, j], a[i]), n, 1);
+pb:genmatrix(lambda([i, j], b[i]), n, 1);
+pc:genmatrix(lambda([i, j], c[i]), n, 1);
+ta1:col(matA, j1);
+ta2:col(matA, j2);
+ta3:col(matA, j3);
+mondai:matA;
+mondai:colset(mondai, j1, pa);
+mondai:colset(mondai, j2, pb);
+mondai:colset(mondai, j3, pc);
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matF@},{@j12@},{@matA@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>varmatrix</type>
+      <tans>ta1</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>ta2</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <input>
+      <name>ans3</name>
+      <type>varmatrix</type>
+      <tans>ta3</tans>
+      <boxsize>5</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options></options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>ta1</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>0.33</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>第{@j1@}列:正解です.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>第{@j1@}列:違います.</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans2</sans>
+        <tans>ta2</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.33</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>第{@j2@}列:正解です.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>2</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>第{@j2@}列:違います.</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans3</sans>
+        <tans>ta3</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0.34</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<p>第{@j3@}列:正解です.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<p>第{@j3@}列:違います.</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>782619621</deployedseed>
+    <deployedseed>704337699</deployedseed>
+    <deployedseed>1505384758</deployedseed>
+    <deployedseed>208653005</deployedseed>
+    <deployedseed>2129457299</deployedseed>
+    <deployedseed>2115050167</deployedseed>
+    <deployedseed>486654035</deployedseed>
+    <deployedseed>1959032766</deployedseed>
+    <deployedseed>1884016470</deployedseed>
+    <deployedseed>904851725</deployedseed>
+    <deployedseed>862485090</deployedseed>
+    <deployedseed>44564264</deployedseed>
+    <deployedseed>947050097</deployedseed>
+    <deployedseed>38129861</deployedseed>
+    <deployedseed>956533369</deployedseed>
+    <deployedseed>2057347331</deployedseed>
+    <deployedseed>1419574678</deployedseed>
+    <deployedseed>1054144526</deployedseed>
+    <deployedseed>68038155</deployedseed>
+    <deployedseed>322236495</deployedseed>
+    <deployedseed>597522646</deployedseed>
+    <deployedseed>620150916</deployedseed>
+    <deployedseed>252563321</deployedseed>
+    <deployedseed>533278720</deployedseed>
+    <deployedseed>1513997724</deployedseed>
+    <deployedseed>30096665</deployedseed>
+    <deployedseed>1670060056</deployedseed>
+    <deployedseed>1895446525</deployedseed>
+    <deployedseed>1091660686</deployedseed>
+    <deployedseed>1138850193</deployedseed>
+  </question>
+
+</quiz>
