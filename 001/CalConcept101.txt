@@ -16,18 +16,20 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
-/* domain=range=R */
-ListAL1:[x, x^3, x^5, x^7];
-/* domain=range=R(>=0) */
-ListAL2:[sqrt(x), sqrt(x^3), sqrt(x^5)];
-/* domain=R, range=R>=0 or <=0 */
 rr1:rand([-3, -2, -1, 1, 2, 3]);
-ListBL1:rr1*[x^2, x^4, x^6, abs(x)];
-/* domain=R>0, range=R */
 rr2:rand([-3, -2, -1, 1, 2, 3]);
-ListBL2:[rr1*log(x), rr1*log(x^3), rr1*log(x^5)];
+rr3:rand([-3, -2, -1, 1, 2, 3]);
+rr4:rand([-3, -2, -1, 1, 2, 3]);
+/* domain=range=R */
+ListAL1:map(lambda([k], append([rr1, k])), [x, x^3, x^5, x^7]);
+/* domain=range=R(>=0) */
+ListAL2:map(lambda([k], append([rr2, k])), [sqrt(x), sqrt(x^3), sqrt(x^5)]);
+/* domain=R, range=R>=0 or <=0 */
+ListBL1:map(lambda([k], append([rr3, k])), [x^2, x^4, x^6, abs(x)]);
+/* domain=R>0, range=R */
+ListBL2:map(lambda([k], append([rr4, k])), [log(x), log(x^3), log(x^5)]);
 
-%_OptString(s):=sconcat("\\(x\\mapsto ", tex1(s), " \\)");
+%_OptString(s):=simplode(append(["\\(", x, "\\mapsto "], s, " \\)"]);
 
 
 
