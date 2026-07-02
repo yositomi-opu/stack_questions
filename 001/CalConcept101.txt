@@ -21,13 +21,13 @@ rr2:rand([-3, -2, -1, 1, 2, 3]);
 rr3:rand([-3, -2, -1, 1, 2, 3]);
 rr4:rand([-3, -2, -1, 1, 2, 3]);
 /* domain=range=R */
-ListAL1:map(lambda([k], append([rr1, k])), [x, x^3, x^5, x^7]);
+ListAL1:map(lambda([k], append([rr1, tex1(k)])), [x, x^3, x^5, x^7]);
 /* domain=range=R(>=0) */
-ListAL2:map(lambda([k], append([rr2, k])), [sqrt(x), sqrt(x^3), sqrt(x^5)]);
+ListAL2:map(lambda([k], append([rr2, tex1(k)])), [sqrt(x), sqrt(x^3), sqrt(x^5)]);
 /* domain=R, range=R>=0 or <=0 */
-ListBL1:map(lambda([k], append([rr3, k])), [x^2, x^4, x^6, abs(x)]);
+ListBL1:map(lambda([k], append([rr3, tex1(k)])), [x^2, x^4, x^6, abs(x)]);
 /* domain=R>0, range=R */
-ListBL2:map(lambda([k], append([rr4, k])), [log(x), log(x^3), log(x^5)]);
+ListBL2:map(lambda([k], append([rr4, tex1(k)])), [log(x), log(x+1), log(x+2)]);
 
 %_OptString(s):=simplode(append(["\\(", x, "\\mapsto "], s, [" \\)"]));
 
