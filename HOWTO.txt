@@ -6,6 +6,7 @@ First define working directory(we refer it WD)
 - git clone https://github.com/maths/moodle-qtype_stack.git
 - cp stack_questions/dump.txt moodle-qtype_stack/stack/maxima/
 - cd moodle-qtype_stack/stack/maxima
+- for a in ../../../stack_questions/*.mac; do ln -s $a; done
 - [edit dump.txt (change /Users/yositomi/... to fit your environment)]
 - brew install maxima
 - brew install rlwrap
