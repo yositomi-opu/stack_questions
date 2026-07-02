@@ -16,10 +16,10 @@ tex2(m):=sconcat("\\(", tex1(m), "\\)");
 tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
 %_rp(L):=random_permutation(L);
 
-rr1:rand([-3, -2, -1, 1, 2, 3]);
-rr2:rand([-3, -2, -1, 1, 2, 3]);
-rr3:rand([-3, -2, -1, 1, 2, 3]);
-rr4:rand([-3, -2, -1, 1, 2, 3]);
+rr1:rand([-3, -2, "", 2, 3]);
+rr2:rand([-3, -2, "", 2, 3]);
+rr3:rand([-3, -2, "", 2, 3]);
+rr4:rand([-3, -2, "", 2, 3]);
 /* domain=range=R */
 ListAL1:map(lambda([k], append([rr1, tex1(k)])), [x, x^3, x^5, x^7]);
 /* domain=range=R(>=0) */
