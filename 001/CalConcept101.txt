@@ -1,0 +1,84 @@
+/************************** MatDefA (rb) ************************/
+/* 001.MCB include file		                                */
+/* Objective: To learn/check matrix definition (size/element    */
+/****************************************************************/
+/* c:[1], w:[3]; */
+if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:4;
+if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:2;
+/********************************************************************/
+
+/********* u.c. ************/
+
+/*** for 000.MCQ-rb.xml ***/
+/* key parameters(e.g. which control the only level of the question) here if required */
+/* The truth values of compound propositions. */
+tex2(m):=sconcat("\\(", tex1(m), "\\)");
+tex2L(L):=block([s:"\\(", k], for k:1 thru length(L) do s:sconcat(s, if stringp(L[k]) then L[k] else tex1(L[k]), " "), s:sconcat(s, "\\)"), return(s));
+%_rp(L):=random_permutation(L);
+
+/* domain=range=R */
+ListAL1:[x, x^3, x^5, x^7];
+/* domain=range=R(>=0) */
+ListAL2:[sqrt(x), sqrt(x^3), sqrt(x^5)];
+/* domain=R, range=R>=0 or <=0 */
+rr1:rand([-3, -2, -1, 1, 2, 3]);
+ListBL1:rr1*[x^2, x^4, x^6, abs(x)];
+/* domain=R>0, range=R */
+rr2:rand([-3, -2, -1, 1, 2, 3]);
+ListBL2:[rr1*log(x), rr1*log(x^3), rr1*log(x^5)];
+
+%_OptString(s):=sconcat("\\(x\\mapsto ", s, " \\)");
+
+
+
+
+
+/********************************** Question text ****************************************/
+/* %__mcq_qtextL : question text language list                                           */
+/* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
+/*****************************************************************************************/
+/* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
+%__mcq_qtextL:[["en", "Choose the function(s) whose domain and range are identical."],
+ ["fr", "Choisissez la ou les fonctions dont le domaine de définition et l’image sont identiques."],
+ ["de", "Wählen Sie die Funktion(en), deren Definitionsbereich und Wertebereich identisch sind."],
+ ["it", "Scegli la funzione (o le funzioni) il cui dominio e la cui immagine coincidono."],
+ ["ja", "定義域と値域が一致する関数をすべて選べ."]];
+
+/******************************** List of patterns/feedbacks *****************************/
+/*  This template assumes the lists %__Copt?L, %__Wopt?L does not depend on the locale.  */
+/*  If it depends on the locale, please set up the list using %_STACK_LANG.              */
+/*****************************************************************************************/
+/* Correct pattern 1 */
+%__CoptL1:map(%_OptString, ListAL1);
+%__Cmsg1L:[["en", "Correct. You have selected the one whose domain and range are both all real numbers."],
+ ["fr", "Correct. Vous avez choisi celle dont le domaine de définition et l’image sont tous deux l’ensemble des nombres réels."],
+ ["de", "Richtig. Sie haben diejenige ausgewählt, deren Definitionsbereich und Wertebereich beide die Menge der reellen Zahlen sind."],
+ ["it", "Corretto. Hai scelto quella il cui dominio e la cui immagine sono entrambi l’insieme dei numeri reali."],
+ ["ja", "正解です. 定義域も値域も実数全体となるものを選んでいます."]];
+
+/* Correct pattern 2 */
+%__CoptL2:map(%_OptString, ListAL2);
+%__Cmsg2L:[["en", "Correct. You have selected the one whose domain is the set of all nonnegative real numbers and whose range is also the set of all nonnegative real numbers."],
+ ["fr", "Correct. Vous avez choisi celle dont le domaine de définition et l’image sont tous deux l’ensemble des nombres réels non négatifs."],
+ ["de", "Richtig. Sie haben diejenige ausgewählt, deren Definitionsbereich und Wertebereich beide die Menge der nichtnegativen reellen Zahlen sind."],
+ ["it", "Corretto. Hai scelto quella il cui dominio e la cui immagine sono entrambi l’insieme dei numeri reali non negativi."],
+ ["ja", "正解です. 定義域も値域も非負実数全体となるものを選んでいます."]];
+
+/* Wrong answer pattern (almost dummy) */
+%__WoptL1:map(%_OptString, ListBL1);
+%__Wmsg1L:[["en", "Your choice seems to have the set of all real numbers as its domain, but its range is not the set of all real numbers."],
+ ["fr", "Votre choix semble avoir pour domaine de définition l’ensemble des nombres réels, mais son image n’est pas l’ensemble des nombres réels."],
+ ["de", "Ihre Auswahl scheint die Menge der reellen Zahlen als Definitionsbereich zu haben, ihr Wertebereich ist jedoch nicht die Menge aller reellen Zahlen."],
+ ["it", "La tua scelta sembra avere come dominio l’insieme di tutti i numeri reali, ma la sua immagine non è l’insieme di tutti i numeri reali."],
+ ["ja", "定義域は実数全体ですが, 値域はそうではないものを選んでいるようです."]];
+
+/* Wrong answer pattern (almost dummy) */
+%__WoptL2:map(%_OptString, ListBL2);
+%__Wmsg2L:[["en", "Your choice seems to have the set of all nonnegative real numbers as its domain, but its range is not the set of all nonnegative real numbers."],
+ ["fr", "Votre choix semble avoir pour domaine de définition l’ensemble des nombres réels non négatifs, mais son image n’est pas l’ensemble des nombres réels non négatifs."],
+ ["de", "Ihre Auswahl scheint die Menge der nichtnegativen reellen Zahlen als Definitionsbereich zu haben, ihr Wertebereich ist jedoch nicht die Menge der nichtnegativen reellen Zahlen."],
+ ["it", "La tua scelta sembra avere come dominio l’insieme dei numeri reali non negativi, ma la sua immagine non è l’insieme dei numeri reali non negativi."],
+ ["ja", "定義域は非負実数全体ですが, 値域はそうではないものを選んでいるようです."]];
+
+
+/********** EOF **********/
