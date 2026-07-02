@@ -27,7 +27,7 @@ ListBL1:rr1*[x^2, x^4, x^6, abs(x)];
 rr2:rand([-3, -2, -1, 1, 2, 3]);
 ListBL2:[rr1*log(x), rr1*log(x^3), rr1*log(x^5)];
 
-%_OptString(s):=sconcat("\\(x\\mapsto ", s, " \\)");
+%_OptString(s):=sconcat("\\(x\\mapsto ", tex1(s), " \\)");
 
 
 
