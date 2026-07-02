@@ -1,3 +1,37 @@
+# how to make pre-dumped maxima command 
+ (STACK コードと mcq_template 等を読み込み済みmaxima の生成方法)
+First define working directory(we refer it WD)
+- cd WD
+- git clone https://github.com/yositomi-opu/stack_questions.git
+- git clone https://github.com/maths/moodle-qtype_stack.git
+- cp stack_questions/dump.txt moodle-qtype_stack/stack/maxima/
+- cd moodle-qtype_stack/stack/maxima
+- [edit dump.txt (change /Users/yositomi/... to fit your environment)]
+- brew install maxima
+- brew install rlwrap
+- maxima < dump.txt
+- [e.g. mv maxima-optimized.new optmaxima.hoge ]
+- create file dump_path.txt as follows (replace WD for real one)
+	__stacklocation:"WD/moodle-qtype_stack";
+	__stacktmplocation:"/tmp";
+
+	file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/###.{mac,mc}")] , file_search_maxima);
+	file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/###.{lisp}")] , file_search_lisp);
+	file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{mac,mc}")] , file_search_maxima);
+	file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{lisp}")] , file_search_lisp);
+	file_search_maxima:append( [sconcat(__stacktmplocation, "/###.{mac,mc}")] , file_search_maxima);
+	file_search_lisp:append( [sconcat(__stacktmplocation, "/###.{lisp}")] , file_search_lisp);
+- create shell script to invoke dumpped maxima: (in the case below, $HOME/bin/optmaxima.sh created)
+cat <<EOF > $HOME/bin/optmaxima.sh
+#!/bin/zsh
+cd WD
+MAXIMA=./optmaxima.hoge
+[ ! -x ./stack-maxima/$MAXIMA ] && exit 1
+if ! grep -q file_search $HOME/.maxima/maxima-init.mac; then cat dump_path.txt >> $HOME/.maxima/maxima-init.mac; fi
+rlwrap ./stack-maxima/${cmd}
+EOF
+chmod +x $HOME/bin/optmaxima.sh
+
 # AIによる多言語化用連想配列生成プロンプト（参考）
 (en) Prompt to generate associative array for multilingual variables.
 
