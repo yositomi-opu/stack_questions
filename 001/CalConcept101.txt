@@ -29,7 +29,7 @@ ListBL1:map(lambda([k], append([rr3, k])), [x^2, x^4, x^6, abs(x)]);
 /* domain=R>0, range=R */
 ListBL2:map(lambda([k], append([rr4, k])), [log(x), log(x^3), log(x^5)]);
 
-%_OptString(s):=simplode(append(["\\(", x, "\\mapsto "], s, " \\)"]);
+%_OptString(s):=simplode(append(["\\(", x, "\\mapsto "], s, [" \\)"]));
 
 
 
