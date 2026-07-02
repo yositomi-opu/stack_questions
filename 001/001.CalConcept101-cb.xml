@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 116894  -->
+<!-- question: 118314  -->
   <question type="stack">
     <name>
-      <text>001.MatMapDef-A-cb</text>
+      <text>001.CalConcept101-cb</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]][[lang code='it']][[/lang]]
@@ -50,7 +50,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 
 /***** See the Sample.txt file below for how to describe question variables here *********/
 /* c[1, 3], w[2, 3] */
-stack_include("https://stack.mathedu.jp/sc/001/CalcConcept101.txt");
+stack_include("https://stack.mathedu.jp/sc/001/CalConcept101.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
@@ -531,6 +531,16 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
         </falsefeedback>
       </node>
     </prt>
+    <deployedseed>713529315</deployedseed>
+    <deployedseed>1783224237</deployedseed>
+    <deployedseed>1314063077</deployedseed>
+    <deployedseed>2087612838</deployedseed>
+    <deployedseed>2007975112</deployedseed>
+    <deployedseed>1580429898</deployedseed>
+    <deployedseed>161364897</deployedseed>
+    <deployedseed>932686546</deployedseed>
+    <deployedseed>1250137908</deployedseed>
+    <deployedseed>274405132</deployedseed>
     <qtest>
       <testcase>1</testcase>
       <description>管理者のインプットを想定したテストケースは満点です。</description>
