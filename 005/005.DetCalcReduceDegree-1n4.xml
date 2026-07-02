@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 118325  -->
+  <question type="stack">
+    <name>
+      <text>005.DetCalcReduceDegree-1n4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[<p><br></p>[[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]][[lang code='it']][[/lang]][[lang code='ja']][[/lang]]
+<p>{@qtext@}</p>
+<div>{@mondai@}\(=\)[[input:ans1]] [[validation:ans1]]</div>
+<div>{@comment@}</div>
+<div>[[input:ans2]][[validation:ans2]]</div>
+<script>
+  var divs = document.getElementsByClassName('varmatrixinput');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+ var divs = document.getElementsByID('mytextarea');
+  for(var i=0; i < divs.length; i++) { 
+    divs[i].style.height = '120px';
+    divs[i].style.fontFamily = '"MigMix 1M", monospace';
+  }
+</script>
+<div>{@AS@}</div>]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/* 行か列が 0でない成分1つの行列の行列式の計算 */
+/* v002 : n=3 では, aLから0を除外 (2023.6.24) */
+/* v001 : 初版 (2023.6.24) */
+stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+stack_include("https://stack.mathedu.jp/sc/multilang_library.mac");
+%_n:4;sz:3;
+%_n1:%_n-1;
+aL:make_random_distribution_pm([[5, 1], [4, 1], [3, 2], [2, 3], [1, 5]]);
+cL:make_random_distribution_pm([[10, 1], [5, 1], [4, 1], [3, 1], [2, 1]]);
+dL:append(makelist(-k, k, 1, 20), makelist(k, k, 1, 20));
+vmat(m):=block([_lc:lmxchar, s], lmxchar:"|", s:sconcat("\\(", tex1(m), "\\)"), lmxchar:_lc, return(s));
+matA2:random_matrix_det_list(%_n1-1, aL, dL);
+i1:rand(%_n1)+1;
+j1:rand(%_n1)+1;
+c1:rand(cL);
+rc:rand([1, 2]); /* 1:row,  2:col */
+tmpIJ(i, i1):=block([], if i<i1 then return(i) else return(i-1));
+matA1:genmatrix(lambda([i, j], if [i, j]=[i1, j1] then c1 elseif not i=i1 and not j=j1 then matA2[tmpIJ(i, i1), tmpIJ(j, j1)] elseif (rc=1 and i=i1 and not j=j1) or (rc=2 and not i=i1 and j=j1) then 0 else rand(aL)), %_n1, %_n1);
+i2:rand(%_n)+1;
+j2:rand(%_n)+1;
+c2:rand(cL);
+rc:rand([1, 2]);
+matA:genmatrix(lambda([i, j], if [i, j]=[i2, j2] then c2 elseif not i=i2 and not j=j2 then matA1[tmpIJ(i, i2), tmpIJ(j, j2)] elseif (rc=1 and i=i2 and not j=j2) or (rc=2 and not i=i2 and j=j2) then 0 else rand(aL)), %_n, %_n);
+mondai:vmat(matA);
+Cans1:determinant(matA);
+ta1:Cans1;
+
+qtext:%__lang([["en", "Compute the following determinant by performing appropriate row or column exchanges to reduce its order."],
+["fr", "Calculez le déterminant suivant en effectuant des échanges appropriés de lignes ou de colonnes afin d’en réduire l’ordre."],
+["de", "Berechnen Sie die folgende Determinante, indem Sie geeignete Zeilen- oder Spaltenvertauschungen durchführen, um ihre Ordnung zu verringern."],
+["it", "Calcola il seguente determinante effettuando opportuni scambi di righe o colonne per ridurne l’ordine."],
+["ja", "次の行列式を適切に行または列交換して, 次数下げを行い計算せよ."]]);
+comment:%__lang([["en", "For calculations only (you may leave this blank)."],
+["fr", "Pour les calculs uniquement (vous pouvez laisser ce champ vide)."],
+["de", "Nur für Berechnungen (dieses Feld kann leer bleiben)."],
+["it", "Solo per i calcoli (puoi lasciare questo campo vuoto)."],
+["ja", "計算用(空欄でOK)"]]);
+AS:%_mat2str(matA);
+
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="moodle_auto_format">
+      <text>{@matA1@}, {@matA2@}, {@[i1,j1]@}, {@c1@}, {@matA@}, d={@ta1@}</text>
+    </questionnote>
+    <questiondescription format="moodle_auto_format">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text>よくできました。正解です!</text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text>惜しい！部分的に正解です。</text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text>残念，間違いです。</text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>dot</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>numerical</type>
+      <tans>ta1</tans>
+      <boxsize>8</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>0</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>hideanswer</options>
+    </input>
+    <input>
+      <name>ans2</name>
+      <type>varmatrix</type>
+      <tans>matA</tans>
+      <boxsize>15</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>allowempty</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[Cmsg:%__lang([["en", "Correct."], ["fr", "Correct !"], ["de", "Richtig!"], ["it", "Corretto!"], ["ja", "正解です."]]);
+Wmsg:%__lang([["en", "Not quite. Check whether you have made a sign error. If you are exchanging adjacent rows or columns, check how many exchanges you performed."],
+["fr", "Ce n’est pas correct. Vérifiez si vous n’avez pas fait d’erreur de signe. Si vous échangez des lignes ou des colonnes voisines, vérifiez combien d’échanges vous avez effectués."],
+["de", "Das ist nicht richtig. Überprüfen Sie, ob Sie einen Vorzeichenfehler gemacht haben. Wenn Sie benachbarte Zeilen oder Spalten vertauschen, prüfen Sie, wie oft Sie vertauscht haben."],
+["it", "Non è corretto. Controlla se hai commesso un errore di segno. Se stai scambiando righe o colonne adiacenti, controlla quante volte hai effettuato lo scambio."],
+["ja", "違います. 符号を間違えていないか確認してみよう. 隣同士を交換する場合, 何回交換したか確認してみよう."]]);
+]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>Cans1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[[[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]][[lang code='it']][[/lang]][[lang code='ja']][[/lang]]
+<p dir="ltr" style="text-align: left;">{@Cmsg@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[[[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]][[lang code='it']][[/lang]][[lang code='ja']][[/lang]]
+<p dir="ltr" style="text-align: left;">{@Wmsg@}</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+    <deployedseed>153729527</deployedseed>
+    <deployedseed>1642313052</deployedseed>
+    <deployedseed>709675864</deployedseed>
+    <deployedseed>653300637</deployedseed>
+    <deployedseed>366723461</deployedseed>
+    <deployedseed>809901433</deployedseed>
+    <deployedseed>359263104</deployedseed>
+    <deployedseed>1714738748</deployedseed>
+    <deployedseed>868957199</deployedseed>
+    <deployedseed>237037623</deployedseed>
+  </question>
+
+</quiz>
