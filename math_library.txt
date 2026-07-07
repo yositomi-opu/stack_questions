@@ -1,0 +1,17 @@
+/***** misc useful mathematics functions *****/
+
+/***** permutations with repetition (重複順列) *****/
+permutations_with_repetition(L, m) := block([sub, x, r, ans:[]],
+    if m < 0 then
+        return("m must be nonnegative")
+    elseif m = 0 then
+        return([[]])
+    else (
+        sub : permutations_with_repetition(L, m - 1),
+        for x in L do
+            for r in sub do
+                ans : endcons(cons(x, r), ans),
+        return(ans)
+    ));
+
+
