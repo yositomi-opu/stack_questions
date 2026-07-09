@@ -48,6 +48,16 @@
             </div>
           </div>
 
+          <label class="check-row" for="randomCorrect">
+            <input id="randomCorrect" type="checkbox">
+            <span>正解数をランダムにする</span>
+          </label>
+
+          <div id="correctCountsRow" class="field-row" hidden>
+            <label for="correctCounts">正解数の候補（カンマ区切り）</label>
+            <input id="correctCounts" value="1, 2" spellcheck="false" placeholder="1, 2, 3">
+          </div>
+
           <label class="check-row" for="requirePairs">
             <input id="requirePairs" type="checkbox" checked>
             <span>各パターンは真偽1対以上を必須とする</span>
@@ -97,7 +107,7 @@
               <button id="clearRowsButton" type="button" class="ghost danger">クリア</button>
             </div>
           </div>
-          <div class="table-wrap">
+          <div id="pairedEditor" class="table-wrap">
             <table>
               <thead>
                 <tr>
@@ -110,6 +120,32 @@
               </thead>
               <tbody id="rowsBody"></tbody>
             </table>
+          </div>
+          <div id="fixedEditor" class="fixed-editor" hidden>
+            <section class="fixed-section">
+              <div class="fixed-heading">
+                <h3>正解選択肢</h3>
+                <button id="addCorrectPatternButton" type="button" class="ghost">正解パターン追加</button>
+              </div>
+              <div class="table-wrap">
+                <table class="fixed-table">
+                  <thead><tr><th>パターン</th><th>選択肢リスト（1行1要素）</th><th>フィードバック</th><th></th></tr></thead>
+                  <tbody id="correctPatternsBody"></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="fixed-section">
+              <div class="fixed-heading">
+                <h3>誤答選択肢</h3>
+                <button id="addWrongPatternButton" type="button" class="ghost">誤答パターン追加</button>
+              </div>
+              <div class="table-wrap">
+                <table class="fixed-table">
+                  <thead><tr><th>パターン</th><th>選択肢リスト（1行1要素）</th><th>フィードバック</th><th></th></tr></thead>
+                  <tbody id="wrongPatternsBody"></tbody>
+                </table>
+              </div>
+            </section>
           </div>
           <p id="statusLine" class="status" aria-live="polite"></p>
         </section>

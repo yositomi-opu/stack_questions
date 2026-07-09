@@ -21,6 +21,8 @@ config,question_id,000.sample-mcq
 config,mode,rb
 config,num_options,2
 config,num_correct,1
+config,random_correct,false
+config,correct_counts,"1, 2"
 config,require_pairs,true
 qtextL,ja,"次のうち正しいものを __SELTYPE__."
 qtextL,en,"__SELTYPE__ the correct statement."
@@ -39,6 +41,7 @@ feedback,02,"パターン02に共通のフィードバック"
 - `qtextL`: `qtextL, 言語, 問題文`。言語は `ja`, `en`, `fr`, `de`, `it` です。
 - `qvar`: 第3フィールド以降を Maxima 式として、上から順にそのまま挿入します。末尾に `;` または `$` がなければ `;` を補います。CSVセル内の改行も保持します。
 - `config`: 任意です。`question_id`, `mode`, `num_options`, `num_correct` を指定できます。
+- `config,random_correct,true`: 正解数をランダムにします。候補は `config,correct_counts,"1, 2, 3"` のように指定します。
 - `config,require_pairs,true`: 各パターンに C/W の両方を必須とし、命題の真偽をランダムに割り当てます（既定）。
 
 多言語の選択肢とフィードバックは、言語を追加フィールドにします。
@@ -62,7 +65,7 @@ feedback,01,en,"English feedback"
 config,require_pairs,false
 ```
 
-このモードでは、1つのパターン番号には C または W のどちらか一方だけを指定します。同じパターン・真偽の `option` を複数行書くと、そのパターンの候補リストになります。フィードバックは先頭行に相当する1件だけです。
+このモードでは画面が「正解選択肢」と「誤答選択肢」の2表に分かれます。各行でパターン番号、1行1要素の候補リスト、フィードバックを編集します。CSVでは、1つのパターン番号に C または W のどちらか一方だけを指定します。同じパターン・真偽の `option` を複数行書くと、そのパターンの候補リストになります。フィードバックは1件だけです。
 
 ```csv
 option,01,C,"正解候補1"

@@ -16,6 +16,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--paper);
@@ -105,6 +109,11 @@ h1 {
 
 h2 {
   font-size: 16px;
+}
+
+h3 {
+  margin: 0;
+  font-size: 14px;
 }
 
 .actions,
@@ -230,6 +239,41 @@ details .field-row {
   border: 1px solid var(--line);
   border-radius: 8px;
   max-height: calc(100vh - 210px);
+}
+
+.fixed-editor,
+.fixed-section {
+  display: grid;
+  gap: 10px;
+}
+
+.fixed-section + .fixed-section {
+  margin-top: 18px;
+}
+
+.fixed-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fixed-table {
+  min-width: 650px;
+}
+
+.fixed-table td:nth-child(1) {
+  width: 116px;
+}
+
+.fixed-table td:nth-child(2),
+.fixed-table td:nth-child(3) {
+  width: auto;
+}
+
+.fixed-table td:nth-child(4) {
+  width: 52px;
+  text-align: center;
 }
 
 table {
