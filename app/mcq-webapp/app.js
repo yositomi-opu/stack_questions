@@ -453,11 +453,6 @@ function generatePairedVariableBlock(patterns, numOptions, counts) {
 }
 
 function generateFixedVariableBlock(patterns, numOptions, counts) {
-  patterns.forEach((pattern) => {
-    if (pattern.C.length && pattern.W.length) {
-      throw new Error(`固定モードではパターン ${pattern.id} の真偽を1種類にしてください`);
-    }
-  });
   const correct = patterns.filter((pattern) => pattern.C.length);
   const wrong = patterns.filter((pattern) => pattern.W.length);
   const maxCorrect = Math.max(...counts);
