@@ -166,13 +166,17 @@
           <p id="statusLine" class="status" aria-live="polite"></p>
         </section>
 
-        <section id="outputPanel" class="panel output-panel">
-          <div class="panel-heading">
-            <h2>生成XML</h2>
-            <button id="copyButton" type="button" class="ghost">コピー</button>
-          </div>
-          <textarea id="xmlOutput" spellcheck="false"></textarea>
-        </section>
+        <div id="xmlPane" class="xml-pane">
+          <button id="xmlToggleTab" class="xml-toggle-tab" type="button" aria-pressed="true" title="生成XMLの表示を切り替え">XML</button>
+          <div id="xmlResizeHandle" class="xml-resize-handle" role="separator" aria-orientation="vertical" aria-label="XML欄の幅を変更"></div>
+          <section id="outputPanel" class="panel output-panel">
+            <div class="panel-heading">
+              <h2>生成XML</h2>
+              <button id="copyButton" type="button" class="ghost">コピー</button>
+            </div>
+            <textarea id="xmlOutput" spellcheck="false"></textarea>
+          </section>
+        </div>
       </section>
     </main>
   </body>

@@ -11,6 +11,7 @@ const state = {
   rows: structuredClone(SAMPLE_ROWS),
   qvars: [],
   templates: { rb: "", cb: "" },
+  xmlWidth: 520,
 };
 
 const el = {
@@ -27,6 +28,9 @@ const el = {
   settingsWidth: document.querySelector("#settingsWidth"),
   dataWidth: document.querySelector("#dataWidth"),
   workspace: document.querySelector(".workspace"),
+  xmlPane: document.querySelector("#xmlPane"),
+  xmlToggleTab: document.querySelector("#xmlToggleTab"),
+  xmlResizeHandle: document.querySelector("#xmlResizeHandle"),
   outputPanel: document.querySelector("#outputPanel"),
   fileInput: document.querySelector("#fileInput"),
   qvars: document.querySelector("#qvars"),
@@ -69,8 +73,11 @@ function updateCorrectCountControls() {
 function updateLayout() {
   el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
   el.workspace.style.setProperty("--data-width", `${el.dataWidth.value}px`);
+  el.workspace.style.setProperty("--xml-width", `${state.xmlWidth}px`);
   el.outputPanel.hidden = !el.showXml.checked;
   el.workspace.classList.toggle("xml-hidden", !el.showXml.checked);
+  el.xmlToggleTab.setAttribute("aria-pressed", String(el.showXml.checked));
+  el.xmlToggleTab.title = el.showXml.checked ? "生成XMLを閉じる" : "生成XMLを開く";
 }
 
 function bindEvents() {
@@ -103,6 +110,8 @@ function bindEvents() {
   });
   el.correctCounts.addEventListener("input", updateOutput);
   el.showXml.addEventListener("change", updateLayout);
+  el.xmlToggleTab.addEventListener("click", toggleXmlPane);
+  el.xmlResizeHandle.addEventListener("pointerdown", beginXmlResize);
   el.settingsWidth.addEventListener("input", updateLayout);
   el.dataWidth.addEventListener("input", updateLayout);
   [el.questionId, el.numOptions, el.numCorrect, ...Object.values(el.questions)].forEach((node) => {
@@ -112,6 +121,40 @@ function bindEvents() {
     state.qvars = [el.qvars.value];
     updateOutput();
   });
+}
+
+function toggleXmlPane() {
+  el.showXml.checked = !el.showXml.checked;
+  updateLayout();
+}
+
+function beginXmlResize(event) {
+  if (!el.showXml.checked) return;
+  event.preventDefault();
+  el.workspace.classList.add("resizing-xml");
+  el.xmlResizeHandle.setPointerCapture(event.pointerId);
+
+  const onPointerMove = (moveEvent) => {
+    const rect = el.workspace.getBoundingClientRect();
+    const nextWidth = clamp(Math.round(rect.right - moveEvent.clientX), 320, 900);
+    state.xmlWidth = nextWidth;
+    updateLayout();
+  };
+
+  const endResize = () => {
+    el.workspace.classList.remove("resizing-xml");
+    el.xmlResizeHandle.removeEventListener("pointermove", onPointerMove);
+    el.xmlResizeHandle.removeEventListener("pointerup", endResize);
+    el.xmlResizeHandle.removeEventListener("pointercancel", endResize);
+  };
+
+  el.xmlResizeHandle.addEventListener("pointermove", onPointerMove);
+  el.xmlResizeHandle.addEventListener("pointerup", endResize);
+  el.xmlResizeHandle.addEventListener("pointercancel", endResize);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 async function loadTemplates() {

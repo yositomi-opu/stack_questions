@@ -152,15 +152,83 @@ h3 {
 .workspace {
   --settings-width: 330px;
   --data-width: 620px;
+  --xml-width: 520px;
   display: grid;
-  grid-template-columns: var(--settings-width) var(--data-width) minmax(420px, 1fr);
+  grid-template-columns: var(--settings-width) var(--data-width) minmax(360px, var(--xml-width));
   gap: 14px;
   max-width: 1480px;
   margin: 0 auto;
 }
 
 .workspace.xml-hidden {
-  grid-template-columns: var(--settings-width) minmax(var(--data-width), 1fr);
+  grid-template-columns: var(--settings-width) minmax(var(--data-width), 1fr) 42px;
+}
+
+.workspace.resizing-xml {
+  cursor: col-resize;
+  user-select: none;
+}
+
+.xml-pane {
+  position: relative;
+  min-width: 0;
+}
+
+.xml-toggle-tab {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  z-index: 4;
+  min-width: 36px;
+  min-height: 72px;
+  padding: 10px 6px;
+  border-color: #b8c2cc;
+  border-radius: 8px 0 0 8px;
+  background: #fff;
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-orientation: mixed;
+  transform: translateX(-100%);
+  writing-mode: vertical-rl;
+  box-shadow: 0 6px 18px rgb(32 33 36 / 12%);
+}
+
+.workspace.xml-hidden .xml-toggle-tab {
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 8px;
+}
+
+.xml-resize-handle {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: -12px;
+  z-index: 3;
+  width: 12px;
+  cursor: col-resize;
+}
+
+.xml-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 3px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.xml-resize-handle:hover::after,
+.workspace.resizing-xml .xml-resize-handle::after {
+  background: var(--focus);
+}
+
+.workspace.xml-hidden .xml-resize-handle {
+  display: none;
 }
 
 .panel {
@@ -367,8 +435,22 @@ td:nth-child(5) {
     grid-template-columns: 320px 1fr;
   }
 
-  .output-panel {
+  .xml-pane {
     grid-column: 1 / -1;
+  }
+
+  .xml-toggle-tab {
+    left: auto;
+    right: 12px;
+    top: -6px;
+    min-height: 38px;
+    transform: translateY(-100%);
+    writing-mode: horizontal-tb;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .xml-resize-handle {
+    display: none;
   }
 }
 
