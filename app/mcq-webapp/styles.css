@@ -154,7 +154,7 @@ h3 {
   --data-width: 620px;
   --xml-width: 520px;
   display: grid;
-  grid-template-columns: var(--settings-width) minmax(360px, var(--data-width)) minmax(320px, var(--xml-width));
+  grid-template-columns: var(--settings-width) minmax(360px, 1fr) var(--xml-width);
   gap: 14px;
   width: 100%;
   max-width: 1480px;
@@ -162,7 +162,7 @@ h3 {
 }
 
 .workspace.xml-hidden {
-  grid-template-columns: var(--settings-width) minmax(var(--data-width), 1fr) 42px;
+  grid-template-columns: var(--settings-width) minmax(360px, 1fr) 42px;
 }
 
 .workspace.resizing-xml {
@@ -178,25 +178,26 @@ h3 {
 .xml-toggle-tab {
   position: absolute;
   top: 16px;
-  left: 0;
+  right: 0;
   z-index: 4;
   min-width: 36px;
   min-height: 72px;
   padding: 10px 6px;
   border-color: #b8c2cc;
-  border-radius: 8px 0 0 8px;
+  border-radius: 0 8px 8px 0;
   background: #fff;
   color: var(--primary-dark);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-orientation: mixed;
-  transform: translateX(-100%);
+  transform: translateX(100%);
   writing-mode: vertical-rl;
   box-shadow: 0 6px 18px rgb(32 33 36 / 12%);
 }
 
 .workspace.xml-hidden .xml-toggle-tab {
+  right: auto;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 8px;

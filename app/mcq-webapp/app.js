@@ -132,25 +132,26 @@ function beginXmlResize(event) {
   if (!el.showXml.checked) return;
   event.preventDefault();
   el.workspace.classList.add("resizing-xml");
-  el.xmlResizeHandle.setPointerCapture(event.pointerId);
 
   const onPointerMove = (moveEvent) => {
     const rect = el.workspace.getBoundingClientRect();
-    const nextWidth = clamp(Math.round(rect.right - moveEvent.clientX), 320, 900);
+    const settingsWidth = Number.parseInt(el.settingsWidth.value, 10) || 330;
+    const maxXmlWidth = Math.max(320, Math.min(900, rect.width - settingsWidth - 360 - 28));
+    const nextWidth = clamp(Math.round(rect.right - moveEvent.clientX), 320, maxXmlWidth);
     state.xmlWidth = nextWidth;
     updateLayout();
   };
 
   const endResize = () => {
     el.workspace.classList.remove("resizing-xml");
-    el.xmlResizeHandle.removeEventListener("pointermove", onPointerMove);
-    el.xmlResizeHandle.removeEventListener("pointerup", endResize);
-    el.xmlResizeHandle.removeEventListener("pointercancel", endResize);
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", endResize);
+    window.removeEventListener("pointercancel", endResize);
   };
 
-  el.xmlResizeHandle.addEventListener("pointermove", onPointerMove);
-  el.xmlResizeHandle.addEventListener("pointerup", endResize);
-  el.xmlResizeHandle.addEventListener("pointercancel", endResize);
+  window.addEventListener("pointermove", onPointerMove);
+  window.addEventListener("pointerup", endResize);
+  window.addEventListener("pointercancel", endResize);
 }
 
 function clamp(value, min, max) {
