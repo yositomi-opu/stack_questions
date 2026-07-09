@@ -1,0 +1,15 @@
+config,question_id,000.sample-mcq
+config,mode,rb
+config,num_options,2
+config,num_correct,1
+qtextL,ja,"次のうち正しいものを __SELTYPE__."
+qtextL,en,"__SELTYPE__ the correct statement."
+qvar,,"aa1:rand([1, 2, 3])"
+qvar,,"aa2:rand([3, 4, 5])"
+option,01,C,"太陽は恒星である"
+option,01,W,"太陽は惑星である"
+feedback,01,"太陽は自ら光を放つ恒星です。"
+option,02,C,"地球は惑星である"
+option,02,C,"地球は太陽系の惑星である"
+option,02,W,"地球は恒星である"
+feedback,02,"地球は太陽の周りを公転する惑星です。"

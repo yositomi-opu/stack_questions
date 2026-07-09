@@ -1,0 +1,51 @@
+# STACK MCQ XML Generator
+
+`001.MCQ-rb.xml` / `001.MCQ-cb.xml` をもとに、CSV または XLSX から MCQ 用 XML を生成するローカル WebApp です。
+
+## 起動
+
+リポジトリのルートで次を実行し、ブラウザで `http://localhost:4173/mcq-webapp/mcq-webapp/` を開きます。
+
+```sh
+python3 -m http.server 4173
+```
+
+## CSV / XLSX 形式
+
+ヘッダーは付けず、行の第1フィールドで種類を指定します。
+
+```csv
+config,question_id,000.sample-mcq
+config,mode,rb
+config,num_options,2
+config,num_correct,1
+qtextL,ja,"次のうち正しいものを __SELTYPE__."
+qtextL,en,"__SELTYPE__ the correct statement."
+qvar,,"aa1:rand([1, 2, 3])"
+qvar,,"aa2:rand([3, 4, 5])"
+option,01,C,"パターン01が真の場合の文"
+option,01,W,"パターン01が偽の場合の文"
+feedback,01,"パターン01に共通のフィードバック"
+option,02,C,"パターン02が真の場合の文"
+option,02,W,"パターン02が偽の場合の文"
+feedback,02,"パターン02に共通のフィードバック"
+```
+
+- `option`: `option, パターン番号, CまたはW, 文`。同じパターン・真偽を複数行書くと、候補リストになります。
+- `feedback`: `feedback, パターン番号, 文`。同じ命題の C/W に共通です。
+- `qtextL`: `qtextL, 言語, 問題文`。言語は `ja`, `en`, `fr`, `de`, `it` です。
+- `qvar`: 第3フィールド以降を Maxima 式として、上から順にそのまま挿入します。末尾に `;` または `$` がなければ `;` を補います。CSVセル内の改行も保持します。
+- `config`: 任意です。`question_id`, `mode`, `num_options`, `num_correct` を指定できます。
+
+多言語の選択肢とフィードバックは、言語を追加フィールドにします。
+
+```csv
+option,01,C,ja,"日本語"
+option,01,C,en,"English"
+feedback,01,ja,"日本語のフィードバック"
+feedback,01,en,"English feedback"
+```
+
+## ランダム化
+
+命題パターンを STACK/Maxima の `random_permutation` で並べ替えます。その先頭から `num_correct` 個を C 文による正答パターンにし、続く `num_options - num_correct` 個を W 文による誤答パターンにします。同一パターンの C/W が同じ問題内に同時出現することはありません。

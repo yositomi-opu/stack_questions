@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>STACK MCQ XML Generator</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="./vendor/xlsx.full.min.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">STACK / MCQ</p>
+          <h1>XML Generator</h1>
+        </div>
+        <div class="actions">
+          <button id="sampleCsvButton" type="button" class="ghost">CSV見本</button>
+          <button id="downloadButton" type="button" class="primary">XML保存</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="panel settings-panel">
+          <div class="field-row">
+            <label for="questionId">ファイル名</label>
+            <input id="questionId" value="000.hogehoge" spellcheck="false">
+          </div>
+
+          <div class="field-row">
+            <label>形式</label>
+            <div class="segmented" role="group" aria-label="形式">
+              <button id="modeRb" type="button" class="active">Radio</button>
+              <button id="modeCb" type="button">Checkbox</button>
+            </div>
+          </div>
+
+          <div class="number-grid">
+            <div class="field-row">
+              <label for="numOptions">選択肢数</label>
+              <input id="numOptions" type="number" min="1" max="99" value="2">
+            </div>
+            <div class="field-row">
+              <label for="numCorrect">正解数</label>
+              <input id="numCorrect" type="number" min="0" max="99" value="1">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label for="fileInput">CSV / XLSX</label>
+            <input id="fileInput" type="file" accept=".csv,.tsv,.xlsx,.xls">
+          </div>
+
+          <div class="field-row">
+            <label for="qvars">問題変数 (qvar)</label>
+            <textarea id="qvars" rows="5" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
+          </div>
+
+          <div class="field-row">
+            <label for="questionJa">問題文 ja</label>
+            <textarea id="questionJa" rows="5">次のうち正しいものを __SELTYPE__.</textarea>
+          </div>
+
+          <details>
+            <summary>多言語問題文</summary>
+            <div class="field-row">
+              <label for="questionEn">en</label>
+              <textarea id="questionEn" rows="3"></textarea>
+            </div>
+            <div class="field-row">
+              <label for="questionFr">fr</label>
+              <textarea id="questionFr" rows="3"></textarea>
+            </div>
+            <div class="field-row">
+              <label for="questionDe">de</label>
+              <textarea id="questionDe" rows="3"></textarea>
+            </div>
+            <div class="field-row">
+              <label for="questionIt">it</label>
+              <textarea id="questionIt" rows="3"></textarea>
+            </div>
+          </details>
+        </aside>
+
+        <section class="panel data-panel">
+          <div class="panel-heading">
+            <h2>選択肢データ</h2>
+            <div class="row-actions">
+              <button id="addRowButton" type="button" class="ghost">行追加</button>
+              <button id="clearRowsButton" type="button" class="ghost danger">クリア</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>パターン</th>
+                  <th>真偽</th>
+                  <th>選択肢 ja</th>
+                  <th>共通FB ja</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="rowsBody"></tbody>
+            </table>
+          </div>
+          <p id="statusLine" class="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel output-panel">
+          <div class="panel-heading">
+            <h2>生成XML</h2>
+            <button id="copyButton" type="button" class="ghost">コピー</button>
+          </div>
+          <textarea id="xmlOutput" spellcheck="false"></textarea>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
