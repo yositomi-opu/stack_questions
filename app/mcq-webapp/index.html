@@ -47,13 +47,18 @@
             </div>
           </div>
 
+          <label class="check-row" for="requirePairs">
+            <input id="requirePairs" type="checkbox" checked>
+            <span>各パターンは真偽1対以上を必須とする</span>
+          </label>
+
           <div class="field-row">
             <label for="fileInput">CSV / XLSX</label>
             <input id="fileInput" type="file" accept=".csv,.tsv,.xlsx,.xls">
           </div>
 
           <div class="field-row">
-            <label for="qvars">問題変数 (qvar)</label>
+            <label for="qvars">問題変数（ランダム変数）</label>
             <textarea id="qvars" rows="5" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 

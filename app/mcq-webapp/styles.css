@@ -29,6 +29,24 @@ select {
   font: inherit;
 }
 
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.check-row input {
+  width: auto;
+  margin: 3px 0 0;
+}
+
+textarea:disabled {
+  background: #f2f4f7;
+  color: var(--muted);
+}
+
 button {
   border: 1px solid var(--line);
   border-radius: 7px;

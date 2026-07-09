@@ -2,6 +2,7 @@ config,question_id,000.sample-mcq
 config,mode,rb
 config,num_options,2
 config,num_correct,1
+config,require_pairs,true
 qtextL,ja,"次のうち正しいものを __SELTYPE__."
 qtextL,en,"__SELTYPE__ the correct statement."
 qvar,,"aa1:rand([1, 2, 3])"

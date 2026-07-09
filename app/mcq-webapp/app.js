@@ -19,6 +19,7 @@ const el = {
   modeCb: document.querySelector("#modeCb"),
   numOptions: document.querySelector("#numOptions"),
   numCorrect: document.querySelector("#numCorrect"),
+  requirePairs: document.querySelector("#requirePairs"),
   fileInput: document.querySelector("#fileInput"),
   qvars: document.querySelector("#qvars"),
   rowsBody: document.querySelector("#rowsBody"),
@@ -60,6 +61,10 @@ function bindEvents() {
   el.sampleCsvButton.addEventListener("click", downloadSampleCsv);
   el.downloadButton.addEventListener("click", downloadXml);
   el.copyButton.addEventListener("click", copyXml);
+  el.requirePairs.addEventListener("change", () => {
+    renderRows();
+    updateOutput();
+  });
   [el.questionId, el.numOptions, el.numCorrect, ...Object.values(el.questions)].forEach((node) => {
     node.addEventListener("input", updateOutput);
   });
@@ -102,7 +107,7 @@ function renderRows() {
       cell(textInput(row, index, "pattern", "01")),
       cell(truthSelect(row, index)),
       cell(textareaInput(row, index, "choice_ja")),
-      cell(textareaInput(row, index, "feedback_ja")),
+      cell(feedbackTextarea(row, index)),
       cell(removeButton(index))
     );
     el.rowsBody.append(tr);
@@ -121,6 +126,7 @@ function truthSelect(row, index) {
   select.value = normalizeTruth(row.truth);
   select.addEventListener("change", () => {
     state.rows[index].truth = select.value;
+    renderRows();
     updateOutput();
   });
   return select;
@@ -133,6 +139,7 @@ function textInput(row, index, key, fallback = "") {
     state.rows[index][key] = input.value;
     updateOutput();
   });
+  if (key === "pattern") input.addEventListener("blur", renderRows);
   return input;
 }
 
@@ -145,6 +152,30 @@ function textareaInput(row, index, key) {
     updateOutput();
   });
   return textarea;
+}
+
+function feedbackTextarea(row, index) {
+  const textarea = document.createElement("textarea");
+  const key = feedbackGroupKey(row);
+  const firstIndex = state.rows.findIndex((candidate) => feedbackGroupKey(candidate) === key);
+  const groupRows = state.rows.filter((candidate) => feedbackGroupKey(candidate) === key);
+  textarea.rows = 2;
+  textarea.value = groupRows.find((candidate) => String(candidate.feedback_ja || "").trim())?.feedback_ja || "";
+  textarea.disabled = index !== firstIndex;
+  if (textarea.disabled) textarea.title = "フィードバックは同じパターンの先頭行で編集します";
+  textarea.addEventListener("input", () => {
+    groupRows.forEach((candidate) => {
+      candidate.feedback_ja = "";
+    });
+    state.rows[index].feedback_ja = textarea.value;
+    updateOutput();
+  });
+  return textarea;
+}
+
+function feedbackGroupKey(row) {
+  const pattern = String(row.pattern || "").trim() || "01";
+  return el.requirePairs.checked ? pattern : `${pattern}:${normalizeTruth(row.truth)}`;
 }
 
 function removeButton(index) {
@@ -178,13 +209,18 @@ function generateXml() {
   if (!template) throw new Error("テンプレート読込待ち");
   const id = cleanId(el.questionId.value);
   const variableBlock = generateVariableBlock();
-  const patternCount = groupPatterns().length;
+  const patterns = groupPatterns();
+  const patternCount = patterns.length;
   const numCorrect = nonNegativeInt(el.numCorrect.value, "正解数");
+  const maxCorrect = el.requirePairs.checked ? numCorrect : patterns.filter((pattern) => pattern.C.length).length;
+  const maxWrong = el.requirePairs.checked
+    ? patternCount - numCorrect
+    : patterns.filter((pattern) => pattern.W.length).length;
   return template
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
     .replace(/%__mcq_rb_cb:"(?:rb|cb)";/, `%__mcq_rb_cb:"${state.mode}";`)
-    .replace(/%__mcq_max_cp:\d+;/, `%__mcq_max_cp:${Math.max(5, numCorrect)};`)
-    .replace(/%__mcq_max_wp:\d+;/, `%__mcq_max_wp:${Math.max(9, patternCount - numCorrect)};`)
+    .replace(/%__mcq_max_cp:\d+;/, `%__mcq_max_cp:${Math.max(5, maxCorrect)};`)
+    .replace(/%__mcq_max_wp:\d+;/, `%__mcq_max_wp:${Math.max(9, maxWrong)};`)
     .replace(
       /(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/\s*)[\s\S]*?(\s*\/\*+\s*END OF MAIN QUESTION VARIABLES\s*\*+\/)/,
       `$1\n${variableBlock}\n$2`
@@ -197,17 +233,15 @@ function generateVariableBlock() {
   const numCorrect = nonNegativeInt(el.numCorrect.value, "正解数");
   const patterns = groupPatterns();
   if (!patterns.length) throw new Error("命題パターンがありません");
-  if (numCorrect > patterns.length) throw new Error("正解数が命題パターン数を超えています");
-  if (numOptions > patterns.length) throw new Error("選択肢数が命題パターン数を超えています");
   if (numCorrect > numOptions) throw new Error("正解数が選択肢数を超えています");
-  patterns.forEach((pattern) => {
-    if (!pattern.C.length || !pattern.W.length) {
-      throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
-    }
-  });
+  if (el.requirePairs.checked) {
+    return generatePairedVariableBlock(patterns, numOptions, numCorrect);
+  }
+  return generateFixedVariableBlock(patterns, numOptions, numCorrect);
+}
 
-  const selectedWrong = numOptions - numCorrect;
-  const lines = [
+function baseVariableLines(numOptions, numCorrect) {
+  return [
     "/**************** Generated by mcq-webapp ****************/",
     ...normalizedQvars(),
     ...(normalizedQvars().length ? [""] : []),
@@ -216,6 +250,21 @@ function generateVariableBlock() {
     "",
     `%__mcq_qtextL:${langAssocFromFields()};`,
     "",
+  ];
+}
+
+function generatePairedVariableBlock(patterns, numOptions, numCorrect) {
+  if (numCorrect > patterns.length) throw new Error("正解数が命題パターン数を超えています");
+  if (numOptions > patterns.length) throw new Error("選択肢数が命題パターン数を超えています");
+  patterns.forEach((pattern) => {
+    if (!pattern.C.length || !pattern.W.length) {
+      throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
+    }
+  });
+
+  const selectedWrong = numOptions - numCorrect;
+  const lines = [
+    ...baseVariableLines(numOptions, numCorrect),
     `/* Randomly choose ${numCorrect} true and ${selectedWrong} false proposition patterns. */`,
     `%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`,
     "",
@@ -229,6 +278,56 @@ function generateVariableBlock() {
   }
   lines.push("/**************** End of generated variables ****************/");
   return lines.join("\n");
+}
+
+function generateFixedVariableBlock(patterns, numOptions, numCorrect) {
+  patterns.forEach((pattern) => {
+    if (pattern.C.length && pattern.W.length) {
+      throw new Error(`固定モードではパターン ${pattern.id} の真偽を1種類にしてください`);
+    }
+  });
+  const correct = patterns.filter((pattern) => pattern.C.length);
+  const wrong = patterns.filter((pattern) => pattern.W.length);
+  const selectedWrong = numOptions - numCorrect;
+  if (numCorrect > correct.length) throw new Error("正解数に対して C パターンが不足しています");
+  if (selectedWrong > wrong.length) throw new Error("誤答数に対して W パターンが不足しています");
+
+  const lines = [
+    ...baseVariableLines(numOptions, numCorrect),
+    "/* Fixed true/false patterns (pair requirement disabled). */",
+    "",
+  ];
+  correct.forEach((pattern, index) => appendFixedPattern(lines, "C", index + 1, pattern));
+  wrong.forEach((pattern, index) => appendFixedPattern(lines, "W", index + 1, pattern));
+  lines.push("/**************** End of generated variables ****************/");
+  return lines.join("\n");
+}
+
+function appendFixedPattern(lines, truth, slot, pattern) {
+  const optName = truth === "C" ? `%__CoptL${slot}L` : `%__WoptL${slot}L`;
+  const msgName = truth === "C" ? `%__Cmsg${slot}L` : `%__Wmsg${slot}L`;
+  const rows = pattern[truth];
+  lines.push(`${optName}:${choicesLangAssoc(rows)};`);
+  lines.push(`${msgName}:${fixedFeedbackAssoc(rows)};`);
+  lines.push("");
+}
+
+function choicesLangAssoc(rows) {
+  return maximaAssoc(
+    LANGS.map((lang) => [lang, rows.map((row) => localized(row, "choice", lang)).filter(Boolean)]),
+    "list"
+  );
+}
+
+function fixedFeedbackAssoc(rows) {
+  return maximaAssoc(
+    LANGS.map((lang) => {
+      const exact = rows.find((row) => String(row[`feedback_${lang}`] || "").trim());
+      const ja = rows.find((row) => String(row.feedback_ja || "").trim());
+      return [lang, String(exact?.[`feedback_${lang}`] || (lang === "en" ? ja?.feedback_ja : "") || "").trim()];
+    }),
+    "string"
+  );
 }
 
 function appendRandomPattern(lines, truth, slot, orderPosition, patterns) {
@@ -402,17 +501,24 @@ function applyRecords(records) {
       row[`choice_${lang}`] = choice;
     } else if (kind === "feedback") {
       const pattern = String(record[1] || "").trim();
-      const hasLang = LANGS.includes(String(record[2] || "").trim().toLowerCase()) && record.length >= 4;
-      const lang = hasLang ? normalizeLang(record[2]) : "ja";
-      const value = String(record.slice(hasLang ? 3 : 2).join(",")).trim();
-      if (!feedback.has(pattern)) feedback.set(pattern, {});
-      feedback.get(pattern)[`feedback_${lang}`] = value;
+      const truthToken = String(record[2] || "").trim();
+      const hasTruth = isTruthToken(truthToken);
+      const langIndex = hasTruth ? 3 : 2;
+      const hasLang = LANGS.includes(String(record[langIndex] || "").trim().toLowerCase());
+      const lang = hasLang ? normalizeLang(record[langIndex]) : "ja";
+      const valueIndex = hasLang ? langIndex + 1 : langIndex;
+      const value = String(record.slice(valueIndex).join(",")).trim();
+      const key = hasTruth ? `${pattern}:${normalizeTruth(truthToken)}` : pattern;
+      if (!feedback.has(key)) feedback.set(key, {});
+      feedback.get(key)[`feedback_${lang}`] = value;
     } else if (kind === "config") {
       applyConfig(String(record[1] || "").trim().toLowerCase(), String(record.slice(2).join(",")).trim());
     }
   });
 
-  rows.forEach((row) => Object.assign(row, feedback.get(row.pattern) || {}));
+  rows.forEach((row) => {
+    Object.assign(row, feedback.get(`${row.pattern}:${row.truth}`) || feedback.get(row.pattern) || {});
+  });
   if (!rows.length) throw new Error("option 行を読み込めませんでした");
   LANGS.forEach((lang) => {
     if (qtexts[lang] != null) el.questions[lang].value = qtexts[lang];
@@ -427,6 +533,7 @@ function applyConfig(key, value) {
   if (key === "mode") setMode(value.toLowerCase().startsWith("c") ? "cb" : "rb");
   if (key === "num_options") el.numOptions.value = value;
   if (key === "num_correct") el.numCorrect.value = value;
+  if (key === "require_pairs") el.requirePairs.checked = parseBoolean(value);
 }
 
 function downloadSampleCsv() {
@@ -435,17 +542,31 @@ function downloadSampleCsv() {
     ["config", "mode", state.mode],
     ["config", "num_options", "2"],
     ["config", "num_correct", "1"],
+    ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["qtextL", "ja", "次のうち正しいものを __SELTYPE__."],
     ["qtextL", "en", "__SELTYPE__ the correct statement."],
     ["qvar", "", "aa1:rand([1, 2, 3])"],
     ["qvar", "", "aa2:rand([3, 4, 5])"],
-    ["option", "01", "C", "太陽は恒星である"],
-    ["option", "01", "W", "太陽は惑星である"],
-    ["feedback", "01", "太陽は自ら光を放つ恒星です。"],
-    ["option", "02", "C", "地球は惑星である"],
-    ["option", "02", "W", "地球は恒星である"],
-    ["feedback", "02", "地球は太陽の周りを公転する惑星です。"],
   ];
+  if (el.requirePairs.checked) {
+    records.push(
+      ["option", "01", "C", "太陽は恒星である"],
+      ["option", "01", "W", "太陽は惑星である"],
+      ["feedback", "01", "太陽は自ら光を放つ恒星です。"],
+      ["option", "02", "C", "地球は惑星である"],
+      ["option", "02", "W", "地球は恒星である"],
+      ["feedback", "02", "地球は太陽の周りを公転する惑星です。"]
+    );
+  } else {
+    records.push(
+      ["option", "01", "C", "\\(x^2=1\\) の解は \\(x=1,-1\\) である"],
+      ["option", "01", "C", "\\(x^2-1=0\\) の解は \\(x=\\pm1\\) である"],
+      ["feedback", "01", "C", "因数分解すると \\((x-1)(x+1)=0\\) です。"],
+      ["option", "02", "W", "\\(x^2=1\\) の解は \\(x=1\\) だけである"],
+      ["option", "02", "W", "\\(x^2-1=0\\) の解は正の数だけである"],
+      ["feedback", "02", "W", "負の解 \\(x=-1\\) もあります。"]
+    );
+  }
   downloadText("mcq_sample.csv", records.map(csvLine).join("\n"), "text/csv;charset=utf-8");
 }
 
@@ -476,6 +597,14 @@ function normalizeTruth(value) {
   return ["c", "correct", "true", "1", "正解", "真"].includes(String(value ?? "").trim().toLowerCase()) ? "C" : "W";
 }
 
+function isTruthToken(value) {
+  return ["c", "w", "correct", "wrong", "true", "false", "1", "0", "正解", "誤答", "真", "偽"]
+    .includes(String(value ?? "").trim().toLowerCase());
+}
+
+function parseBoolean(value) {
+  return ["true", "1", "yes", "on", "必須"].includes(String(value ?? "").trim().toLowerCase());
+}
 function normalizeLang(value) {
   const lang = String(value || "ja").trim().toLowerCase();
   return LANGS.includes(lang) ? lang : "ja";
