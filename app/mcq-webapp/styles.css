@@ -154,8 +154,9 @@ h3 {
   --data-width: 620px;
   --xml-width: 520px;
   display: grid;
-  grid-template-columns: var(--settings-width) var(--data-width) minmax(360px, var(--xml-width));
+  grid-template-columns: var(--settings-width) minmax(360px, var(--data-width)) minmax(320px, var(--xml-width));
   gap: 14px;
+  width: 100%;
   max-width: 1480px;
   margin: 0 auto;
 }
@@ -205,9 +206,9 @@ h3 {
   position: absolute;
   top: 12px;
   bottom: 12px;
-  left: -12px;
+  left: -16px;
   z-index: 3;
-  width: 12px;
+  width: 18px;
   cursor: col-resize;
 }
 
@@ -216,10 +217,10 @@ h3 {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 5px;
+  left: 8px;
   width: 3px;
   border-radius: 999px;
-  background: transparent;
+  background: #c9d2dc;
 }
 
 .xml-resize-handle:hover::after,
