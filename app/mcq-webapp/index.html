@@ -63,6 +63,22 @@
             <span>各パターンは真偽1対以上を必須とする</span>
           </label>
 
+          <details>
+            <summary>表示設定</summary>
+            <label class="check-row display-option" for="showXml">
+              <input id="showXml" type="checkbox" checked>
+              <span>XMLを表示する</span>
+            </label>
+            <div class="field-row">
+              <label for="settingsWidth">設定欄の幅</label>
+              <input id="settingsWidth" type="range" min="260" max="500" value="330">
+            </div>
+            <div class="field-row">
+              <label for="dataWidth">選択肢欄の幅</label>
+              <input id="dataWidth" type="range" min="420" max="900" value="620">
+            </div>
+          </details>
+
           <div class="field-row">
             <label for="fileInput">CSV / XLSX</label>
             <input id="fileInput" type="file" accept=".csv,.tsv,.xlsx,.xls">
@@ -150,7 +166,7 @@
           <p id="statusLine" class="status" aria-live="polite"></p>
         </section>
 
-        <section class="panel output-panel">
+        <section id="outputPanel" class="panel output-panel">
           <div class="panel-heading">
             <h2>生成XML</h2>
             <button id="copyButton" type="button" class="ghost">コピー</button>

@@ -150,11 +150,17 @@ h3 {
 }
 
 .workspace {
+  --settings-width: 330px;
+  --data-width: 620px;
   display: grid;
-  grid-template-columns: minmax(260px, 330px) minmax(420px, 1fr) minmax(420px, 1fr);
+  grid-template-columns: var(--settings-width) var(--data-width) minmax(420px, 1fr);
   gap: 14px;
   max-width: 1480px;
   margin: 0 auto;
+}
+
+.workspace.xml-hidden {
+  grid-template-columns: var(--settings-width) minmax(var(--data-width), 1fr);
 }
 
 .panel {
@@ -232,6 +238,14 @@ details {
 
 details .field-row {
   margin-top: 12px;
+}
+
+.display-option {
+  margin-top: 12px;
+}
+
+input[type="range"] {
+  padding: 0;
 }
 
 .table-wrap {

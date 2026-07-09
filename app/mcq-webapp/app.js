@@ -23,6 +23,11 @@ const el = {
   correctCounts: document.querySelector("#correctCounts"),
   correctCountsRow: document.querySelector("#correctCountsRow"),
   requirePairs: document.querySelector("#requirePairs"),
+  showXml: document.querySelector("#showXml"),
+  settingsWidth: document.querySelector("#settingsWidth"),
+  dataWidth: document.querySelector("#dataWidth"),
+  workspace: document.querySelector(".workspace"),
+  outputPanel: document.querySelector("#outputPanel"),
   fileInput: document.querySelector("#fileInput"),
   qvars: document.querySelector("#qvars"),
   rowsBody: document.querySelector("#rowsBody"),
@@ -50,6 +55,7 @@ init();
 async function init() {
   bindEvents();
   updateCorrectCountControls();
+  updateLayout();
   renderRows();
   await loadTemplates();
   updateOutput();
@@ -58,6 +64,13 @@ async function init() {
 function updateCorrectCountControls() {
   el.correctCountsRow.hidden = !el.randomCorrect.checked;
   el.numCorrect.disabled = el.randomCorrect.checked;
+}
+
+function updateLayout() {
+  el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
+  el.workspace.style.setProperty("--data-width", `${el.dataWidth.value}px`);
+  el.outputPanel.hidden = !el.showXml.checked;
+  el.workspace.classList.toggle("xml-hidden", !el.showXml.checked);
 }
 
 function bindEvents() {
@@ -89,6 +102,9 @@ function bindEvents() {
     updateOutput();
   });
   el.correctCounts.addEventListener("input", updateOutput);
+  el.showXml.addEventListener("change", updateLayout);
+  el.settingsWidth.addEventListener("input", updateLayout);
+  el.dataWidth.addEventListener("input", updateLayout);
   [el.questionId, el.numOptions, el.numCorrect, ...Object.values(el.questions)].forEach((node) => {
     node.addEventListener("input", updateOutput);
   });
@@ -124,6 +140,7 @@ function setMode(mode) {
 }
 
 function renderRows() {
+  updateOptionLimit();
   const paired = el.requirePairs.checked;
   el.pairedEditor.hidden = !paired;
   el.fixedEditor.hidden = paired;
@@ -145,6 +162,21 @@ function renderRows() {
     );
     el.rowsBody.append(tr);
   });
+}
+
+function updateOptionLimit() {
+  const patternCount = el.requirePairs.checked ? groupPatterns().length : countFixedPatterns();
+  const maximum = Math.max(1, patternCount);
+  el.numOptions.max = String(maximum);
+  if (Number(el.numOptions.value) > maximum) el.numOptions.value = String(maximum);
+}
+
+function countFixedPatterns() {
+  return ["C", "W"].reduce((total, truth) =>
+    total + fixedGroups(truth).filter((group) =>
+      group.rows.some((row) => LANGS.some((lang) => String(row[`choice_${lang}`] || "").trim()))
+    ).length, 0
+  );
 }
 
 function renderFixedGroups(truth, target) {
@@ -194,6 +226,7 @@ function fixedChoicesTextarea(group) {
   textarea.value = group.rows.map((row) => row.choice_ja || "").join("\n");
   textarea.addEventListener("input", () => {
     setFixedGroupChoices(group, textarea.value.split(/\r?\n/));
+    updateOptionLimit();
     updateOutput();
   });
   return textarea;
@@ -281,6 +314,7 @@ function textInput(row, index, key, fallback = "") {
   input.value = row[key] ?? fallback;
   input.addEventListener("input", () => {
     state.rows[index][key] = input.value;
+    if (key === "pattern") updateOptionLimit();
     updateOutput();
   });
   if (key === "pattern") input.addEventListener("blur", renderRows);
@@ -293,6 +327,7 @@ function textareaInput(row, index, key) {
   textarea.value = row[key] ?? "";
   textarea.addEventListener("input", () => {
     state.rows[index][key] = textarea.value;
+    if (key === "choice_ja") updateOptionLimit();
     updateOutput();
   });
   return textarea;
