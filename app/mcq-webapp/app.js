@@ -28,6 +28,7 @@ const el = {
   addRowButton: document.querySelector("#addRowButton"),
   clearRowsButton: document.querySelector("#clearRowsButton"),
   sampleCsvButton: document.querySelector("#sampleCsvButton"),
+  saveCsvButton: document.querySelector("#saveCsvButton"),
   downloadButton: document.querySelector("#downloadButton"),
   copyButton: document.querySelector("#copyButton"),
   questions: Object.fromEntries(
@@ -59,6 +60,7 @@ function bindEvents() {
   });
   el.fileInput.addEventListener("change", readSelectedFile);
   el.sampleCsvButton.addEventListener("click", downloadSampleCsv);
+  el.saveCsvButton.addEventListener("click", downloadCurrentCsv);
   el.downloadButton.addEventListener("click", downloadXml);
   el.copyButton.addEventListener("click", copyXml);
   el.requirePairs.addEventListener("change", () => {
@@ -567,7 +569,57 @@ function downloadSampleCsv() {
       ["feedback", "02", "W", "負の解 \\(x=-1\\) もあります。"]
     );
   }
-  downloadText("mcq_sample.csv", records.map(csvLine).join("\n"), "text/csv;charset=utf-8");
+  downloadText("mcq_sample.csv", `\ufeff${records.map(csvLine).join("\n")}`, "text/csv;charset=utf-8");
+}
+
+function downloadCurrentCsv() {
+  const records = [
+    ["config", "question_id", cleanId(el.questionId.value)],
+    ["config", "mode", state.mode],
+    ["config", "num_options", el.numOptions.value],
+    ["config", "num_correct", el.numCorrect.value],
+    ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
+  ];
+
+  LANGS.forEach((lang) => {
+    const value = el.questions[lang].value.trim();
+    if (value) records.push(["qtextL", lang, value]);
+  });
+  state.qvars
+    .map((expression) => String(expression).trim())
+    .filter(Boolean)
+    .forEach((expression) => records.push(["qvar", "", expression]));
+
+  state.rows.forEach((row) => {
+    LANGS.forEach((lang) => {
+      const value = String(row[`choice_${lang}`] || "").trim();
+      if (!value) return;
+      records.push(lang === "ja"
+        ? ["option", row.pattern, normalizeTruth(row.truth), value]
+        : ["option", row.pattern, normalizeTruth(row.truth), lang, value]);
+    });
+  });
+
+  const writtenFeedback = new Set();
+  state.rows.forEach((row) => {
+    const key = feedbackGroupKey(row);
+    if (writtenFeedback.has(key)) return;
+    writtenFeedback.add(key);
+    const groupRows = state.rows.filter((candidate) => feedbackGroupKey(candidate) === key);
+    LANGS.forEach((lang) => {
+      const source = groupRows.find((candidate) => String(candidate[`feedback_${lang}`] || "").trim());
+      const value = String(source?.[`feedback_${lang}`] || "").trim();
+      if (!value) return;
+      const base = el.requirePairs.checked
+        ? ["feedback", row.pattern]
+        : ["feedback", row.pattern, normalizeTruth(row.truth)];
+      records.push(lang === "ja" ? [...base, value] : [...base, lang, value]);
+    });
+  });
+
+  const filename = `${cleanId(el.questionId.value)}.csv`;
+  downloadText(filename, `\ufeff${records.map(csvLine).join("\n")}`, "text/csv;charset=utf-8");
+  setStatus(`${filename} を保存しました`);
 }
 
 function csvLine(values) {

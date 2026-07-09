@@ -2,6 +2,8 @@
 
 `001.MCQ-rb.xml` / `001.MCQ-cb.xml` をもとに、CSV または XLSX から MCQ 用 XML を生成するローカル WebApp です。
 
+画面で編集した内容は「CSV保存」で再編集可能なCSVとして保存できます。「CSV見本」は現在選択中の真偽ペアモードに対応した固定サンプルを保存します。
+
 ## 起動
 
 リポジトリのルートで次を実行し、ブラウザで `http://localhost:4173/mcq-webapp/mcq-webapp/` を開きます。
