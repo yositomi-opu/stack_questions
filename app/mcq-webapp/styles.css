@@ -51,6 +51,12 @@ textarea:disabled {
   color: var(--muted);
 }
 
+input:disabled {
+  background: #f2f4f7;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 button {
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -599,8 +605,34 @@ h3 {
   padding-bottom: 3px;
 }
 
+.random-correct-row,
 .correct-counts {
-  grid-column: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.random-correct-row {
+  flex-wrap: wrap;
+}
+
+.random-correct-row .check-row {
+  flex: 0 0 auto;
+}
+
+.correct-counts[hidden] {
+  display: none;
+}
+
+.correct-counts label {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.correct-counts input {
+  width: 92px;
+  min-width: 92px;
+  padding: 5px 7px;
 }
 
 .section-divider {

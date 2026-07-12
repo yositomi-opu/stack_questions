@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260712-ui13">
+    <link rel="stylesheet" href="./styles.css?v=20260712-ui14">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./app.js?v=20260712-ui16"></script>
   </head>
@@ -110,18 +110,20 @@
                 </div>
               </div>
               <div class="choice-flags">
-                <label class="check-row" for="randomCorrect">
-                  <input id="randomCorrect" type="checkbox">
-                  <span>正解数をランダムにする</span>
-                </label>
+                <div class="random-correct-row">
+                  <label class="check-row" for="randomCorrect">
+                    <input id="randomCorrect" type="checkbox">
+                    <span>正解数をランダムにする</span>
+                  </label>
+                  <div id="correctCountsRow" class="correct-counts" hidden>
+                    <label for="correctCounts">候補</label>
+                    <input id="correctCounts" value="1, 2" spellcheck="false" placeholder="1, 2, 3">
+                  </div>
+                </div>
                 <label class="check-row" for="requirePairs">
                   <input id="requirePairs" type="checkbox" checked>
                   <span>各パターンは真偽1対以上を必須とする</span>
                 </label>
-              </div>
-              <div id="correctCountsRow" class="field-row correct-counts" hidden>
-                <label for="correctCounts">正解数の候補（カンマ区切り）</label>
-                <input id="correctCounts" value="1, 2" spellcheck="false" placeholder="1, 2, 3">
               </div>
             </div>
           </section>
