@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=20260712-ui10">
     <script defer src="./vendor/xlsx.full.min.js"></script>
-    <script defer src="./app.js"></script>
+    <script defer src="./app.js?v=20260712-ui16"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -16,106 +16,116 @@
           <h1>XML Generator</h1>
         </div>
         <div class="actions">
+          <button id="copyCasButton" type="button" class="ghost">CAS検証用コピー</button>
+          <button id="downloadIncludeButton" type="button" class="ghost" hidden>include保存</button>
           <button id="sampleCsvButton" type="button" class="ghost">CSV見本</button>
           <button id="saveCsvButton" type="button" class="ghost">CSV保存</button>
           <button id="downloadButton" type="button" class="primary">XML保存</button>
         </div>
       </header>
 
-      <section class="workspace">
-        <aside class="panel settings-panel">
-          <div class="field-row">
-            <label for="questionId">ファイル名</label>
-            <input id="questionId" value="000.hogehoge" spellcheck="false">
-          </div>
-
-          <div class="field-row">
-            <label>形式</label>
-            <div class="segmented" role="group" aria-label="形式">
-              <button id="modeRb" type="button" class="active">Radio</button>
-              <button id="modeCb" type="button">Checkbox</button>
-            </div>
-          </div>
-
-          <div class="number-grid">
-            <div class="field-row">
-              <label for="numOptions">選択肢数</label>
-              <input id="numOptions" type="number" min="1" max="99" value="2">
-            </div>
-            <div class="field-row">
-              <label for="numCorrect">正解数</label>
-              <input id="numCorrect" type="number" min="0" max="99" value="1">
-            </div>
-          </div>
-
-          <label class="check-row" for="randomCorrect">
-            <input id="randomCorrect" type="checkbox">
-            <span>正解数をランダムにする</span>
-          </label>
-
-          <div id="correctCountsRow" class="field-row" hidden>
-            <label for="correctCounts">正解数の候補（カンマ区切り）</label>
-            <input id="correctCounts" value="1, 2" spellcheck="false" placeholder="1, 2, 3">
-          </div>
-
-          <label class="check-row" for="requirePairs">
-            <input id="requirePairs" type="checkbox" checked>
-            <span>各パターンは真偽1対以上を必須とする</span>
-          </label>
-
-          <details>
-            <summary>表示設定</summary>
+      <section class="title-toolbar" aria-label="問題ファイル設定">
+        <div class="title-field">
+          <label class="sr-only" for="questionId">タイトル</label>
+          <input id="questionId" value="" placeholder="001.タイトルを入力" spellcheck="false">
+        </div>
+        <div class="file-field">
+          <button id="dataFileButton" type="button" class="ghost">CSV/XLSX読込</button>
+          <button id="xmlFileButton" type="button" class="ghost">XML読込</button>
+          <input id="dataFileInput" class="visually-hidden-file" type="file" accept=".csv,.tsv,.xlsx,.xls">
+          <input id="xmlFileInput" class="visually-hidden-file" type="file" accept=".xml,application/xml,text/xml">
+        </div>
+        <details class="display-settings">
+          <summary>表示設定</summary>
+          <div class="display-settings-menu">
             <label class="check-row display-option" for="showXml">
               <input id="showXml" type="checkbox" checked>
               <span>XMLを表示する</span>
             </label>
             <div class="field-row">
-              <label for="settingsWidth">設定欄の幅</label>
-              <input id="settingsWidth" type="range" min="260" max="500" value="330">
+              <label for="settingsWidth">左欄の幅</label>
+              <input id="settingsWidth" type="range" min="300" max="620" value="390">
             </div>
             <div class="field-row">
               <label for="dataWidth">選択肢欄の幅</label>
               <input id="dataWidth" type="range" min="420" max="900" value="620">
             </div>
-          </details>
-
-          <div class="field-row">
-            <label for="fileInput">CSV / XLSX</label>
-            <input id="fileInput" type="file" accept=".csv,.tsv,.xlsx,.xls">
           </div>
+        </details>
+      </section>
 
-          <div class="field-row">
+      <section class="workspace">
+        <aside class="panel settings-panel">
+          <section class="language-settings" aria-labelledby="languageHeading">
+            <h2 id="languageHeading">多言語設定</h2>
+            <div class="field-row base-language-row">
+              <label for="baseLanguage">基本言語</label>
+              <select id="baseLanguage"></select>
+            </div>
+            <p class="language-help">XMLに展開する言語を選択</p>
+            <div id="languageChoices" class="language-choices"></div>
+            <button id="prepareTranslationButton" type="button" class="primary translation-button">多言語展開</button>
+            <details id="translationPanel" class="translation-panel">
+              <summary>翻訳結果を確認・修正</summary>
+              <p class="translation-guide">生成された依頼をChatGPTへ貼り付け、返されたJSONでこの欄を置き換えてから「結果を反映」を押してください。</p>
+              <textarea id="translationJson" rows="12" spellcheck="false"></textarea>
+              <div class="row-actions translation-actions">
+                <button id="copyTranslationButton" type="button" class="ghost">依頼をコピー</button>
+                <button id="applyTranslationButton" type="button" class="primary">結果を反映</button>
+              </div>
+              <p id="translationStatus" class="translation-status" aria-live="polite"></p>
+            </details>
+          </section>
+
+          <div class="field-row qvars-field">
             <label for="qvars">問題変数（ランダム変数）</label>
-            <textarea id="qvars" rows="5" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
+            <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 
-          <div class="field-row">
-            <label for="questionJa">問題文 ja</label>
-            <textarea id="questionJa" rows="5">次のうち正しいものを __SELTYPE__.</textarea>
-          </div>
-
-          <details>
-            <summary>多言語問題文</summary>
-            <div class="field-row">
-              <label for="questionEn">en</label>
-              <textarea id="questionEn" rows="3"></textarea>
-            </div>
-            <div class="field-row">
-              <label for="questionFr">fr</label>
-              <textarea id="questionFr" rows="3"></textarea>
-            </div>
-            <div class="field-row">
-              <label for="questionDe">de</label>
-              <textarea id="questionDe" rows="3"></textarea>
-            </div>
-            <div class="field-row">
-              <label for="questionIt">it</label>
-              <textarea id="questionIt" rows="3"></textarea>
-            </div>
-          </details>
+          <section class="question-texts" aria-labelledby="questionTextsHeading">
+            <h2 id="questionTextsHeading">問題文</h2>
+            <div id="questionTextFields"></div>
+          </section>
         </aside>
 
+        <div id="settingsResizeHandle" class="settings-resize-handle" role="separator" aria-orientation="vertical" aria-label="左欄の幅を変更" title="左右にドラッグして左欄の幅を変更"></div>
+
         <section class="panel data-panel">
+          <section class="choice-settings" aria-labelledby="choiceSettingsHeading">
+            <h2 id="choiceSettingsHeading">選択肢設定</h2>
+            <div class="choice-settings-grid">
+              <fieldset class="mode-options">
+                <legend>形式</legend>
+                <label><input id="modeRb" type="radio" name="mode" value="rb" checked> Radio</label>
+                <label><input id="modeCb" type="radio" name="mode" value="cb"> Checkbox</label>
+              </fieldset>
+              <div class="number-grid">
+                <div class="field-row">
+                  <label for="numOptions">選択肢数</label>
+                  <input id="numOptions" type="number" min="1" max="99" value="2">
+                </div>
+                <div class="field-row">
+                  <label for="numCorrect">正解選択肢数</label>
+                  <input id="numCorrect" type="number" min="0" max="99" value="1">
+                </div>
+              </div>
+              <div class="choice-flags">
+                <label class="check-row" for="randomCorrect">
+                  <input id="randomCorrect" type="checkbox">
+                  <span>正解数をランダムにする</span>
+                </label>
+                <label class="check-row" for="requirePairs">
+                  <input id="requirePairs" type="checkbox" checked>
+                  <span>各パターンは真偽1対以上を必須とする</span>
+                </label>
+              </div>
+              <div id="correctCountsRow" class="field-row correct-counts" hidden>
+                <label for="correctCounts">正解数の候補（カンマ区切り）</label>
+                <input id="correctCounts" value="1, 2" spellcheck="false" placeholder="1, 2, 3">
+              </div>
+            </div>
+          </section>
+          <div class="section-divider"></div>
           <div class="panel-heading">
             <h2>選択肢データ</h2>
             <div class="row-actions">
@@ -129,8 +139,8 @@
                 <tr>
                   <th>パターン</th>
                   <th>真偽</th>
-                  <th>選択肢 ja</th>
-                  <th>共通FB ja</th>
+                  <th id="choiceLanguageHeading">選択肢 ja</th>
+                  <th id="feedbackLanguageHeading">共通FB ja</th>
                   <th></th>
                 </tr>
               </thead>
