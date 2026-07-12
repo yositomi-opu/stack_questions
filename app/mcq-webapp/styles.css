@@ -523,16 +523,21 @@ h3 {
 .language-independent-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   width: fit-content;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
 }
 
 .language-independent-toggle input {
-  width: auto;
+  flex: 0 0 auto;
+  width: 14px;
+  min-width: 14px;
+  height: 14px;
   margin: 0;
+  padding: 0;
 }
 
 .typed-editor.cas textarea {
