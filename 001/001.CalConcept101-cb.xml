@@ -22,7 +22,7 @@
     </stackversion>
     <questionvariables>
       <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
-stack_include("https://stack.mathedu.jp/sc/ky_linear_algebra.mac");
+stack_include("https://yositomi-opu.github.io/stack_questions/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
 %__mcq_rb_cb:"cb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
@@ -43,20 +43,20 @@ stack_include("https://stack.mathedu.jp/sc/tex_library.mac");
 %__mcq_max_wp:9;
 
 /********************************* DO NOT EDIT HERE **************************************/
-stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
+stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre.mac");
 /*****************************************************************************************/
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
 
 /***** See the Sample.txt file below for how to describe question variables here *********/
 /* c[1, 3], w[2, 3] */
-stack_include("https://stack.mathedu.jp/sc/001/CalConcept101.txt");
+stack_include("https://yositomi-opu.github.io/stack_questions/001/CalConcept101.txt");
 
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
-stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
+stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.mac");
 /*****************************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
@@ -120,7 +120,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_post.mac");
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://stack.mathedu.jp/sc/mcq_template_fvar.txt");]]></text>
+        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar.txt");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
