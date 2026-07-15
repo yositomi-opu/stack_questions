@@ -14,7 +14,7 @@ if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min
 [%__mcq_fbp, %__mcq_subsc, %__mcq_noidea, %__mcq_nocorrectopt, %__mcq_nocorrecttrue, %__mcq_qtext_auto]:%_MCQ_FLAGS;
 /* get_assoc_array is also defined in ky_linear_algebra.txt */
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
-%__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), return (m));
+%__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 
 %__mcq_nocoptSL:[["en", "None of the above."]];
@@ -43,4 +43,3 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_noidea_checked:%__mcq_lang(%__mcq_noidea_checkedL, %_STACK_LANG);
  
 /************* EOF **************/
-

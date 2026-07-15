@@ -744,7 +744,7 @@ function updateOutput() {
 function generateXml() {
   const template = state.templates[state.mode];
   if (!template) throw new Error("テンプレート読込待ち");
-  const id = cleanId(el.questionId.value);
+  const id = xmlFileStem(baseTitle(el.questionId.value));
   const generatedVariables = generateVariableBlock();
   const metadataComment = `/* MCQ_WEBAPP_DATA_BASE64:${encodeAppMetadata()} */`;
   const variableBlock = state.includeSource
@@ -1336,7 +1336,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
 
 function applyAppStateSnapshot(snapshot) {
   if (!snapshot || snapshot.version !== 1 || !Array.isArray(snapshot.rows)) throw new Error("再編集用データが不正です");
-  el.questionId.value = String(snapshot.questionId || "");
+  el.questionId.value = baseTitle(snapshot.questionId);
   setMode(snapshot.mode === "cb" ? "cb" : "rb");
   el.baseLanguage.value = normalizeLang(snapshot.baseLanguage);
   LANGS.forEach((lang) => {
@@ -1426,7 +1426,7 @@ function importLegacyQuestionVariables(variables, documentNode, filename, xmlVar
   state.qvars = [el.qvars.value];
 
   const xmlName = documentNode.querySelector("question > name > text")?.textContent?.trim();
-  el.questionId.value = xmlName || filename.replace(/\.xml$/i, "");
+  el.questionId.value = baseTitle(xmlName || filename);
   setMode(/%__mcq_rb_cb\s*:\s*"cb"/.test(xmlVariables) || documentNode.querySelector('input > type')?.textContent === "checkbox" ? "cb" : "rb");
   const numOptions = variables.match(/%_MCQ_NUM_OPTS\s*:\s*(\d+)/)?.[1];
   const numCorrect = variables.match(/%_MCQ_NUM_COPTS\s*:\s*(\d+)/)?.[1];
@@ -1858,7 +1858,7 @@ function applyRecords(records) {
 }
 
 function applyConfig(key, value) {
-  if (key === "question_id" || key === "id") el.questionId.value = cleanId(value);
+  if (key === "question_id" || key === "id") el.questionId.value = baseTitle(value);
   if (key === "mode") setMode(value.toLowerCase().startsWith("c") ? "cb" : "rb");
   if (key === "num_options") el.numOptions.value = value;
   if (key === "num_correct") el.numCorrect.value = value;
@@ -1911,10 +1911,10 @@ function downloadSampleCsv() {
 }
 
 function downloadCurrentCsv() {
-  const id = titleForSave();
-  if (!id) return;
+  const title = titleForSave();
+  if (!title) return;
   const records = [
-    ["config", "question_id", id],
+    ["config", "question_id", title],
     ["config", "mode", state.mode],
     ["config", "num_options", el.numOptions.value],
     ["config", "num_correct", el.numCorrect.value],
@@ -1967,7 +1967,7 @@ function downloadCurrentCsv() {
     });
   });
 
-  const filename = `${id}.csv`;
+  const filename = `${title}.csv`;
   downloadText(filename, `\ufeff${records.map(csvLine).join("\n")}`, "text/csv;charset=utf-8");
   setStatus(`${filename} を保存しました`);
 }
@@ -1977,10 +1977,17 @@ function csvLine(values) {
 }
 
 function downloadXml() {
-  const id = titleForSave();
-  if (!id) return;
-  downloadText(`${id}.xml`, el.xmlOutput.value, "application/xml;charset=utf-8");
-  setStatus(`${id}.xml を保存しました`);
+  const title = titleForSave();
+  if (!title) return;
+  try {
+    const xml = generateXml();
+    el.xmlOutput.value = xml;
+    const filename = `${xmlFileStem(title)}.xml`;
+    downloadText(filename, xml, "application/xml;charset=utf-8");
+    setStatus(`${filename} を保存しました`);
+  } catch (error) {
+    setStatus(`XMLを保存できません: ${error.message}`, true);
+  }
 }
 
 function downloadIncludeFile() {
@@ -1989,7 +1996,9 @@ function downloadIncludeFile() {
     return;
   }
   try {
-    const filename = state.includeSource.filename || basenameFromPath(state.includeSource.path) || "include.txt";
+    const title = titleForSave();
+    if (!title) return;
+    const filename = `${title}.txt`;
     downloadText(filename, generateIncludeFileContent(), "text/plain;charset=utf-8");
     setStatus(`${filename} を保存しました。XML内のstack_includeは維持されます`);
   } catch (error) {
@@ -2000,7 +2009,7 @@ function downloadIncludeFile() {
 function titleForSave() {
   let value = el.questionId.value.trim();
   if (!value) {
-    value = window.prompt("タイトルが未入力です。保存するファイルのタイトルを入力してください。", "001.")?.trim() || "";
+    value = window.prompt("タイトルが未入力です。保存するファイルのタイトルを入力してください。", "NurseSample001")?.trim() || "";
     if (!value) {
       setStatus("タイトルが未入力のため保存を中止しました", true);
       el.questionId.focus();
@@ -2009,7 +2018,17 @@ function titleForSave() {
     el.questionId.value = value;
     updateOutput();
   }
-  return cleanId(value);
+  const title = baseTitle(value);
+  if (!title) {
+    setStatus("保存に使用できるタイトルを入力してください", true);
+    el.questionId.focus();
+    return "";
+  }
+  if (el.questionId.value !== title) {
+    el.questionId.value = title;
+    updateOutput();
+  }
+  return title;
 }
 
 async function copyXml() {
@@ -2119,6 +2138,17 @@ function nonNegativeInt(value, label) {
 
 function cleanId(value) {
   return String(value || "").trim().replace(/[^\w.-]+/g, "_");
+}
+
+function baseTitle(value) {
+  return cleanId(basenameFromPath(value))
+    .replace(/\.(?:xml|csv|txt)$/i, "")
+    .replace(/^001\./i, "")
+    .replace(/-(?:cb|rb)$/i, "");
+}
+
+function xmlFileStem(title) {
+  return `001.${baseTitle(title)}-${state.mode}`;
 }
 
 function escapeXml(value) {
