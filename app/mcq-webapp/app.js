@@ -12,7 +12,6 @@ const state = {
   rows: structuredClone(SAMPLE_ROWS),
   qvars: [],
   templates: { rb: "", cb: "" },
-  xmlWidth: 520,
   translationsStale: false,
   questionTypes: Object.fromEntries(LANGS.map((lang) => [lang, "text"])),
   includeSource: null,
@@ -37,13 +36,13 @@ const el = {
   workspace: document.querySelector(".workspace"),
   xmlPane: document.querySelector("#xmlPane"),
   xmlToggleTab: document.querySelector("#xmlToggleTab"),
-  xmlResizeHandle: document.querySelector("#xmlResizeHandle"),
   outputPanel: document.querySelector("#outputPanel"),
   dataFileButton: document.querySelector("#dataFileButton"),
   xmlFileButton: document.querySelector("#xmlFileButton"),
   dataFileInput: document.querySelector("#dataFileInput"),
   xmlFileInput: document.querySelector("#xmlFileInput"),
   qvars: document.querySelector("#qvars"),
+  saveVariablesSeparately: document.querySelector("#saveVariablesSeparately"),
   rowsBody: document.querySelector("#rowsBody"),
   pairedEditor: document.querySelector("#pairedEditor"),
   fixedEditor: document.querySelector("#fixedEditor"),
@@ -101,11 +100,14 @@ function updateCorrectCountControls() {
 }
 
 function updateLayout() {
+  const workspaceWidth = el.workspace.getBoundingClientRect().width || window.innerWidth;
+  const settingsMax = Math.max(300, Math.floor(workspaceWidth * 0.8));
+  el.settingsWidth.max = String(settingsMax);
+  if (Number(el.settingsWidth.value) > settingsMax) el.settingsWidth.value = String(settingsMax);
   el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
   el.workspace.style.setProperty("--data-width", `${el.dataWidth.value}px`);
-  el.workspace.style.setProperty("--xml-width", `${state.xmlWidth}px`);
   el.outputPanel.hidden = !el.showXml.checked;
-  el.workspace.classList.toggle("xml-hidden", !el.showXml.checked);
+  el.xmlPane.classList.toggle("closed", !el.showXml.checked);
   el.xmlToggleTab.setAttribute("aria-pressed", String(el.showXml.checked));
   el.xmlToggleTab.title = el.showXml.checked ? "生成XMLを閉じる" : "生成XMLを開く";
 }
@@ -137,6 +139,7 @@ function bindEvents() {
   el.copyButton.addEventListener("click", copyXml);
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
   el.downloadIncludeButton.addEventListener("click", downloadIncludeFile);
+  el.saveVariablesSeparately.addEventListener("change", changeIncludeMode);
   el.requirePairs.addEventListener("change", () => {
     renderRows();
     updateOutput();
@@ -148,10 +151,10 @@ function bindEvents() {
   el.correctCounts.addEventListener("input", updateOutput);
   el.showXml.addEventListener("change", updateLayout);
   el.xmlToggleTab.addEventListener("click", toggleXmlPane);
-  el.xmlResizeHandle.addEventListener("pointerdown", beginXmlResize);
   el.settingsResizeHandle.addEventListener("pointerdown", beginSettingsResize);
   el.settingsWidth.addEventListener("input", updateLayout);
   el.dataWidth.addEventListener("input", updateLayout);
+  window.addEventListener("resize", updateLayout);
   Object.values(el.languageChecks).forEach((node) => {
     node.addEventListener("change", () => {
       ensureOneLanguage(node);
@@ -192,32 +195,6 @@ function toggleXmlPane() {
   updateLayout();
 }
 
-function beginXmlResize(event) {
-  if (!el.showXml.checked) return;
-  event.preventDefault();
-  el.workspace.classList.add("resizing-xml");
-
-  const onPointerMove = (moveEvent) => {
-    const rect = el.workspace.getBoundingClientRect();
-    const settingsWidth = Number.parseInt(el.settingsWidth.value, 10) || 330;
-    const maxXmlWidth = Math.max(320, Math.min(900, rect.width - settingsWidth - 360 - 28));
-    const nextWidth = clamp(Math.round(rect.right - moveEvent.clientX), 320, maxXmlWidth);
-    state.xmlWidth = nextWidth;
-    updateLayout();
-  };
-
-  const endResize = () => {
-    el.workspace.classList.remove("resizing-xml");
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", endResize);
-    window.removeEventListener("pointercancel", endResize);
-  };
-
-  window.addEventListener("pointermove", onPointerMove);
-  window.addEventListener("pointerup", endResize);
-  window.addEventListener("pointercancel", endResize);
-}
-
 function beginSettingsResize(event) {
   if (window.matchMedia("(max-width: 780px)").matches) return;
   event.preventDefault();
@@ -226,7 +203,7 @@ function beginSettingsResize(event) {
 
   const onPointerMove = (moveEvent) => {
     const rect = el.workspace.getBoundingClientRect();
-    const maxWidth = Math.max(300, Math.min(620, rect.width - 460));
+    const maxWidth = Math.max(300, Math.floor(rect.width * 0.8));
     const nextWidth = clamp(Math.round(moveEvent.clientX - rect.left), 300, maxWidth);
     el.settingsWidth.value = String(nextWidth);
     updateLayout();
@@ -744,6 +721,7 @@ function updateOutput() {
 function generateXml() {
   const template = state.templates[state.mode];
   if (!template) throw new Error("テンプレート読込待ち");
+  refreshGeneratedIncludeSource();
   const id = xmlFileStem(baseTitle(el.questionId.value));
   const generatedVariables = generateVariableBlock();
   const metadataComment = `/* MCQ_WEBAPP_DATA_BASE64:${encodeAppMetadata()} */`;
@@ -844,6 +822,8 @@ function appStateSnapshot() {
       url: state.includeSource.url,
       path: state.includeSource.path,
       filename: state.includeSource.filename,
+      generated: Boolean(state.includeSource.generated),
+      autoUrl: Boolean(state.includeSource.autoUrl),
     } : null,
   };
 }
@@ -1324,7 +1304,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
   } else {
     importLegacyQuestionVariables(includeSource?.content || variables, documentNode, filename, variables);
     state.includeSource = includeSource;
-    el.downloadIncludeButton.hidden = !includeSource;
+    syncIncludeControls();
   }
   renderRows();
   updateCorrectCountControls();
@@ -1364,8 +1344,67 @@ function applyAppStateSnapshot(snapshot) {
     url: String(snapshot.includeSource.url || ""),
     path: String(snapshot.includeSource.path || ""),
     filename: String(snapshot.includeSource.filename || basenameFromPath(snapshot.includeSource.path) || "include.txt"),
+    generated: Boolean(snapshot.includeSource.generated),
+    autoUrl: Boolean(snapshot.includeSource.autoUrl),
   } : null;
-  el.downloadIncludeButton.hidden = !state.includeSource;
+  syncIncludeControls();
+}
+
+function changeIncludeMode() {
+  if (!el.saveVariablesSeparately.checked) {
+    state.includeSource = null;
+    syncIncludeControls();
+    updateOutput();
+    return;
+  }
+
+  const title = titleForSave();
+  if (!title) {
+    el.saveVariablesSeparately.checked = false;
+    return;
+  }
+  const path = `001/${title}.txt`;
+  const defaultUrl = publicIncludeUrl(path);
+  const selected = window.prompt(
+    "XMLの stack_include(...) に設定するURLです。必要な場合は手動で変更してください。",
+    defaultUrl
+  );
+  if (selected === null) {
+    el.saveVariablesSeparately.checked = false;
+    return;
+  }
+  const url = selected.trim() || defaultUrl;
+  if (/["\r\n]/.test(url)) {
+    setStatus("include URLに引用符や改行は使用できません", true);
+    el.saveVariablesSeparately.checked = false;
+    return;
+  }
+  state.includeSource = {
+    url,
+    path: includePathFromUrl(url) || path,
+    filename: `${title}.txt`,
+    generated: true,
+    autoUrl: url === defaultUrl,
+  };
+  syncIncludeControls();
+  updateOutput();
+  setStatus(`問題変数を ${title}.txt として保存する設定にしました`);
+}
+
+function syncIncludeControls() {
+  const enabled = Boolean(state.includeSource);
+  el.saveVariablesSeparately.checked = enabled;
+  el.downloadIncludeButton.hidden = !enabled;
+}
+
+function refreshGeneratedIncludeSource() {
+  if (!state.includeSource?.generated || !state.includeSource.autoUrl) return;
+  const title = baseTitle(el.questionId.value);
+  if (!title) return;
+  const path = `001/${title}.txt`;
+  state.includeSource.url = publicIncludeUrl(path);
+  state.includeSource.path = path;
+  state.includeSource.filename = `${title}.txt`;
 }
 
 function importLegacyQuestionVariables(variables, documentNode, filename, xmlVariables = variables) {
@@ -2051,6 +2090,7 @@ async function copyCasDebugCode() {
 }
 
 function generateIncludeFileContent() {
+  if (state.includeSource?.generated) return `${generateVariableBlock().trim()}\n`;
   const generated = generateVariableBlock();
   const generatedAssignments = splitMaximaStatements(stripMaximaComments(generated))
     .map(parseMaximaAssignment)
@@ -2090,7 +2130,7 @@ function generateIncludeFileContent() {
       ? `${output.slice(0, eofIndex)}${insertion}${output.slice(eofIndex)}`
       : `${output.trimEnd()}${insertion}`;
   }
-  return output.trim();
+  return `${output.trim()}\n`;
 }
 
 function downloadText(filename, text, type) {

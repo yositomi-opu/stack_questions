@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260712-ui14">
+    <link rel="stylesheet" href="./styles.css?v=20260716-ui17">
     <script defer src="./vendor/xlsx.full.min.js"></script>
-    <script defer src="./app.js?v=20260715-ui19"></script>
+    <script defer src="./app.js?v=20260716-ui22"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -44,7 +44,7 @@
             </label>
             <div class="field-row">
               <label for="settingsWidth">左欄の幅</label>
-              <input id="settingsWidth" type="range" min="300" max="620" value="390">
+              <input id="settingsWidth" type="range" min="300" max="2400" value="390">
             </div>
             <div class="field-row">
               <label for="dataWidth">選択肢欄の幅</label>
@@ -76,6 +76,11 @@
               <p id="translationStatus" class="translation-status" aria-live="polite"></p>
             </details>
           </section>
+
+          <label class="check-row include-mode-row" for="saveVariablesSeparately">
+            <input id="saveVariablesSeparately" type="checkbox">
+            <span>問題変数を別ファイルに保存する</span>
+          </label>
 
           <div class="field-row qvars-field">
             <label for="qvars">問題変数（ランダム変数）</label>
@@ -178,9 +183,8 @@
           <p id="statusLine" class="status" aria-live="polite"></p>
         </section>
 
-        <div id="xmlPane" class="xml-pane">
+        <div id="xmlPane" class="xml-pane" role="dialog" aria-label="生成XMLウィンドウ">
           <button id="xmlToggleTab" class="xml-toggle-tab" type="button" aria-pressed="true" title="生成XMLの表示を切り替え">XML</button>
-          <div id="xmlResizeHandle" class="xml-resize-handle" role="separator" aria-orientation="vertical" aria-label="XML欄の幅を変更" title="左へドラッグで広げる／右へドラッグで狭める"></div>
           <section id="outputPanel" class="panel output-panel">
             <div class="panel-heading">
               <h2>生成XML</h2>
