@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260716-ui17">
+    <link rel="stylesheet" href="./styles.css?v=20260720-ui18">
     <script defer src="./vendor/xlsx.full.min.js"></script>
-    <script defer src="./app.js?v=20260716-ui22"></script>
+    <script defer src="./app.js?v=20260720-ui23"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -86,6 +86,23 @@
             <label for="qvars">問題変数（ランダム変数）</label>
             <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
+
+          <section class="cas-evaluation-panel" aria-labelledby="casEvaluationHeading">
+            <div class="cas-evaluation-heading">
+              <h2 id="casEvaluationHeading">ローカルCAS評価</h2>
+              <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
+            </div>
+            <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
+            <details id="casVariablesPanel" class="cas-variables-panel">
+              <summary>定義済み変数 <span id="casVariableCount">0</span></summary>
+              <div class="cas-variable-table-wrap">
+                <table class="cas-variable-table">
+                  <thead><tr><th>変数</th><th>型</th><th>length</th><th>評価値</th></tr></thead>
+                  <tbody id="casVariablesBody"></tbody>
+                </table>
+              </div>
+            </details>
+          </section>
 
           <section class="question-texts" aria-labelledby="questionTextsHeading">
             <h2 id="questionTextsHeading">問題文</h2>

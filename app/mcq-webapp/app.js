@@ -15,6 +15,7 @@ const state = {
   translationsStale: false,
   questionTypes: Object.fromEntries(LANGS.map((lang) => [lang, "text"])),
   includeSource: null,
+  casEvaluation: { status: "idle", stale: false, variables: [], expressions: {} },
 };
 
 buildLanguageInputs();
@@ -42,6 +43,11 @@ const el = {
   dataFileInput: document.querySelector("#dataFileInput"),
   xmlFileInput: document.querySelector("#xmlFileInput"),
   qvars: document.querySelector("#qvars"),
+  evaluateCasButton: document.querySelector("#evaluateCasButton"),
+  casEvaluationStatus: document.querySelector("#casEvaluationStatus"),
+  casVariablesPanel: document.querySelector("#casVariablesPanel"),
+  casVariableCount: document.querySelector("#casVariableCount"),
+  casVariablesBody: document.querySelector("#casVariablesBody"),
   saveVariablesSeparately: document.querySelector("#saveVariablesSeparately"),
   rowsBody: document.querySelector("#rowsBody"),
   pairedEditor: document.querySelector("#pairedEditor"),
@@ -118,6 +124,7 @@ function bindEvents() {
   el.addRowButton.addEventListener("click", () => {
     state.rows.push({ pattern: nextPattern(), truth: "C", [`choice_${baseLang()}`]: "", [`feedback_${baseLang()}`]: "" });
     markTranslationsStale("選択肢行が追加されました");
+    markCasEvaluationStale();
     renderRows();
     updateOutput();
   });
@@ -126,6 +133,7 @@ function bindEvents() {
   el.clearRowsButton.addEventListener("click", () => {
     state.rows = [];
     markTranslationsStale("選択肢がクリアされました");
+    markCasEvaluationStale();
     renderRows();
     updateOutput();
   });
@@ -138,6 +146,7 @@ function bindEvents() {
   el.downloadButton.addEventListener("click", downloadXml);
   el.copyButton.addEventListener("click", copyXml);
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
+  el.evaluateCasButton.addEventListener("click", evaluateCasLocally);
   el.downloadIncludeButton.addEventListener("click", downloadIncludeFile);
   el.saveVariablesSeparately.addEventListener("change", changeIncludeMode);
   el.requirePairs.addEventListener("change", () => {
@@ -186,8 +195,180 @@ function bindEvents() {
   });
   el.qvars.addEventListener("input", () => {
     state.qvars = [el.qvars.value];
+    markCasEvaluationStale();
     updateOutput();
   });
+}
+
+function setCasEvaluationStatus(message, kind = "") {
+  el.casEvaluationStatus.textContent = message;
+  el.casEvaluationStatus.className = `cas-evaluation-status${kind ? ` ${kind}` : ""}`;
+}
+
+function markCasEvaluationStale() {
+  if (state.casEvaluation.status === "idle") return;
+  state.casEvaluation.stale = true;
+  setCasEvaluationStatus("入力が変更されました。もう一度評価してください", "stale");
+  updateCasEvaluationBadges();
+}
+
+function problemVariableNames() {
+  const internal = /^(?:%__mcq|%__[CW](?:opt|msg)|%_MCQ)/;
+  return [...new Set(
+    splitMaximaStatements(stripMaximaComments(el.qvars.value))
+      .map(parseMaximaAssignment)
+      .filter(Boolean)
+      .map((item) => item.name)
+      .filter((name) => !internal.test(name))
+  )];
+}
+
+function choiceEvaluationId(index, lang = baseLang()) {
+  return `choice:${index}:${lang}`;
+}
+
+function casChoiceExpressions() {
+  const lang = baseLang();
+  return state.rows.flatMap((row, index) => {
+    const expression = String(row[`choice_${lang}`] || "").trim();
+    if ((row[`choice_type_${lang}`] || "text") !== "cas" || !expression) return [];
+    return [{ id: choiceEvaluationId(index, lang), expression }];
+  });
+}
+
+async function evaluateCasLocally() {
+  const expressions = casChoiceExpressions();
+  el.evaluateCasButton.disabled = true;
+  state.casEvaluation.status = "loading";
+  state.casEvaluation.stale = false;
+  setCasEvaluationStatus(`Maximaで評価中（変数 ${problemVariableNames().length}件・CAS式 ${expressions.length}件）`);
+  updateCasEvaluationBadges();
+  try {
+    const response = await fetch("/api/maxima/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        variables: el.qvars.value,
+        variableNames: problemVariableNames(),
+        expressions,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `評価APIエラー (${response.status})`);
+
+    state.casEvaluation.status = result.ok ? "ready" : "error";
+    state.casEvaluation.variables = Array.isArray(result.variables) ? result.variables : [];
+    state.casEvaluation.expressions = Object.fromEntries(
+      (Array.isArray(result.expressions) ? result.expressions : []).map((item) => [item.id, item])
+    );
+    state.casEvaluation.stale = false;
+    applyCasListExpressionResults();
+    renderCasVariables();
+    updateCasEvaluationBadges();
+
+    const evaluated = Object.values(state.casEvaluation.expressions).filter((item) => item.ok).length;
+    const failed = expressions.length - evaluated;
+    if (!result.ok) {
+      setCasEvaluationStatus(result.error || "問題変数を評価できませんでした", "error");
+    } else if (failed) {
+      setCasEvaluationStatus(`評価完了：変数 ${state.casEvaluation.variables.length}件・CAS式 ${evaluated}件成功／${failed}件失敗`, "error");
+    } else {
+      setCasEvaluationStatus(`評価完了：変数 ${state.casEvaluation.variables.length}件・CAS式 ${evaluated}件`);
+    }
+    updateOutput();
+  } catch (error) {
+    state.casEvaluation.status = "error";
+    state.casEvaluation.expressions = {};
+    setCasEvaluationStatus(
+      `${error.message}。この機能は python3 app/mcq-webapp/server.py で起動してください`,
+      "error"
+    );
+    updateCasEvaluationBadges();
+  } finally {
+    el.evaluateCasButton.disabled = false;
+  }
+}
+
+function applyCasListExpressionResults() {
+  const lang = baseLang();
+  state.rows.forEach((row, index) => {
+    if ((row[`choice_type_${lang}`] || "text") !== "cas") return;
+    const result = state.casEvaluation.expressions[choiceEvaluationId(index, lang)];
+    if (result?.ok) row[`choice_list_expr_${lang}`] = result.type === "list";
+  });
+}
+
+function renderCasVariables() {
+  el.casVariablesBody.replaceChildren();
+  el.casVariableCount.textContent = String(state.casEvaluation.variables.length);
+  if (!state.casEvaluation.variables.length) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = "表示できる代入変数がありません";
+    row.append(cell);
+    el.casVariablesBody.append(row);
+    return;
+  }
+  state.casEvaluation.variables.forEach((item) => {
+    const row = document.createElement("tr");
+    const values = item.ok
+      ? [item.name, item.type || "", item.length ?? "—", item.value || ""]
+      : [item.name, "エラー", "—", item.error || "評価できませんでした"];
+    values.forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = String(value);
+      cell.title = String(value);
+      row.append(cell);
+    });
+    el.casVariablesBody.append(row);
+  });
+}
+
+function casEvaluationBadge(ids, active = true) {
+  const badge = document.createElement("span");
+  badge.className = "cas-eval-badge";
+  badge.dataset.evalIds = ids.join(",");
+  badge.hidden = !active;
+  updateCasEvaluationBadge(badge);
+  return badge;
+}
+
+function updateCasEvaluationBadges() {
+  document.querySelectorAll(".cas-eval-badge").forEach(updateCasEvaluationBadge);
+}
+
+function updateCasEvaluationBadge(badge) {
+  badge.className = "cas-eval-badge";
+  if (state.casEvaluation.status === "loading") {
+    badge.textContent = "CAS評価中…";
+    return;
+  }
+  if (state.casEvaluation.stale) {
+    badge.textContent = "再評価が必要";
+    badge.classList.add("stale");
+    return;
+  }
+  const ids = String(badge.dataset.evalIds || "").split(",").filter(Boolean);
+  const results = ids.map((id) => state.casEvaluation.expressions[id]).filter(Boolean);
+  if (!results.length) {
+    badge.textContent = "CAS未評価";
+    return;
+  }
+  const failed = results.filter((item) => !item.ok);
+  if (failed.length) {
+    badge.textContent = `CAS評価エラー ${failed.length}件`;
+    badge.title = failed.map((item) => item.error || "評価できませんでした").join("\n");
+    badge.classList.add("error");
+    return;
+  }
+  const lengths = results.map((item) => item.type === "list" ? item.length : 1);
+  const total = lengths.reduce((sum, value) => sum + Number(value || 0), 0);
+  badge.textContent = lengths.length === 1
+    ? (results[0].type === "list" ? `CASリスト length: ${lengths[0]}` : `CAS値：1選択肢 (${results[0].type})`)
+    : `CAS lengths: ${lengths.join(" + ")} = ${total}`;
+  badge.title = results.map((item) => item.value || "").join("\n");
+  badge.classList.add("ok");
 }
 
 function toggleXmlPane() {
@@ -313,6 +494,7 @@ function changeBaseLanguage() {
   el.languageChecks[baseLang()].checked = true;
   updateBaseLanguageUi();
   updateQuestionLanguageVisibility();
+  markCasEvaluationStale();
   renderRows();
   markTranslationsStale("基本言語が変更されました");
   updateOutput();
@@ -435,6 +617,10 @@ function fixedChoicesTextarea(group) {
   editor.className = "typed-editor";
   const mode = valueTypeSelect(group.rows.find((row) => row[typeKey])?.[typeKey] || "text");
   const textarea = document.createElement("textarea");
+  const badge = casEvaluationBadge(
+    group.rows.map((row) => choiceEvaluationId(state.rows.indexOf(row))),
+    mode.value === "cas"
+  );
   const independent = languageIndependentToggle(group.rows, () => {
     copyLanguageIndependentChoices(group.rows);
     markTranslationsStale("選択肢の言語依存設定が変更されました");
@@ -444,6 +630,8 @@ function fixedChoicesTextarea(group) {
   textarea.value = group.rows.map((row) => row[`choice_${baseLang()}`] || "").join("\n");
   textarea.addEventListener("input", () => {
     setFixedGroupChoices(group, textarea.value.split(/\r?\n/));
+    badge.dataset.evalIds = group.rows.map((row) => choiceEvaluationId(state.rows.indexOf(row))).join(",");
+    markCasEvaluationStale();
     updateOptionLimit();
     updateOutput();
   });
@@ -453,11 +641,13 @@ function fixedChoicesTextarea(group) {
       row[`choice_list_expr_${baseLang()}`] = false;
     });
     editor.classList.toggle("cas", mode.value === "cas");
+    badge.hidden = mode.value !== "cas";
+    markCasEvaluationStale();
     markTranslationsStale("選択肢の入力形式が変更されました");
     updateOutput();
   });
   editor.classList.toggle("cas", mode.value === "cas");
-  editor.append(independent, mode, textarea);
+  editor.append(independent, mode, badge, textarea);
   return editor;
 }
 
@@ -557,6 +747,7 @@ function removeFixedGroupButton(group) {
   button.title = "パターンを削除";
   button.addEventListener("click", () => {
     state.rows = state.rows.filter((row) => !group.rows.includes(row));
+    markCasEvaluationStale();
     markTranslationsStale("選択肢パターンが削除されました");
     renderRows();
     updateOutput();
@@ -571,6 +762,7 @@ function addFixedPattern(truth) {
     [`choice_${baseLang()}`]: "",
     [`feedback_${baseLang()}`]: "",
   });
+  markCasEvaluationStale();
   markTranslationsStale("選択肢パターンが追加されました");
   renderRows();
   updateOutput();
@@ -613,7 +805,10 @@ function textareaInput(row, index, key) {
   textarea.value = row[key] ?? "";
   textarea.addEventListener("input", () => {
     state.rows[index][key] = textarea.value;
-    if (key.startsWith("choice_")) updateOptionLimit();
+    if (key.startsWith("choice_")) {
+      markCasEvaluationStale();
+      updateOptionLimit();
+    }
     markTranslationsStale("基本言語の選択肢が変更されました");
     updateOutput();
   });
@@ -627,10 +822,13 @@ function typedTextareaInput(row, index, field) {
   const modeKey = `${field}_type_${lang}`;
   const mode = valueTypeSelect(row[modeKey] || "text");
   const textarea = textareaInput(row, index, `${field}_${lang}`);
+  const badge = casEvaluationBadge([choiceEvaluationId(index, lang)], mode.value === "cas");
   mode.addEventListener("change", () => {
     state.rows[index][modeKey] = mode.value;
     state.rows[index][`${field}_list_expr_${lang}`] = false;
     editor.classList.toggle("cas", mode.value === "cas");
+    badge.hidden = mode.value !== "cas";
+    markCasEvaluationStale();
     markTranslationsStale("選択肢の入力形式が変更されました");
     updateOutput();
   });
@@ -647,7 +845,7 @@ function typedTextareaInput(row, index, field) {
       updateOutput();
     }));
   }
-  editor.append(mode, textarea);
+  editor.append(mode, badge, textarea);
   return editor;
 }
 
@@ -699,6 +897,7 @@ function removeButton(index) {
   button.title = "削除";
   button.addEventListener("click", () => {
     state.rows.splice(index, 1);
+    markCasEvaluationStale();
     markTranslationsStale("選択肢行が削除されました");
     renderRows();
     updateOutput();

@@ -8,11 +8,50 @@
 
 ## 起動
 
-リポジトリのルートで次を実行し、ブラウザで `http://localhost:4173/mcq-webapp/mcq-webapp/` を開きます。
+### macOS / Linux
+
+リポジトリのルートで次を実行し、ブラウザで `http://127.0.0.1:4173/` を開きます。
 
 ```sh
-python3 -m http.server 4173
+python3 app/mcq-webapp/server.py
 ```
+
+ローカルCAS評価には、`PATH`から実行できるMaximaが必要です。サーバーは既定で`127.0.0.1`だけに接続を受け付けます。
+
+### Windows
+
+1. [Python 3.10以降](https://www.python.org/downloads/windows/)をインストールします。
+2. [Windows版Maxima](https://maxima.sourceforge.io/download.html)の`win64.exe`インストーラーを使ってMaximaをインストールします。
+3. リポジトリ内の`scripts\windows\start-mcq-webapp.bat`をダブルクリックします。
+
+ランチャーはPythonとMaximaを確認してからサーバーを起動し、`http://127.0.0.1:4173/`をブラウザで開きます。終了するにはランチャーのウィンドウで`Ctrl+C`を押してください。Pythonパッケージの追加インストールは不要です。
+
+Maximaは、まず`PATH`、次にWindowsの一般的なインストール先から自動検出します。検出されない場合は、コマンドプロンプトで実際のパスを指定してからランチャーを実行してください。
+
+```bat
+set "MAXIMA_EXECUTABLE=C:\maxima-5.xx.x\bin\maxima.bat"
+scripts\windows\start-mcq-webapp.bat
+```
+
+macOS、Linuxでも`MAXIMA_EXECUTABLE`を利用できます。環境だけを診断する場合は、リポジトリのルートで次を実行します。
+
+```sh
+python3 app/mcq-webapp/server.py --check
+```
+
+## ローカルCAS評価
+
+「問題変数を評価」を押すと、ローカルMaximaが次のファイルを読み込んでから問題変数と選択肢のCAS式を評価します。
+
+- `ky_linear_algebra.mac`
+- `tex_library.mac`
+- `mcq_template_pre.mac`
+
+「定義済み変数」には、問題変数欄のトップレベル代入から抽出した変数名、型、リストの`length`、評価値が表示されます。選択肢がCAS式の場合は入力欄にも評価結果が表示され、リストなら`CASリスト length: 3`のように候補数を確認できます。評価結果がリストだったCAS式は、XML生成時にも候補リスト式として扱われます。
+
+問題変数または選択肢を変更すると評価結果は「再評価が必要」になります。ランダム変数を含む場合、表示される値と`length`はその評価時点の1回分です。
+
+このAPIは入力したMaximaコードをローカルで実行します。信頼できる問題コードだけを評価し、外部公開用サーバーとしては使用しないでください。
 
 ## CSV / XLSX 形式
 
