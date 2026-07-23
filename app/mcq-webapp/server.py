@@ -11,12 +11,15 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import time
 import webbrowser
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import unquote, urlparse
+from urllib.request import Request, urlopen
 
 
 WEB_ROOT = Path(__file__).resolve().parent
@@ -30,6 +33,7 @@ STACK_INCLUDE_RE = re.compile(
     re.IGNORECASE,
 )
 MARKER = "__MCQ_EVAL_71C59D__"
+SERVER_NAME = "stack-mcq-webapp"
 
 
 def find_maxima() -> str | None:
@@ -265,7 +269,23 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
 
+    def do_GET(self) -> None:  # noqa: N802
+        if self.path == "/api/server/status":
+            self.send_json(
+                HTTPStatus.OK,
+                {"ok": True, "service": SERVER_NAME, "pid": os.getpid()},
+            )
+            return
+        super().do_GET()
+
     def do_POST(self) -> None:  # noqa: N802
+        if self.path == "/api/server/shutdown":
+            if self.client_address[0] not in {"127.0.0.1", "::1"}:
+                self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "ローカル接続だけが停止できます"})
+                return
+            self.send_json(HTTPStatus.OK, {"ok": True})
+            threading.Thread(target=self.server.shutdown, daemon=True).start()
+            return
         if self.path != "/api/maxima/evaluate":
             self.send_error(HTTPStatus.NOT_FOUND)
             return
@@ -295,11 +315,57 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
 
+def local_server_url(host: str, port: int) -> str:
+    connect_host = "127.0.0.1" if host in {"0.0.0.0", "::"} else host
+    if ":" in connect_host and not connect_host.startswith("["):
+        connect_host = f"[{connect_host}]"
+    return f"http://{connect_host}:{port}"
+
+
+def running_server(url: str) -> dict[str, Any] | None:
+    try:
+        with urlopen(f"{url}/api/server/status", timeout=0.8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        return payload if payload.get("service") == SERVER_NAME else None
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError):
+        try:
+            with urlopen(f"{url}/", timeout=0.8) as response:
+                page = response.read(64 * 1024).decode("utf-8", errors="replace")
+            if "<title>STACK MCQ XML Generator</title>" in page:
+                return {"ok": True, "service": SERVER_NAME, "legacy": True}
+        except (HTTPError, URLError, TimeoutError, OSError):
+            pass
+        return None
+
+
+def reload_running_server(url: str) -> bool:
+    status = running_server(url)
+    if not status:
+        return False
+    if status.get("legacy"):
+        raise RuntimeError(
+            "旧バージョンのMCQ WebAppサーバーが動作中です。"
+            "起動したターミナルでCtrl+Cを押して終了した後、もう一度起動してください"
+        )
+    request = Request(f"{url}/api/server/shutdown", data=b"", method="POST")
+    try:
+        with urlopen(request, timeout=2) as response:
+            response.read()
+    except (HTTPError, URLError, TimeoutError, OSError) as exc:
+        raise RuntimeError(f"動作中のサーバーを停止できませんでした: {exc}") from exc
+    for _ in range(50):
+        if not running_server(url):
+            return True
+        time.sleep(0.1)
+    raise RuntimeError("動作中のサーバーの停止が5秒でタイムアウトしました")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="STACK MCQ WebアプリとローカルMaxima評価APIを起動します")
     parser.add_argument("--host", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=4173, help="port (default: 4173)")
     parser.add_argument("--check", action="store_true", help="Maxima評価環境を診断して終了します")
+    parser.add_argument("--reload", action="store_true", help="動作中のMCQ WebAppサーバーを停止して再起動します")
     parser.add_argument("--open-browser", action="store_true", help="起動後にブラウザを開きます")
     args = parser.parse_args()
     if args.check:
@@ -325,12 +391,37 @@ def main() -> None:
         except (OSError, RuntimeError) as exc:
             parser.exit(1, f"環境チェックに失敗しました: {exc}\n")
 
-    server = ThreadingHTTPServer((args.host, args.port), McqRequestHandler)
-    url = f"http://{args.host}:{args.port}/"
-    print(f"STACK MCQ XML Generator: {url}")
+    url = local_server_url(args.host, args.port)
+    if args.reload:
+        try:
+            if reload_running_server(url):
+                print("動作中のMCQ WebAppサーバーを停止しました。再起動します")
+        except RuntimeError as exc:
+            parser.exit(1, f"{exc}\n")
+    elif status := running_server(url):
+        print(f"STACK MCQ XML Generator はすでに動作しています: {url}/")
+        if status.get("legacy"):
+            print("旧バージョンを初回だけ再起動する場合は、起動したターミナルでCtrl+Cを押してから起動してください")
+        else:
+            print(f"再起動する場合: python3 app/mcq-webapp/server.py --port {args.port} --reload")
+        print("引数の一覧: python3 app/mcq-webapp/server.py --help")
+        return
+
+    try:
+        server = ThreadingHTTPServer((args.host, args.port), McqRequestHandler)
+    except OSError as exc:
+        if exc.errno in {48, 98, 10048}:
+            parser.exit(
+                1,
+                f"ポート {args.port} は別のプロセスが使用しています。\n"
+                f"別のポートで起動する場合: python3 app/mcq-webapp/server.py --port {args.port + 1}\n"
+                "引数の一覧: python3 app/mcq-webapp/server.py --help\n",
+            )
+        raise
+    print(f"STACK MCQ XML Generator: {url}/")
     print("終了するには Ctrl-C を押してください")
     if args.open_browser:
-        threading.Timer(0.5, webbrowser.open, args=(url,)).start()
+        threading.Timer(0.5, webbrowser.open, args=(f"{url}/",)).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

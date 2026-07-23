@@ -18,6 +18,18 @@ python3 app/mcq-webapp/server.py
 
 ローカルCAS評価には、`PATH`から実行できるMaximaが必要です。サーバーは既定で`127.0.0.1`だけに接続を受け付けます。
 
+同じポートですでにMCQ WebAppサーバーが動作している場合は、起動済みのURLと再起動方法が表示されます。動作中のサーバーを停止して再起動するには、次を実行します。
+
+```sh
+python3 app/mcq-webapp/server.py --reload
+```
+
+使用できる引数の一覧は、次のコマンドで確認できます。
+
+```sh
+python3 app/mcq-webapp/server.py --help
+```
+
 ### Windows
 
 1. [Python 3.10以降](https://www.python.org/downloads/windows/)をインストールします。
