@@ -10,7 +10,9 @@
 
 ### macOS / Linux
 
-リポジトリのルートで次を実行し、ブラウザで `http://127.0.0.1:4173/` を開きます。
+macOSでは、リポジトリ内の`scripts/macos/start-mcq-webapp.command`をダブルクリックします。初回にSTACKが未設定の場合は、既存のclone先を入力できます。何も入力せずEnterを押すと、STACKをGitHubからローカル領域へ自動取得します。
+
+ターミナルから起動する場合は、リポジトリのルートで次を実行し、ブラウザで`http://127.0.0.1:4173/`を開きます。
 
 ```sh
 python3 app/mcq-webapp/server.py
@@ -34,9 +36,10 @@ python3 app/mcq-webapp/server.py --help
 
 1. [Python 3.10以降](https://www.python.org/downloads/windows/)をインストールします。
 2. [Windows版Maxima](https://maxima.sourceforge.io/download.html)の`win64.exe`インストーラーを使ってMaximaをインストールします。
-3. リポジトリ内の`scripts\windows\start-mcq-webapp.bat`をダブルクリックします。
+3. Gitでこのリポジトリをcloneします。
+4. リポジトリ内の`scripts\windows\start-mcq-webapp.bat`をダブルクリックします。
 
-ランチャーはPythonとMaximaを確認してからサーバーを起動し、`http://127.0.0.1:4173/`をブラウザで開きます。終了するにはランチャーのウィンドウで`Ctrl+C`を押してください。Pythonパッケージの追加インストールは不要です。
+ランチャーはPython、Maxima、STACKコードを確認してからサーバーを起動し、`http://127.0.0.1:4173/`をブラウザで開きます。初回にSTACKが未設定の場合は、既存のclone先を入力できます。何も入力せずEnterを押すと、STACKをGitHubからローカル領域へ自動取得します。終了するにはランチャーのウィンドウで`Ctrl+C`を押してください。Pythonパッケージの追加インストールは不要です。
 
 Maximaは、まず`PATH`、次にWindowsの一般的なインストール先から自動検出します。検出されない場合は、コマンドプロンプトで実際のパスを指定してからランチャーを実行してください。
 
@@ -55,6 +58,14 @@ python3 app/mcq-webapp/server.py --check
 
 通常版MaximaだけではSTACK固有の関数を評価できません。STACK（`moodle-qtype_stack`）をgit cloneした場所、または`stackmaxima.mac`が置かれているSTACK Maximaディレクトリを一度設定すると、WebAppはその場所をローカル設定に保存し、リポジトリの`dump.txt`を読み込んだSTACK用Maxima実行ファイルを生成します。
 
+STACKを持っていない場合は、GitHubから自動取得して設定できます。
+
+```sh
+python3 app/mcq-webapp/server.py --install-stack
+```
+
+既存のSTACK cloneを使用する場合は、その場所を指定します。
+
 ```sh
 python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack
 ```
@@ -65,7 +76,13 @@ python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack
 python3 app/mcq-webapp/server.py --setup-stack /path/to/stack-maxima
 ```
 
-clone先と生成した実行ファイルの場所は`app/mcq-webapp/.local-config.json`に保存されます。生成物は`app/mcq-webapp/.local/`に置かれ、どちらもGitにはcommitされません。設定後は通常どおりサーバーを起動すると、STACK用Maximaが優先して使われます。
+clone先と生成した実行ファイルの場所は`app/mcq-webapp/.local-config.json`に保存されます。自動取得したSTACKと生成物は`app/mcq-webapp/.local/`に置かれ、いずれもGitにはcommitされません。設定後は通常どおりサーバーを起動すると、STACK用Maximaが優先して使われます。
+
+利用中のMaximaがダンプ生成に対応しない場合は、設定処理は失敗せず、評価のたびにSTACKコードを通常読込する方式へ自動的に切り替わります。明示的に通常読込を選ぶ場合は`--no-dump`を追加します。
+
+```sh
+python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack --no-dump
+```
 
 STACKを更新した場合や`dump.txt`を変更した場合は、保存済みのclone先を使って実行ファイルを再生成します。
 

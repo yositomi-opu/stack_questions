@@ -39,6 +39,7 @@ STACK_INCLUDE_RE = re.compile(
 )
 MARKER = "__MCQ_EVAL_71C59D__"
 SERVER_NAME = "stack-mcq-webapp"
+STACK_REPOSITORY = "https://github.com/maths/moodle-qtype_stack.git"
 
 
 def server_command(*arguments: str) -> str:
@@ -108,6 +109,17 @@ def find_maxima() -> str | None:
     if dumped and Path(dumped).is_file():
         return str(Path(dumped).resolve())
     return find_system_maxima()
+
+
+def configured_stack_maxima_directory() -> Path | None:
+    configured = load_local_config().get("stack_maxima_dir", "")
+    path = Path(configured).expanduser().resolve() if configured else None
+    return path if path and (path / "stackmaxima.mac").is_file() else None
+
+
+def using_dumped_maxima(maxima: str) -> bool:
+    dumped = load_local_config().get("dumped_maxima", "")
+    return bool(dumped and Path(dumped).is_file() and Path(maxima).resolve() == Path(dumped).resolve())
 
 
 def maxima_command(maxima: str, *arguments: str) -> list[str]:
@@ -189,6 +201,72 @@ def build_dumped_maxima(stack_path: Path) -> Path:
     return executable.resolve()
 
 
+def configure_stack(stack_path: Path, build_dump: bool = True) -> tuple[str, str]:
+    maxima_dir = stack_maxima_directory(stack_path)
+    if not maxima_dir:
+        raise ValueError("STACK Maximaディレクトリを特定できません")
+    config = load_local_config()
+    config.update(
+        {
+            "stack_path": str(stack_path),
+            "stack_maxima_dir": str(maxima_dir),
+            "stack_runtime_mode": "load",
+        }
+    )
+    if not build_dump:
+        config.pop("dumped_maxima", None)
+        save_local_config(config)
+        return "load", "STACKコードを評価時に通常読込します"
+    save_local_config(config)
+    try:
+        executable = build_dumped_maxima(stack_path)
+        config = load_local_config()
+        config["stack_runtime_mode"] = "dump"
+        save_local_config(config)
+        return "dump", f"STACK用Maximaを生成しました: {executable}"
+    except (OSError, RuntimeError) as exc:
+        config = load_local_config()
+        config.pop("dumped_maxima", None)
+        config["stack_runtime_mode"] = "load"
+        save_local_config(config)
+        return "load", f"ダンプ生成を利用できないため通常読込を使用します（{exc}）"
+
+
+def install_stack_repository() -> Path:
+    destination = LOCAL_DIR / "moodle-qtype_stack"
+    if stack_maxima_directory(destination):
+        return destination.resolve()
+    if destination.exists():
+        raise RuntimeError(
+            f"STACK取得先がすでに存在しますが、正しいcloneではありません: {destination}"
+        )
+    git = shutil.which("git")
+    if not git:
+        raise RuntimeError("gitが見つかりません。Gitをインストールするか、既存のSTACK clone先を指定してください")
+    LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+    temporary = LOCAL_DIR / f".moodle-qtype_stack.{os.getpid()}.new"
+    if temporary.exists():
+        shutil.rmtree(temporary)
+    try:
+        completed = subprocess.run(
+            [git, "clone", "--depth", "1", STACK_REPOSITORY, str(temporary)],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            timeout=300,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise RuntimeError("STACKのgit cloneが300秒でタイムアウトしました") from exc
+    if completed.returncode != 0 or not stack_maxima_directory(temporary):
+        diagnostics = (completed.stdout + "\n" + completed.stderr).strip()[-3000:]
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise RuntimeError(f"STACKをgit cloneできませんでした\n{diagnostics}")
+    temporary.replace(destination)
+    return destination.resolve()
+
+
 def resolve_stack_include(reference: str) -> Path:
     parsed = urlparse(reference)
     relative = unquote(parsed.path if parsed.scheme else reference).lstrip("/")
@@ -234,7 +312,36 @@ printf(true, "{end}~%")$
 """
 
 
-def build_maxima_program(variable_file: Path, variable_names: list[str], expressions: list[dict[str, str]]) -> str:
+def stack_runtime_program(maxima: str) -> list[str]:
+    if using_dumped_maxima(maxima):
+        return []
+    maxima_dir = configured_stack_maxima_directory()
+    if not maxima_dir:
+        return []
+    maxima_pattern = maxima_string(str(maxima_dir / "###.{mac,mc}"))
+    lisp_pattern = maxima_string(str(maxima_dir / "###.{lisp}"))
+    contrib_maxima_pattern = maxima_string(str(maxima_dir / "contrib" / "###.{mac,mc}"))
+    contrib_lisp_pattern = maxima_string(str(maxima_dir / "contrib" / "###.{lisp}"))
+    return [
+        f"file_search_maxima:append([{maxima_pattern}],file_search_maxima)$",
+        f"file_search_lisp:append([{lisp_pattern}],file_search_lisp)$",
+        f"file_search_maxima:append([{contrib_maxima_pattern}],file_search_maxima)$",
+        f"file_search_lisp:append([{contrib_lisp_pattern}],file_search_lisp)$",
+        f"batchload({maxima_string(str(maxima_dir / 'stackmaxima.mac'))})$",
+        "load(stats)$",
+        "load(distrib)$",
+        "load(descriptive)$",
+        "alias(stack_include_contrib,load)$",
+        "__mcq_stack_loaded:true$",
+    ]
+
+
+def build_maxima_program(
+    maxima: str,
+    variable_file: Path,
+    variable_names: list[str],
+    expressions: list[dict[str, str]],
+) -> str:
     libraries = [
         REPO_ROOT / "ky_linear_algebra.mac",
         REPO_ROOT / "tex_library.mac",
@@ -248,6 +355,7 @@ def build_maxima_program(variable_file: Path, variable_names: list[str], express
         '%__STACK_LANG:"ja"$',
         "%_MCQ_FLAGS:[true,true,false,false,false,true]$",
     ]
+    lines.extend(stack_runtime_program(maxima))
     lines.extend(f"batchload({maxima_string(str(path))})$" for path in libraries if path.is_file())
     lines.extend(
         [
@@ -334,7 +442,7 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
         program_file = temp / "evaluate.mac"
         variable_file.write_text(rewritten_variables + "\n", encoding="utf-8")
         program_file.write_text(
-            build_maxima_program(variable_file, variable_names, normalized_expressions),
+            build_maxima_program(maxima, variable_file, variable_names, normalized_expressions),
             encoding="utf-8",
         )
         try:
@@ -348,7 +456,7 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 cwd=REPO_ROOT,
                 text=True,
                 capture_output=True,
-                timeout=MAXIMA_TIMEOUT_SECONDS,
+                timeout=MAXIMA_TIMEOUT_SECONDS if using_dumped_maxima(maxima) else 45,
                 check=False,
             )
         except subprocess.TimeoutExpired as exc:
@@ -474,20 +582,30 @@ def main() -> None:
         help="STACKのgit clone先を保存し、dump.txtからSTACK用Maximaを生成します",
     )
     parser.add_argument(
+        "--install-stack",
+        action="store_true",
+        help="STACKをGitHubからローカル領域へcloneして設定します",
+    )
+    parser.add_argument(
         "--rebuild-stack-maxima",
         action="store_true",
         help="保存済みのSTACK clone先を使ってSTACK用Maximaを再生成します",
     )
+    parser.add_argument(
+        "--no-dump",
+        action="store_true",
+        help="STACK用実行ファイルを生成せず、評価時の通常読込を使用します",
+    )
     parser.add_argument("--reload", action="store_true", help="動作中のMCQ WebAppサーバーを停止して再起動します")
     parser.add_argument("--open-browser", action="store_true", help="起動後にブラウザを開きます")
     args = parser.parse_args()
-    if args.setup_stack or args.rebuild_stack_maxima:
+    if args.setup_stack or args.install_stack or args.rebuild_stack_maxima:
         try:
-            if args.setup_stack:
+            if args.install_stack:
+                print(f"STACKを取得しています: {STACK_REPOSITORY}")
+                stack_path = install_stack_repository()
+            elif args.setup_stack:
                 stack_path = validate_stack_path(args.setup_stack)
-                config = load_local_config()
-                config["stack_path"] = str(stack_path)
-                save_local_config(config)
             else:
                 configured_path = load_local_config().get("stack_path", "")
                 if not configured_path:
@@ -496,9 +614,11 @@ def main() -> None:
                     )
                 stack_path = validate_stack_path(configured_path)
             print(f"STACK: {stack_path}")
-            print("dump.txtを読み込み、STACK用Maximaを生成しています...")
-            executable = build_dumped_maxima(stack_path)
-            print(f"STACK用Maximaを生成しました: {executable}")
+            if not args.no_dump:
+                print("dump.txtを読み込み、STACK用Maximaを生成しています...")
+            mode, message = configure_stack(stack_path, build_dump=not args.no_dump)
+            print(message)
+            print(f"STACK読込方式: {'ダンプ済み実行ファイル' if mode == 'dump' else '評価時の通常読込'}")
             print(f"設定確認: {server_command('--check')}")
             return
         except (OSError, ValueError, RuntimeError) as exc:
@@ -532,6 +652,9 @@ def main() -> None:
             print(f"STACK code: {'OK' if stack_loaded else '未読込'}")
             if not stack_loaded:
                 print(f"設定方法: {server_command('--setup-stack', '/path/to/moodle-qtype_stack')}")
+                parser.exit(1, "STACKコードを読み込めないため、ローカルCAS評価の設定が未完了です\n")
+            mode = "ダンプ済み実行ファイル" if using_dumped_maxima(maxima) else "評価時の通常読込"
+            print(f"STACK読込方式: {mode}")
             print("MCQ WebAppのローカルCAS評価を利用できます")
             return
         except (OSError, RuntimeError) as exc:
