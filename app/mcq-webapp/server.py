@@ -24,6 +24,9 @@ from urllib.request import Request, urlopen
 
 WEB_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = WEB_ROOT.parents[1]
+LOCAL_CONFIG = WEB_ROOT / ".local-config.json"
+LOCAL_DIR = WEB_ROOT / ".local"
+DUMP_TEMPLATE = REPO_ROOT / "dump.txt"
 MAX_BODY_BYTES = 512 * 1024
 MAX_EXPRESSIONS = 300
 MAXIMA_TIMEOUT_SECONDS = 12
@@ -36,8 +39,23 @@ MARKER = "__MCQ_EVAL_71C59D__"
 SERVER_NAME = "stack-mcq-webapp"
 
 
-def find_maxima() -> str | None:
-    """Find the command-line Maxima executable on macOS, Linux, or Windows."""
+def load_local_config() -> dict[str, str]:
+    try:
+        payload = json.loads(LOCAL_CONFIG.read_text(encoding="utf-8"))
+        return {str(key): str(value) for key, value in payload.items()} if isinstance(payload, dict) else {}
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_local_config(config: dict[str, str]) -> None:
+    LOCAL_CONFIG.write_text(
+        json.dumps(config, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def find_system_maxima() -> str | None:
+    """Find the regular command-line Maxima executable."""
     configured = os.environ.get("MAXIMA_EXECUTABLE", "").strip().strip('"')
     if configured:
         configured_path = Path(configured).expanduser()
@@ -74,6 +92,17 @@ def find_maxima() -> str | None:
     return str(existing[0]) if existing else None
 
 
+def find_maxima() -> str | None:
+    """Prefer the STACK-enabled local Maxima image, then regular Maxima."""
+    configured = os.environ.get("MAXIMA_EXECUTABLE", "").strip()
+    if configured:
+        return find_system_maxima()
+    dumped = load_local_config().get("dumped_maxima", "")
+    if dumped and Path(dumped).is_file():
+        return str(Path(dumped).resolve())
+    return find_system_maxima()
+
+
 def maxima_command(maxima: str, *arguments: str) -> list[str]:
     """Build a subprocess command, including the Windows batch-file wrapper."""
     command = [maxima, *arguments]
@@ -84,6 +113,73 @@ def maxima_command(maxima: str, *arguments: str) -> list[str]:
 
 def maxima_string(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def stack_maxima_directory(stack_path: Path) -> Path | None:
+    candidates = [stack_path / "stack" / "maxima", stack_path]
+    return next((candidate for candidate in candidates if (candidate / "stackmaxima.mac").is_file()), None)
+
+
+def validate_stack_path(value: str) -> Path:
+    stack_path = Path(value).expanduser().resolve()
+    if not stack_maxima_directory(stack_path):
+        raise ValueError(
+            "STACKの場所が正しくありません"
+            f"（{stack_path}/stack/maxima/stackmaxima.mac または {stack_path}/stackmaxima.mac が見つかりません）"
+        )
+    return stack_path
+
+
+def build_dumped_maxima(stack_path: Path) -> Path:
+    maxima = find_system_maxima()
+    if not maxima:
+        raise RuntimeError("ダンプ生成に使用する通常版Maximaが見つかりません")
+    if not DUMP_TEMPLATE.is_file():
+        raise RuntimeError(f"ダンプ設定が見つかりません: {DUMP_TEMPLATE}")
+    dump_source = DUMP_TEMPLATE.read_text(encoding="utf-8")
+    maxima_dir = stack_maxima_directory(stack_path)
+    if not maxima_dir:
+        raise RuntimeError("STACK Maximaディレクトリを特定できません")
+    if "__STACK_MAXIMA_DIR__" not in dump_source or "__MAXIMA_OPTIMISED__" not in dump_source:
+        raise RuntimeError("dump.txtに必要な置換項目がありません")
+
+    LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+    executable = LOCAL_DIR / ("maxima-stack.exe" if os.name == "nt" else "maxima-stack")
+    generated = LOCAL_DIR / f".{executable.name}.{os.getpid()}.new"
+    generated.unlink(missing_ok=True)
+    configured_dump = (
+        dump_source
+        .replace("__STACK_MAXIMA_DIR__", str(maxima_dir).replace("\\", "\\\\"))
+        .replace("__MAXIMA_OPTIMISED__", str(generated).replace("\\", "\\\\"))
+    )
+    try:
+        completed = subprocess.run(
+            maxima_command(maxima, "--very-quiet"),
+            cwd=REPO_ROOT,
+            input=configured_dump,
+            text=True,
+            capture_output=True,
+            timeout=180,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError("STACK用Maximaの生成が180秒でタイムアウトしました") from exc
+    if completed.returncode != 0 or not generated.is_file():
+        diagnostics = (completed.stdout + "\n" + completed.stderr).strip()[-5000:]
+        generated.unlink(missing_ok=True)
+        raise RuntimeError(f"STACK用Maximaを生成できませんでした\n{diagnostics}")
+    generated.chmod(generated.stat().st_mode | 0o111)
+    generated.replace(executable)
+    config = load_local_config()
+    config.update(
+        {
+            "stack_path": str(stack_path),
+            "stack_maxima_dir": str(maxima_dir),
+            "dumped_maxima": str(executable.resolve()),
+        }
+    )
+    save_local_config(config)
+    return executable.resolve()
 
 
 def resolve_stack_include(reference: str) -> Path:
@@ -365,9 +461,42 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=4173, help="port (default: 4173)")
     parser.add_argument("--check", action="store_true", help="Maxima評価環境を診断して終了します")
+    parser.add_argument(
+        "--setup-stack",
+        metavar="PATH",
+        help="STACKのgit clone先を保存し、dump.txtからSTACK用Maximaを生成します",
+    )
+    parser.add_argument(
+        "--rebuild-stack-maxima",
+        action="store_true",
+        help="保存済みのSTACK clone先を使ってSTACK用Maximaを再生成します",
+    )
     parser.add_argument("--reload", action="store_true", help="動作中のMCQ WebAppサーバーを停止して再起動します")
     parser.add_argument("--open-browser", action="store_true", help="起動後にブラウザを開きます")
     args = parser.parse_args()
+    if args.setup_stack or args.rebuild_stack_maxima:
+        try:
+            if args.setup_stack:
+                stack_path = validate_stack_path(args.setup_stack)
+                config = load_local_config()
+                config["stack_path"] = str(stack_path)
+                save_local_config(config)
+            else:
+                configured_path = load_local_config().get("stack_path", "")
+                if not configured_path:
+                    raise ValueError(
+                        "STACKのclone先が未設定です。先に --setup-stack PATH を実行してください"
+                    )
+                stack_path = validate_stack_path(configured_path)
+            print(f"STACK: {stack_path}")
+            print("dump.txtを読み込み、STACK用Maximaを生成しています...")
+            executable = build_dumped_maxima(stack_path)
+            print(f"STACK用Maximaを生成しました: {executable}")
+            print("設定確認: python3 app/mcq-webapp/server.py --check")
+            return
+        except (OSError, ValueError, RuntimeError) as exc:
+            parser.exit(1, f"STACK用Maximaの設定に失敗しました: {exc}\n")
+
     if args.check:
         try:
             maxima = find_maxima()
@@ -379,13 +508,23 @@ def main() -> None:
                 {
                     "variables": "__mcq_environment_check:1$",
                     "variableNames": ["__mcq_environment_check"],
-                    "expressions": [],
+                    "expressions": [{"id": "stack-check", "expression": "__mcq_stack_loaded"}],
                 }
             )
             if not result.get("ok") or not result.get("variables", [{}])[0].get("ok"):
                 raise RuntimeError(result.get("error", "Maximaによるテスト評価に失敗しました"))
+            stack_result = result.get("expressions", [{}])[0]
+            stack_loaded = stack_result.get("ok") and stack_result.get("value") == "true"
+            config = load_local_config()
             print(f"Python: OK")
             print(f"Maxima: OK ({maxima})")
+            if config.get("stack_path"):
+                print(f"STACK path: {config['stack_path']}")
+            if config.get("stack_maxima_dir"):
+                print(f"STACK Maxima: {config['stack_maxima_dir']}")
+            print(f"STACK code: {'OK' if stack_loaded else '未読込'}")
+            if not stack_loaded:
+                print("設定方法: python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack")
             print("MCQ WebAppのローカルCAS評価を利用できます")
             return
         except (OSError, RuntimeError) as exc:

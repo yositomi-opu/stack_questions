@@ -51,6 +51,34 @@ macOS、Linuxでも`MAXIMA_EXECUTABLE`を利用できます。環境だけを診
 python3 app/mcq-webapp/server.py --check
 ```
 
+## STACK用Maximaの設定
+
+通常版MaximaだけではSTACK固有の関数を評価できません。STACK（`moodle-qtype_stack`）をgit cloneした場所、または`stackmaxima.mac`が置かれているSTACK Maximaディレクトリを一度設定すると、WebAppはその場所をローカル設定に保存し、リポジトリの`dump.txt`を読み込んだSTACK用Maxima実行ファイルを生成します。
+
+```sh
+python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack
+```
+
+`stackmaxima.mac`がディレクトリ直下にある構成も指定できます。
+
+```sh
+python3 app/mcq-webapp/server.py --setup-stack /path/to/stack-maxima
+```
+
+clone先と生成した実行ファイルの場所は`app/mcq-webapp/.local-config.json`に保存されます。生成物は`app/mcq-webapp/.local/`に置かれ、どちらもGitにはcommitされません。設定後は通常どおりサーバーを起動すると、STACK用Maximaが優先して使われます。
+
+STACKを更新した場合や`dump.txt`を変更した場合は、保存済みのclone先を使って実行ファイルを再生成します。
+
+```sh
+python3 app/mcq-webapp/server.py --rebuild-stack-maxima
+```
+
+設定とSTACKコードの読込状態は、次で確認できます。
+
+```sh
+python3 app/mcq-webapp/server.py --check
+```
+
 ## ローカルCAS評価
 
 「問題変数を評価」を押すと、ローカルMaximaが次のファイルを読み込んでから問題変数と選択肢のCAS式を評価します。

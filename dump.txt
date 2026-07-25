@@ -1,11 +1,11 @@
-/* Please adjust this to suit your environment. /root/build/moodle_qtype_stack is fine, too. */
-__stacklocation:"/Users/yositomi/work-build/moodle-qtype_stack";
+/* __STACK_MAXIMA_DIR__ is replaced by app/mcq-webapp/server.py --setup-stack. */
+__stackmaximadir:"__STACK_MAXIMA_DIR__";
 __stacktmplocation:"/tmp";
 
-file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/###.{mac,mc}")] , file_search_maxima);
-file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/###.{lisp}")] , file_search_lisp);
-file_search_maxima:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{mac,mc}")] , file_search_maxima);
-file_search_lisp:append( [sconcat(__stacklocation, "/stack/maxima/contrib/###.{lisp}")] , file_search_lisp);
+file_search_maxima:append( [sconcat(__stackmaximadir, "/###.{mac,mc}")] , file_search_maxima);
+file_search_lisp:append( [sconcat(__stackmaximadir, "/###.{lisp}")] , file_search_lisp);
+file_search_maxima:append( [sconcat(__stackmaximadir, "/contrib/###.{mac,mc}")] , file_search_maxima);
+file_search_lisp:append( [sconcat(__stackmaximadir, "/contrib/###.{lisp}")] , file_search_lisp);
 file_search_maxima:append( [sconcat(__stacktmplocation, "/###.{mac,mc}")] , file_search_maxima);
 file_search_lisp:append( [sconcat(__stacktmplocation, "/###.{lisp}")] , file_search_lisp);
 
@@ -17,4 +17,5 @@ load(stats)$
 load(distrib)$
 load(descriptive)$
 alias(stack_include_contrib, load)$
-:lisp (sb-ext:save-lisp-and-die "maxima-optimised.new" :toplevel (symbol-function 'cl-user::run) :executable t)
+__mcq_stack_loaded:true$
+:lisp (sb-ext:save-lisp-and-die "__MAXIMA_OPTIMISED__" :toplevel (symbol-function 'cl-user::run) :executable t)
