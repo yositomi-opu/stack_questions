@@ -1,5 +1,6 @@
 const LANGS = ["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv"];
 const DEFAULT_QUESTION_TEXT = "次のうち正しいものを __SELTYPE__.";
+const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
 const SAMPLE_ROWS = [
   { pattern: "01", truth: "C", choice_ja: "太陽は恒星である", feedback_ja: "太陽は自ら光を放つ恒星です。" },
   { pattern: "01", truth: "W", choice_ja: "太陽は惑星である", feedback_ja: "太陽は自ら光を放つ恒星です。" },
@@ -48,6 +49,12 @@ const el = {
   casVariablesPanel: document.querySelector("#casVariablesPanel"),
   casVariableCount: document.querySelector("#casVariableCount"),
   casVariablesBody: document.querySelector("#casVariablesBody"),
+  stackApiUrl: document.querySelector("#stackApiUrl"),
+  checkStackApiButton: document.querySelector("#checkStackApiButton"),
+  testStackQuestionButton: document.querySelector("#testStackQuestionButton"),
+  stackApiStatus: document.querySelector("#stackApiStatus"),
+  stackApiResultPanel: document.querySelector("#stackApiResultPanel"),
+  stackApiResult: document.querySelector("#stackApiResult"),
   saveVariablesSeparately: document.querySelector("#saveVariablesSeparately"),
   rowsBody: document.querySelector("#rowsBody"),
   pairedEditor: document.querySelector("#pairedEditor"),
@@ -91,11 +98,13 @@ init();
 
 async function init() {
   bindEvents();
+  el.stackApiUrl.value = localStorage.getItem(STACK_API_URL_STORAGE_KEY) || "";
   populateBaseLanguage();
   updateQuestionLanguageVisibility();
   updateCorrectCountControls();
   updateLayout();
   renderRows();
+  renderCasVariables();
   await loadTemplates();
   updateOutput();
 }
@@ -147,6 +156,11 @@ function bindEvents() {
   el.copyButton.addEventListener("click", copyXml);
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
   el.evaluateCasButton.addEventListener("click", evaluateCasLocally);
+  el.checkStackApiButton.addEventListener("click", checkStackApiConnection);
+  el.testStackQuestionButton.addEventListener("click", testGeneratedQuestionWithStack);
+  el.stackApiUrl.addEventListener("input", () => {
+    localStorage.setItem(STACK_API_URL_STORAGE_KEY, el.stackApiUrl.value.trim());
+  });
   el.downloadIncludeButton.addEventListener("click", downloadIncludeFile);
   el.saveVariablesSeparately.addEventListener("change", changeIncludeMode);
   el.requirePairs.addEventListener("change", () => {
@@ -205,6 +219,87 @@ function setCasEvaluationStatus(message, kind = "") {
   el.casEvaluationStatus.className = `cas-evaluation-status${kind ? ` ${kind}` : ""}`;
 }
 
+function setStackApiStatus(message, kind = "") {
+  el.stackApiStatus.textContent = message;
+  el.stackApiStatus.className = `stack-api-status${kind ? ` ${kind}` : ""}`;
+}
+
+function setStackApiBusy(busy) {
+  el.checkStackApiButton.disabled = busy;
+  el.testStackQuestionButton.disabled = busy;
+}
+
+async function callStackApi(path, payload) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = await response.json().catch(() => ({ error: "ローカルサーバーからJSON応答を取得できませんでした" }));
+  if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
+  return result;
+}
+
+function displayStackApiResult(result) {
+  el.stackApiResult.textContent = JSON.stringify(result, null, 2);
+  el.stackApiResultPanel.hidden = false;
+}
+
+async function checkStackApiConnection() {
+  const url = el.stackApiUrl.value.trim();
+  if (!url) {
+    setStackApiStatus("STACK APIのURLを入力してください", "error");
+    return;
+  }
+  setStackApiBusy(true);
+  setStackApiStatus("接続を確認しています…");
+  try {
+    const response = await callStackApi("/api/stack/check", { url });
+    el.stackApiUrl.value = response.url;
+    localStorage.setItem(STACK_API_URL_STORAGE_KEY, response.url);
+    setStackApiStatus(`${response.message}（${response.url}）`, "success");
+    displayStackApiResult(response.result);
+  } catch (error) {
+    setStackApiStatus(error.message, "error");
+  } finally {
+    setStackApiBusy(false);
+  }
+}
+
+async function testGeneratedQuestionWithStack() {
+  const url = el.stackApiUrl.value.trim();
+  if (!url) {
+    setStackApiStatus("STACK APIのURLを入力してください", "error");
+    return;
+  }
+  updateOutput();
+  if (!el.xmlOutput.value.trim() || el.xmlOutput.value.startsWith("<!-- XMLを生成できませんでした")) {
+    setStackApiStatus("先に問題XMLを生成できる状態にしてください", "error");
+    return;
+  }
+  setStackApiBusy(true);
+  setStackApiStatus("生成XMLをSTACK APIでテストしています…");
+  try {
+    const response = await callStackApi("/api/stack/test", {
+      url,
+      questionDefinition: el.xmlOutput.value,
+    });
+    el.stackApiUrl.value = response.url;
+    localStorage.setItem(STACK_API_URL_STORAGE_KEY, response.url);
+    const apiResult = response.result || {};
+    const messages = Array.isArray(apiResult.messages) ? apiResult.messages : [];
+    const summary = messages.length
+      ? `テスト完了（メッセージ ${messages.length}件）`
+      : "テスト完了";
+    setStackApiStatus(`${summary}（${response.url}/test）`, "success");
+    displayStackApiResult(apiResult);
+  } catch (error) {
+    setStackApiStatus(error.message, "error");
+  } finally {
+    setStackApiBusy(false);
+  }
+}
+
 function markCasEvaluationStale() {
   if (state.casEvaluation.status === "idle") return;
   state.casEvaluation.stale = true;
@@ -241,6 +336,7 @@ async function evaluateCasLocally() {
   el.evaluateCasButton.disabled = true;
   state.casEvaluation.status = "loading";
   state.casEvaluation.stale = false;
+  el.casVariablesPanel.open = true;
   setCasEvaluationStatus(`Maximaで評価中（変数 ${problemVariableNames().length}件・CAS式 ${expressions.length}件）`);
   updateCasEvaluationBadges();
   try {

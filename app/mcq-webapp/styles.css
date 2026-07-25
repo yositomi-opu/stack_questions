@@ -470,17 +470,95 @@ h3 {
   background: #f2f9f7;
 }
 
-.cas-evaluation-heading {
+.cas-evaluation-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.cas-evaluation-heading button {
+.cas-evaluation-controls button {
   min-height: 34px;
   padding: 0 11px;
   font-size: 12px;
+}
+
+.cas-evaluation-controls .cas-evaluation-status {
+  flex: 1 1 180px;
+}
+
+.cas-results-panel {
+  margin-top: 14px;
+}
+
+.stack-api-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #c6cfe0;
+  border-radius: 8px;
+  background: #f6f8fc;
+}
+
+.stack-api-help,
+.stack-api-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.stack-api-controls {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.stack-api-controls label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stack-api-controls input {
+  min-width: 0;
+}
+
+.stack-api-status.error {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.stack-api-status.success {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.stack-api-result-panel summary {
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stack-api-result-panel pre {
+  max-height: 280px;
+  margin: 8px 0 0;
+  padding: 10px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .stack-api-controls {
+    grid-template-columns: 1fr;
+  }
 }
 
 .cas-evaluation-status {

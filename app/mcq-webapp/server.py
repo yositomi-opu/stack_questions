@@ -20,7 +20,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 
@@ -32,6 +32,8 @@ DUMP_TEMPLATE = REPO_ROOT / "dump.txt"
 MAX_BODY_BYTES = 512 * 1024
 MAX_EXPRESSIONS = 300
 MAXIMA_TIMEOUT_SECONDS = 12
+STACK_API_TIMEOUT_SECONDS = 30
+MAX_STACK_API_RESPONSE_BYTES = 2 * 1024 * 1024
 NAME_RE = re.compile(r"^[%A-Za-z_][%A-Za-z0-9_]*$")
 STACK_INCLUDE_RE = re.compile(
     r"stack_include\s*\(\s*\"([^\"\r\n]+)\"\s*\)\s*[;$]?",
@@ -476,6 +478,83 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return response
 
 
+def normalize_stack_api_url(value: str) -> str:
+    """Normalize a STACK API base URL while retaining an optional path prefix."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("STACK APIのURLを入力してください")
+    parsed = urlparse(value.strip())
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("STACK APIのURLは http:// または https:// で指定してください")
+    if parsed.username or parsed.password:
+        raise ValueError("ユーザー名やパスワードを含むURLは使用できません")
+    path = parsed.path.rstrip("/")
+    for suffix in ("/stack.php", "/render", "/test", "/validate", "/grade", "/diff", "/download"):
+        if path.endswith(suffix):
+            path = path[: -len(suffix)]
+            break
+    return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
+
+
+def request_stack_api(base_url: str, route: str, payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    normalized_url = normalize_stack_api_url(base_url)
+    endpoint = f"{normalized_url}{route}"
+    request = Request(
+        endpoint,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=STACK_API_TIMEOUT_SECONDS) as response:
+            body = response.read(MAX_STACK_API_RESPONSE_BYTES + 1)
+    except HTTPError as exc:
+        body = exc.read(MAX_STACK_API_RESPONSE_BYTES + 1)
+        detail = body.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(f"STACK APIがHTTP {exc.code}を返しました: {detail[:1000]}") from exc
+    except (URLError, TimeoutError, OSError) as exc:
+        raise RuntimeError(f"STACK APIへ接続できません: {exc}") from exc
+    if len(body) > MAX_STACK_API_RESPONSE_BYTES:
+        raise RuntimeError("STACK APIの応答が大きすぎます")
+    try:
+        result = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("STACK APIからJSON以外の応答が返されました") from exc
+    if not isinstance(result, dict):
+        raise RuntimeError("STACK APIの応答形式を確認できませんでした")
+    return normalized_url, result
+
+
+def check_stack_api(base_url: str) -> dict[str, Any]:
+    sample_xml = '<quiz><question type="stack"></question></quiz>'
+    normalized_url, result = request_stack_api(
+        base_url,
+        "/render",
+        {
+            "questionDefinition": sample_xml,
+            "renderInputs": "",
+            "fullRender": [],
+            "readOnly": True,
+        },
+    )
+    return {
+        "ok": True,
+        "url": normalized_url,
+        "message": "STACK APIの /render からJSON応答を受信しました",
+        "result": result,
+    }
+
+
+def test_stack_question(base_url: str, question_definition: str) -> dict[str, Any]:
+    if not isinstance(question_definition, str) or not question_definition.strip():
+        raise ValueError("テストする問題XMLがありません")
+    normalized_url, result = request_stack_api(
+        base_url,
+        "/test",
+        {"questionDefinition": question_definition},
+    )
+    return {"ok": True, "url": normalized_url, "result": result}
+
+
 class McqRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
@@ -497,7 +576,7 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
             self.send_json(HTTPStatus.OK, {"ok": True})
             threading.Thread(target=self.server.shutdown, daemon=True).start()
             return
-        if self.path != "/api/maxima/evaluate":
+        if self.path not in {"/api/maxima/evaluate", "/api/stack/check", "/api/stack/test"}:
             self.send_error(HTTPStatus.NOT_FOUND)
             return
         try:
@@ -507,7 +586,15 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(payload, dict):
                 raise ValueError("JSONオブジェクトを送信してください")
-            result = evaluate_payload(payload)
+            if self.path == "/api/maxima/evaluate":
+                result = evaluate_payload(payload)
+            elif self.path == "/api/stack/check":
+                result = check_stack_api(payload.get("url", ""))
+            else:
+                result = test_stack_question(
+                    payload.get("url", ""),
+                    payload.get("questionDefinition", ""),
+                )
             self.send_json(HTTPStatus.OK, result)
         except (ValueError, json.JSONDecodeError) as exc:
             self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})

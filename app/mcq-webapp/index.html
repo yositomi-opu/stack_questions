@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260720-ui18">
+    <link rel="stylesheet" href="./styles.css?v=20260725-ui20">
     <script defer src="./vendor/xlsx.full.min.js"></script>
-    <script defer src="./app.js?v=20260720-ui23"></script>
+    <script defer src="./app.js?v=20260725-ui25"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -91,22 +91,10 @@
             <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 
-          <section class="cas-evaluation-panel" aria-labelledby="casEvaluationHeading">
-            <div class="cas-evaluation-heading">
-              <h2 id="casEvaluationHeading">ローカルCAS評価</h2>
-              <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
-            </div>
+          <div class="cas-evaluation-controls">
+            <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
             <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
-            <details id="casVariablesPanel" class="cas-variables-panel">
-              <summary>定義済み変数 <span id="casVariableCount">0</span></summary>
-              <div class="cas-variable-table-wrap">
-                <table class="cas-variable-table">
-                  <thead><tr><th>変数</th><th>型</th><th>length</th><th>評価値</th></tr></thead>
-                  <tbody id="casVariablesBody"></tbody>
-                </table>
-              </div>
-            </details>
-          </section>
+          </div>
 
           <section class="question-texts" aria-labelledby="questionTextsHeading">
             <h2 id="questionTextsHeading">問題文</h2>
@@ -201,6 +189,33 @@
               </div>
             </section>
           </div>
+          <section class="cas-evaluation-panel cas-results-panel" aria-labelledby="casEvaluationHeading">
+            <h2 id="casEvaluationHeading">問題変数評価結果</h2>
+            <details id="casVariablesPanel" class="cas-variables-panel" open>
+              <summary>定義済み変数 <span id="casVariableCount">0</span></summary>
+              <div class="cas-variable-table-wrap">
+                <table class="cas-variable-table">
+                  <thead><tr><th>変数</th><th>型</th><th>length</th><th>評価値</th></tr></thead>
+                  <tbody id="casVariablesBody"></tbody>
+                </table>
+              </div>
+            </details>
+          </section>
+          <section class="stack-api-panel" aria-labelledby="stackApiHeading">
+            <h2 id="stackApiHeading">STACK API 動作確認</h2>
+            <p class="stack-api-help">STACK APIのベースURLを入力すると、接続確認と現在の生成XMLのテストを実行できます。</p>
+            <div class="stack-api-controls">
+              <label for="stackApiUrl">API URL</label>
+              <input id="stackApiUrl" type="url" placeholder="http://localhost:3080" spellcheck="false">
+              <button id="checkStackApiButton" type="button" class="ghost">接続確認</button>
+              <button id="testStackQuestionButton" type="button" class="primary">生成XMLをテスト</button>
+            </div>
+            <p id="stackApiStatus" class="stack-api-status" aria-live="polite">未確認</p>
+            <details id="stackApiResultPanel" class="stack-api-result-panel" hidden>
+              <summary>API応答の詳細</summary>
+              <pre id="stackApiResult"></pre>
+            </details>
+          </section>
           <p id="statusLine" class="status" aria-live="polite"></p>
         </section>
 
