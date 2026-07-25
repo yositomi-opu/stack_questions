@@ -7,8 +7,10 @@ import argparse
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -37,6 +39,11 @@ STACK_INCLUDE_RE = re.compile(
 )
 MARKER = "__MCQ_EVAL_71C59D__"
 SERVER_NAME = "stack-mcq-webapp"
+
+
+def server_command(*arguments: str) -> str:
+    command = [sys.executable, str(Path(__file__).resolve()), *arguments]
+    return subprocess.list2cmdline(command) if os.name == "nt" else shlex.join(command)
 
 
 def load_local_config() -> dict[str, str]:
@@ -492,7 +499,7 @@ def main() -> None:
             print("dump.txtを読み込み、STACK用Maximaを生成しています...")
             executable = build_dumped_maxima(stack_path)
             print(f"STACK用Maximaを生成しました: {executable}")
-            print("設定確認: python3 app/mcq-webapp/server.py --check")
+            print(f"設定確認: {server_command('--check')}")
             return
         except (OSError, ValueError, RuntimeError) as exc:
             parser.exit(1, f"STACK用Maximaの設定に失敗しました: {exc}\n")
@@ -524,7 +531,7 @@ def main() -> None:
                 print(f"STACK Maxima: {config['stack_maxima_dir']}")
             print(f"STACK code: {'OK' if stack_loaded else '未読込'}")
             if not stack_loaded:
-                print("設定方法: python3 app/mcq-webapp/server.py --setup-stack /path/to/moodle-qtype_stack")
+                print(f"設定方法: {server_command('--setup-stack', '/path/to/moodle-qtype_stack')}")
             print("MCQ WebAppのローカルCAS評価を利用できます")
             return
         except (OSError, RuntimeError) as exc:
@@ -542,8 +549,8 @@ def main() -> None:
         if status.get("legacy"):
             print("旧バージョンを初回だけ再起動する場合は、起動したターミナルでCtrl+Cを押してから起動してください")
         else:
-            print(f"再起動する場合: python3 app/mcq-webapp/server.py --port {args.port} --reload")
-        print("引数の一覧: python3 app/mcq-webapp/server.py --help")
+            print(f"再起動する場合: {server_command('--port', str(args.port), '--reload')}")
+        print(f"引数の一覧: {server_command('--help')}")
         return
 
     try:
@@ -553,8 +560,8 @@ def main() -> None:
             parser.exit(
                 1,
                 f"ポート {args.port} は別のプロセスが使用しています。\n"
-                f"別のポートで起動する場合: python3 app/mcq-webapp/server.py --port {args.port + 1}\n"
-                "引数の一覧: python3 app/mcq-webapp/server.py --help\n",
+                f"別のポートで起動する場合: {server_command('--port', str(args.port + 1))}\n"
+                f"引数の一覧: {server_command('--help')}\n",
             )
         raise
     print(f"STACK MCQ XML Generator: {url}/")
