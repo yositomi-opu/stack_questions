@@ -6,11 +6,38 @@
 
 選択肢数の最大値は、入力済みのパターン数に合わせて自動調整されます。生成XML欄は縦の「XML」タブで開閉でき、境界線をドラッグして幅を調整できます。「表示設定」ではXML列の表示・非表示と、設定欄・選択肢欄の幅も変更できます。
 
+## 初めて使う場合
+
+Git、Python 3.10以降、Maximaをインストールしてから、このリポジトリをcloneします。
+
+```sh
+git clone https://github.com/yositomi-opu/stack_questions.git
+cd stack_questions
+```
+
+その後、macOSでは`scripts/macos/start-mcq-webapp.command`、Windowsでは`scripts\windows\start-mcq-webapp.bat`を起動します。
+
+初回はSTACKコードの場所を尋ねられます。
+
+- STACKをまだ持っていない場合：何も入力せずEnterを押します。`app/mcq-webapp/.local/`へ自動取得します。
+- すでにSTACKをcloneしている場合：`moodle-qtype_stack`のclone先を入力します。
+- `stackmaxima.mac`を直接置いたフォルダーがある場合：そのフォルダーを入力します。
+
+セットアップが完了するとブラウザが開きます。開かない場合は、[http://127.0.0.1:4173/](http://127.0.0.1:4173/)を手動で開いてください。
+
+画面では、問題変数・問題文・選択肢を入力し、「問題変数を評価」でSTACK/Maximaの評価結果を確認してから「XML保存」でファイルを保存します。
+
 ## 起動
 
 ### macOS / Linux
 
 macOSでは、リポジトリ内の`scripts/macos/start-mcq-webapp.command`をダブルクリックします。初回にSTACKが未設定の場合は、既存のclone先を入力できます。何も入力せずEnterを押すと、STACKをGitHubからローカル領域へ自動取得します。
+
+macOSで初回のダブルクリックがセキュリティ設定により拒否された場合は、FinderでファイルをControlキーを押しながらクリックして「開く」を選択するか、ターミナルから次を実行します。
+
+```sh
+./scripts/macos/start-mcq-webapp.command
+```
 
 ターミナルから起動する場合は、リポジトリのルートで次を実行し、ブラウザで`http://127.0.0.1:4173/`を開きます。
 
@@ -95,6 +122,21 @@ python3 app/mcq-webapp/server.py --rebuild-stack-maxima
 ```sh
 python3 app/mcq-webapp/server.py --check
 ```
+
+正常な場合は、出力に`STACK code: OK`と、使用中の`STACK読込方式`が表示されます。Windowsのコマンドプロンプトから手動確認する場合は、次を使用できます。
+
+```bat
+py -3 app\mcq-webapp\server.py --check
+```
+
+## 困ったとき
+
+- `server.py: No such file or directory`：リポジトリのルートへ移動してから実行するか、OS別ランチャーを使用してください。
+- `Address already in use`：同じポートのサーバーがすでに動作しています。ブラウザで`http://127.0.0.1:4173/`を開くか、`--reload`で再起動してください。
+- `STACK code: 未読込`：OS別ランチャーを再実行するか、`--install-stack`または`--setup-stack`で設定してください。
+- `rand(...)`などが式のまま表示される：`--check`で`STACK code: OK`を確認し、サーバーを`--reload`で再起動してからブラウザを再読み込みしてください。
+- ダンプ生成に失敗する：通常は評価時の通常読込へ自動的に切り替わります。手動設定では`--no-dump`を追加できます。
+- WindowsでMaximaが見つからない：`MAXIMA_EXECUTABLE`に`maxima.bat`または`maxima.exe`の実際のパスを設定してください。
 
 ## ローカルCAS評価
 
