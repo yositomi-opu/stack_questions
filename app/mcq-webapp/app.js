@@ -1536,6 +1536,9 @@ async function readSelectedXml(event) {
     const summary = importXmlText(xmlText, file.name, includeSource);
     const includeNote = includeSource ? `／include: ${includeSource.path}` : "";
     setStatus(`${file.name} を読み込みました（基本言語: ${summary.baseLanguage}／言語: ${summary.languages.join(", ")}／パターン: ${summary.patterns}${includeNote}）`);
+    if (includeSource && (problemVariableNames().length || casChoiceExpressions().length)) {
+      await evaluateCasLocally();
+    }
   } catch (error) {
     setStatus(`XMLを読み込めません: ${error.message}`, true);
   } finally {
@@ -1553,7 +1556,7 @@ async function resolveMainInclude(xmlText) {
   const url = match[1];
   const path = includePathFromUrl(url);
   const candidates = [];
-  if (path) candidates.push(new URL(`../../${path}`, window.location.href).href);
+  if (path) candidates.push(`/api/repository/include?path=${encodeURIComponent(path)}`);
   candidates.push(url);
   let lastError = "";
   for (const candidate of [...new Set(candidates)]) {

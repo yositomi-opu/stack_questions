@@ -152,6 +152,8 @@ py -3 app\mcq-webapp\server.py --check
 
 このAPIは入力したMaximaコードをローカルで実行します。信頼できる問題コードだけを評価し、外部公開用サーバーとしては使用しないでください。
 
+既存XMLの問題変数が`stack_include`でリポジトリ内の`.txt`または`.mac`を参照している場合、WebAppはローカルサーバー経由でそのファイルを優先して読み込みます。外部公開URLへ接続できない環境でも、clone済みのincludeファイルから問題文と選択肢を復元できます。CAS式を含むXMLは、読込後に問題変数と選択肢を自動評価します。
+
 ## STACK APIによる動作確認
 
 画面下部の「STACK API 動作確認」に、STACK APIのベースURL（例: `http://localhost:3080`）を入力します。

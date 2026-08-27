@@ -20,7 +20,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import unquote, urlparse, urlunparse
+from urllib.parse import parse_qs, unquote, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 
@@ -34,6 +34,8 @@ MAX_EXPRESSIONS = 300
 MAXIMA_TIMEOUT_SECONDS = 12
 STACK_API_TIMEOUT_SECONDS = 30
 MAX_STACK_API_RESPONSE_BYTES = 2 * 1024 * 1024
+MAX_REPOSITORY_FILE_BYTES = 2 * 1024 * 1024
+REPOSITORY_INCLUDE_SUFFIXES = {".txt", ".mac", ".mc"}
 NAME_RE = re.compile(r"^[%A-Za-z_][%A-Za-z0-9_]*$")
 STACK_INCLUDE_RE = re.compile(
     r"stack_include\s*\(\s*\"([^\"\r\n]+)\"\s*\)\s*[;$]?",
@@ -555,16 +557,54 @@ def test_stack_question(base_url: str, question_definition: str) -> dict[str, An
     return {"ok": True, "url": normalized_url, "result": result}
 
 
+def read_repository_include(raw_path: str) -> tuple[str, bytes]:
+    path_text = unquote(raw_path).replace("\\", "/").lstrip("/")
+    relative = Path(path_text)
+    if (
+        not path_text
+        or relative.is_absolute()
+        or any(part in {"", ".", ".."} or part.startswith(".") for part in relative.parts)
+        or relative.suffix.lower() not in REPOSITORY_INCLUDE_SUFFIXES
+    ):
+        raise ValueError("includeファイルのパスが不正です")
+    target = (REPO_ROOT / relative).resolve()
+    try:
+        target.relative_to(REPO_ROOT)
+    except ValueError as exc:
+        raise ValueError("リポジトリ外のファイルは取得できません") from exc
+    if not target.is_file():
+        raise FileNotFoundError(path_text)
+    if target.stat().st_size > MAX_REPOSITORY_FILE_BYTES:
+        raise ValueError("includeファイルが大きすぎます")
+    return path_text, target.read_bytes()
+
+
 class McqRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
 
     def do_GET(self) -> None:  # noqa: N802
-        if self.path == "/api/server/status":
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/server/status":
             self.send_json(
                 HTTPStatus.OK,
                 {"ok": True, "service": SERVER_NAME, "pid": os.getpid()},
             )
+            return
+        if parsed.path == "/api/repository/include":
+            try:
+                path = parse_qs(parsed.query).get("path", [""])[0]
+                _filename, body = read_repository_include(path)
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+            except ValueError as exc:
+                self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            except FileNotFoundError:
+                self.send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "includeファイルが見つかりません"})
             return
         super().do_GET()
 

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STACK MCQ XML Generator 仕様書</title>
+  <style>
+    :root {
+      --navy:#17324d; --blue:#1f6fa8; --teal:#14806f; --ink:#243444;
+      --muted:#607182; --line:#d3dee7; --paper:#fff; --pale:#eef5fa;
+      --green:#eef8f4; --warn:#fff6df; --code:#f6f8fa;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      margin:0; color:var(--ink); background:#edf1f5;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN",
+        "Yu Gothic",Meiryo,sans-serif; line-height:1.72;
+    }
+    .page { max-width:1120px; margin:28px auto; background:var(--paper); box-shadow:0 8px 30px #22384d1c; }
+    header { padding:54px 64px 42px; color:white; background:linear-gradient(128deg,var(--navy),#245b82 68%,var(--teal)); }
+    .eyebrow { margin:0 0 8px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; opacity:.8; }
+    h1 { margin:0; font-size:36px; line-height:1.25; }
+    .lead { max-width:760px; margin:16px 0 0; font-size:17px; opacity:.9; }
+    .meta { display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:28px; font-size:13px; opacity:.86; }
+    main { padding:42px 64px 70px; }
+    nav { padding:22px 26px; border:1px solid var(--line); border-radius:10px; background:var(--pale); }
+    nav h2 { margin-top:0; border:0; }
+    nav ol { columns:2; margin-bottom:0; }
+    nav a { color:var(--blue); text-decoration:none; }
+    section { margin-top:50px; scroll-margin-top:20px; }
+    h2 { margin:0 0 20px; padding-bottom:8px; color:var(--navy); border-bottom:2px solid var(--blue); font-size:24px; }
+    h3 { margin:28px 0 10px; color:var(--blue); font-size:17px; }
+    h4 { margin:20px 0 8px; color:var(--navy); font-size:14px; }
+    p { margin:8px 0 14px; }
+    ul,ol { padding-left:1.4em; }
+    li { margin:5px 0; }
+    code { padding:.12em .35em; border-radius:4px; background:var(--code); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.92em; }
+    pre { overflow:auto; padding:16px 18px; border:1px solid var(--line); border-radius:8px; background:var(--code); line-height:1.5; font-size:12px; }
+    table { width:100%; border-collapse:collapse; margin:14px 0 24px; font-size:14px; }
+    th,td { padding:10px 12px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:white; background:var(--navy); }
+    tr:nth-child(even) td { background:#f8fafc; }
+    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .card { padding:18px; border:1px solid var(--line); border-radius:9px; background:#fff; }
+    .card strong { display:block; margin-bottom:7px; color:var(--blue); }
+    .note,.warning { margin:18px 0; padding:14px 17px; border-left:5px solid var(--teal); background:var(--green); }
+    .warning { border-color:#c68a18; background:var(--warn); }
+    .flow { display:flex; align-items:stretch; gap:8px; margin:18px 0; }
+    .flow span { flex:1; padding:13px 8px; border:1px solid var(--line); border-radius:7px; background:var(--pale); text-align:center; font-weight:700; }
+    .flow i { align-self:center; color:var(--blue); font-style:normal; font-weight:bold; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; color:#fff; background:var(--teal); font-size:11px; font-weight:700; }
+    footer { padding:20px 64px; color:var(--muted); border-top:1px solid var(--line); font-size:12px; }
+    @media (max-width:760px) {
+      .page { margin:0; box-shadow:none; } header,main,footer { padding-left:24px; padding-right:24px; }
+      nav ol { columns:1; } .cards { grid-template-columns:1fr; } .flow { flex-direction:column; } .flow i { transform:rotate(90deg); }
+      h1 { font-size:29px; }
+    }
+    @media print {
+      body { background:white; font-size:10pt; } .page { max-width:none; margin:0; box-shadow:none; }
+      header { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+      main { padding:28px 42px; } section { break-before:page; margin-top:0; }
+      nav { break-before:auto; } table,pre,.card,.note,.warning { break-inside:avoid; }
+      a { color:inherit; text-decoration:none; } footer { display:none; }
+    }
+  </style>
+</head>
+<body>
+<article class="page">
+  <header>
+    <p class="eyebrow">Functional &amp; Technical Specification</p>
+    <h1>STACK MCQ XML Generator 仕様書</h1>
+    <p class="lead">CSV / XLSX・画面入力からSTACK用多肢選択問題XMLを生成し、ローカルCASおよびSTACK APIで検証するローカルWebアプリケーション。</p>
+    <div class="meta">
+      <span>文書版: 1.0</span><span>作成日: 2026-07-26</span>
+      <span>対象: <code>app/mcq-webapp</code></span><span>基準コミット: <code>31e8ccf</code></span>
+    </div>
+  </header>
+  <main>
+    <nav aria-label="目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#overview">概要</a></li><li><a href="#scope">対象範囲と前提</a></li>
+        <li><a href="#architecture">構成</a></li><li><a href="#ui">画面仕様</a></li>
+        <li><a href="#editing">問題編集仕様</a></li><li><a href="#io">入出力仕様</a></li>
+        <li><a href="#generation">XML生成・ランダム化</a></li><li><a href="#cas">ローカルCAS評価</a></li>
+        <li><a href="#stack-api">STACK API連携</a></li><li><a href="#startup">セットアップ・起動</a></li>
+        <li><a href="#api">ローカルAPI</a></li><li><a href="#quality">制約・品質・セキュリティ</a></li>
+        <li><a href="#acceptance">受入確認</a></li><li><a href="#history">開発履歴</a></li>
+      </ol>
+    </nav>
+
+    <section id="overview">
+      <h2>1. 概要</h2>
+      <p>本アプリは、リポジトリ内のSTACK問題テンプレート <code>001.MCQ-rb.xml</code> / <code>001.MCQ-cb.xml</code> を基礎として、Radio Button形式またはCheckbox形式の問題XMLを作成する。サーバーはPython標準ライブラリで静的ファイルとローカルAPIを提供し、画面処理はHTML/CSS/JavaScriptで完結する。</p>
+      <div class="cards">
+        <div class="card"><strong>作成</strong>問題文、問題変数、選択肢、フィードバック、正解数、言語を画面で編集する。</div>
+        <div class="card"><strong>変換</strong>CSV / TSV / XLSX / 既存XMLを読み込み、編集可能な状態へ復元してXMLを生成する。</div>
+        <div class="card"><strong>検証</strong>ローカルSTACK/Maximaで式を評価し、任意のSTACK APIで生成XMLをテストする。</div>
+      </div>
+      <h3>主な利用者</h3>
+      <ul>
+        <li>STACK問題を作成・編集する教員、教材開発者。</li>
+        <li>問題パターンや行列サイズなどを変えながら、多数の関連問題を作成する利用者。</li>
+        <li>CSV/XLSXで選択肢データを管理し、Moodle XMLへ変換する利用者。</li>
+      </ul>
+    </section>
+
+    <section id="scope">
+      <h2>2. 対象範囲と前提</h2>
+      <table>
+        <tr><th>区分</th><th>仕様</th></tr>
+        <tr><td>実行形態</td><td>ローカルWebアプリ。既定URLは <code>http://127.0.0.1:4173/</code>。</td></tr>
+        <tr><td>対応OS</td><td>macOS、Windows。LinuxはPythonサーバーの手動起動を想定。</td></tr>
+        <tr><td>必須環境</td><td>Git、Python 3.10以降、Maxima。ローカルCAS利用時はSTACKコード。</td></tr>
+        <tr><td>追加Python依存</td><td>なし。サーバーはPython標準ライブラリで動作する。</td></tr>
+        <tr><td>ブラウザ側依存</td><td>同梱SheetJSをXLSX読込に利用。モダンブラウザを前提とする。</td></tr>
+        <tr><td>対象外</td><td>ユーザー認証、共有編集、クラウド保存、Moodleへの直接登録、翻訳APIの自動呼出し。</td></tr>
+      </table>
+      <div class="warning"><strong>信頼境界:</strong> ローカルCAS評価は入力されたMaximaコードを実行する。信頼できる問題コードだけを扱い、外部公開サーバーとして使用しない。</div>
+    </section>
+
+    <section id="architecture">
+      <h2>3. システム構成</h2>
+      <div class="flow">
+        <span>ブラウザUI<br><small>index.html / app.js / styles.css</small></span><i>→</i>
+        <span>Pythonローカルサーバー<br><small>server.py</small></span><i>→</i>
+        <span>Maxima / STACK<br><small>ローカル評価</small></span>
+      </div>
+      <div class="flow">
+        <span>生成XML</span><i>→</i><span>Pythonプロキシ</span><i>→</i><span>任意のSTACK API<br><small>/render・/test</small></span>
+      </div>
+      <table>
+        <tr><th>コンポーネント</th><th>責務</th></tr>
+        <tr><td><code>index.html</code></td><td>入力欄、編集表、評価結果、STACK API確認欄、XMLペインを定義。</td></tr>
+        <tr><td><code>app.js</code></td><td>状態管理、ファイル解析、画面描画、XML生成、翻訳補助、CAS/API呼出し、保存処理。</td></tr>
+        <tr><td><code>styles.css</code></td><td>3ペインUI、リサイズ、レスポンシブ表示、評価結果・状態表示。</td></tr>
+        <tr><td><code>server.py</code></td><td>静的配信、サーバーライフサイクル、STACK設定、Maxima実行、STACK APIプロキシ。</td></tr>
+        <tr><td><code>templates/*.xml</code></td><td>Radio / Checkbox問題の生成テンプレート。</td></tr>
+        <tr><td>OS別ランチャー</td><td>環境診断、初回STACK設定、サーバー起動、ブラウザ表示。</td></tr>
+      </table>
+    </section>
+
+    <section id="ui">
+      <h2>4. 画面仕様</h2>
+      <table>
+        <tr><th>領域</th><th>主な項目・動作</th></tr>
+        <tr><td>上部操作</td><td>CAS検証用コピー、include保存、CSV見本、CSV保存、XML保存。</td></tr>
+        <tr><td>タイトル・読込</td><td>問題ID、CSV/XLSX読込、XML読込、表示設定。</td></tr>
+        <tr><td>左欄</td><td>多言語設定、問題変数の別ファイル化、問題変数、CAS評価ボタン、言語別問題文。</td></tr>
+        <tr><td>中央欄</td><td>Radio/Checkbox、選択肢数、正解数、ランダム正解数、真偽ペア設定、選択肢編集。</td></tr>
+        <tr><td>評価結果</td><td>選択肢リストの下に問題変数の変数名・型・length・評価値を表示。評価時に自動更新・展開。</td></tr>
+        <tr><td>STACK API</td><td>API URL、接続確認、生成XMLテスト、JSON応答詳細。</td></tr>
+        <tr><td>XMLペイン</td><td>生成結果を常時同期。縦タブで開閉し、境界ドラッグと表示設定で幅・表示を変更。</td></tr>
+      </table>
+      <h3>表示設定</h3>
+      <ul>
+        <li>XMLペインの表示・非表示を切替可能。</li>
+        <li>左側設定欄と選択肢欄の幅をレンジ入力で調整可能。</li>
+        <li>選択肢数の上限は入力済みパターン数に応じて自動調整する。</li>
+      </ul>
+    </section>
+
+    <section id="editing">
+      <h2>5. 問題編集仕様</h2>
+      <h3>5.1 問題形式</h3>
+      <ul>
+        <li><strong>Radio:</strong> 単一選択用テンプレートを使用する。</li>
+        <li><strong>Checkbox:</strong> 複数選択用テンプレートを使用する。</li>
+      </ul>
+      <h3>5.2 選択肢データモデル</h3>
+      <p>選択肢はパターン番号、真偽（C/W）、言語別選択肢、フィードバック、値種別（text/CAS）を保持する。同一パターン・真偽を複数行登録した場合は候補リストとして扱う。</p>
+      <h3>5.3 真偽ペアモード</h3>
+      <table>
+        <tr><th>設定</th><th>動作</th></tr>
+        <tr><td>有効（既定）</td><td>各パターンにC/W双方を要求し、同一問題内では一方だけを採用する。フィードバックはパターン単位で共有。</td></tr>
+        <tr><td>無効</td><td>正解・誤答を独立表で管理する。各パターンは候補リストとフィードバック1件を持つ。</td></tr>
+      </table>
+      <h3>5.4 多言語</h3>
+      <p>対応言語は <code>en, ja, fr, it, de, pt, zh, ko, ru, sv</code>。基本言語を1つ選び、XMLへ展開する言語を複数選択する。最低1言語を必須とする。</p>
+      <p>「多言語展開」は翻訳依頼JSONを生成する。利用者がChatGPT等へ貼り付け、返却JSONを画面へ戻して反映する。入力変更後は翻訳結果を古い状態として扱い、再展開を要求する。</p>
+    </section>
+
+    <section id="io">
+      <h2>6. 入出力仕様</h2>
+      <h3>6.1 CSV / TSV / XLSX入力</h3>
+      <p>ヘッダーなしのレコード形式。XLSXは先頭シートを読み込む。</p>
+      <table>
+        <tr><th>レコード</th><th>用途</th><th>主な項目</th></tr>
+        <tr><td><code>config</code></td><td>問題全体設定</td><td>question_id, mode, num_options, num_correct, random_correct, correct_counts, require_pairs</td></tr>
+        <tr><td><code>qtextL</code></td><td>言語別問題文</td><td>言語、本文</td></tr>
+        <tr><td><code>qvar</code></td><td>問題変数</td><td>第3フィールド以降をMaxima式として保持</td></tr>
+        <tr><td><code>option</code></td><td>選択肢</td><td>パターン、C/W、任意の言語、本文</td></tr>
+        <tr><td><code>feedback</code></td><td>フィードバック</td><td>パターン、任意のC/W・言語、本文</td></tr>
+      </table>
+      <h3>6.2 CSV出力</h3>
+      <ul><li>「CSV見本」は現在のモード用固定サンプルをUTF-8 BOM付きで保存。</li><li>「CSV保存」は現在の編集状態を再読込可能な形式で保存。</li></ul>
+      <h3>6.3 XML入力</h3>
+      <ul>
+        <li>WebAppメタデータ <code>MCQ_WEBAPP_DATA_BASE64</code> がある場合、編集状態を正確に復元。</li>
+        <li>メタデータがない旧形式では、管理対象のMaxima代入・言語関連付け・選択肢を解析して復元。</li>
+        <li><code>stack_include(...)</code> がある場合、参照先の読込と編集用スケルトン生成を試みる。</li>
+      </ul>
+      <h3>6.4 XML / include出力</h3>
+      <p>問題IDに基づくファイル名でMoodle XMLを保存する。問題変数を別ファイルに保存する場合、XMLは <code>stack_include("URL")</code> を保持し、共通設定ファイルを別途保存する。既定公開PATHは <code>https://yositomi-opu.github.io/stack_questions/001/</code> で、XML保存後の調整を想定する。</p>
+    </section>
+
+    <section id="generation">
+      <h2>7. XML生成・ランダム化仕様</h2>
+      <ol>
+        <li>選択された問題形式のテンプレートを読み込む。</li>
+        <li>画面状態を検証し、問題変数・内部管理変数・言語関連付けをMaximaコードへ変換する。</li>
+        <li>選択肢とフィードバックをC/W・パターン・言語単位で構築する。</li>
+        <li>編集状態をBase64メタデータとして問題変数内へ埋め込み、再編集可能性を確保する。</li>
+        <li>テンプレートへ値を反映し、XMLペインと保存ファイルへ出力する。</li>
+      </ol>
+      <h3>ランダム化</h3>
+      <p>真偽ペアモードではパターンをSTACK/Maximaの <code>random_permutation</code> で並べ替え、先頭から正答、続いて誤答を割り当てる。同一パターンのC/Wが同一問題に同時出現しないようにする。</p>
+      <p>正解数のランダム化を有効にすると、指定候補（例: <code>1, 2, 3</code>）から正解数を選ぶ。固定モードでは入力された正解数を使用する。</p>
+    </section>
+
+    <section id="cas">
+      <h2>8. ローカルCAS評価仕様</h2>
+      <h3>8.1 評価フロー</h3>
+      <div class="flow"><span>問題変数・CAS選択肢</span><i>→</i><span><code>/api/maxima/evaluate</code></span><i>→</i><span>STACK対応Maxima</span></div>
+      <ul>
+        <li>問題変数のトップレベル代入から変数名を抽出する。</li>
+        <li>選択肢の値種別がCASの場合、その式も同一評価コンテキストで評価する。</li>
+        <li>型（matrix/list/number/string/symbol/expression）、リスト長、評価値を返す。</li>
+        <li>CAS式がリストと判定された場合、XML生成でも候補リスト式として扱う。</li>
+        <li>問題変数または選択肢変更後は結果を「再評価が必要」とする。</li>
+      </ul>
+      <h3>8.2 読込ライブラリ</h3>
+      <p><code>ky_linear_algebra.mac</code>、<code>tex_library.mac</code>、<code>mcq_template_pre.mac</code>、および設定済みSTACKコードを読み込む。<code>stack_include</code> はローカル参照へ解決して評価する。</p>
+      <h3>8.3 STACK用Maxima</h3>
+      <ul>
+        <li>通常Maximaは <code>MAXIMA_EXECUTABLE</code>、PATH、Windowsの一般的な配置順で検出。</li>
+        <li>STACK clone先と生成物を <code>.local-config.json</code> に保存。</li>
+        <li><code>dump.txt</code> を基にダンプ済み実行ファイルを生成し、通常Maximaより優先。</li>
+        <li>ダンプ生成不可時は評価ごとのSTACK通常読込へ自動フォールバック。</li>
+      </ul>
+    </section>
+
+    <section id="stack-api">
+      <h2>9. STACK API連携仕様</h2>
+      <table>
+        <tr><th>操作</th><th>外部ルート</th><th>仕様</th></tr>
+        <tr><td>接続確認</td><td><code>POST /render</code></td><td>最小確認用XMLを送り、JSON応答を受信できることを確認。</td></tr>
+        <tr><td>生成XMLテスト</td><td><code>POST /test</code></td><td>現在の生成XMLを送り、メッセージと応答詳細を表示。</td></tr>
+      </table>
+      <ul>
+        <li>入力はSTACK APIのベースURL。末尾の <code>/stack.php</code>、<code>/render</code>、<code>/test</code> 等は除去して正規化。</li>
+        <li>URLはブラウザのlocalStorageへ保存し、次回復元する。</li>
+        <li>ブラウザのCORS制約を避けるため、外部通信は <code>server.py</code> がプロキシする。</li>
+        <li>HTTP/HTTPSのみ許可し、資格情報を含むURLは拒否。タイムアウト30秒、応答上限2 MiB。</li>
+      </ul>
+    </section>
+
+    <section id="startup">
+      <h2>10. セットアップ・起動仕様</h2>
+      <h3>10.1 OS別ランチャー</h3>
+      <table>
+        <tr><th>OS</th><th>入口</th><th>動作</th></tr>
+        <tr><td>macOS</td><td><code>scripts/macos/start-mcq-webapp.command</code></td><td>Python確認、環境診断、STACK入力/自動取得、再診断、ブラウザ起動。</td></tr>
+        <tr><td>Windows</td><td><code>scripts\windows\start-mcq-webapp.bat</code></td><td>Pythonランチャーを介して同等の診断・設定・起動を実施。</td></tr>
+      </table>
+      <h3>10.2 server.py オプション</h3>
+      <table>
+        <tr><th>引数</th><th>意味</th></tr>
+        <tr><td><code>--host</code> / <code>--port</code></td><td>bind先とポート。既定は127.0.0.1:4173。</td></tr>
+        <tr><td><code>--check</code></td><td>Python/Maxima/STACK評価環境を診断して終了。</td></tr>
+        <tr><td><code>--install-stack</code></td><td>STACKをGitHubからローカル領域へcloneして設定。</td></tr>
+        <tr><td><code>--setup-stack PATH</code></td><td>既存STACK cloneまたはstackmaxima.mac配置先を設定。</td></tr>
+        <tr><td><code>--rebuild-stack-maxima</code></td><td>保存済み設定からダンプ済みMaximaを再生成。</td></tr>
+        <tr><td><code>--no-dump</code></td><td>ダンプを生成せず評価時の通常読込を選択。</td></tr>
+        <tr><td><code>--reload</code></td><td>動作中の同アプリサーバーを停止し再起動。</td></tr>
+        <tr><td><code>--open-browser</code></td><td>起動後に既定ブラウザを開く。</td></tr>
+      </table>
+      <p>同一ポートですでに本アプリが動作している場合は「すでに動作中」とURL、再起動方法、ヘルプ表示方法を案内して終了する。別プロセスがポートを使用している場合は別ポート例を表示する。</p>
+    </section>
+
+    <section id="api">
+      <h2>11. ローカルAPI仕様</h2>
+      <table>
+        <tr><th>Method / Path</th><th>要求</th><th>応答・用途</th></tr>
+        <tr><td><code>GET /api/server/status</code></td><td>なし</td><td>サービス名、PID。重複起動検出。</td></tr>
+        <tr><td><code>POST /api/server/shutdown</code></td><td>ローカル接続のみ</td><td><code>--reload</code> 用の安全な停止。</td></tr>
+        <tr><td><code>POST /api/maxima/evaluate</code></td><td>variables, variableNames, expressions</td><td>問題変数・式ごとのok/type/length/value/error。</td></tr>
+        <tr><td><code>POST /api/stack/check</code></td><td>url</td><td>正規化URLを使って外部 <code>/render</code> を確認。</td></tr>
+        <tr><td><code>POST /api/stack/test</code></td><td>url, questionDefinition</td><td>外部 <code>/test</code> のJSON応答。</td></tr>
+      </table>
+      <p>JSONリクエスト本文は最大512 KiB。Maxima式は最大300件。Maxima評価タイムアウトは12秒。</p>
+    </section>
+
+    <section id="quality">
+      <h2>12. 制約・品質・セキュリティ</h2>
+      <ul>
+        <li>既定bind先を127.0.0.1とし、ローカル利用を基本とする。</li>
+        <li>停止APIは127.0.0.1 / ::1からのみ受け付ける。</li>
+        <li>外部STACK APIは利用者が指定した信頼できるURLだけを使用する。</li>
+        <li>ローカル設定、STACK clone、ダンプ済みMaximaは <code>app/mcq-webapp/.local*</code> に置きGit管理しない。</li>
+        <li>XML特殊文字、Maxima文字列、CSVフィールドは出力先に応じてエスケープする。</li>
+        <li>乱数評価は実行ごとに値が変わり得るため、画面値は評価時点の1回分である。</li>
+        <li>翻訳品質は外部生成結果に依存し、反映前の利用者確認を前提とする。</li>
+      </ul>
+      <div class="note"><strong>保守方針:</strong> テンプレート構造またはSTACK管理変数を変更する場合、XML新規生成だけでなく、メタデータ付きXMLと旧形式XMLの再読込互換性を確認する。</div>
+    </section>
+
+    <section id="acceptance">
+      <h2>13. 受入確認項目</h2>
+      <ol>
+        <li>OS別ランチャーから初回STACK設定とブラウザ起動が完了する。</li>
+        <li>Radio / Checkboxの双方でXMLを生成・保存できる。</li>
+        <li>真偽ペア有効/無効、固定/ランダム正解数の各組合せで選択肢数が整合する。</li>
+        <li>CSV/TSV/XLSXを読み込み、CSVへ保存し直せる。</li>
+        <li>生成XMLを再読込し、問題ID・設定・問題文・問題変数・選択肢を復元できる。</li>
+        <li>多言語依頼JSONの生成と返却JSONの反映ができ、変更時に再翻訳警告が出る。</li>
+        <li><code>rand</code> 等のSTACK関数がローカル評価され、変数型・length・値が一覧更新される。</li>
+        <li>問題変数別保存でincludeファイルと <code>stack_include</code> 参照を出力できる。</li>
+        <li>STACK API URLの接続確認と生成XMLの <code>/test</code> 結果表示ができる。</li>
+        <li>二重起動時に起動済み案内、<code>--reload</code> 時に停止・再起動が行われる。</li>
+      </ol>
+    </section>
+
+    <section id="history">
+      <h2>14. 主な開発履歴</h2>
+      <table>
+        <tr><th>コミット</th><th>内容</th></tr>
+        <tr><td><code>8781c25</code> ほか</td><td>生成XMLペインの開閉、リサイズ、表示設定、レスポンシブ調整。</td></tr>
+        <tr><td><code>f4e6011</code> ほか</td><td>多言語編集、選択肢表示、正解数・保存名・フォールバック改善。</td></tr>
+        <tr><td><code>9c4eada</code></td><td>問題変数別ファイルとXMLペイン操作改善。</td></tr>
+        <tr><td><code>edc2f91</code></td><td>ローカルMaxima評価、変数結果、選択肢CAS length、Windowsランチャー。</td></tr>
+        <tr><td><code>b232f35</code></td><td>問題変数別保存の説明ツールチップ。</td></tr>
+        <tr><td><code>c6dca40</code></td><td>動作中判定、再起動、引数ヘルプを含むサーバーライフサイクル。</td></tr>
+        <tr><td><code>c99edaa</code> - <code>22d6053</code></td><td>STACK clone先保存、ダンプ生成、通常読込フォールバック、Mac/Windows初回セットアップ。</td></tr>
+        <tr><td><code>d7e5221</code></td><td>利用開始・診断・トラブルシューティングのREADME整備。</td></tr>
+        <tr><td><code>c19e802</code></td><td>問題変数結果欄の配置更新とSTACK API接続・生成XMLテスト。</td></tr>
+        <tr><td><code>31e8ccf</code></td><td>Windows/macOSセットアップガイドの日本語・英語PDF。</td></tr>
+      </table>
+      <p><span class="tag">Source of truth</span> 実装の最終的な挙動は対象コミットのソースコードと <code>app/mcq-webapp/README.md</code> を正とする。</p>
+    </section>
+  </main>
+  <footer>STACK MCQ XML Generator Specification v1.0 - stack_questions</footer>
+</article>
+</body>
+</html>
