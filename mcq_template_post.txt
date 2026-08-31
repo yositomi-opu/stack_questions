@@ -107,11 +107,11 @@ Cans1:mcq_correct(ta1);/* formal defintion. not used */
  ["fr", "Sélectionnez toutes les réponses correctes "],
  ["de", "Wählen Sie alle richtigen Antworten aus "],
  ["it", "Seleziona tutte le risposte corrette "],
- ["ja", "すべて選べ."]];
+ ["ja", "すべて選べ"]];
 %__mcq_SELALLL:[["en", "Select all correct answers "],
  ["fr", "Sélectionnez toutes les réponses correctes "],
  ["de", "Wählen Sie alle richtigen Antworten aus "],
- ["ja", "すべて選べ."]];
+ ["ja", "すべて選べ"]];
 %__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
 %__mcq_SELONEANYL:[
  ["en", "Choose one (even if multiple correct answers exist)"],
