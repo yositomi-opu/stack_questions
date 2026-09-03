@@ -2,7 +2,7 @@ config,question_id,SampleNurse008
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】患者ケア用器材について適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】患者ケア用器材に関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"再使用する器材は、患者間で適切に洗浄・消毒または滅菌する"
 option,01,W,"再使用する器材は、患者間で処理せずそのまま使用する"
 feedback,01,"再使用可能な器材は、用途と感染リスクに応じて患者間で再処理します。"

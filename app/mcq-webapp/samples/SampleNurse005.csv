@@ -2,7 +2,7 @@ config,question_id,SampleNurse005
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】個人防護具について適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】個人防護具に関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"個人防護具は、予想される曝露の種類と程度に応じて選択する"
 option,01,W,"個人防護具は、処置内容にかかわらず常に同じ組合せを使用する"
 feedback,01,"個人防護具は、血液・体液の飛散や接触などのリスク評価に基づいて選びます。"

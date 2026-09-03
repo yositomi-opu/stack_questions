@@ -2,7 +2,7 @@ config,question_id,SampleNurse001
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】標準予防策について適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】標準予防策に関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"標準予防策は、感染症の診断の有無にかかわらず、すべての患者に適用する"
 option,01,W,"標準予防策は、感染症と診断された患者だけに適用する"
 feedback,01,"標準予防策は、感染状態にかかわらず、すべての患者ケアに適用する基本的な対策です。"

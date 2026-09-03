@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import locale as locale_module
 import os
 import re
 import shlex
@@ -44,6 +45,45 @@ STACK_INCLUDE_RE = re.compile(
 MARKER = "__MCQ_EVAL_71C59D__"
 SERVER_NAME = "stack-mcq-webapp"
 STACK_REPOSITORY = "https://github.com/maths/moodle-qtype_stack.git"
+STACK_API_COMPOSE = REPO_ROOT / "deploy" / "stack-api" / "compose.yaml"
+STACK_API_COMPOSE_PROJECT = "stack-mcq-webapp"
+DOCKER_STACK_MAXIMA = "docker://stack-mcq-webapp/maxima"
+ACTIVE_UI_LOCALE = "ja"
+ACTIVE_STACK_API_URL = "http://127.0.0.1:3080"
+ALLOW_REMOTE_STACK_API = False
+_DUMP_VALIDITY: dict[str, bool] = {}
+_DUMP_WARNED: set[str] = set()
+
+
+def resolve_ui_locale(value: str) -> str:
+    normalized = (value or "auto").strip().lower().replace("-", "_")
+    if normalized in {"ja", "en"}:
+        return normalized
+    if normalized != "auto":
+        raise ValueError("localeはauto、ja、enのいずれかで指定してください")
+    candidates: list[str] = []
+    if sys.platform == "darwin" and shutil.which("defaults"):
+        try:
+            completed = subprocess.run(
+                ["defaults", "read", "-g", "AppleLocale"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+                check=False,
+            )
+            if completed.returncode == 0:
+                candidates.append(completed.stdout.strip())
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    language_name, _encoding = locale_module.getlocale()
+    if language_name:
+        candidates.append(language_name)
+    candidates.extend(os.environ.get(name, "").strip() for name in ("LC_ALL", "LC_MESSAGES", "LANG"))
+    language = next(
+        (item.lower() for item in candidates if item and item.lower() not in {"c", "c.utf-8", "posix"}),
+        "",
+    )
+    return "ja" if language.startswith("ja") else "en"
 
 
 def server_command(*arguments: str) -> str:
@@ -110,9 +150,108 @@ def find_maxima() -> str | None:
     if configured:
         return find_system_maxima()
     dumped = load_local_config().get("dumped_maxima", "")
-    if dumped and Path(dumped).is_file():
-        return str(Path(dumped).resolve())
-    return find_system_maxima()
+    if dumped:
+        dumped_path = Path(dumped).expanduser().resolve()
+        if dumped_path.is_file():
+            ensure_executable(dumped_path, "STACK用Maxima")
+            if dumped_maxima_works(dumped_path):
+                return str(dumped_path)
+            warning_key = str(dumped_path)
+            if warning_key not in _DUMP_WARNED:
+                reason = (
+                    "（macOSの隔離属性が付いています。同期先では再生成してください）"
+                    if has_macos_quarantine(dumped_path)
+                    else ""
+                )
+                print(
+                    f"保存済みSTACK用Maximaを使用せず別の実行方式へ切り替えます{reason}: {dumped_path}",
+                    file=sys.stderr,
+                )
+                _DUMP_WARNED.add(warning_key)
+    system_maxima = find_system_maxima()
+    if configured_stack_maxima_directory() and system_maxima:
+        return system_maxima
+    if docker_stack_maxima_available():
+        return DOCKER_STACK_MAXIMA
+    return system_maxima
+
+
+def ensure_executable(path: Path, label: str) -> None:
+    if os.name == "nt" or os.access(path, os.X_OK):
+        return
+    try:
+        path.chmod(path.stat().st_mode | 0o111)
+    except OSError as exc:
+        raise RuntimeError(
+            f"{label}に実行権限がありません: {path}\n"
+            f"修復方法: chmod +x {shlex.quote(str(path))}"
+        ) from exc
+    if not os.access(path, os.X_OK):
+        raise RuntimeError(
+            f"{label}に実行権限を付けられませんでした: {path}\n"
+            f"修復方法: chmod +x {shlex.quote(str(path))}"
+        )
+
+
+def has_macos_quarantine(path: Path) -> bool:
+    """Detect a synced/downloaded executable without asking Gatekeeper to launch it."""
+    if sys.platform != "darwin" or not shutil.which("xattr"):
+        return False
+    try:
+        completed = subprocess.run(
+            ["xattr", "-p", "com.apple.quarantine", str(path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
+
+
+def dumped_maxima_works(path: Path) -> bool:
+    cache_key = str(path)
+    if cache_key in _DUMP_VALIDITY:
+        return _DUMP_VALIDITY[cache_key]
+    # A Nextcloud-synchronised Mach-O file commonly receives quarantine metadata.
+    # Launching it just to perform a health check opens a scary Gatekeeper dialog,
+    # so reject it before execution and use the source-loading/Docker fallback.
+    if has_macos_quarantine(path):
+        _DUMP_VALIDITY[cache_key] = False
+        return False
+    marker = "__MCQ_DUMP_HEALTH_OK__"
+    try:
+        completed = subprocess.run(
+            maxima_command(str(path), "--very-quiet", "--batch-string", f'print("{marker}")$ quit()$'),
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+        valid = completed.returncode == 0 and marker in completed.stdout
+    except (OSError, subprocess.TimeoutExpired):
+        valid = False
+    _DUMP_VALIDITY[cache_key] = valid
+    return valid
+
+
+def check_startup_maxima() -> None:
+    try:
+        maxima = find_maxima()
+    except RuntimeError as exc:
+        print(f"Maxima: 設定エラー - {exc}", file=sys.stderr)
+        return
+    if maxima:
+        label = "Docker STACK Maxima" if maxima == DOCKER_STACK_MAXIMA else maxima
+        print(f"Maxima: OK ({label})")
+    else:
+        print(
+            "Maxima: 未検出 - 問題変数の評価を使うにはPATHを設定するか"
+            "MAXIMA_EXECUTABLEを指定してください",
+            file=sys.stderr,
+        )
 
 
 def configured_stack_maxima_directory() -> Path | None:
@@ -122,12 +261,27 @@ def configured_stack_maxima_directory() -> Path | None:
 
 
 def using_dumped_maxima(maxima: str) -> bool:
+    if maxima == DOCKER_STACK_MAXIMA:
+        return False
     dumped = load_local_config().get("dumped_maxima", "")
     return bool(dumped and Path(dumped).is_file() and Path(maxima).resolve() == Path(dumped).resolve())
 
 
 def maxima_command(maxima: str, *arguments: str) -> list[str]:
     """Build a subprocess command, including the Windows batch-file wrapper."""
+    if maxima == DOCKER_STACK_MAXIMA:
+        return [
+            *docker_compose_prefix(),
+            "-p",
+            STACK_API_COMPOSE_PROJECT,
+            "-f",
+            str(STACK_API_COMPOSE),
+            "exec",
+            "-T",
+            "maxima",
+            "/opt/maxima/bin/maxima-optimised",
+            *arguments,
+        ]
     command = [maxima, *arguments]
     if os.name == "nt" and Path(maxima).suffix.lower() in {".bat", ".cmd"}:
         return [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/s", "/c", subprocess.list2cmdline(command)]
@@ -136,6 +290,73 @@ def maxima_command(maxima: str, *arguments: str) -> list[str]:
 
 def maxima_string(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def docker_compose_prefix() -> list[str]:
+    for candidate in (["docker", "compose"], ["docker-compose"]):
+        if not shutil.which(candidate[0]):
+            continue
+        try:
+            completed = subprocess.run(
+                [*candidate, "version"],
+                cwd=REPO_ROOT,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=3,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if completed.returncode == 0:
+            return list(candidate)
+    raise RuntimeError("Docker Composeが見つかりません")
+
+
+def docker_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    environment["MCQ_REPO_ROOT"] = str(REPO_ROOT)
+    parsed = urlparse(ACTIVE_STACK_API_URL)
+    environment["STACK_API_PORT"] = str(parsed.port or 3080)
+    return environment
+
+
+def docker_stack_maxima_available() -> bool:
+    if not STACK_API_COMPOSE.is_file() or not shutil.which("docker"):
+        return False
+    try:
+        completed = subprocess.run(
+            [
+                *docker_compose_prefix(),
+                "-p",
+                STACK_API_COMPOSE_PROJECT,
+                "-f",
+                str(STACK_API_COMPOSE),
+                "exec",
+                "-T",
+                "maxima",
+                "true",
+            ],
+            cwd=REPO_ROOT,
+            env=docker_environment(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+            check=False,
+        )
+        return completed.returncode == 0
+    except (OSError, RuntimeError, subprocess.TimeoutExpired):
+        return False
+
+
+def path_for_maxima(path: Path, maxima: str) -> str:
+    resolved = path.resolve()
+    if maxima != DOCKER_STACK_MAXIMA:
+        return str(resolved)
+    try:
+        relative = resolved.relative_to(REPO_ROOT)
+    except ValueError as exc:
+        raise RuntimeError(f"Docker Maximaから参照できないパスです: {resolved}") from exc
+    return "/workspace/" + relative.as_posix()
 
 
 def stack_maxima_directory(stack_path: Path) -> Path | None:
@@ -286,10 +507,10 @@ def resolve_stack_include(reference: str) -> Path:
     return candidate
 
 
-def rewrite_stack_includes(source: str) -> str:
+def rewrite_stack_includes(source: str, maxima: str) -> str:
     def replace(match: re.Match[str]) -> str:
         path = resolve_stack_include(match.group(1))
-        return f"batchload({maxima_string(str(path))})$"
+        return f"batchload({maxima_string(path_for_maxima(path, maxima))})$"
 
     return STACK_INCLUDE_RE.sub(replace, source)
 
@@ -317,6 +538,8 @@ printf(true, "{end}~%")$
 
 
 def stack_runtime_program(maxima: str) -> list[str]:
+    if maxima == DOCKER_STACK_MAXIMA:
+        return ["__mcq_stack_loaded:true$"]
     if using_dumped_maxima(maxima):
         return []
     maxima_dir = configured_stack_maxima_directory()
@@ -355,16 +578,20 @@ def build_maxima_program(
         "display2d:false$",
         "linel:100000$",
         'load("stringproc")$',
-        '%_STACK_LANG:"ja"$',
-        '%__STACK_LANG:"ja"$',
+        f'%_STACK_LANG:{maxima_string(ACTIVE_UI_LOCALE)}$',
+        f'%__STACK_LANG:{maxima_string(ACTIVE_UI_LOCALE)}$',
         "%_MCQ_FLAGS:[true,true,false,false,false,true]$",
     ]
     lines.extend(stack_runtime_program(maxima))
-    lines.extend(f"batchload({maxima_string(str(path))})$" for path in libraries if path.is_file())
+    lines.extend(
+        f"batchload({maxima_string(path_for_maxima(path, maxima))})$"
+        for path in libraries
+        if path.is_file()
+    )
     lines.extend(
         [
             f'printf(true, "~%{MARKER}QVARS_BEGIN~%")$',
-            f"__mcq_qvars_result:errcatch(batchload({maxima_string(str(variable_file))}))$",
+            f"__mcq_qvars_result:errcatch(batchload({maxima_string(path_for_maxima(variable_file, maxima))}))$",
             f'printf(true, "{MARKER}QVARS_STATUS:~a~%", if __mcq_qvars_result=[] then "error" else "ok")$',
             f'printf(true, "{MARKER}QVARS_END~%")$',
         ]
@@ -439,8 +666,11 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
             continue
         normalized_expressions.append({"id": item["id"][:200], "expression": expression})
 
-    rewritten_variables = rewrite_stack_includes(variables)
-    with tempfile.TemporaryDirectory(prefix="mcq-maxima-") as temp_dir:
+    rewritten_variables = rewrite_stack_includes(variables, maxima)
+    if maxima == DOCKER_STACK_MAXIMA:
+        LOCAL_DIR.mkdir(parents=True, exist_ok=True)
+    temp_parent = str(LOCAL_DIR) if maxima == DOCKER_STACK_MAXIMA else None
+    with tempfile.TemporaryDirectory(prefix="mcq-maxima-", dir=temp_parent) as temp_dir:
         temp = Path(temp_dir)
         variable_file = temp / "variables.mac"
         program_file = temp / "evaluate.mac"
@@ -449,22 +679,24 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
             build_maxima_program(maxima, variable_file, variable_names, normalized_expressions),
             encoding="utf-8",
         )
+        evaluation_timeout = MAXIMA_TIMEOUT_SECONDS if using_dumped_maxima(maxima) else 60
         try:
             completed = subprocess.run(
                 maxima_command(
                     maxima,
                     "--very-quiet",
                     "--batch-string",
-                    f"batchload({maxima_string(str(program_file))})$",
+                    f"batchload({maxima_string(path_for_maxima(program_file, maxima))})$",
                 ),
                 cwd=REPO_ROOT,
+                env=docker_environment() if maxima == DOCKER_STACK_MAXIMA else None,
                 text=True,
                 capture_output=True,
-                timeout=MAXIMA_TIMEOUT_SECONDS if using_dumped_maxima(maxima) else 45,
+                timeout=evaluation_timeout,
                 check=False,
             )
         except subprocess.TimeoutExpired as exc:
-            raise RuntimeError(f"Maxima評価が{MAXIMA_TIMEOUT_SECONDS}秒でタイムアウトしました") from exc
+            raise RuntimeError(f"Maxima評価が{evaluation_timeout}秒でタイムアウトしました") from exc
 
     output = completed.stdout + "\n" + completed.stderr
     qvars_status = re.search(re.escape(MARKER) + r"QVARS_STATUS:(ok|error)", output)
@@ -497,8 +729,20 @@ def normalize_stack_api_url(value: str) -> str:
     return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
 
 
+def require_allowed_stack_api_url(normalized_url: str) -> None:
+    if ALLOW_REMOTE_STACK_API:
+        return
+    configured = normalize_stack_api_url(ACTIVE_STACK_API_URL)
+    if normalized_url != configured:
+        raise ValueError(
+            f"このサーバーではSTACK API接続先を {configured} に固定しています。"
+            "別サーバーを許可する場合だけ --allow-remote-stack-api を付けて再起動してください"
+        )
+
+
 def request_stack_api(base_url: str, route: str, payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     normalized_url = normalize_stack_api_url(base_url)
+    require_allowed_stack_api_url(normalized_url)
     endpoint = f"{normalized_url}{route}"
     request = Request(
         endpoint,
@@ -585,10 +829,32 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        if parsed.path == "/config.js":
+            body = (
+                "window.MCQ_WEBAPP_CONFIG = "
+                + json.dumps(
+                    {"locale": ACTIVE_UI_LOCALE, "stackApiUrl": ACTIVE_STACK_API_URL},
+                    ensure_ascii=False,
+                )
+                + ";\n"
+            ).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/javascript; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if parsed.path == "/api/server/status":
             self.send_json(
                 HTTPStatus.OK,
-                {"ok": True, "service": SERVER_NAME, "pid": os.getpid()},
+                {
+                    "ok": True,
+                    "service": SERVER_NAME,
+                    "pid": os.getpid(),
+                    "locale": ACTIVE_UI_LOCALE,
+                    "stackApiUrl": ACTIVE_STACK_API_URL,
+                },
             )
             return
         if parsed.path == "/api/repository/include":
@@ -699,9 +965,29 @@ def reload_running_server(url: str) -> bool:
 
 
 def main() -> None:
+    global ACTIVE_STACK_API_URL, ACTIVE_UI_LOCALE, ALLOW_REMOTE_STACK_API
     parser = argparse.ArgumentParser(description="STACK MCQ WebアプリとローカルMaxima評価APIを起動します")
     parser.add_argument("--host", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=4173, help="port (default: 4173)")
+    parser.add_argument(
+        "--locale",
+        choices=("auto", "ja", "en"),
+        default=os.environ.get("MCQ_WEBAPP_LOCALE", load_local_config().get("ui_locale_mode", "auto")),
+        help="起動時UIロケール: auto, ja, en (default: auto)",
+    )
+    parser.add_argument(
+        "--stack-api-url",
+        default=os.environ.get(
+            "MCQ_STACK_API_URL",
+            load_local_config().get("stack_api_url", "http://127.0.0.1:3080"),
+        ),
+        help="既定のSTACK API URL (default: http://127.0.0.1:3080)",
+    )
+    parser.add_argument(
+        "--allow-remote-stack-api",
+        action="store_true",
+        help="既定URL以外のSTACK APIへのプロキシを許可します（信頼できる環境専用）",
+    )
     parser.add_argument("--check", action="store_true", help="Maxima評価環境を診断して終了します")
     parser.add_argument(
         "--setup-stack",
@@ -726,6 +1012,12 @@ def main() -> None:
     parser.add_argument("--reload", action="store_true", help="動作中のMCQ WebAppサーバーを停止して再起動します")
     parser.add_argument("--open-browser", action="store_true", help="起動後にブラウザを開きます")
     args = parser.parse_args()
+    try:
+        ACTIVE_UI_LOCALE = resolve_ui_locale(args.locale)
+        ACTIVE_STACK_API_URL = normalize_stack_api_url(args.stack_api_url)
+        ALLOW_REMOTE_STACK_API = args.allow_remote_stack_api
+    except ValueError as exc:
+        parser.exit(2, f"起動設定が不正です: {exc}\n")
     if args.setup_stack or args.install_stack or args.rebuild_stack_maxima:
         try:
             if args.install_stack:
@@ -780,7 +1072,10 @@ def main() -> None:
             if not stack_loaded:
                 print(f"設定方法: {server_command('--setup-stack', '/path/to/moodle-qtype_stack')}")
                 parser.exit(1, "STACKコードを読み込めないため、ローカルCAS評価の設定が未完了です\n")
-            mode = "ダンプ済み実行ファイル" if using_dumped_maxima(maxima) else "評価時の通常読込"
+            if maxima == DOCKER_STACK_MAXIMA:
+                mode = "Docker goemaxima"
+            else:
+                mode = "ダンプ済み実行ファイル" if using_dumped_maxima(maxima) else "評価時の通常読込"
             print(f"STACK読込方式: {mode}")
             print("MCQ WebAppのローカルCAS評価を利用できます")
             return
@@ -815,6 +1110,9 @@ def main() -> None:
             )
         raise
     print(f"STACK MCQ XML Generator: {url}/")
+    print(f"UI locale: {ACTIVE_UI_LOCALE} ({args.locale})")
+    print(f"STACK API: {ACTIVE_STACK_API_URL}")
+    check_startup_maxima()
     print("終了するには Ctrl-C を押してください")
     if args.open_browser:
         threading.Timer(0.5, webbrowser.open, args=(f"{url}/",)).start()

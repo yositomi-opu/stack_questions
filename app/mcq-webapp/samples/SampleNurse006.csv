@@ -2,7 +2,7 @@ config,question_id,SampleNurse006
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】鋭利器材の安全な取扱いについて適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】鋭利器材の安全な取扱いに関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"使用済み注射針のリキャップは、原則として行わない"
 option,01,W,"使用済み注射針は、両手で必ずリキャップする"
 feedback,01,"針刺し防止のため、使用済み注射針のリキャップは原則として避けます。"

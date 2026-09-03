@@ -5,8 +5,8 @@ config,num_correct,1
 config,random_correct,false
 config,correct_counts,"1, 2"
 config,require_pairs,true
-qtextL,ja,"次のうち正しいものを __SELTYPE__."
-qtextL,en,"__SELTYPE__ the correct statement."
+qtextL,ja,"次の選択肢について答えよ。__SELPROMPT__"
+qtextL,en,"Consider the following options. __SELPROMPT__"
 qvar,,"aa1:rand([1, 2, 3])"
 qvar,,"aa2:rand([3, 4, 5])"
 option,01,C,"太陽は恒星である"

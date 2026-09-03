@@ -2,7 +2,7 @@ config,question_id,SampleNurse007
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】呼吸器衛生・咳エチケットについて適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】呼吸器衛生・咳エチケットに関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"咳やくしゃみの際は、口と鼻を覆う"
 option,01,W,"咳やくしゃみの際は、口と鼻を覆わない"
 feedback,01,"呼吸器分泌物の飛散を減らすため、咳やくしゃみの際は口と鼻を覆います。"

@@ -2,7 +2,7 @@ config,question_id,SampleNurse002
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】手指衛生のタイミングについて適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】手指衛生のタイミングに関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"患者に触れる前には手指衛生を行う"
 option,01,W,"患者に触れる前の手指衛生は不要である"
 feedback,01,"患者に触れる前は、手指衛生を行う重要なタイミングです。"

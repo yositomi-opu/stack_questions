@@ -4,34 +4,51 @@
 
 画面で編集した内容は「CSV保存」で再編集可能なCSVとして保存できます。「CSV見本」は現在選択中の真偽ペアモードに対応した固定サンプルを保存します。
 
-選択肢数の最大値は、入力済みのパターン数に合わせて自動調整されます。生成XML欄は縦の「XML」タブで開閉でき、境界線をドラッグして幅を調整できます。「表示設定」ではXML列の表示・非表示と、設定欄・選択肢欄の幅も変更できます。
+選択肢数の最大値は、文字列1件を1候補、評価済みCASリストをその`length`件として、利用可能な候補数に合わせて自動調整されます。同じパターンのCASリストから複数の選択肢を生成できます。生成XML欄は縦の「XML」タブで開閉でき、境界線をドラッグして幅を調整できます。「表示設定」ではXML列の表示・非表示と、設定欄・選択肢欄の幅も変更できます。
 
 ## 初めて使う場合
 
-Git、Python 3.10以降、Maximaをインストールしてから、このリポジトリをcloneします。
+Git、Python 3.10以降、Docker EngineとDocker Composeを用意してから、このリポジトリをcloneします。macOS／WindowsではDocker Desktopを使うのが簡単です。Docker Desktopは起動した状態にしてください。
 
 ```sh
 git clone https://github.com/yositomi-opu/stack_questions.git
 cd stack_questions
+make setup
 ```
 
-その後、macOSでは`scripts/macos/start-mcq-webapp.command`、Windowsでは`scripts\windows\start-mcq-webapp.bat`を起動します。
+`make setup`はOSを判別し、権限を修復し、公式STACK API Dockerイメージを取得して、STACK APIとMCQ WebAppをバックグラウンド起動します。2回目以降は`make start`を使用します。ホストにMaximaがありSTACKコードが設定済みならそれを優先し、そうでなければDocker内のSTACK用Maximaで問題変数を評価します。
 
-初回はSTACKコードの場所を尋ねられます。
+セットアップ後、[http://127.0.0.1:4173/](http://127.0.0.1:4173/)を開きます。画面では、問題変数・問題文・選択肢を入力し、「問題変数を評価」でSTACK/Maximaの評価結果を確認してから「XML保存」でファイルを保存します。
 
-- STACKをまだ持っていない場合：何も入力せずEnterを押します。`app/mcq-webapp/.local/`へ自動取得します。
-- すでにSTACKをcloneしている場合：`moodle-qtype_stack`のclone先を入力します。
-- `stackmaxima.mac`を直接置いたフォルダーがある場合：そのフォルダーを入力します。
+GitHub Pages上でも静的な入力・CSV保存・XML生成は動作しますが、PagesではPython／Maxima／Dockerを実行できません。そのため、問題変数の評価、CAS式の`length`取得、STACK APIテストには、この手順で起動したローカル版を使用してください。
 
-セットアップが完了するとブラウザが開きます。開かない場合は、[http://127.0.0.1:4173/](http://127.0.0.1:4173/)を手動で開いてください。
+## 管理コマンド
 
-画面では、問題変数・問題文・選択肢を入力し、「問題変数を評価」でSTACK/Maximaの評価結果を確認してから「XML保存」でファイルを保存します。
+リポジトリのルートで実行します。
 
-## 起動
+```sh
+make setup    # 初回設定、Dockerイメージ取得、両サービスの起動
+make check    # 権限修復とPython／Maxima／STACK API／WebAppの総合診断
+make start    # STACK APIとWebAppを開始
+make stop     # 両サービスを停止
+make restart  # 両サービスを再起動
+make status   # 保存設定とWebAppの状態を表示
+```
 
-### macOS / Linux
+`make setup`時にサーバーのロケールを自動判定し、日本語ロケールなら日本語、それ以外なら英語でUIと初期問題を開きます。固定する場合は次のように指定します。この設定は`app/mcq-webapp/.local-config.json`へ保存されます。
 
-macOSでは、リポジトリ内の`scripts/macos/start-mcq-webapp.command`をダブルクリックします。初回にSTACKが未設定の場合は、既存のclone先を入力できます。何も入力せずEnterを押すと、STACKをGitHubからローカル領域へ自動取得します。
+```sh
+make setup LOCALE=ja
+make setup LOCALE=en
+```
+
+画面右上の`English`／`日本語`ボタンで一時的に表示を切り替えることもできます。問題文、選択肢、生成XML、STACK API応答の内容は切替対象外です。
+
+## OS別の起動
+
+### macOS
+
+Docker Desktop、Git、Python 3.10以降をインストールします。ターミナルでは`make setup`を実行します。Finderからは`scripts/macos/start-mcq-webapp.command`をダブルクリックでき、未設定ならsetup、設定済みならstartを自動実行してブラウザを開きます。
 
 macOSで初回のダブルクリックがセキュリティ設定により拒否された場合は、FinderでファイルをControlキーを押しながらクリックして「開く」を選択するか、ターミナルから次を実行します。
 
@@ -39,51 +56,52 @@ macOSで初回のダブルクリックがセキュリティ設定により拒否
 ./scripts/macos/start-mcq-webapp.command
 ```
 
-ターミナルから起動する場合は、リポジトリのルートで次を実行し、ブラウザで`http://127.0.0.1:4173/`を開きます。
-
-```sh
-python3 app/mcq-webapp/server.py
-```
-
-ローカルCAS評価には、`PATH`から実行できるMaximaが必要です。サーバーは既定で`127.0.0.1`だけに接続を受け付けます。
-
-同じポートですでにMCQ WebAppサーバーが動作している場合は、起動済みのURLと再起動方法が表示されます。動作中のサーバーを停止して再起動するには、次を実行します。
-
-```sh
-python3 app/mcq-webapp/server.py --reload
-```
-
-使用できる引数の一覧は、次のコマンドで確認できます。
-
-```sh
-python3 app/mcq-webapp/server.py --help
-```
-
 ### Windows
 
 1. [Python 3.10以降](https://www.python.org/downloads/windows/)をインストールします。
-2. [Windows版Maxima](https://maxima.sourceforge.io/download.html)の`win64.exe`インストーラーを使ってMaximaをインストールします。
+2. Docker Desktopをインストールし、Linux containersで起動します。
 3. Gitでこのリポジトリをcloneします。
 4. リポジトリ内の`scripts\windows\start-mcq-webapp.bat`をダブルクリックします。
 
-ランチャーはPython、Maxima、STACKコードを確認してからサーバーを起動し、`http://127.0.0.1:4173/`をブラウザで開きます。初回にSTACKが未設定の場合は、既存のclone先を入力できます。何も入力せずEnterを押すと、STACKをGitHubからローカル領域へ自動取得します。終了するにはランチャーのウィンドウで`Ctrl+C`を押してください。Pythonパッケージの追加インストールは不要です。
-
-Maximaは、まず`PATH`、次にWindowsの一般的なインストール先から自動検出します。検出されない場合は、コマンドプロンプトで実際のパスを指定してからランチャーを実行してください。
+WindowsではGNU Makeは標準搭載されていません。Makeを導入した場合は同じ`make`コマンドを使用できます。導入しない場合も、次の同等コマンドが使えます。
 
 ```bat
-set "MAXIMA_EXECUTABLE=C:\maxima-5.xx.x\bin\maxima.bat"
-scripts\windows\start-mcq-webapp.bat
+scripts\windows\mcq-webapp.bat setup
+scripts\windows\mcq-webapp.bat check
+scripts\windows\mcq-webapp.bat start
+scripts\windows\mcq-webapp.bat stop
+scripts\windows\mcq-webapp.bat restart
 ```
 
-macOS、Linuxでも`MAXIMA_EXECUTABLE`を利用できます。環境だけを診断する場合は、リポジトリのルートで次を実行します。
+Windows版Maximaは必須ではありません。インストールして`MAXIMA_EXECUTABLE`を設定した場合は、ホストMaximaを優先できます。
+
+### Ubuntu
+
+Ubuntu ServerではGit、Python 3.10以降、GNU Make、Docker Engine、Docker Compose pluginを用意します。Dockerは[公式のUbuntu向け手順](https://docs.docker.com/engine/install/ubuntu/)でインストールし、`docker compose version`と`docker info`が成功する状態にします。
+
+`docker info`がpermission deniedになる場合は、Docker公式のLinux post-install手順に従って実行ユーザーを`docker`グループへ追加し、いったんログアウトして入り直してください。`make check`はリポジトリ内の実行権限を自動修復し、Docker socketのように管理者権限が必要な項目は修復方法が分かるエラーとして報告します。
+
+Workshop参加者が別PCのブラウザから接続する場合は、初回だけ次のように設定します。
 
 ```sh
-python3 app/mcq-webapp/server.py --check
+make setup HOST=0.0.0.0 LOCALE=ja
 ```
+
+ブラウザでは`http://<UbuntuサーバーのIP>:4173/`を開きます。ファイアウォールではTCP 4173だけを必要なネットワークから許可してください。STACK APIの3080番ポートはDocker Composeにより`127.0.0.1`だけへbindされ、WebAppサーバー経由で利用されます。公開サーバーでは、TLSと認証を提供するリバースプロキシを別途設置してください。
+
+### ポート変更
+
+初回setup時に保存します。
+
+```sh
+make setup PORT=4174 STACK_API_PORT=3081
+```
+
+WebAppのログは`app/mcq-webapp/.local/service/mcq-webapp.log`に保存されます。ローカル設定・PID・ログ・取得物はGit管理されません。
 
 ## STACK用Maximaの設定
 
-通常版MaximaだけではSTACK固有の関数を評価できません。STACK（`moodle-qtype_stack`）をgit cloneした場所、または`stackmaxima.mac`が置かれているSTACK Maximaディレクトリを一度設定すると、WebAppはその場所をローカル設定に保存し、リポジトリの`dump.txt`を読み込んだSTACK用Maxima実行ファイルを生成します。
+通常はDocker内のSTACK用Maximaが自動で使われるため、この節の手動設定は不要です。ホストにMaximaをインストールして直接使いたい場合だけ、STACK（`moodle-qtype_stack`）のclone先、または`stackmaxima.mac`が置かれているディレクトリを設定します。WebAppはその場所をローカル設定へ保存し、可能ならリポジトリの`dump.txt`からSTACK用Maxima実行ファイルを生成します。
 
 STACKを持っていない場合は、GitHubから自動取得して設定できます。
 
@@ -123,7 +141,7 @@ python3 app/mcq-webapp/server.py --rebuild-stack-maxima
 python3 app/mcq-webapp/server.py --check
 ```
 
-正常な場合は、出力に`STACK code: OK`と、使用中の`STACK読込方式`が表示されます。Windowsのコマンドプロンプトから手動確認する場合は、次を使用できます。
+正常な場合は、出力に`STACK code: OK`と、使用中の`STACK読込方式`（Docker goemaxima、ダンプ済み実行ファイル、または評価時の通常読込）が表示されます。Windowsのコマンドプロンプトから手動確認する場合は、次を使用できます。
 
 ```bat
 py -3 app\mcq-webapp\server.py --check
@@ -136,6 +154,7 @@ py -3 app\mcq-webapp\server.py --check
 - `STACK code: 未読込`：OS別ランチャーを再実行するか、`--install-stack`または`--setup-stack`で設定してください。
 - `rand(...)`などが式のまま表示される：`--check`で`STACK code: OK`を確認し、サーバーを`--reload`で再起動してからブラウザを再読み込みしてください。
 - ダンプ生成に失敗する：通常は評価時の通常読込へ自動的に切り替わります。手動設定では`--no-dump`を追加できます。
+- macOSで「`maxima-stack`は開けません。ゴミ箱に入れますか？」と表示される：`maxima-stack`はホスト固有の生成キャッシュで、Nextcloud経由で別のMacへ同期して使うものではありません。ゴミ箱へ移して構いません。`make check`は隔離属性の付いたキャッシュを実行せず設定から外し、通常読込またはDockerへ切り替えます。
 - WindowsでMaximaが見つからない：`MAXIMA_EXECUTABLE`に`maxima.bat`または`maxima.exe`の実際のパスを設定してください。
 
 ## ローカルCAS評価
@@ -148,6 +167,8 @@ py -3 app\mcq-webapp\server.py --check
 
 「定義済み変数」には、問題変数欄のトップレベル代入から抽出した変数名、型、リストの`length`、評価値が表示されます。選択肢がCAS式の場合は入力欄にも評価結果が表示され、リストなら`CASリスト length: 3`のように候補数を確認できます。評価結果がリストだったCAS式は、XML生成時にも候補リスト式として扱われます。
 
+CAS式をまだ評価していない場合、候補数は安全側に1件として扱われます。「問題変数を評価」を押すとリスト長に応じて選択肢数の上限が更新されます。1つのパターン内にCASリスト式を複数置いた場合は、各リストを平坦化した候補リストとして生成します。
+
 問題変数または選択肢を変更すると評価結果は「再評価が必要」になります。ランダム変数を含む場合、表示される値と`length`はその評価時点の1回分です。
 
 このAPIは入力したMaximaコードをローカルで実行します。信頼できる問題コードだけを評価し、外部公開用サーバーとしては使用しないでください。
@@ -156,14 +177,14 @@ py -3 app\mcq-webapp\server.py --check
 
 ## STACK APIによる動作確認
 
-画面下部の「STACK API 動作確認」に、STACK APIのベースURL（例: `http://localhost:3080`）を入力します。
+`make setup`／`make start`は、公式STACK APIとgoemaximaをDockerで起動します。既定URLは`http://127.0.0.1:3080`で、画面にも自動設定されます。
 
 - 「接続確認」：STACK APIの`/render`へ確認用リクエストを送り、JSON応答を受信できるか確認します。
 - 「生成XMLをテスト」：現在画面に生成されている問題XMLをSTACK APIの`/test`へ送り、STACK側のテスト結果を表示します。
 
-入力したURLはそのブラウザ内に保存され、次回起動時にも復元されます。末尾に`/stack.php`、`/render`、`/test`などを含むURLを貼り付けた場合も、ベースURLへ自動調整します。API応答の詳細は画面上で展開して確認できます。
+API応答の詳細は画面上で展開して確認できます。Workshop公開時のサーバーサイドリクエスト偽装を防ぐため、既定ではセットアップ済みのローカルURL以外へ接続できません。信頼できるローカル環境で別のSTACK APIを使う場合だけ、`server.py`を`--allow-remote-stack-api`付きで直接起動します。
 
-この機能はローカルの`server.py`を経由してSTACK APIへ接続します。接続先は信頼できるSTACKサーバーだけを指定してください。
+この機能はローカルの`server.py`を経由してSTACK APIへ接続します。
 
 ## CSV / XLSX 形式
 
@@ -177,8 +198,8 @@ config,num_correct,1
 config,random_correct,false
 config,correct_counts,"1, 2"
 config,require_pairs,true
-qtextL,ja,"次のうち正しいものを __SELTYPE__."
-qtextL,en,"__SELTYPE__ the correct statement."
+qtextL,ja,"次の選択肢について答えよ。__SELPROMPT__"
+qtextL,en,"Consider the following options. __SELPROMPT__"
 qvar,,"aa1:rand([1, 2, 3])"
 qvar,,"aa2:rand([3, 4, 5])"
 option,01,C,"パターン01が真の場合の文"
@@ -191,11 +212,21 @@ feedback,02,"パターン02に共通のフィードバック"
 
 - `option`: `option, パターン番号, CまたはW, 文`。同じパターン・真偽を複数行書くと、候補リストになります。
 - `feedback`: `feedback, パターン番号, 文`。同じ命題の C/W に共通です。
-- `qtextL`: `qtextL, 言語, 問題文`。言語は `ja`, `en`, `fr`, `de`, `it` です。
+- `qtextL`: `qtextL, 言語, 問題文`。言語は `en`, `ja`, `fr`, `it`, `de`, `pt`, `zh`, `ko`, `ru`, `sv` です。
 - `qvar`: 第3フィールド以降を Maxima 式として、上から順にそのまま挿入します。末尾に `;` または `$` がなければ `;` を補います。CSVセル内の改行も保持します。
 - `config`: 任意です。`question_id`, `mode`, `num_options`, `num_correct` を指定できます。
 - `config,random_correct,true`: 正解数をランダムにします。候補は `config,correct_counts,"1, 2, 3"` のように指定します。
 - `config,require_pairs,true`: 各パターンに C/W の両方を必須とし、命題の真偽をランダムに割り当てます（既定）。
+
+### 選択指示のプレースホルダー
+
+新規問題では、問題文の独立した文として`__SELPROMPT__`を使用してください。Radio／Checkboxと正解数に応じて、たとえば日本語では次の完全な指示文に置換されるため、文法が周囲の語順に依存しません。
+
+- Radio・正解1個：`正しいものを1つ選べ。`
+- Radio・正解候補が複数：`正しいものを1つ選べ（複数ある場合も1つでよい）。`
+- Checkbox：`正しいものをすべて選べ。`
+
+英語、フランス語、ドイツ語、イタリア語、ポルトガル語、中国語、韓国語、ロシア語、スウェーデン語にも対応しています。従来の`__SELTYPE__`は既存問題用に残していますが、名詞句の前後に置く断片なので、言語やRadio／Checkboxの組合せによっては文法を完全には保証できません。
 
 多言語の選択肢とフィードバックは、言語を追加フィールドにします。
 

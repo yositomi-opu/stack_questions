@@ -1,11 +1,19 @@
 const LANGS = ["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv"];
-const DEFAULT_QUESTION_TEXT = "次のうち正しいものを __SELTYPE__.";
+const SERVER_CONFIG = window.MCQ_WEBAPP_CONFIG || {};
+const INITIAL_LOCALE = ["ja", "en"].includes(SERVER_CONFIG.locale)
+  ? SERVER_CONFIG.locale
+  : (window.mcqI18n?.language || "ja");
+const DEFAULT_QUESTION_TEXTS = {
+  ja: "次の選択肢について答えよ。__SELPROMPT__",
+  en: "Consider the following options. __SELPROMPT__",
+};
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
+const uiText = (text) => window.mcqI18n?.translate(text) || text;
 const SAMPLE_ROWS = [
-  { pattern: "01", truth: "C", choice_ja: "太陽は恒星である", feedback_ja: "太陽は自ら光を放つ恒星です。" },
-  { pattern: "01", truth: "W", choice_ja: "太陽は惑星である", feedback_ja: "太陽は自ら光を放つ恒星です。" },
-  { pattern: "02", truth: "C", choice_ja: "地球は惑星である", feedback_ja: "地球は太陽の周りを公転する惑星です。" },
-  { pattern: "02", truth: "W", choice_ja: "地球は恒星である", feedback_ja: "地球は太陽の周りを公転する惑星です。" },
+  { pattern: "01", truth: "C", choice_ja: "太陽は恒星である", feedback_ja: "太陽は自ら光を放つ恒星です。", choice_en: "The Sun is a star", feedback_en: "The Sun is a star that emits its own light." },
+  { pattern: "01", truth: "W", choice_ja: "太陽は惑星である", feedback_ja: "太陽は自ら光を放つ恒星です。", choice_en: "The Sun is a planet", feedback_en: "The Sun is a star that emits its own light." },
+  { pattern: "02", truth: "C", choice_ja: "地球は惑星である", feedback_ja: "地球は太陽の周りを公転する惑星です。", choice_en: "Earth is a planet", feedback_en: "Earth is a planet that orbits the Sun." },
+  { pattern: "02", truth: "W", choice_ja: "地球は恒星である", feedback_ja: "地球は太陽の周りを公転する惑星です。", choice_en: "Earth is a star", feedback_en: "Earth is a planet that orbits the Sun." },
 ];
 
 const state = {
@@ -98,7 +106,9 @@ init();
 
 async function init() {
   bindEvents();
-  el.stackApiUrl.value = localStorage.getItem(STACK_API_URL_STORAGE_KEY) || "";
+  el.stackApiUrl.value = SERVER_CONFIG.stackApiUrl
+    || localStorage.getItem(STACK_API_URL_STORAGE_KEY)
+    || "http://127.0.0.1:3080";
   populateBaseLanguage();
   updateQuestionLanguageVisibility();
   updateCorrectCountControls();
@@ -124,7 +134,7 @@ function updateLayout() {
   el.outputPanel.hidden = !el.showXml.checked;
   el.xmlPane.classList.toggle("closed", !el.showXml.checked);
   el.xmlToggleTab.setAttribute("aria-pressed", String(el.showXml.checked));
-  el.xmlToggleTab.title = el.showXml.checked ? "生成XMLを閉じる" : "生成XMLを開く";
+  el.xmlToggleTab.title = uiText(el.showXml.checked ? "生成XMLを閉じる" : "生成XMLを開く");
 }
 
 function bindEvents() {
@@ -361,6 +371,7 @@ async function evaluateCasLocally() {
     applyCasListExpressionResults();
     renderCasVariables();
     updateCasEvaluationBadges();
+    updateOptionLimit();
 
     const evaluated = Object.values(state.casEvaluation.expressions).filter((item) => item.ok).length;
     const failed = expressions.length - evaluated;
@@ -538,14 +549,14 @@ function buildLanguageInputs() {
     checkbox.id = `language${upperFirst(lang)}`;
     checkbox.type = "checkbox";
     checkbox.value = lang;
-    checkbox.checked = lang === "ja";
+    checkbox.checked = lang === INITIAL_LOCALE;
     label.append(checkbox, document.createTextNode(lang));
     choices.append(label);
 
     const field = document.createElement("div");
     field.className = "question-language-field";
     field.dataset.lang = lang;
-    field.hidden = lang !== "ja";
+    field.hidden = lang !== INITIAL_LOCALE;
     const fieldLabel = document.createElement("label");
     fieldLabel.htmlFor = `question${upperFirst(lang)}`;
     fieldLabel.textContent = lang;
@@ -556,7 +567,7 @@ function buildLanguageInputs() {
     const textarea = document.createElement("textarea");
     textarea.id = `question${upperFirst(lang)}`;
     textarea.rows = 4;
-    if (lang === "ja") textarea.value = DEFAULT_QUESTION_TEXT;
+    if (DEFAULT_QUESTION_TEXTS[lang]) textarea.value = DEFAULT_QUESTION_TEXTS[lang];
     heading.append(fieldLabel, mode);
     field.append(heading, textarea);
     fields.append(field);
@@ -576,14 +587,14 @@ function populateBaseLanguage() {
     const option = document.createElement("option");
     option.value = lang;
     option.textContent = lang;
-    option.selected = lang === "ja";
+    option.selected = lang === INITIAL_LOCALE;
     el.baseLanguage.append(option);
   });
   updateBaseLanguageUi();
 }
 
 function baseLang() {
-  return el.baseLanguage.value || "ja";
+  return el.baseLanguage.value || INITIAL_LOCALE;
 }
 
 function changeBaseLanguage() {
@@ -652,18 +663,31 @@ function renderRows() {
 }
 
 function updateOptionLimit() {
-  const patternCount = el.requirePairs.checked ? groupPatterns().length : countFixedPatterns();
-  const maximum = Math.max(1, patternCount);
+  const patterns = groupPatterns();
+  const capacity = el.requirePairs.checked
+    ? patterns.reduce((total, pattern) =>
+      total + Math.max(patternChoiceCapacity(pattern, "C"), patternChoiceCapacity(pattern, "W")), 0)
+    : patterns.reduce((total, pattern) =>
+      total + patternChoiceCapacity(pattern, "C") + patternChoiceCapacity(pattern, "W"), 0);
+  const maximum = Math.max(1, capacity);
   el.numOptions.max = String(maximum);
   if (Number(el.numOptions.value) > maximum) el.numOptions.value = String(maximum);
 }
 
-function countFixedPatterns() {
-  return ["C", "W"].reduce((total, truth) =>
-    total + fixedGroups(truth).filter((group) =>
-      group.rows.some((row) => activeLangs().some((lang) => String(row[`choice_${lang}`] || "").trim()))
-    ).length, 0
-  );
+function evaluatedChoiceCapacity(row, lang = baseLang()) {
+  if (!String(row[`choice_${lang}`] || "").trim()) return 0;
+  if ((row[`choice_type_${lang}`] || "text") !== "cas") return 1;
+  if (!state.casEvaluation.stale) {
+    const index = state.rows.indexOf(row);
+    const result = state.casEvaluation.expressions[choiceEvaluationId(index, lang)];
+    if (result?.ok) return result.type === "list" ? Number(result.length || 0) : 1;
+  }
+  // Until Maxima has evaluated a CAS expression, count it conservatively as one.
+  return 1;
+}
+
+function patternChoiceCapacity(pattern, truth) {
+  return pattern[truth].reduce((total, row) => total + evaluatedChoiceCapacity(row), 0);
 }
 
 function renderFixedGroups(truth, target) {
@@ -1137,38 +1161,79 @@ function decodeAppMetadata(value) {
 }
 
 function generatePairedVariableBlock(patterns, numOptions, counts) {
-  const minCorrect = Math.min(...counts);
-  const maxCorrect = Math.max(...counts);
-  if (maxCorrect > patterns.length) throw new Error("正解数が命題パターン数を超えています");
-  if (numOptions > patterns.length) throw new Error("選択肢数が命題パターン数を超えています");
   patterns.forEach((pattern) => {
     if (!pattern.C.length || !pattern.W.length) {
       throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
     }
   });
 
-  const maxWrong = numOptions - minCorrect;
+  const plans = counts.map((correctChoices) => {
+    const wrongChoices = numOptions - correctChoices;
+    const plan = pairedPatternSlotPlan(patterns, correctChoices, wrongChoices);
+    if (!plan) {
+      throw new Error(
+        `正解${correctChoices}個・誤答${wrongChoices}個を、評価済みの候補数と重複しないパターンから生成できません`
+      );
+    }
+    return { correctChoices, ...plan };
+  });
+  const maxCorrectSlots = Math.max(...plans.map((plan) => plan.correctSlots));
+  const maxWrongSlots = Math.max(...plans.map((plan) => plan.wrongSlots));
+
   const lines = [
     ...baseVariableLines(numOptions, counts),
-    `/* Randomly choose the number of true patterns from [${counts.join(", ")}]. */`,
+    `/* Randomly assign distinct patterns; each pattern may supply multiple options. */`,
     `%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`,
+    `%__mcq_num_cpatterns:${slotPlanExpression(plans, "correctSlots")};`,
+    `%__mcq_num_wpatterns:${slotPlanExpression(plans, "wrongSlots")};`,
     "",
   ];
 
-  for (let index = 0; index < maxCorrect; index += 1) {
+  for (let index = 0; index < maxCorrectSlots; index += 1) {
     appendRandomPattern(
       lines, "C", index + 1, String(index + 1), patterns,
-      `${index + 1} <= %_MCQ_NUM_COPTS`
+      `${index + 1} <= %__mcq_num_cpatterns`
     );
   }
-  for (let index = 0; index < maxWrong; index += 1) {
+  for (let index = 0; index < maxWrongSlots; index += 1) {
     appendRandomPattern(
-      lines, "W", index + 1, `%_MCQ_NUM_COPTS + ${index + 1}`, patterns,
-      `${index + 1} <= %_MCQ_NUM_OPTS - %_MCQ_NUM_COPTS`
+      lines, "W", index + 1, `%__mcq_num_cpatterns + ${index + 1}`, patterns,
+      `${index + 1} <= %__mcq_num_wpatterns`
     );
   }
   lines.push("/**************** End of generated variables ****************/");
   return lines.join("\n");
+}
+
+function pairedPatternSlotPlan(patterns, correctChoices, wrongChoices) {
+  const patternCount = patterns.length;
+  const correctCapacities = patterns.map((pattern) => patternChoiceCapacity(pattern, "C")).sort((a, b) => a - b);
+  const wrongCapacities = patterns.map((pattern) => patternChoiceCapacity(pattern, "W")).sort((a, b) => a - b);
+  const candidates = [];
+  for (let correctSlots = correctChoices ? 1 : 0; correctSlots <= patternCount; correctSlots += 1) {
+    if (!correctChoices && correctSlots > 0) break;
+    for (let wrongSlots = wrongChoices ? 1 : 0; wrongSlots <= patternCount - correctSlots; wrongSlots += 1) {
+      if (!wrongChoices && wrongSlots > 0) break;
+      const correctCapacity = correctCapacities.slice(0, correctSlots).reduce((sum, value) => sum + value, 0);
+      const wrongCapacity = wrongCapacities.slice(0, wrongSlots).reduce((sum, value) => sum + value, 0);
+      if (correctCapacity >= correctChoices && wrongCapacity >= wrongChoices) {
+        candidates.push({ correctSlots, wrongSlots });
+      }
+    }
+  }
+  candidates.sort((a, b) =>
+    (a.correctSlots + a.wrongSlots) - (b.correctSlots + b.wrongSlots)
+    || Math.abs(a.correctSlots - correctChoices) - Math.abs(b.correctSlots - correctChoices)
+  );
+  return candidates[0] || null;
+}
+
+function slotPlanExpression(plans, key) {
+  if (plans.every((plan) => plan[key] === plans[0][key])) return String(plans[0][key]);
+  return plans.slice(0, -1).reduceRight(
+    (otherwise, plan) => `if %_MCQ_NUM_COPTS=${plan.correctChoices} then ${plan[key]} else ${otherwise}`,
+    String(plans.at(-1)[key])
+  );
 }
 
 function generateFixedVariableBlock(patterns, numOptions, counts) {
@@ -1176,8 +1241,10 @@ function generateFixedVariableBlock(patterns, numOptions, counts) {
   const wrong = patterns.filter((pattern) => pattern.W.length);
   const maxCorrect = Math.max(...counts);
   const maxWrong = numOptions - Math.min(...counts);
-  if (maxCorrect > correct.length) throw new Error("正解数の候補に対して正解パターンが不足しています");
-  if (maxWrong > wrong.length) throw new Error("正解数の候補に対して誤答パターンが不足しています");
+  const correctCapacity = correct.reduce((sum, pattern) => sum + patternChoiceCapacity(pattern, "C"), 0);
+  const wrongCapacity = wrong.reduce((sum, pattern) => sum + patternChoiceCapacity(pattern, "W"), 0);
+  if (maxCorrect > correctCapacity) throw new Error("正解数の候補に対して正解選択肢が不足しています");
+  if (maxWrong > wrongCapacity) throw new Error("正解数の候補に対して誤答選択肢が不足しています");
 
   const lines = [
     ...baseVariableLines(numOptions, counts),
@@ -1202,8 +1269,7 @@ function appendFixedPattern(lines, truth, slot, pattern) {
 
 function independentChoicesValue(rows) {
   const items = rows.map((row) => localizedTyped(row, "choice", baseLang())).filter((item) => item.value);
-  if (items.length === 1 && items[0].listExpression) return maximaTypedValue(items[0]);
-  return `[${items.map(maximaTypedValue).join(", ")}]`;
+  return maximaChoiceList(items);
 }
 
 function choicesLangAssoc(rows) {
@@ -1249,12 +1315,8 @@ function randomizedLangAssoc(patterns, truth, orderPosition) {
   const entries = availableLangs(patterns.flatMap((pattern) => pattern[truth]));
   return maximaAssociation(entries.map((lang) => {
     const choicesByPattern = patterns.map((pattern) => {
-      const values = pattern[truth]
-        .map((row) => localizedTyped(row, "choice", lang))
-        .filter((item) => item.value)
-        .map(maximaTypedValue);
       const sourceItems = pattern[truth].map((row) => localizedTyped(row, "choice", lang)).filter((item) => item.value);
-      return sourceItems.length === 1 && sourceItems[0].listExpression ? maximaTypedValue(sourceItems[0]) : `[${values.join(", ")}]`;
+      return maximaChoiceList(sourceItems);
     });
     return `["${lang}", [${choicesByPattern.join(", ")}][%__mcq_pattern_order[${orderPosition}]]]`;
   }));
@@ -1323,10 +1385,15 @@ function maximaAssoc(entries, type) {
   const normalized = entries.filter(([, value]) => Array.isArray(value) ? value.length : String(value?.value ?? "").trim());
   return maximaAssociation(normalized.map(([lang, value]) => {
     const rendered = type === "list"
-      ? (value.length === 1 && value[0].listExpression ? maximaTypedValue(value[0]) : `[${value.map(maximaTypedValue).join(", ")}]`)
+      ? maximaChoiceList(value)
       : maximaTypedValue(value);
     return `["${lang}", ${rendered}]`;
   }));
+}
+
+function maximaChoiceList(items) {
+  const rendered = `[${items.map(maximaTypedValue).join(", ")}]`;
+  return items.some((item) => item.listExpression) ? `flatten(${rendered})` : rendered;
 }
 
 function maximaAssociation(entries) {
@@ -1384,7 +1451,7 @@ function translationPayload() {
     schema: "stack-mcq-translations-v1",
     source_language: source,
     target_languages: translationTargets(),
-    preserve_exactly: ["__SELTYPE__", "Maxima expressions", "LaTeX", "STACK {@...@} blocks", "HTML tags"],
+    preserve_exactly: ["__SELPROMPT__", "__SELTYPE__", "Maxima expressions", "LaTeX", "STACK {@...@} blocks", "HTML tags"],
     question_type: questionType,
     question_text: questionType === "text" ? el.questions[source].value : null,
     rows: state.rows.map((row, index) => ({
@@ -1409,10 +1476,10 @@ function prepareTranslationRequest() {
   copyCasValuesToTargets();
   const payload = translationPayload();
   el.translationJson.value = [
-    "次のSTACK MCQ教材を target_languages に翻訳してください。",
-    "数式、変数、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。",
-    "説明文を付けず、入力と同じ構造に translations を追加した有効なJSONだけを返してください。",
-    'translations は {"en":{"question_text":"...","rows":[{"id":"0","choice":"...","feedback":"..."}]}} の形式にしてください。',
+    uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
+    uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
+    uiText("説明文を付けず、入力と同じ構造に translations を追加した有効なJSONだけを返してください。"),
+    uiText('translations は {"en":{"question_text":"...","rows":[{"id":"0","choice":"...","feedback":"..."}]}} の形式にしてください。'),
     "",
     JSON.stringify(payload, null, 2),
   ].join("\n");
@@ -1530,7 +1597,7 @@ async function readSelectedXml(event) {
   const file = event.target.files?.[0];
   if (!file) return;
   try {
-    if (!window.confirm(`${file.name} を読み込みます。\n現在の入力内容は置き換えられます。`)) return;
+    if (!window.confirm(uiText(`${file.name} を読み込みます。\n現在の入力内容は置き換えられます。`))) return;
     const xmlText = await file.text();
     const includeSource = await resolveMainInclude(xmlText);
     const summary = importXmlText(xmlText, file.name, includeSource);
@@ -1664,7 +1731,7 @@ function changeIncludeMode() {
   const path = `001/${title}.txt`;
   const defaultUrl = publicIncludeUrl(path);
   const selected = window.prompt(
-    "XMLの stack_include(...) に設定するURLです。必要な場合は手動で変更してください。",
+    uiText("XMLの stack_include(...) に設定するURLです。必要な場合は手動で変更してください。"),
     defaultUrl
   );
   if (selected === null) {
@@ -2224,8 +2291,8 @@ function downloadSampleCsv() {
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "base_language", baseLang()],
-    ["qtextL", "ja", "次のうち正しいものを __SELTYPE__."],
-    ["qtextL", "en", "__SELTYPE__ the correct statement."],
+    ["qtextL", "ja", DEFAULT_QUESTION_TEXTS.ja],
+    ["qtextL", "en", DEFAULT_QUESTION_TEXTS.en],
     ["qvar", "", "aa1:rand([1, 2, 3])"],
     ["qvar", "", "aa2:rand([3, 4, 5])"],
   ];
@@ -2350,7 +2417,7 @@ function downloadIncludeFile() {
 function titleForSave() {
   let value = el.questionId.value.trim();
   if (!value) {
-    value = window.prompt("タイトルが未入力です。保存するファイルのタイトルを入力してください。", "NurseSample001")?.trim() || "";
+    value = window.prompt(uiText("タイトルが未入力です。保存するファイルのタイトルを入力してください。"), "NurseSample001")?.trim() || "";
     if (!value) {
       setStatus("タイトルが未入力のため保存を中止しました", true);
       el.questionId.focus();

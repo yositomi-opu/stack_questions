@@ -2,7 +2,7 @@ config,question_id,SampleNurse004
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】手袋の使用について適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】手袋の使用に関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"血液や体液に触れる可能性がある場合は、手袋を使用する"
 option,01,W,"血液や体液に触れる可能性があっても、手袋は使用しない"
 feedback,01,"血液・体液、粘膜、損傷皮膚などへの接触が予想される場合は手袋を使用します。"

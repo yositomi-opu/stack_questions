@@ -98,30 +98,26 @@ ta1:%__mcq_taW;
 if %__mcq_nocorrectopt then (if %__mcq_nocorrecttrue then ta1:append(%__mcq_taC, %__mcq_NCL) else ta1:append(%__mcq_taW, %__mcq_NCL));
 if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
 Cans1:mcq_correct(ta1);/* formal defintion. not used */
-/********** __SELTYPE__ (%__mcq_qtext_auto) **********/
+/********** __SELPROMPT__ / legacy __SELTYPE__ (%__mcq_qtext_auto) **********/
 %__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
-%__mcq_SELL:[["en", "Choose "], ["fr", "Choisissez "], ["de", "Wählen Sie "], ["it", "Scegli "], ["ja", "選べ."]];
+/* Legacy fragment for question texts which put __SELTYPE__ next to the object. */
+%__mcq_SELL:[["en", "Choose"], ["fr", "Choisissez"], ["de", "Wählen Sie"], ["it", "Scegli"], ["ja", "1つ選べ"], ["pt", "Escolha"], ["zh", "选择"], ["ko", "선택하시오"], ["ru", "Выберите"], ["sv", "Välj"]];
 %__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
-%__mcq_SELALLL:[
- ["en", "Select all correct answers "],
- ["fr", "Sélectionnez toutes les réponses correctes "],
- ["de", "Wählen Sie alle richtigen Antworten aus "],
- ["it", "Seleziona tutte le risposte corrette "],
- ["ja", "すべて選べ"]];
-%__mcq_SELALLL:[["en", "Select all correct answers "],
- ["fr", "Sélectionnez toutes les réponses correctes "],
- ["de", "Wählen Sie alle richtigen Antworten aus "],
- ["ja", "すべて選べ"]];
+%__mcq_SELALLL:[["en", "Choose all"], ["fr", "Choisissez toutes les"], ["de", "Wählen Sie alle"], ["it", "Scegli tutte le"], ["ja", "すべて選べ"], ["pt", "Escolha todas as"], ["zh", "选择所有"], ["ko", "모두 선택하시오"], ["ru", "Выберите все"], ["sv", "Välj alla"]];
 %__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
 %__mcq_SELONEANYL:[
- ["en", "Choose one (even if multiple correct answers exist)"],
- ["fr", "Choisissez une (même s’il existe plusieurs réponses correctes)"],
- ["de", "Wählen Sie eine (auch wenn es mehrere richtige Antworten gibt)"],
- ["it", "Scegli una (anche se esistono più risposte corrette)"],
- ["ja", "1つ選べ（正解が複数あっても1つでよい）"]];
+ ["en", "Choose one of the"], ["fr", "Choisissez une des"], ["de", "Wählen Sie eine der"], ["it", "Scegli una delle"], ["ja", "1つ選べ（正解が複数あっても1つでよい）"], ["pt", "Escolha uma das"], ["zh", "选择其中一个"], ["ko", "그중 하나를 선택하시오"], ["ru", "Выберите один из"], ["sv", "Välj ett av"]];
 %__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
-qtext:ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext);
+
+/* New full-sentence prompt. Prefer __SELPROMPT__ in newly authored questions. */
+%__mcq_SELPROMPT_ONE_L:[
+ ["en", "Select the correct answer."], ["fr", "Sélectionnez la bonne réponse."], ["de", "Wählen Sie die richtige Antwort aus."], ["it", "Seleziona la risposta corretta."], ["ja", "正しいものを1つ選べ。"], ["pt", "Selecione a resposta correta."], ["zh", "请选择一个正确答案。"], ["ko", "정답 하나를 선택하시오."], ["ru", "Выберите правильный ответ."], ["sv", "Välj rätt svar."]];
+%__mcq_SELPROMPT_ALL_L:[
+ ["en", "Select all correct answers."], ["fr", "Sélectionnez toutes les bonnes réponses."], ["de", "Wählen Sie alle richtigen Antworten aus."], ["it", "Seleziona tutte le risposte corrette."], ["ja", "正しいものをすべて選べ。"], ["pt", "Selecione todas as respostas corretas."], ["zh", "请选择所有正确答案。"], ["ko", "정답을 모두 선택하시오."], ["ru", "Выберите все правильные ответы."], ["sv", "Välj alla rätta svar."]];
+%__mcq_SELPROMPT_ANY_L:[
+ ["en", "Select one correct answer, even if more than one is correct."], ["fr", "Sélectionnez une bonne réponse, même s’il y en a plusieurs."], ["de", "Wählen Sie eine richtige Antwort aus, auch wenn es mehrere gibt."], ["it", "Seleziona una risposta corretta, anche se ce n’è più di una."], ["ja", "正しいものを1つ選べ（複数ある場合も1つでよい）。"], ["pt", "Selecione uma resposta correta, mesmo que haja mais de uma."], ["zh", "请选择一个正确答案，即使正确答案不止一个。"], ["ko", "정답이 여러 개여도 하나만 선택하시오."], ["ru", "Выберите один правильный ответ, даже если их несколько."], ["sv", "Välj ett rätt svar, även om det finns flera."]];
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG) else if %__mcq_num_copts>1 then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG) else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
+qtext:ssubst(%__mcq_selprompt, "__SELPROMPT__", ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext));
 
 /***** EOF *****/
-

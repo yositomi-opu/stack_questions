@@ -9,7 +9,7 @@
 /* noidea: "I don't know" option is included? */
 /* nocorrectopt: "No correct options above." option is included?  */
 /* nocorrecttrue: "No correct options above." is correcct option? */
-/* qtext_auto: check the case of rb or cb and decide appropriate words for __SELTYPE__ */
+/* qtext_auto: check rb/cb and decide the full __SELPROMPT__ or legacy __SELTYPE__ text */
 if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min;
 [%__mcq_fbp, %__mcq_subsc, %__mcq_noidea, %__mcq_nocorrectopt, %__mcq_nocorrecttrue, %__mcq_qtext_auto]:%_MCQ_FLAGS;
 /* get_assoc_array is also defined in ky_linear_algebra.txt */

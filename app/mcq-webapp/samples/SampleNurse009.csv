@@ -2,7 +2,7 @@ config,question_id,SampleNurse009
 config,mode,rb
 config,num_options,5
 config,num_correct,1
-qtextL,ja,"【感染対策】接触予防策について適切な記述を __SELTYPE__."
+qtextL,ja,"【感染対策】接触予防策に関する次の記述について答えよ。__SELPROMPT__"
 option,01,C,"接触予防策は、標準予防策に追加して実施する"
 option,01,W,"接触予防策を行う場合は、標準予防策を中止する"
 feedback,01,"感染経路別予防策は標準予防策に追加して行います。"

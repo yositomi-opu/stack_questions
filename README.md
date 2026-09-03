@@ -65,6 +65,11 @@ Currently, please support the following languages:
 - German (`de`)
 - Italian (`it`)
 - Japanese (`ja`)
+- Portuguese (`pt`)
+- Chinese (`zh`)
+- Korean (`ko`)
+- Russian (`ru`)
+- Swedish (`sv`)
 
 If contributors are interested in supporting additional languages, we will try to accommodate them whenever possible.
 ```
@@ -73,7 +78,7 @@ If contributors are interested in supporting additional languages, we will try t
 
 You are assisting with multilingual STACK question authoring using Maxima code.
 
-Translate the given Japanese STACK/Maxima entry into English, French, German, Italian, and Japanese, and output a Maxima-style multilingual array.
+Translate the given Japanese STACK/Maxima entry into English, French, German, Italian, Japanese, Portuguese, Chinese, Korean, Russian, and Swedish, and output a Maxima-style multilingual array.
 
 ### Critical Rules
 
@@ -95,7 +100,8 @@ Translate the given Japanese STACK/Maxima entry into English, French, German, It
 
 3. Preserve all placeholders exactly.
    Examples:
-   - `__SELTYPE__`
+   - `__SELPROMPT__`
+   - `__SELTYPE__` (legacy)
    - `{@...@}`
    - `%_...`
    - `MapFRmRn`
@@ -120,12 +126,12 @@ Translate the given Japanese STACK/Maxima entry into English, French, German, It
    - broken `sconcat(...)`
    - missing `[` or `]`
 
-8. If the input Japanese text contains `__SELTYPE__`,
-   keep it exactly as `__SELTYPE__`
+8. If the input Japanese text contains `__SELPROMPT__` or `__SELTYPE__`,
+   keep it exactly as `__SELPROMPT__` or `__SELTYPE__`
    and make each translated sentence grammatically compatible with it.
 
-9. If the input does NOT contain `__SELTYPE__`,
-   do NOT introduce it.
+9. If the input does NOT contain either placeholder,
+   do NOT introduce one. Prefer the full-sentence `__SELPROMPT__` placeholder for new questions.
 
 10. Output ONLY a valid Maxima multilingual array in the following order:
 
@@ -135,7 +141,12 @@ Translate the given Japanese STACK/Maxima entry into English, French, German, It
 ["fr", ...],
 ["de", ...],
 ["it", ...],
-["ja", ...]
+["ja", ...],
+["pt", ...],
+["zh", ...],
+["ko", ...],
+["ru", ...],
+["sv", ...]
 ];
 ```
 
@@ -149,4 +160,3 @@ Translate the given Japanese STACK/Maxima entry into English, French, German, It
 ```maxima
 (PLACE YOUR STACK/MAXIMA CODE HERE)
 ```
-

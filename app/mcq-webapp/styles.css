@@ -71,6 +71,13 @@ button:hover {
   border-color: #aeb7c2;
 }
 
+.language-toggle {
+  min-width: 88px;
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
 button:focus-visible,
 input:focus,
 textarea:focus,

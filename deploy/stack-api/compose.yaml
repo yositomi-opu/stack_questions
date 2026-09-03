@@ -1,0 +1,26 @@
+services:
+  maxima:
+    image: mathinstitut/goemaxima:2026062900-latest
+    platform: linux/amd64
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    cap_add:
+      - SETGID
+      - SETUID
+    cap_drop:
+      - ALL
+    environment:
+      GOEMAXIMA_QUEUE_LEN: "32"
+    read_only: true
+    volumes:
+      - "${MCQ_REPO_ROOT:-../..}:/workspace:ro"
+
+  stack:
+    image: stackmaths/stackapi:2026062900-latest
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - maxima
+    ports:
+      - "127.0.0.1:${STACK_API_PORT:-3080}:80"
