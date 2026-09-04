@@ -15,7 +15,7 @@ make setup INCLUDE_BASE_URL=https://username.github.io/repository/
 make start
 ```
 
-`make check` reports the required Python, Git, Make, Docker, and Docker Compose components. `make install-deps` shows the OS-specific install plan and runs it only after interactive confirmation. `INCLUDE_BASE_URL` is optional; set it when publishing a fork of the include libraries or saving question variables separately with `stack_include`. Direct embedding of the main question variables remains the default. See [app/mcq-webapp/README.md](app/mcq-webapp/README.md) for macOS, Windows, and Ubuntu instructions.
+`make check` reports the required Python, Git, Make, Docker, and Docker Compose components. On Linux, if the current user cannot access the Docker socket, it explains the security implications and offers to run `sudo usermod -aG docker <user>` only after interactive confirmation. Run these commands as your normal user, not with `sudo`. `make install-deps` shows the OS-specific install plan and runs it only after interactive confirmation. `INCLUDE_BASE_URL` is optional; set it when publishing a fork of the include libraries or saving question variables separately with `stack_include`. Direct embedding of the main question variables remains the default. See [app/mcq-webapp/README.md](app/mcq-webapp/README.md) for macOS, Windows, and Ubuntu instructions.
 
 ## MCQ questions
 

@@ -13,10 +13,11 @@ Git、Python 3.10以降、Docker EngineとDocker Composeを用意してから、
 ```sh
 git clone https://github.com/yositomi-opu/stack_questions.git
 cd stack_questions
+make check
 make setup
 ```
 
-`make setup`はOSを判別し、権限を修復し、公式STACK API Dockerイメージを取得して、STACK APIとMCQ WebAppをバックグラウンド起動します。2回目以降は`make start`を使用します。ホストにMaximaがありSTACKコードが設定済みならそれを優先し、そうでなければDocker内のSTACK用Maximaで問題変数を評価します。
+clone直後の`make check`はセットアップ前診断として動作します。必要なコマンドとDocker接続を確認し、問題がなければ`次の操作: make setup`と表示します。`make setup`はOSを判別し、権限を修復し、公式STACK API Dockerイメージを取得して、STACK APIとMCQ WebAppをバックグラウンド起動します。2回目以降は`make start`を使用します。ホストにMaximaがありSTACKコードが設定済みならそれを優先し、そうでなければDocker内のSTACK用Maximaで問題変数を評価します。
 
 セットアップ後、[http://127.0.0.1:4173/](http://127.0.0.1:4173/)を開きます。画面では、問題変数・問題文・選択肢を入力し、「問題変数を評価」でSTACK/Maximaの評価結果を確認してから「XML保存」でファイルを保存します。
 
@@ -43,7 +44,7 @@ make setup LOCALE=ja
 make setup LOCALE=en
 ```
 
-`make check`はPython 3.10以降、Git、Make、Docker CLI、Docker Compose、Docker Desktop（Mac／Windows）を個別に確認します。macOSではHomebrew、全OSでホストMaximaも表示しますが、これら2つは必須ではありません。不足がある場合、`make setup`または`make install-deps`は実行予定のOS別コマンドを先に表示し、端末で明示的に許可された場合だけ実行します。LinuxのDocker Engineはリポジトリ設定と管理者権限を伴うため、自動変更せずDocker公式手順を案内します。Python自体がない場合は管理スクリプトを実行できないため、先にOSのPython 3を導入してください。
+`make check`はPython 3.10以降、Git、Make、Docker CLI、Docker Compose、Docker Desktop（Mac／Windows）を個別に確認します。macOSではHomebrew、全OSでホストMaximaも表示しますが、これら2つは必須ではありません。不足がある場合、`make setup`または`make install-deps`は実行予定のOS別コマンドを先に表示し、端末で明示的に許可された場合だけ実行します。LinuxのDocker Engine自体は、リポジトリ設定と管理者権限を伴うため自動インストールしません。Docker socketの権限不足だけは、`make check`と`make setup`が内容と注意点を表示し、端末で明示的に許可された場合に限り`sudo usermod -aG docker <ユーザー名>`を実行します。Python自体がない場合は管理スクリプトを実行できないため、先にOSのPython 3を導入してください。
 
 ## stack_includeの公開URL
 
@@ -107,7 +108,7 @@ Windows版Maximaは必須ではありません。インストールして`MAXIMA
 
 Ubuntu ServerではGit、Python 3.10以降、GNU Make、Docker Engine、Docker Compose pluginを用意します。Dockerは[公式のUbuntu向け手順](https://docs.docker.com/engine/install/ubuntu/)でインストールし、`docker compose version`と`docker info`が成功する状態にします。
 
-`docker info`がpermission deniedになる場合は、Docker公式のLinux post-install手順に従って実行ユーザーを`docker`グループへ追加し、いったんログアウトして入り直してください。`make check`はリポジトリ内の実行権限を自動修復し、Docker socketのように管理者権限が必要な項目は修復方法が分かるエラーとして報告します。
+`docker info`がpermission deniedになる場合、`make check`は実行ユーザーが`docker`グループに未登録か、登録済みだが現在のセッションへ未反映なのかを判別します。未登録の場合は、dockerグループがroot相当の権限を持つことと実行予定の`sudo usermod -aG docker <ユーザー名>`を表示し、確認を得た場合だけ実行します。実行後はいったんログアウトしてログインし直し、`docker info`を確認してから`make setup`を実行してください。`sudo make check`や`sudo make setup`は、リポジトリ内にroot所有ファイルを作る可能性があるため使用しないでください。
 
 Workshop参加者が別PCのブラウザから接続する場合は、初回だけ次のように設定します。
 
@@ -180,7 +181,7 @@ py -3 app\mcq-webapp\server.py --check
 - macOSで「Docker Desktop本体が見つかりません」：`brew install --cask docker-desktop`で導入し、`open -a Docker`で起動します。Dockerメニューの表示後、起動完了まで待ってから`make setup`を再実行してください。
 - `server.py: No such file or directory`：リポジトリのルートへ移動してから実行するか、OS別ランチャーを使用してください。
 - `Address already in use`：同じポートのサーバーがすでに動作しています。ブラウザで`http://127.0.0.1:4173/`を開くか、`--reload`で再起動してください。
-- `STACK code: 未読込`：OS別ランチャーを再実行するか、`--install-stack`または`--setup-stack`で設定してください。
+- clone直後の`STACK code: 未読込`：Docker権限を反映して`make setup`を実行すると、Docker内のSTACK用Maximaが自動的に使われます。ホストMaximaを使う場合だけ、`--install-stack`または`--setup-stack`で設定してください。
 - `rand(...)`などが式のまま表示される：`--check`で`STACK code: OK`を確認し、サーバーを`--reload`で再起動してからブラウザを再読み込みしてください。
 - ダンプ生成に失敗する：通常は評価時の通常読込へ自動的に切り替わります。手動設定では`--no-dump`を追加できます。
 - macOSで「`maxima-stack`は開けません。ゴミ箱に入れますか？」と表示される：`maxima-stack`はホスト固有の生成キャッシュで、Nextcloud経由で別のMacへ同期して使うものではありません。ゴミ箱へ移して構いません。`make check`は隔離属性の付いたキャッシュを実行せず設定から外し、通常読込またはDockerへ切り替えます。

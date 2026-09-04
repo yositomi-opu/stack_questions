@@ -8,6 +8,7 @@ import json
 import locale as locale_module
 import os
 import platform
+import shlex
 import shutil
 import stat
 import subprocess
@@ -462,7 +463,69 @@ def compose_prefix() -> list[str]:
     raise ManagerError(f"Docker Composeが見つかりません。\n{dependency_help()}")
 
 
-def require_docker_daemon() -> None:
+def offer_linux_docker_group_fix() -> None:
+    """Offer the standard Docker group fix after an explicit confirmation."""
+    import grp
+    import pwd
+
+    account = pwd.getpwuid(os.getuid())
+    username = account.pw_name
+    try:
+        docker_group = grp.getgrnam("docker")
+    except KeyError as exc:
+        raise ManagerError(
+            "Docker socketへのアクセス権限がありません。また、dockerグループも見つかりません。\n"
+            "Docker Engineのインストールを確認し、sudo systemctl restart docker を実行してから再確認してください。"
+        ) from exc
+
+    active_group_ids = set(os.getgroups()) | {os.getgid()}
+    group_active = docker_group.gr_gid in active_group_ids
+    group_configured = (
+        group_active
+        or account.pw_gid == docker_group.gr_gid
+        or username in docker_group.gr_mem
+    )
+    if group_configured and not group_active:
+        raise ManagerError(
+            f"ユーザー {username} はdockerグループに登録済みですが、現在のログインセッションには未反映です。\n"
+            "いったんログアウトしてログインし直した後、docker info と make setup を実行してください。"
+        )
+    if group_active:
+        raise ManagerError(
+            f"ユーザー {username} のdockerグループは有効ですが、Docker socketへ接続できません。\n"
+            "sudo systemctl restart docker を実行し、ls -l /var/run/docker.sock で所有グループを確認してください。"
+        )
+
+    command = ["sudo", "usermod", "-aG", "docker", username]
+    displayed_command = shlex.join(command)
+    instructions = (
+        f"実行コマンド: {displayed_command}\n"
+        "実行後はいったんログアウトしてログインし直し、docker info と make setup を実行してください。"
+    )
+    if not sys.stdin.isatty():
+        raise ManagerError(
+            "Docker socketへのアクセス権限がありません。対話端末ではないため自動修復しません。\n"
+            + instructions
+        )
+
+    print(
+        "\nDockerグループへの所属は、実質的にroot相当の権限をユーザーへ与えます。\n"
+        f"ユーザー {username} をdockerグループへ追加するため、次を実行します。\n"
+        f"  {displayed_command}"
+    )
+    answer = input("sudoを使用して実行しますか？ [y/N] ").strip().lower()
+    if answer not in {"y", "yes"}:
+        raise ManagerError("Dockerグループの設定を変更しませんでした。\n" + instructions)
+    if not shutil.which("sudo"):
+        raise ManagerError("sudoが見つかりません。rootユーザーに次の実行を依頼してください。\n" + instructions)
+    run(command)
+    raise ManagerError(
+        f"ユーザー {username} をdockerグループへ追加しました。現在のセッションにはまだ反映されません。\n"
+        "いったんログアウトしてログインし直した後、docker info と make setup を実行してください。"
+    )
+
+
+def require_docker_daemon(*, offer_group_fix: bool = False) -> None:
     completed = subprocess.run(
         ["docker", "info"],
         cwd=REPO_ROOT,
@@ -485,9 +548,11 @@ def require_docker_daemon() -> None:
                 "open -a Docker で起動し、起動完了を待ってから再実行してください。"
             )
         if platform.system() == "Linux" and ("permission denied" in diagnostics or "connect: permission" in diagnostics):
+            if offer_group_fix and hasattr(os, "getuid") and os.geteuid() != 0:
+                offer_linux_docker_group_fix()
             raise ManagerError(
-                "Docker socketへのアクセス権限がありません。Docker公式のpost-install手順に従って"
-                "実行ユーザーをdockerグループへ追加し、ログインし直してください。"
+                "Docker socketへのアクセス権限がありません。次を実行してからログインし直してください。\n"
+                "sudo usermod -aG docker \"$USER\""
             )
         raise ManagerError(f"Docker daemonへ接続できません。Docker DesktopまたはDocker Engineを起動してください。\n{dependency_help()}")
 
@@ -694,7 +759,7 @@ def setup(config: dict[str, Any]) -> None:
     if missing:
         install_missing_dependencies(missing)
     require_basic_dependencies()
-    require_docker_daemon()
+    require_docker_daemon(offer_group_fix=True)
     compose_prefix()
     print_step("公式STACK APIイメージを取得")
     run(compose_command(config, "pull"), env=compose_environment(config))
@@ -722,18 +787,48 @@ def check(config: dict[str, Any]) -> None:
         print("権限・ローカル書込: OK")
     except OSError as exc:
         failures.append(f"権限・ローカル書込: {exc}")
-    if run(python_command("--check"), check=False).returncode:
-        failures.append("ローカルMaxima／STACKコードの評価に失敗")
+    docker_ready = False
     if not set(missing) & {"docker", "docker-compose", "docker-desktop"}:
         try:
-            require_docker_daemon()
+            require_docker_daemon(offer_group_fix=True)
+            docker_ready = True
+        except ManagerError as exc:
+            failures.append(f"Docker: {exc}")
+    else:
+        failures.append("Docker: 必須コンポーネントが不足しているため接続確認を省略しました")
+
+    saved_config = load_config()
+    setup_complete = all(
+        saved_config.get(key)
+        for key in ("server_host", "server_port", "stack_api_port", "ui_locale_mode")
+    )
+    if not setup_complete:
+        print("ローカルMaxima／STACKコード: 初回セットアップ前のため確認を省略")
+        print("STACK API: 初回セットアップ前のため確認を省略")
+        print("MCQ WebApp: 初回セットアップ前のため確認を省略")
+        if failures:
+            raise ManagerError("\n".join(f"- {failure}" for failure in failures))
+        if not docker_ready:
+            raise ManagerError("Docker daemonへ接続できません")
+        print("事前チェック: OK")
+        print("次の操作: make setup")
+        return
+
+    host_stack_configured = bool(saved_config.get("stack_maxima_dir"))
+    if docker_ready or host_stack_configured:
+        if run(python_command("--check"), check=False).returncode:
+            failures.append("ローカルMaxima／STACKコードの評価に失敗")
+    else:
+        print("ローカルMaxima／STACKコード: Docker権限を解決するまで確認を省略")
+    if docker_ready:
+        try:
             run(compose_command(config, "ps"), env=compose_environment(config))
             stack_api_request(config["stack_api_url"])
             print(f"STACK API: OK ({config['stack_api_url']})")
         except (ManagerError, HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
             failures.append(f"STACK API: {exc}")
     else:
-        failures.append("STACK API: Dockerの必須コンポーネントが不足しているため確認を省略しました")
+        print("STACK API: Dockerへ接続できないため確認を省略")
     status = web_status(config)
     if status:
         print(f"MCQ WebApp: OK ({local_web_url(config)}/, PID {status.get('pid', '?')})")
