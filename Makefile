@@ -13,9 +13,11 @@ HOST ?=
 PORT ?=
 STACK_API_PORT ?=
 LOCALE ?=
-SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if $(STACK_API_PORT),--stack-api-port "$(STACK_API_PORT)") $(if $(LOCALE),--locale "$(LOCALE)")
+INCLUDE_BASE_URL ?=
+RUNTIME_ARGS := $(if $(INCLUDE_BASE_URL),--include-base-url "$(INCLUDE_BASE_URL)")
+SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if $(STACK_API_PORT),--stack-api-port "$(STACK_API_PORT)") $(if $(LOCALE),--locale "$(LOCALE)") $(RUNTIME_ARGS)
 
-.PHONY: all clean setup check start stop restart status
+.PHONY: all clean check-python setup check install-deps start stop restart status
 
 all: $(MACFILES)
 
@@ -25,20 +27,31 @@ all: $(MACFILES)
 clean:
 	rm -f $(MACFILES)
 
-setup:
+ifeq ($(OS),Windows_NT)
+check-python:
+	@$(PYTHON) --version >NUL 2>&1 || (echo Python 3.10 or later is required. Install it from https://www.python.org/downloads/windows/ & exit /b 1)
+else
+check-python:
+	@$(PYTHON) --version >/dev/null 2>&1 || { echo "Python 3.10 or later is required. Install Python 3 and retry."; exit 1; }
+endif
+
+setup: check-python
 	@$(PYTHON) scripts/mcq-webapp.py setup $(SETUP_ARGS)
 
-check:
-	@$(PYTHON) scripts/mcq-webapp.py check
+check: check-python
+	@$(PYTHON) scripts/mcq-webapp.py check $(RUNTIME_ARGS)
 
-start:
-	@$(PYTHON) scripts/mcq-webapp.py start
+install-deps: check-python
+	@$(PYTHON) scripts/mcq-webapp.py install-deps
 
-stop:
+start: check-python
+	@$(PYTHON) scripts/mcq-webapp.py start $(RUNTIME_ARGS)
+
+stop: check-python
 	@$(PYTHON) scripts/mcq-webapp.py stop
 
-restart:
-	@$(PYTHON) scripts/mcq-webapp.py restart
+restart: check-python
+	@$(PYTHON) scripts/mcq-webapp.py restart $(RUNTIME_ARGS)
 
-status:
-	@$(PYTHON) scripts/mcq-webapp.py status
+status: check-python
+	@$(PYTHON) scripts/mcq-webapp.py status $(RUNTIME_ARGS)

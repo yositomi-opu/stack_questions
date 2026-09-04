@@ -50,6 +50,8 @@ STACK_API_COMPOSE_PROJECT = "stack-mcq-webapp"
 DOCKER_STACK_MAXIMA = "docker://stack-mcq-webapp/maxima"
 ACTIVE_UI_LOCALE = "ja"
 ACTIVE_STACK_API_URL = "http://127.0.0.1:3080"
+DEFAULT_INCLUDE_BASE_URL = "https://yositomi-opu.github.io/stack_questions/"
+ACTIVE_INCLUDE_BASE_URL = DEFAULT_INCLUDE_BASE_URL
 ALLOW_REMOTE_STACK_API = False
 _DUMP_VALIDITY: dict[str, bool] = {}
 _DUMP_WARNED: set[str] = set()
@@ -84,6 +86,21 @@ def resolve_ui_locale(value: str) -> str:
         "",
     )
     return "ja" if language.startswith("ja") else "en"
+
+
+def normalize_include_base_url(value: str) -> str:
+    candidate = (value or "").strip()
+    if not candidate:
+        raise ValueError("include URLベースを入力してください")
+    if any(character in candidate for character in ('"', "\r", "\n")):
+        raise ValueError("include URLベースに引用符や改行は使用できません")
+    parsed = urlparse(candidate)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("include URLベースはhttp://またはhttps://で始まるURLを指定してください")
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("include URLベースに認証情報、クエリ、フラグメントは指定できません")
+    path = parsed.path.rstrip("/") + "/"
+    return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
 
 
 def server_command(*arguments: str) -> str:
@@ -833,7 +850,11 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
             body = (
                 "window.MCQ_WEBAPP_CONFIG = "
                 + json.dumps(
-                    {"locale": ACTIVE_UI_LOCALE, "stackApiUrl": ACTIVE_STACK_API_URL},
+                    {
+                        "locale": ACTIVE_UI_LOCALE,
+                        "stackApiUrl": ACTIVE_STACK_API_URL,
+                        "includeBaseUrl": ACTIVE_INCLUDE_BASE_URL,
+                    },
                     ensure_ascii=False,
                 )
                 + ";\n"
@@ -854,6 +875,7 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
                     "pid": os.getpid(),
                     "locale": ACTIVE_UI_LOCALE,
                     "stackApiUrl": ACTIVE_STACK_API_URL,
+                    "includeBaseUrl": ACTIVE_INCLUDE_BASE_URL,
                 },
             )
             return
@@ -965,7 +987,7 @@ def reload_running_server(url: str) -> bool:
 
 
 def main() -> None:
-    global ACTIVE_STACK_API_URL, ACTIVE_UI_LOCALE, ALLOW_REMOTE_STACK_API
+    global ACTIVE_INCLUDE_BASE_URL, ACTIVE_STACK_API_URL, ACTIVE_UI_LOCALE, ALLOW_REMOTE_STACK_API
     parser = argparse.ArgumentParser(description="STACK MCQ WebアプリとローカルMaxima評価APIを起動します")
     parser.add_argument("--host", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=4173, help="port (default: 4173)")
@@ -982,6 +1004,14 @@ def main() -> None:
             load_local_config().get("stack_api_url", "http://127.0.0.1:3080"),
         ),
         help="既定のSTACK API URL (default: http://127.0.0.1:3080)",
+    )
+    parser.add_argument(
+        "--include-base-url",
+        default=os.environ.get(
+            "INCLUDE_BASE_URL",
+            load_local_config().get("include_base_url", DEFAULT_INCLUDE_BASE_URL),
+        ),
+        help=f"stack_include用の公開URLベース (default: {DEFAULT_INCLUDE_BASE_URL})",
     )
     parser.add_argument(
         "--allow-remote-stack-api",
@@ -1015,6 +1045,7 @@ def main() -> None:
     try:
         ACTIVE_UI_LOCALE = resolve_ui_locale(args.locale)
         ACTIVE_STACK_API_URL = normalize_stack_api_url(args.stack_api_url)
+        ACTIVE_INCLUDE_BASE_URL = normalize_include_base_url(args.include_base_url)
         ALLOW_REMOTE_STACK_API = args.allow_remote_stack_api
     except ValueError as exc:
         parser.exit(2, f"起動設定が不正です: {exc}\n")
@@ -1112,6 +1143,7 @@ def main() -> None:
     print(f"STACK MCQ XML Generator: {url}/")
     print(f"UI locale: {ACTIVE_UI_LOCALE} ({args.locale})")
     print(f"STACK API: {ACTIVE_STACK_API_URL}")
+    print(f"include URL base: {ACTIVE_INCLUDE_BASE_URL}")
     check_startup_maxima()
     print("終了するには Ctrl-C を押してください")
     if args.open_browser:

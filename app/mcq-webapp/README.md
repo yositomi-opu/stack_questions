@@ -28,7 +28,8 @@ GitHub Pages上でも静的な入力・CSV保存・XML生成は動作します�
 
 ```sh
 make setup    # 初回設定、Dockerイメージ取得、両サービスの起動
-make check    # 権限修復とPython／Maxima／STACK API／WebAppの総合診断
+make check    # 必須コマンド、権限、Maxima、STACK API、WebAppの総合診断
+make install-deps  # 不足コマンドのOS別導入案を表示し、確認後に導入
 make start    # STACK APIとWebAppを開始
 make stop     # 両サービスを停止
 make restart  # 両サービスを再起動
@@ -42,6 +43,24 @@ make setup LOCALE=ja
 make setup LOCALE=en
 ```
 
+`make check`はPython 3.10以降、Git、Make、Docker CLI、Docker Compose、Docker Desktop（Mac／Windows）を個別に確認します。macOSではHomebrew、全OSでホストMaximaも表示しますが、これら2つは必須ではありません。不足がある場合、`make setup`または`make install-deps`は実行予定のOS別コマンドを先に表示し、端末で明示的に許可された場合だけ実行します。LinuxのDocker Engineはリポジトリ設定と管理者権限を伴うため、自動変更せずDocker公式手順を案内します。Python自体がない場合は管理スクリプトを実行できないため、先にOSのPython 3を導入してください。
+
+## stack_includeの公開URL
+
+問題変数をXMLへ直接記述する方式が既定です。「問題変数を別ファイルに保存する」を有効にした場合だけ、別ファイルと`stack_include(...)`を生成します。一般ユーザーは、Moodle／STACKサーバーから取得できる公開URLを初回setupで指定してください。
+
+```sh
+make setup INCLUDE_BASE_URL=https://username.github.io/repository/
+```
+
+末尾の`/`は自動的に補われ、設定は`app/mcq-webapp/.local-config.json`へ保存されます。画面の「include URLベース」でも一時的に変更できます。このURLは、生成XML内の`ky_linear_algebra.mac`、`tex_library.mac`、各`mcq_template_*.mac`と、別保存した問題変数ファイルのすべてに適用されます。公開先にはリポジトリのこれらのファイルを同じ相対配置で置いてください。たとえば問題名が`NurseSample001`なら、問題変数の生成URLは次のようになります。
+
+```text
+https://username.github.io/repository/001/NurseSample001.txt
+```
+
+設定を省略した場合は、後方互換性のため`https://yositomi-opu.github.io/stack_questions/`を使用します。自分で作成したincludeファイルをこのURLへ配置することはできないため、別ファイル方式を使うユーザーは自分のGitHub PagesまたはWebサーバーを設定する必要があります。`localhost`は通常Moodleサーバー自身を指すため、MoodleとWebAppが同一ホストでない限り指定しないでください。
+
 画面右上の`English`／`日本語`ボタンで一時的に表示を切り替えることもできます。問題文、選択肢、生成XML、STACK API応答の内容は切替対象外です。
 
 ## OS別の起動
@@ -49,6 +68,15 @@ make setup LOCALE=en
 ### macOS
 
 Docker Desktop、Git、Python 3.10以降をインストールします。ターミナルでは`make setup`を実行します。Finderからは`scripts/macos/start-mcq-webapp.command`をダブルクリックでき、未設定ならsetup、設定済みならstartを自動実行してブラウザを開きます。
+
+Homebrewが利用できる場合、Docker Desktopは次のコマンドでインストールして起動できます。
+
+```sh
+brew install --cask docker-desktop
+open -a Docker
+```
+
+Docker Desktopの起動完了後、`docker info`が成功することを確認してから`make setup`を実行します。`make setup`はOSを自動判別し、macOSでDocker Desktop本体が見つからない場合には上記のインストール方法を表示します。
 
 macOSで初回のダブルクリックがセキュリティ設定により拒否された場合は、FinderでファイルをControlキーを押しながらクリックして「開く」を選択するか、ターミナルから次を実行します。
 
@@ -149,6 +177,7 @@ py -3 app\mcq-webapp\server.py --check
 
 ## 困ったとき
 
+- macOSで「Docker Desktop本体が見つかりません」：`brew install --cask docker-desktop`で導入し、`open -a Docker`で起動します。Dockerメニューの表示後、起動完了まで待ってから`make setup`を再実行してください。
 - `server.py: No such file or directory`：リポジトリのルートへ移動してから実行するか、OS別ランチャーを使用してください。
 - `Address already in use`：同じポートのサーバーがすでに動作しています。ブラウザで`http://127.0.0.1:4173/`を開くか、`--reload`で再起動してください。
 - `STACK code: 未読込`：OS別ランチャーを再実行するか、`--install-stack`または`--setup-stack`で設定してください。

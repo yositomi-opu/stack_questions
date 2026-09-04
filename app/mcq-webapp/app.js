@@ -8,6 +8,8 @@ const DEFAULT_QUESTION_TEXTS = {
   en: "Consider the following options. __SELPROMPT__",
 };
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
+const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-base-url";
+const DEFAULT_INCLUDE_BASE_URL = "https://yositomi-opu.github.io/stack_questions/";
 const uiText = (text) => window.mcqI18n?.translate(text) || text;
 const SAMPLE_ROWS = [
   { pattern: "01", truth: "C", choice_ja: "太陽は恒星である", feedback_ja: "太陽は自ら光を放つ恒星です。", choice_en: "The Sun is a star", feedback_en: "The Sun is a star that emits its own light." },
@@ -58,6 +60,7 @@ const el = {
   casVariableCount: document.querySelector("#casVariableCount"),
   casVariablesBody: document.querySelector("#casVariablesBody"),
   stackApiUrl: document.querySelector("#stackApiUrl"),
+  includeBaseUrl: document.querySelector("#includeBaseUrl"),
   checkStackApiButton: document.querySelector("#checkStackApiButton"),
   testStackQuestionButton: document.querySelector("#testStackQuestionButton"),
   stackApiStatus: document.querySelector("#stackApiStatus"),
@@ -109,6 +112,16 @@ async function init() {
   el.stackApiUrl.value = SERVER_CONFIG.stackApiUrl
     || localStorage.getItem(STACK_API_URL_STORAGE_KEY)
     || "http://127.0.0.1:3080";
+  try {
+    el.includeBaseUrl.value = normalizedIncludeBaseUrl(
+      SERVER_CONFIG.includeBaseUrl
+        || localStorage.getItem(INCLUDE_BASE_URL_STORAGE_KEY)
+        || DEFAULT_INCLUDE_BASE_URL
+    );
+  } catch (_error) {
+    el.includeBaseUrl.value = DEFAULT_INCLUDE_BASE_URL;
+    localStorage.removeItem(INCLUDE_BASE_URL_STORAGE_KEY);
+  }
   populateBaseLanguage();
   updateQuestionLanguageVisibility();
   updateCorrectCountControls();
@@ -171,6 +184,11 @@ function bindEvents() {
   el.stackApiUrl.addEventListener("input", () => {
     localStorage.setItem(STACK_API_URL_STORAGE_KEY, el.stackApiUrl.value.trim());
   });
+  el.includeBaseUrl.addEventListener("input", () => {
+    localStorage.setItem(INCLUDE_BASE_URL_STORAGE_KEY, el.includeBaseUrl.value.trim());
+    updateOutput();
+  });
+  el.includeBaseUrl.addEventListener("change", changeIncludeBaseUrl);
   el.downloadIncludeButton.addEventListener("click", downloadIncludeFile);
   el.saveVariablesSeparately.addEventListener("change", changeIncludeMode);
   el.requirePairs.addEventListener("change", () => {
@@ -1038,8 +1056,9 @@ function updateOutput() {
 }
 
 function generateXml() {
-  const template = state.templates[state.mode];
-  if (!template) throw new Error("テンプレート読込待ち");
+  const sourceTemplate = state.templates[state.mode];
+  if (!sourceTemplate) throw new Error("テンプレート読込待ち");
+  const template = rewriteTemplateIncludeUrls(sourceTemplate);
   refreshGeneratedIncludeSource();
   const id = xmlFileStem(baseTitle(el.questionId.value));
   const generatedVariables = generateVariableBlock();
@@ -1639,10 +1658,17 @@ async function resolveMainInclude(xmlText) {
 }
 
 function includePathFromUrl(url) {
+  let configuredPrefix = "";
+  try {
+    configuredPrefix = normalizedIncludeBaseUrl(el.includeBaseUrl.value);
+  } catch (_error) {
+    // An invalid field is reported when generating XML; legacy URLs can still be imported.
+  }
   const prefixes = [
+    configuredPrefix,
     "https://stack.mathedu.jp/sc/",
     "https://yositomi-opu.github.io/stack_questions/",
-  ];
+  ].filter(Boolean);
   const prefix = prefixes.find((candidate) => url.startsWith(candidate));
   if (!prefix) return "";
   const path = decodeURIComponent(url.slice(prefix.length)).replace(/^\/+/, "");
@@ -1650,8 +1676,55 @@ function includePathFromUrl(url) {
 }
 
 function publicIncludeUrl(path) {
+  const baseUrl = normalizedIncludeBaseUrl(el.includeBaseUrl.value);
   const encodedPath = String(path).split("/").map((part) => encodeURIComponent(part)).join("/");
-  return `https://yositomi-opu.github.io/stack_questions/${encodedPath}`;
+  return new URL(encodedPath, baseUrl).toString();
+}
+
+function rewriteTemplateIncludeUrls(template) {
+  const baseUrl = normalizedIncludeBaseUrl(el.includeBaseUrl.value);
+  return [
+    "https://yositomi-opu.github.io/stack_questions/",
+    "https://stack.mathedu.jp/sc/",
+  ].reduce(
+    (result, prefix) => result.replaceAll(`stack_include("${prefix}`, `stack_include("${baseUrl}`),
+    template
+  );
+}
+
+function normalizedIncludeBaseUrl(value) {
+  const candidate = String(value || "").trim();
+  if (!candidate) throw new Error("include URLベースを入力してください");
+  if (/["\r\n]/.test(candidate)) {
+    throw new Error("include URLベースに引用符や改行は使用できません");
+  }
+  let parsed;
+  try {
+    parsed = new URL(candidate);
+  } catch (_error) {
+    throw new Error("include URLベースはhttp://またはhttps://で始まるURLを指定してください");
+  }
+  if (!["http:", "https:"].includes(parsed.protocol) || !parsed.host) {
+    throw new Error("include URLベースはhttp://またはhttps://で始まるURLを指定してください");
+  }
+  if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new Error("include URLベースに認証情報、クエリ、フラグメントは指定できません");
+  }
+  parsed.pathname = `${parsed.pathname.replace(/\/+$/, "")}/`;
+  return parsed.toString();
+}
+
+function changeIncludeBaseUrl() {
+  try {
+    const normalized = normalizedIncludeBaseUrl(el.includeBaseUrl.value);
+    el.includeBaseUrl.value = normalized;
+    localStorage.setItem(INCLUDE_BASE_URL_STORAGE_KEY, normalized);
+    updateOutput();
+    setStatus(`include URLベースを ${normalized} に設定しました`);
+  } catch (error) {
+    setStatus(error.message, true);
+    el.includeBaseUrl.focus();
+  }
 }
 
 function basenameFromPath(value) {
@@ -1729,27 +1802,21 @@ function changeIncludeMode() {
     return;
   }
   const path = `001/${title}.txt`;
-  const defaultUrl = publicIncludeUrl(path);
-  const selected = window.prompt(
-    uiText("XMLの stack_include(...) に設定するURLです。必要な場合は手動で変更してください。"),
-    defaultUrl
-  );
-  if (selected === null) {
+  let defaultUrl;
+  try {
+    defaultUrl = publicIncludeUrl(path);
+  } catch (error) {
+    setStatus(error.message, true);
     el.saveVariablesSeparately.checked = false;
-    return;
-  }
-  const url = selected.trim() || defaultUrl;
-  if (/["\r\n]/.test(url)) {
-    setStatus("include URLに引用符や改行は使用できません", true);
-    el.saveVariablesSeparately.checked = false;
+    el.includeBaseUrl.focus();
     return;
   }
   state.includeSource = {
-    url,
-    path: includePathFromUrl(url) || path,
+    url: defaultUrl,
+    path,
     filename: `${title}.txt`,
     generated: true,
-    autoUrl: url === defaultUrl,
+    autoUrl: true,
   };
   syncIncludeControls();
   updateOutput();

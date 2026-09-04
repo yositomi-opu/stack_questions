@@ -1,10 +1,25 @@
 # stack_questions
+
+**English** | [日本語](README.ja.md)
+
 Linear algebra and calculus related stack libraries and question template.
 XML pool will be found in xml.mathedu.jp.
 
-# MCQ questions
-```markdown
-## MCQ Question Authoring
+## MCQ WebApp setup
+
+The local MCQ WebApp and STACK API are managed from the repository root:
+
+```sh
+make check
+make setup INCLUDE_BASE_URL=https://username.github.io/repository/
+make start
+```
+
+`make check` reports the required Python, Git, Make, Docker, and Docker Compose components. `make install-deps` shows the OS-specific install plan and runs it only after interactive confirmation. `INCLUDE_BASE_URL` is optional; set it when publishing a fork of the include libraries or saving question variables separately with `stack_include`. Direct embedding of the main question variables remains the default. See [app/mcq-webapp/README.md](app/mcq-webapp/README.md) for macOS, Windows, and Ubuntu instructions.
+
+## MCQ questions
+
+### MCQ Question Authoring
 
 Please refer to `001.MCQ-rb.xml` and the included file `Sample.txt` for implementation examples.
 
@@ -23,7 +38,7 @@ Before implementing an MCQ, carefully consider:
 
 If the only possible incorrect answers are simple calculation mistakes, the problem is probably not suitable for MCQ format. In such cases, the `005` drill-type format with numerical or algebraic input may be more appropriate.
 
-### Multilingual Question Text
+#### Multilingual Question Text
 
 Please create the question text in a multilingual-compatible form.
 
@@ -32,7 +47,7 @@ Then, use the prompt below to generate a multilingual associative array.
 
 The template system automatically selects and expands the appropriate language at runtime.
 
-### Multilingual Choices
+#### Multilingual Choices
 
 Prepare both:
 
@@ -51,7 +66,7 @@ instead of:
 
 The template system automatically detects these variable definitions and generates language-dependent choices appropriately.
 
-### Multilingual Feedback
+#### Multilingual Feedback
 
 Feedback messages are fundamentally language-dependent.
 Therefore, create feedback from the beginning as multilingual associative arrays.
@@ -72,15 +87,13 @@ Currently, please support the following languages:
 - Swedish (`sv`)
 
 If contributors are interested in supporting additional languages, we will try to accommodate them whenever possible.
-```
-
-## Prompt for Multilingual STACK / Maxima Translation
+### Prompt for Multilingual STACK / Maxima Translation
 
 You are assisting with multilingual STACK question authoring using Maxima code.
 
 Translate the given Japanese STACK/Maxima entry into English, French, German, Italian, Japanese, Portuguese, Chinese, Korean, Russian, and Swedish, and output a Maxima-style multilingual array.
 
-### Critical Rules
+#### Critical Rules
 
 1. Preserve all Maxima variable names exactly, including capitalization.
    - `weL` and `WeL` are different variables.
@@ -155,7 +168,7 @@ Translate the given Japanese STACK/Maxima entry into English, French, German, It
    - all brackets are balanced,
    - the result is syntactically valid Maxima code.
 
-### Input
+#### Input
 
 ```maxima
 (PLACE YOUR STACK/MAXIMA CODE HERE)

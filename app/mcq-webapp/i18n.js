@@ -26,6 +26,8 @@
     "依頼をコピー": "Copy request",
     "結果を反映": "Apply results",
     "問題変数を別ファイルに保存する": "Save question variables in a separate file",
+    "include URLベース": "Include URL base",
+    "Moodle/STACKサーバーから取得できる公開URLを指定します。": "Enter a public URL that the Moodle/STACK server can access.",
     "問題変数（ランダム変数）": "Question variables (random variables)",
     "問題変数を評価": "Evaluate question variables",
     "未評価": "Not evaluated",
@@ -133,10 +135,14 @@
     "多言語展開を更新してください": "Update the translations",
     "XMLの stack_include(...) に設定するURLです。必要な場合は手動で変更してください。": "URL used by stack_include(...) in the XML. Change it if necessary.",
     "include URLに引用符や改行は使用できません": "The include URL cannot contain quotes or line breaks",
+    "include URLベースを入力してください": "Enter the include URL base",
+    "include URLベースに引用符や改行は使用できません": "The include URL base cannot contain quotes or line breaks",
+    "include URLベースはhttp://またはhttps://で始まるURLを指定してください": "The include URL base must start with http:// or https://",
+    "include URLベースに認証情報、クエリ、フラグメントは指定できません": "Do not put credentials, a query, or a fragment in the include URL base",
     "タイトルが未入力です。保存するファイルのタイトルを入力してください。": "The title is empty. Enter a title for the saved file.",
     "表示言語を英語に切り替える": "Switch the interface language to English",
     "表示言語を日本語に切り替える": "Switch the interface language to Japanese",
-    "問題変数の設定を stack_include して、選択肢の数、正解選択肢の数、行列のサイズなどのパラメータを変えた複数の問題で共通設定を保存する場合に使用します。PATH の default は https://yositomi-opu.github.io/stack_questions/001/ です。XMLファイル保存後に調整してください。": "Use this to store common settings with stack_include when creating multiple questions with different parameters, such as option counts, correct-option counts, or matrix sizes. The default PATH is https://yositomi-opu.github.io/stack_questions/001/ . Adjust it after saving the XML file."
+    "問題変数の設定を stack_include して複数の問題で共通設定を保存する場合に使用します。公開先はinclude URLベースで設定します。": "Use stack_include to share question-variable settings across multiple questions. Configure the public location with the include URL base."
   }));
 
   const originals = new WeakMap();
@@ -151,6 +157,7 @@
     [/^CAS評価エラー (\d+)件$/, "$1 CAS evaluation error(s)"],
     [/^CASリスト length: (\d+)$/, "CAS list length: $1"],
     [/^CAS値：1選択肢 \((.+)\)$/, "CAS value: 1 option ($1)"],
+    [/^include URLベースを (.+) に設定しました$/, "Set the include URL base to $1"],
     [/^正解(\d+)個・誤答(\d+)個を、評価済みの候補数と重複しないパターンから生成できません$/, "Cannot generate $1 correct and $2 incorrect options from the evaluated capacities without reusing a pattern"],
     [/^テスト完了（メッセージ (\d+)件）$/, "Test completed ($1 message(s))"],
     [/^Maximaで評価中（変数 (\d+)件・CAS式 (\d+)件）$/, "Evaluating with Maxima ($1 variables, $2 CAS expressions)"],

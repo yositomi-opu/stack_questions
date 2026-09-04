@@ -6,9 +6,9 @@
     <title>STACK MCQ XML Generator</title>
     <link rel="stylesheet" href="./styles.css?v=20260903-ui21">
     <script defer src="./vendor/xlsx.full.min.js"></script>
-    <script defer src="./config.js?v=20260903-config1"></script>
-    <script defer src="./i18n.js?v=20260903-i18n4"></script>
-    <script defer src="./app.js?v=20260903-ui29"></script>
+    <script defer src="./config.js?v=20260904-config2"></script>
+    <script defer src="./i18n.js?v=20260904-i18n6"></script>
+    <script defer src="./app.js?v=20260904-ui34"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -83,11 +83,22 @@
           <label
             class="check-row include-mode-row"
             for="saveVariablesSeparately"
-            title="問題変数の設定を stack_include して、選択肢の数、正解選択肢の数、行列のサイズなどのパラメータを変えた複数の問題で共通設定を保存する場合に使用します。PATH の default は https://yositomi-opu.github.io/stack_questions/001/ です。XMLファイル保存後に調整してください。"
+            title="問題変数の設定を stack_include して複数の問題で共通設定を保存する場合に使用します。公開先はinclude URLベースで設定します。"
           >
             <input id="saveVariablesSeparately" type="checkbox">
             <span>問題変数を別ファイルに保存する</span>
           </label>
+
+          <div class="field-row include-base-field">
+            <label for="includeBaseUrl">include URLベース</label>
+            <input
+              id="includeBaseUrl"
+              type="url"
+              placeholder="https://username.github.io/repository/"
+              spellcheck="false"
+            >
+            <p class="language-help">Moodle/STACKサーバーから取得できる公開URLを指定します。</p>
+          </div>
 
           <div class="field-row qvars-field">
             <label for="qvars">問題変数（ランダム変数）</label>
