@@ -66,13 +66,12 @@ if (!is_readable($moodleroot . '/config.php')) {
     exit(1);
 }
 
-// Load repository files before Moodle bootstrap changes the working directory.
-// Keeping these paths relative also lets the web user run the script from a
-// repository below a private home directory without traversing its ancestors.
-$supportlibrary = './support/moodle/lib';
+// Resolve helper files beside this script. The Make target stages the CLI and
+// helpers in a private temporary directory that the Moodle web user can read.
+$supportlibrary = __DIR__ . '/lib';
 if (!is_readable($supportlibrary . '/credential_exporter.php')
         || !is_readable($supportlibrary . '/workshop_user_manager.php')) {
-    fwrite(STDERR, "Run this command from the stack_questions repository root.\n");
+    fwrite(STDERR, "Workshop helper files are missing or unreadable.\n");
     exit(1);
 }
 require_once($supportlibrary . '/credential_exporter.php');

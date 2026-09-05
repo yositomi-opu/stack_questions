@@ -64,5 +64,20 @@ install-moodle-auth:
 	@./deploy/moodle-auth/install-plugin.sh "$(MOODLE_ROOT)"
 
 workshop-users:
-	@sudo -u "$(MOODLE_WEB_USER)" "$(PHP_BIN)" \
-		"support/moodle/workshop_users.php" --moodleroot="$(MOODLE_ROOT)" $(WORKSHOP_ARGS)
+	@set -eu; \
+		workshop_tmp=$$(mktemp -d /tmp/stack-questions-workshop.XXXXXX); \
+		cleanup() { \
+			rm -f "$$workshop_tmp/workshop_users.php" \
+				"$$workshop_tmp/lib/credential_exporter.php" \
+				"$$workshop_tmp/lib/workshop_user_manager.php"; \
+			rmdir "$$workshop_tmp/lib" "$$workshop_tmp" 2>/dev/null || true; \
+		}; \
+		trap cleanup EXIT; \
+		trap 'exit 1' HUP INT TERM; \
+		mkdir -m 0755 "$$workshop_tmp/lib"; \
+		install -m 0644 support/moodle/workshop_users.php "$$workshop_tmp/"; \
+		install -m 0644 support/moodle/lib/credential_exporter.php "$$workshop_tmp/lib/"; \
+		install -m 0644 support/moodle/lib/workshop_user_manager.php "$$workshop_tmp/lib/"; \
+		chmod 0755 "$$workshop_tmp" "$$workshop_tmp/lib"; \
+		sudo -u "$(MOODLE_WEB_USER)" "$(PHP_BIN)" \
+			"$$workshop_tmp/workshop_users.php" --moodleroot="$(MOODLE_ROOT)" $(WORKSHOP_ARGS)

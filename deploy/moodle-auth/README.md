@@ -45,6 +45,8 @@ make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
   WORKSHOP_ARGS='--action=create --courseid=17 --prefix=jspr26 --start=1 --end=100 --activeend=20 --confirm'
 ```
 
+The Make target securely stages the PHP script and its helpers in a temporary directory, runs them as the Moodle web user, and removes the temporary files afterward. The repository can therefore remain under a private home directory; do not loosen the home directory permissions for this command.
+
 This creates lowercase Moodle usernames `jspr26001`–`jspr26100` with uppercase ID numbers `JSPR26001`–`JSPR26100`, random policy-compliant passwords, and the `editingteacher` role in course 17. Accounts 001–020 start active; both the site account and course enrolment are suspended for 021–100. Email is disabled and users are not forced to change the generated password.
 
 The command writes a private administrator CSV and printable A4 HTML with ten cut-apart credential cards per page under `<moodledata>/stack_questions/workshop_credentials/`. The directory is mode `0700` and the files are mode `0600`. They contain plaintext passwords and must never be committed to the repository or sent through ordinary email.

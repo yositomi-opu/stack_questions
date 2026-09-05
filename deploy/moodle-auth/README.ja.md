@@ -169,14 +169,7 @@ make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
   WORKSHOP_ARGS='--action=create --courseid=17 --prefix=jspr26 --start=1 --end=100 --activeend=20 --confirm'
 ```
 
-これは内部で、Moodleの`config.php`を読める`www-data`ユーザーとして次の単独PHP scriptを実行します。
-
-```sh
-sudo -u www-data /usr/bin/php support/moodle/workshop_users.php \
-  --moodleroot=/home/www/htdocs/moodle \
-  --action=create --courseid=17 --prefix=jspr26 \
-  --start=1 --end=100 --activeend=20 --confirm
-```
+これは内部で、PHP scriptと補助ファイルを一時directoryへ安全に配置し、Moodleの`config.php`を読める`www-data`ユーザーとして実行します。そのため、repositoryが一般ユーザーの非公開home directory内にあっても、home directoryのpermissionを緩める必要はありません。一時ファイルは実行後に削除されます。
 
 Moodleのlogin usernameは仕様上小文字である必要があるため、利用者が入力するログインIDは`jspr26001`のような小文字です。管理用の「IDナンバー」には対応する大文字の`JSPR26001`を保存します。各アカウントにはMoodleのpassword policyを満たす、紛らわしい文字を除いたランダムpasswordを設定します。password変更の強制とemail通知は行いません。
 
