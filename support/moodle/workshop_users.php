@@ -66,20 +66,22 @@ if (!is_readable($moodleroot . '/config.php')) {
     exit(1);
 }
 
+// Load repository files before Moodle bootstrap changes the working directory.
+// Keeping these paths relative also lets the web user run the script from a
+// repository below a private home directory without traversing its ancestors.
+$supportlibrary = './support/moodle/lib';
+if (!is_readable($supportlibrary . '/credential_exporter.php')
+        || !is_readable($supportlibrary . '/workshop_user_manager.php')) {
+    fwrite(STDERR, "Run this command from the stack_questions repository root.\n");
+    exit(1);
+}
+require_once($supportlibrary . '/credential_exporter.php');
+require_once($supportlibrary . '/workshop_user_manager.php');
+
 require($moodleroot . '/config.php');
 require_once($CFG->libdir . '/clilib.php');
 require_once($CFG->dirroot . '/user/lib.php');
 require_once($CFG->libdir . '/enrollib.php');
-
-// Keep repository files relative to the inherited working directory. The web
-// user may work inside a private home but be unable to traverse its absolute path.
-$supportlibrary = './support/moodle/lib';
-if (!is_readable($supportlibrary . '/credential_exporter.php')
-        || !is_readable($supportlibrary . '/workshop_user_manager.php')) {
-    cli_error('Run this command from the stack_questions repository root.');
-}
-require_once($supportlibrary . '/credential_exporter.php');
-require_once($supportlibrary . '/workshop_user_manager.php');
 
 use stack_questions\moodle_support\credential_exporter;
 use stack_questions\moodle_support\workshop_user_manager;
