@@ -29,6 +29,7 @@ WEB_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = WEB_ROOT.parents[1]
 LOCAL_CONFIG = WEB_ROOT / ".local-config.json"
 LOCAL_DIR = WEB_ROOT / ".local"
+DOCKER_EVALUATION_DIR = LOCAL_DIR / "docker-evaluation"
 DUMP_TEMPLATE = REPO_ROOT / "dump.txt"
 MAX_BODY_BYTES = 512 * 1024
 MAX_EXPRESSIONS = 300
@@ -686,9 +687,16 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
     rewritten_variables = rewrite_stack_includes(variables, maxima)
     if maxima == DOCKER_STACK_MAXIMA:
         LOCAL_DIR.mkdir(parents=True, exist_ok=True)
-    temp_parent = str(LOCAL_DIR) if maxima == DOCKER_STACK_MAXIMA else None
+        DOCKER_EVALUATION_DIR.mkdir(mode=0o711, exist_ok=True)
+        DOCKER_EVALUATION_DIR.chmod(0o711)
+    temp_parent = str(DOCKER_EVALUATION_DIR) if maxima == DOCKER_STACK_MAXIMA else None
     with tempfile.TemporaryDirectory(prefix="mcq-maxima-", dir=temp_parent) as temp_dir:
         temp = Path(temp_dir)
+        if maxima == DOCKER_STACK_MAXIMA:
+            # The container deliberately drops DAC_OVERRIDE.  Allow it to
+            # traverse this random temporary directory without making the
+            # parent directory listable by other host users.
+            temp.chmod(0o711)
         variable_file = temp / "variables.mac"
         program_file = temp / "evaluate.mac"
         variable_file.write_text(rewritten_variables + "\n", encoding="utf-8")
@@ -696,6 +704,9 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
             build_maxima_program(maxima, variable_file, variable_names, normalized_expressions),
             encoding="utf-8",
         )
+        if maxima == DOCKER_STACK_MAXIMA:
+            variable_file.chmod(0o604)
+            program_file.chmod(0o604)
         evaluation_timeout = MAXIMA_TIMEOUT_SECONDS if using_dumped_maxima(maxima) else 60
         try:
             completed = subprocess.run(
@@ -1089,7 +1100,11 @@ def main() -> None:
                 }
             )
             if not result.get("ok") or not result.get("variables", [{}])[0].get("ok"):
-                raise RuntimeError(result.get("error", "Maximaによるテスト評価に失敗しました"))
+                message = result.get("error", "Maximaによるテスト評価に失敗しました")
+                diagnostics = str(result.get("diagnostics", "")).strip()
+                if diagnostics:
+                    message += f"\nMaxima diagnostics:\n{diagnostics}"
+                raise RuntimeError(message)
             stack_result = result.get("expressions", [{}])[0]
             stack_loaded = stack_result.get("ok") and stack_result.get("value") == "true"
             config = load_local_config()

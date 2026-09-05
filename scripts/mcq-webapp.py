@@ -733,8 +733,8 @@ def check_maxima_evaluation() -> None:
     if checked.returncode == 0:
         return
     raise ManagerError(
-        "Maxima評価を設定できませんでした。Docker側のmaximaサービスとログを確認してください。\n"
-        f"{dependency_help()}"
+        "Maxima評価を設定できませんでした。直前のMaxima diagnosticsとDocker側のmaximaサービスを確認してください。\n"
+        f"ログ確認: {subprocess.list2cmdline(compose_command(runtime_config(), 'logs', 'maxima'))}"
     )
 
 
