@@ -14,10 +14,11 @@ PORT ?=
 STACK_API_PORT ?=
 LOCALE ?=
 INCLUDE_BASE_URL ?=
+MOODLE_ROOT ?= /home/www/htdocs/moodle
 RUNTIME_ARGS := $(if $(INCLUDE_BASE_URL),--include-base-url "$(INCLUDE_BASE_URL)")
 SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if $(STACK_API_PORT),--stack-api-port "$(STACK_API_PORT)") $(if $(LOCALE),--locale "$(LOCALE)") $(RUNTIME_ARGS)
 
-.PHONY: all clean check-python setup check install-deps start stop restart status
+.PHONY: all clean check-python setup check install-deps start stop restart status install-moodle-auth
 
 all: $(MACFILES)
 
@@ -55,3 +56,6 @@ restart: check-python
 
 status: check-python
 	@$(PYTHON) scripts/mcq-webapp.py status $(RUNTIME_ARGS)
+
+install-moodle-auth:
+	@./deploy/moodle-auth/install-plugin.sh "$(MOODLE_ROOT)"

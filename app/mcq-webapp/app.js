@@ -10,6 +10,8 @@ const DEFAULT_QUESTION_TEXTS = {
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
 const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-base-url";
 const DEFAULT_INCLUDE_BASE_URL = "https://yositomi-opu.github.io/stack_questions/";
+const WEBAPP_BASE_URL = new URL("./", window.location.href);
+const webappUrl = (path) => new URL(String(path).replace(/^\/+/, ""), WEBAPP_BASE_URL).toString();
 const uiText = (text) => window.mcqI18n?.translate(text) || text;
 const SAMPLE_ROWS = [
   { pattern: "01", truth: "C", choice_ja: "太陽は恒星である", feedback_ja: "太陽は自ら光を放つ恒星です。", choice_en: "The Sun is a star", feedback_en: "The Sun is a star that emits its own light." },
@@ -258,7 +260,7 @@ function setStackApiBusy(busy) {
 }
 
 async function callStackApi(path, payload) {
-  const response = await fetch(path, {
+  const response = await fetch(webappUrl(path), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -368,7 +370,7 @@ async function evaluateCasLocally() {
   setCasEvaluationStatus(`Maximaで評価中（変数 ${problemVariableNames().length}件・CAS式 ${expressions.length}件）`);
   updateCasEvaluationBadges();
   try {
-    const response = await fetch("/api/maxima/evaluate", {
+    const response = await fetch(webappUrl("/api/maxima/evaluate"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1642,7 +1644,7 @@ async function resolveMainInclude(xmlText) {
   const url = match[1];
   const path = includePathFromUrl(url);
   const candidates = [];
-  if (path) candidates.push(`/api/repository/include?path=${encodeURIComponent(path)}`);
+  if (path) candidates.push(webappUrl(`/api/repository/include?path=${encodeURIComponent(path)}`));
   candidates.push(url);
   let lastError = "";
   for (const candidate of [...new Set(candidates)]) {

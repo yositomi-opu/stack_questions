@@ -17,6 +17,8 @@ make start
 
 `make check` reports the required Python, Git, Make, Docker, and Docker Compose components. On Linux, if the current user cannot access the Docker socket, it explains the security implications and offers the appropriate group setup only after interactive confirmation. Both regular Docker Engine and the Docker Snap are detected. Run these commands as your normal user, not with `sudo`. `make install-deps` shows the OS-specific install plan and runs it only after interactive confirmation. `INCLUDE_BASE_URL` is optional; set it when publishing a fork of the include libraries or saving question variables separately with `stack_include`. Direct embedding of the main question variables remains the default. See [app/mcq-webapp/README.md](app/mcq-webapp/README.md) for macOS, Windows, and Ubuntu instructions.
 
+For same-host access restricted to teachers logged in to Moodle, use the [Moodle login protection guide](deploy/moodle-auth/README.md). The bundled Moodle 4.5 local plugin and Nginx `auth_request` configuration protect the whole UI and its APIs without requiring LTI registration.
+
 ## MCQ questions
 
 ### MCQ Question Authoring

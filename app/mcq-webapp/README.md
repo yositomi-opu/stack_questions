@@ -118,6 +118,8 @@ make setup HOST=0.0.0.0 LOCALE=ja
 
 ブラウザでは`http://<UbuntuサーバーのIP>:4173/`を開きます。ファイアウォールではTCP 4173だけを必要なネットワークから許可してください。STACK APIの3080番ポートはDocker Composeにより`127.0.0.1`だけへbindされ、WebAppサーバー経由で利用されます。公開サーバーでは、TLSと認証を提供するリバースプロキシを別途設置してください。
 
+同じUbuntuホストのMoodleへログインした教員だけに公開する場合は、4173番を直接公開せず、Moodleと同じNginx経由で認証する構成を推奨します。この場合は`HOST=127.0.0.1`を使用してください。Moodle 4.5用localプラグイン、Nginx設定例、導入・確認手順は[deploy/moodle-auth/README.ja.md](../../deploy/moodle-auth/README.ja.md)にあります。これはLTIではなく、WebApp本体とMoodleを疎結合のまま保つ同一ホスト用の認証ゲートです。
+
 ### ポート変更
 
 初回setup時に保存します。

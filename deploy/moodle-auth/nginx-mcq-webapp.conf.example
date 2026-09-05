@@ -1,0 +1,52 @@
+# Add these locations inside the same `server {}` block that serves Moodle.
+# This ready-to-use example assumes:
+#   Moodle URL:  https://moodle.example.org/
+#   Moodle root: /home/www/htdocs/moodle
+#   PHP-FPM:     /run/php/php8.3-fpm.sock
+#   WebApp:      http://127.0.0.1:4173/
+#
+# If $CFG->wwwroot contains a path such as /moodle, change both public
+# locations to /moodle/mcq-webapp. The WebApp must remain inside the Moodle
+# session cookie path so that the browser sends its MoodleSession cookie.
+
+location = /_mcq_webapp_auth {
+    internal;
+
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass_request_body off;
+    fastcgi_param CONTENT_LENGTH "";
+    fastcgi_param QUERY_STRING "";
+    fastcgi_param REQUEST_METHOD GET;
+    fastcgi_param SCRIPT_FILENAME /home/www/htdocs/moodle/local/mcqwebapp/auth.php;
+    fastcgi_param SCRIPT_NAME /local/mcqwebapp/auth.php;
+    fastcgi_param HTTP_COOKIE $http_cookie;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+}
+
+location = /mcq-webapp {
+    return 301 /mcq-webapp/;
+}
+
+# Keep the local service-control endpoint inaccessible through the proxy.
+# `make stop` and `make restart` still use it directly over loopback.
+location = /mcq-webapp/api/server/shutdown {
+    return 404;
+}
+
+location ^~ /mcq-webapp/ {
+    auth_request /_mcq_webapp_auth;
+
+    # A logged-out browser is sent through Moodle's normal login flow.
+    error_page 401 =302 /local/mcqwebapp/launch.php;
+
+    # The trailing slash removes /mcq-webapp/ before forwarding the request.
+    proxy_pass http://127.0.0.1:4173/;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Prefix /mcq-webapp;
+    proxy_read_timeout 120s;
+}
