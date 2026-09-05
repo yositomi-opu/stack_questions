@@ -15,7 +15,7 @@ make setup INCLUDE_BASE_URL=https://username.github.io/repository/
 make start
 ```
 
-`make check` は、必要なPython、Git、Make、Docker、Docker Composeを確認します。Linuxで実行ユーザーがDocker socketへアクセスできない場合は、権限付与による影響を説明し、対話形式で確認を得た場合にだけ `sudo usermod -aG docker <ユーザー名>` を実行します。これらのmakeコマンド自体は `sudo` を付けず、一般ユーザーとして実行してください。`make install-deps` はOS別のインストール計画を表示し、対話形式で確認を得た場合にだけ実行します。`INCLUDE_BASE_URL` は省略可能です。includeライブラリをfork先で公開する場合や、問題変数を `stack_include` を使って別ファイルに保存する場合に指定してください。主要な問題変数を直接埋め込む方式がデフォルトです。macOS、Windows、Ubuntuでの詳しい手順は、[app/mcq-webapp/README.md](app/mcq-webapp/README.md)を参照してください。
+`make check` は、必要なPython、Git、Make、Docker、Docker Composeを確認します。Linuxで実行ユーザーがDocker socketへアクセスできない場合は、権限付与による影響を説明し、対話形式で確認を得た場合にだけ適切なグループ設定を実行します。通常版Docker EngineとSnap版Dockerの両方を自動判別します。これらのmakeコマンド自体は `sudo` を付けず、一般ユーザーとして実行してください。`make install-deps` はOS別のインストール計画を表示し、対話形式で確認を得た場合にだけ実行します。`INCLUDE_BASE_URL` は省略可能です。includeライブラリをfork先で公開する場合や、問題変数を `stack_include` を使って別ファイルに保存する場合に指定してください。主要な問題変数を直接埋め込む方式がデフォルトです。macOS、Windows、Ubuntuでの詳しい手順は、[app/mcq-webapp/README.md](app/mcq-webapp/README.md)を参照してください。
 
 ## MCQ問題
 

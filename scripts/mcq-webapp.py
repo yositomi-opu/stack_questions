@@ -463,8 +463,13 @@ def compose_prefix() -> list[str]:
     raise ManagerError(f"Docker Composeが見つかりません。\n{dependency_help()}")
 
 
+def snap_docker_installed() -> bool:
+    docker = shutil.which("docker") or ""
+    return docker.startswith(("/snap/bin/", "/var/lib/snapd/snap/bin/"))
+
+
 def offer_linux_docker_group_fix() -> None:
-    """Offer the standard Docker group fix after an explicit confirmation."""
+    """Offer the appropriate Docker group fix after explicit confirmation."""
     import grp
     import pwd
 
@@ -472,34 +477,51 @@ def offer_linux_docker_group_fix() -> None:
     username = account.pw_name
     try:
         docker_group = grp.getgrnam("docker")
-    except KeyError as exc:
-        raise ManagerError(
-            "Docker socketへのアクセス権限がありません。また、dockerグループも見つかりません。\n"
-            "Docker Engineのインストールを確認し、sudo systemctl restart docker を実行してから再確認してください。"
-        ) from exc
+    except KeyError:
+        docker_group = None
 
-    active_group_ids = set(os.getgroups()) | {os.getgid()}
-    group_active = docker_group.gr_gid in active_group_ids
-    group_configured = (
-        group_active
-        or account.pw_gid == docker_group.gr_gid
-        or username in docker_group.gr_mem
-    )
+    group_active = False
+    group_configured = False
+    if docker_group:
+        active_group_ids = set(os.getgroups()) | {os.getgid()}
+        group_active = docker_group.gr_gid in active_group_ids
+        group_configured = (
+            group_active
+            or account.pw_gid == docker_group.gr_gid
+            or username in docker_group.gr_mem
+        )
     if group_configured and not group_active:
         raise ManagerError(
             f"ユーザー {username} はdockerグループに登録済みですが、現在のログインセッションには未反映です。\n"
             "いったんログアウトしてログインし直した後、docker info と make setup を実行してください。"
         )
     if group_active:
+        restart_command = "sudo snap restart docker.dockerd" if snap_docker_installed() else "sudo systemctl restart docker"
         raise ManagerError(
             f"ユーザー {username} のdockerグループは有効ですが、Docker socketへ接続できません。\n"
-            "sudo systemctl restart docker を実行し、ls -l /var/run/docker.sock で所有グループを確認してください。"
+            f"{restart_command} を実行し、ls -l /var/run/docker.sock で所有グループを確認してください。"
         )
 
-    command = ["sudo", "usermod", "-aG", "docker", username]
-    displayed_command = shlex.join(command)
+    docker_is_snap = snap_docker_installed()
+    if docker_group:
+        commands = [["sudo", "usermod", "-aG", "docker", username]]
+    elif docker_is_snap:
+        commands = [
+            ["sudo", "addgroup", "--system", "docker"],
+            ["sudo", "adduser", username, "docker"],
+            ["sudo", "snap", "disable", "docker"],
+            ["sudo", "snap", "enable", "docker"],
+        ]
+    else:
+        commands = [
+            ["sudo", "groupadd", "docker"],
+            ["sudo", "usermod", "-aG", "docker", username],
+            ["sudo", "systemctl", "restart", "docker"],
+        ]
+    displayed_commands = "\n".join(f"  {shlex.join(command)}" for command in commands)
+    installation_label = "Snap版Docker" if docker_is_snap else "Docker Engine"
     instructions = (
-        f"実行コマンド: {displayed_command}\n"
+        f"実行コマンド:\n{displayed_commands}\n"
         "実行後はいったんログアウトしてログインし直し、docker info と make setup を実行してください。"
     )
     if not sys.stdin.isatty():
@@ -510,15 +532,16 @@ def offer_linux_docker_group_fix() -> None:
 
     print(
         "\nDockerグループへの所属は、実質的にroot相当の権限をユーザーへ与えます。\n"
-        f"ユーザー {username} をdockerグループへ追加するため、次を実行します。\n"
-        f"  {displayed_command}"
+        f"{installation_label}用にユーザー {username} のアクセス権限を設定するため、次を実行します。\n"
+        f"{displayed_commands}"
     )
     answer = input("sudoを使用して実行しますか？ [y/N] ").strip().lower()
     if answer not in {"y", "yes"}:
         raise ManagerError("Dockerグループの設定を変更しませんでした。\n" + instructions)
     if not shutil.which("sudo"):
         raise ManagerError("sudoが見つかりません。rootユーザーに次の実行を依頼してください。\n" + instructions)
-    run(command)
+    for command in commands:
+        run(command)
     raise ManagerError(
         f"ユーザー {username} をdockerグループへ追加しました。現在のセッションにはまだ反映されません。\n"
         "いったんログアウトしてログインし直した後、docker info と make setup を実行してください。"

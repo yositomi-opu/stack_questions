@@ -108,7 +108,7 @@ Windows版Maximaは必須ではありません。インストールして`MAXIMA
 
 Ubuntu ServerではGit、Python 3.10以降、GNU Make、Docker Engine、Docker Compose pluginを用意します。Dockerは[公式のUbuntu向け手順](https://docs.docker.com/engine/install/ubuntu/)でインストールし、`docker compose version`と`docker info`が成功する状態にします。
 
-`docker info`がpermission deniedになる場合、`make check`は実行ユーザーが`docker`グループに未登録か、登録済みだが現在のセッションへ未反映なのかを判別します。未登録の場合は、dockerグループがroot相当の権限を持つことと実行予定の`sudo usermod -aG docker <ユーザー名>`を表示し、確認を得た場合だけ実行します。実行後はいったんログアウトしてログインし直し、`docker info`を確認してから`make setup`を実行してください。`sudo make check`や`sudo make setup`は、リポジトリ内にroot所有ファイルを作る可能性があるため使用しないでください。
+`docker info`がpermission deniedになる場合、`make check`は実行ユーザーが`docker`グループに未登録か、登録済みだが現在のセッションへ未反映なのかを判別します。未登録の場合は、dockerグループがroot相当の権限を持つことと実行予定のコマンドを表示し、確認を得た場合だけ実行します。通常版Dockerでは`groupadd`／`usermod`、`/snap/bin/docker`で検出されるSnap版では`addgroup`／`adduser`とDocker Snapの無効化・再有効化を使用します。実行後はいったんログアウトしてログインし直し、`docker info`を確認してから`make setup`を実行してください。`sudo make check`や`sudo make setup`は、リポジトリ内にroot所有ファイルを作る可能性があるため使用しないでください。
 
 Workshop参加者が別PCのブラウザから接続する場合は、初回だけ次のように設定します。
 
