@@ -19,6 +19,8 @@ make start
 
 For same-host access restricted to teachers logged in to Moodle, use the [Moodle login protection guide](deploy/moodle-auth/README.md). The bundled Moodle 4.5 local plugin and Nginx `auth_request` configuration protect the whole UI and its APIs without requiring LTI registration.
 
+The repository also includes a standalone Moodle administration CLI for bulk-creating anonymous workshop accounts and activating or suspending ranges such as `21–30`. It is independent of the local authentication plugin. Its administrator CSV and A4 cut-apart credential cards are stored with private permissions below the non-web-accessible Moodle data directory. See the Moodle protection guide for commands and operational safeguards.
+
 ## MCQ questions
 
 ### MCQ Question Authoring

@@ -19,6 +19,8 @@ make start
 
 同じUbuntuホストのMoodleへログインした教員だけにWebAppを公開する場合は、[Moodleログインによる保護手順](deploy/moodle-auth/README.ja.md)を使用できます。Moodle 4.5用localプラグインとNginxの`auth_request`で全画面・APIを保護する構成で、LTI登録は不要です。
 
+repositoryには、Moodleプラグインとは独立したWorkshop用アカウント管理CLIも含まれます。匿名アカウントを一括作成し、`21–30`のような番号範囲で有効化・停止できます。ランダムpasswordの管理用CSVとA4切り取りカードは、Web非公開の`moodledata`配下へ安全な権限で保存されます。操作例は上記の保護手順を参照してください。
+
 ## MCQ問題
 
 ### MCQ問題の作成

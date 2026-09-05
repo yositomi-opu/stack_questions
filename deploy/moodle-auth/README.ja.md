@@ -158,12 +158,71 @@ sudo -u www-data /usr/bin/php \
   /home/www/htdocs/moodle/admin/cli/purge_caches.php
 ```
 
+## Workshop用アカウントの一括管理
+
+repositoryには、匿名のWorkshop用アカウントを作成し、番号範囲で有効化・停止・確認する単独の管理CLI [workshop_users.php](../../support/moodle/workshop_users.php) が含まれています。このCLIはMoodle localプラグインの一部ではなく、Moodleへの追加installやdatabase upgradeは不要です。Ubuntu上のrepository rootから必要なときだけ実行します。
+
+次のコマンドは、`jspr26001`から`jspr26100`まで100個作成し、コースID 17へ編集権限のある教員として登録します。1–20だけを有効にし、21–100はMoodleアカウントとコース登録の両方を停止状態にします。
+
+```sh
+make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
+  WORKSHOP_ARGS='--action=create --courseid=17 --prefix=jspr26 --start=1 --end=100 --activeend=20 --confirm'
+```
+
+これは内部で、Moodleの`config.php`を読める`www-data`ユーザーとして次の単独PHP scriptを実行します。
+
+```sh
+sudo -u www-data /usr/bin/php support/moodle/workshop_users.php \
+  --moodleroot=/home/www/htdocs/moodle \
+  --action=create --courseid=17 --prefix=jspr26 \
+  --start=1 --end=100 --activeend=20 --confirm
+```
+
+Moodleのlogin usernameは仕様上小文字である必要があるため、利用者が入力するログインIDは`jspr26001`のような小文字です。管理用の「IDナンバー」には対応する大文字の`JSPR26001`を保存します。各アカウントにはMoodleのpassword policyを満たす、紛らわしい文字を除いたランダムpasswordを設定します。password変更の強制とemail通知は行いません。
+
+作成時に次の2ファイルの絶対pathが表示されます。
+
+- 管理用CSV: username、password、初期状態など
+- A4印刷用HTML: 2列×5行、1ページ10枚の切り取りカード
+
+どちらもWeb公開領域ではない`/home/www/moodledata/stack_questions/workshop_credentials/`へ保存され、directoryは`0700`、fileは`0600`になります。平文passwordを含むので、repositoryへ追加したり通常のemailへ添付したりしないでください。HTMLを管理者のhomeへ取り出す場合は、CLIが表示した正確なpathを使って、たとえば次のようにコピーします。
+
+```sh
+sudo install -o YOUR_ACCOUNT -g YOUR_GROUP -m 0600 \
+  /home/www/moodledata/stack_questions/workshop_credentials/jspr26-001-100-DATE.html \
+  /home/YOUR_ACCOUNT/jspr26-login-cards.html
+```
+
+現在の状態はpasswordを表示せずに確認できます。
+
+```sh
+make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
+  WORKSHOP_ARGS='--action=status --courseid=17 --prefix=jspr26 --start=1 --end=100'
+```
+
+当日に21人以上来た場合は、必要な番号だけを範囲指定して有効にします。たとえば21–30は次のとおりです。有効化してもpasswordは変わりません。
+
+```sh
+make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
+  WORKSHOP_ARGS='--action=activate --courseid=17 --prefix=jspr26 --start=21 --end=30 --confirm'
+```
+
+使用後は同じ形式で範囲を停止できます。
+
+```sh
+make workshop-users MOODLE_ROOT=/home/www/htdocs/moodle \
+  WORKSHOP_ARGS='--action=suspend --courseid=17 --prefix=jspr26 --start=1 --end=30 --confirm'
+```
+
+`create`、`activate`、`suspend`は変更内容を確認したことを示す`--confirm`が必須です。範囲内に既存IDがある場合、または有効化・停止する範囲に対象アカウントが不足している場合は、途中まで変更せずに失敗します。使用済みアカウントは別のWorkshopで再利用せず、未使用で停止したままの範囲だけを後日有効化してください。
+
 ## セキュリティ上の要点
 
 - `HOST=0.0.0.0`にせず、4173と3080を外部へ公開しないでください。
 - Nginxの認証はページだけでなく、Maxima評価やSTACK API中継を含む全URLに適用されます。
 - ローカル停止APIはNginx設定で404にし、サービス操作はサーバー上の`make stop`／`make restart`だけで行います。
-- 認証endpointは個人情報を返さず、HTTP statusだけを返します。pluginも個人データを保存しません。
+- 認証endpointは個人情報を返さず、HTTP statusだけを返します。アクセス制御機能はplugin独自のユーザーデータベースを持ちません。
+- 単独のWorkshopアカウント管理CLIが生成する認証情報fileは`moodledata`の非公開領域に限定し、配布・保管後は不要な複製を残さないでください。
 - 権限は固定role名ではなく`moodle/question:add` capabilityで判定するため、role名が日本語・英語のどちらでも動きます。
 - Workshop終了後はplugin設定を無効にするか、`make stop`でサービスを止めてください。
 

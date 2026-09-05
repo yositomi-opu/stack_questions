@@ -15,10 +15,13 @@ STACK_API_PORT ?=
 LOCALE ?=
 INCLUDE_BASE_URL ?=
 MOODLE_ROOT ?= /home/www/htdocs/moodle
+MOODLE_WEB_USER ?= www-data
+PHP_BIN ?= /usr/bin/php
+WORKSHOP_ARGS ?= --help
 RUNTIME_ARGS := $(if $(INCLUDE_BASE_URL),--include-base-url "$(INCLUDE_BASE_URL)")
 SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if $(STACK_API_PORT),--stack-api-port "$(STACK_API_PORT)") $(if $(LOCALE),--locale "$(LOCALE)") $(RUNTIME_ARGS)
 
-.PHONY: all clean check-python setup check install-deps start stop restart status install-moodle-auth
+.PHONY: all clean check-python setup check install-deps start stop restart status install-moodle-auth workshop-users
 
 all: $(MACFILES)
 
@@ -59,3 +62,7 @@ status: check-python
 
 install-moodle-auth:
 	@./deploy/moodle-auth/install-plugin.sh "$(MOODLE_ROOT)"
+
+workshop-users:
+	@sudo -u "$(MOODLE_WEB_USER)" "$(PHP_BIN)" \
+		"support/moodle/workshop_users.php" --moodleroot="$(MOODLE_ROOT)" $(WORKSHOP_ARGS)
