@@ -4,8 +4,8 @@ const INITIAL_LOCALE = window.mcqI18n?.language
   || (["ja", "en"].includes(SERVER_CONFIG.locale) ? SERVER_CONFIG.locale : "ja");
 const LANGUAGE_SETTINGS_STORAGE_KEY = "mcq-webapp.question-languages";
 const DEFAULT_QUESTION_TEXTS = {
-  ja: "次の恒星・惑星・衛星に関する主張について、__SELPROMPT__",
-  en: "Consider the following statements about stars, planets, and satellites. __SELPROMPT__",
+  ja: "次の恒星・惑星・衛星に関する主張について正しいものを __SELTYPE__。",
+  en: "__SELTYPE__ correct statements about stars, planets, and satellites.",
 };
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
 const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-base-url";
@@ -2932,8 +2932,8 @@ function downloadSampleCsv() {
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", el.requirePairs.checked ? "mixed" : "true"],
     ["config", "base_language", baseLang()],
-    ["qtextL", "string", "ja", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.ja : "次の方程式の解に関する主張について、__SELPROMPT__"],
-    ["qtextL", "string", "en", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.en : "Consider the following statements about solutions of equations. __SELPROMPT__"],
+    ["qtextL", "string", "ja", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.ja : "次の方程式の解に関する主張について正しいものを __SELTYPE__。"],
+    ["qtextL", "string", "en", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.en : "__SELTYPE__ correct statements about solutions of equations."],
     ["qvar", "cas", "n/a", "aa1:rand([1, 2, 3])"],
     ["qvar", "cas", "n/a", "aa2:rand([3, 4, 5])"],
   ];

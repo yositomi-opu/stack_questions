@@ -52,7 +52,7 @@ stack_include("https://stack.mathedu.jp/sc/mcq_template_pre.mac");
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:2;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:1;
 
-%__mcq_qtextL:[["ja", "次の恒星・惑星・衛星に関する主張について、__SELPROMPT__"], ["en", "Consider the following statements about stars, planets, and satellites. __SELPROMPT__"]];
+%__mcq_qtextL:[["ja", "次の恒星・惑星・衛星に関する主張について正しいものを __SELTYPE__。"], ["en", "__SELTYPE__ correct statements about stars, planets, and satellites."]];
 
 /* Randomly choose 1 true and 1 false proposition patterns. */
 %__mcq_pattern_order:random_permutation(makelist(k, k, 1, 4));
