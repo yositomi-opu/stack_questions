@@ -1809,19 +1809,19 @@ function translationPayload() {
     schema: "stack-mcq-translations-v1",
     source_language: source,
     target_languages: translationTargets(),
-    preserve_exactly: ["__SELPROMPT__", "__SELTYPE__", "Maxima expressions", "LaTeX", "STACK {@...@} blocks", "HTML tags"],
+    preserve_exactly: ["__SELPROMPT__", "__SELTYPE__", "Maxima syntax and identifiers (translate only human-readable text inside string literals)", "LaTeX", "STACK {@...@} blocks", "HTML tags"],
     question_type: questionType,
-    question_text: !state.questionLanguageIndependent && questionType === "text" ? el.questions[source].value : null,
+    question_text: !state.questionLanguageIndependent ? el.questions[source].value : null,
     rows: state.rows.map((row, index) => ({
       id: String(index),
       pattern: String(row.pattern || ""),
       truth: normalizeTruth(row.truth),
       choice_type: row[`choice_type_${source}`] || "text",
-      choice: !row.choice_language_independent && (row[`choice_type_${source}`] || "text") === "text"
+      choice: !row.choice_language_independent
         ? String(row[`choice_${source}`] || "")
         : null,
       feedback_type: row[`feedback_type_${source}`] || "text",
-      feedback: !feedbackLanguageIndependent(row) && (row[`feedback_type_${source}`] || "text") === "text"
+      feedback: !feedbackLanguageIndependent(row)
         ? String(row[`feedback_${source}`] || "")
         : null,
     })),
@@ -1833,13 +1833,18 @@ function prepareTranslationRequest() {
     setTranslationStatus("基本言語以外の展開先言語を1つ以上選択してください", "error");
     return;
   }
-  copyCasValuesToTargets();
+  copyLanguageIndependentValuesToTargets();
   const payload = translationPayload();
   el.translationJson.value = [
     uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
     uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
+    uiText("CAS式は文字列内の文章だけを翻訳し、変数名・関数名・演算子・引用符を保持した式全体を返してください。nullの項目は翻訳不要です。"),
+    uiText("元のquestion_textとrowsは翻訳元として保持し、翻訳結果はtranslations内の各target_languagesのキーに入れてください。ptはポルトガル語です。"),
     uiText("説明文を付けず、入力と同じ構造に translations を追加した有効なJSONだけを返してください。"),
-    uiText('translations は {"en":{"question_text":"...","rows":[{"id":"0","choice":"...","feedback":"..."}]}} の形式にしてください。'),
+    uiText("translations は次の言語キーと形式で返してください:"),
+    JSON.stringify(Object.fromEntries(payload.target_languages.map((lang) => [lang, {
+      question_text: "...", rows: [{id: "0", choice: "...", feedback: "..."}],
+    }]))),
     "",
     JSON.stringify(payload, null, 2),
   ].join("\n");
@@ -1876,8 +1881,8 @@ function applyTranslationResult() {
       el.languageChecks[lang].checked = true;
       if (typeof translation.question_text === "string") {
         el.questions[lang].value = translation.question_text;
-        state.questionTypes[lang] = "text";
-        el.questionModes[lang].value = "text";
+        state.questionTypes[lang] = state.questionTypes[baseLang()] || "text";
+        el.questionModes[lang].value = state.questionTypes[lang];
       }
       if (Array.isArray(translation.rows)) {
         translation.rows.forEach((translatedRow) => {
@@ -1885,11 +1890,12 @@ function applyTranslationResult() {
           if (!state.rows[index]) return;
           if (typeof translatedRow.choice === "string") {
             state.rows[index][`choice_${lang}`] = translatedRow.choice;
-            state.rows[index][`choice_type_${lang}`] = "text";
+            state.rows[index][`choice_type_${lang}`] = state.rows[index][`choice_type_${baseLang()}`] || "text";
+            state.rows[index][`choice_list_expr_${lang}`] = Boolean(state.rows[index][`choice_list_expr_${baseLang()}`]);
           }
           if (typeof translatedRow.feedback === "string") {
             state.rows[index][`feedback_${lang}`] = translatedRow.feedback;
-            state.rows[index][`feedback_type_${lang}`] = "text";
+            state.rows[index][`feedback_type_${lang}`] = state.rows[index][`feedback_type_${baseLang()}`] || "text";
           }
         });
       }
@@ -1906,18 +1912,13 @@ function applyTranslationResult() {
   }
 }
 
-function copyCasValuesToTargets() {
+function copyLanguageIndependentValuesToTargets() {
   const source = baseLang();
   translationTargets().forEach((lang) => {
-    if ((state.questionTypes[source] || "text") === "cas") {
-      el.questions[lang].value = el.questions[source].value;
-      state.questionTypes[lang] = "cas";
-      el.questionModes[lang].value = "cas";
-    }
     state.rows.forEach((row) => {
       ["choice", "feedback"].forEach((field) => {
-        const independentChoice = field === "choice" && row.choice_language_independent;
-        if (!independentChoice && (row[`${field}_type_${source}`] || "text") !== "cas") return;
+        const independent = field === "choice" ? row.choice_language_independent : feedbackLanguageIndependent(row);
+        if (!independent) return;
         row[`${field}_${lang}`] = row[`${field}_${source}`] || "";
         row[`${field}_type_${lang}`] = row[`${field}_type_${source}`] || "text";
         row[`${field}_list_expr_${lang}`] = Boolean(row[`${field}_list_expr_${source}`]);
