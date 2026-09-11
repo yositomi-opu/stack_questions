@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./styles.css?v=20260912-ui27">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260912-i18n15"></script>
+    <script defer src="./i18n.js?v=20260912-i18n16"></script>
     <script defer src="./app.js?v=20260912-ui46"></script>
     <script defer src="./preview.js?v=20260912-preview2"></script>
   </head>
@@ -158,9 +158,19 @@
           </section>
           <div class="section-divider"></div>
           <section class="parameters-section" aria-labelledby="parametersHeading">
-            <h2 id="parametersHeading"><label for="parameters">パラメータ</label></h2>
+            <div class="question-text-heading">
+              <h2 id="parametersHeading"><label for="parameters">パラメータ</label></h2>
+              <div class="question-text-help">
+                <button type="button" class="question-text-help-button" aria-label="パラメータの入力について" aria-describedby="parametersHelp">?</button>
+                <div id="parametersHelp" class="question-text-tooltip" role="tooltip">
+                  <p>問題ごとに変えたい値を、問題変数本体より先に設定する欄です。不要なら空欄で構いません。</p>
+                  <p>stack_includeで共通の問題変数を読み込む場合に特に有効です。同じファイルを使ったまま、%_rk:2; のようにrankなどを指定して別の問題を作れます。</p>
+                  <p>実行順は「選択肢設定 → パラメータ → 問題変数本体（stack_include）」です。選択肢数と正解数は上の選択肢設定で指定します。</p>
+                  <p>読み込み先の共通ファイルでは、パラメータが未設定の場合だけ既定値を入れるようにします。ここで指定した値は各問題のXMLに保存されます。</p>
+                </div>
+              </div>
+            </div>
             <textarea id="parameters" rows="3" spellcheck="false" placeholder="%_rk:2;"></textarea>
-            <p class="language-help">選択肢数の設定後、問題変数（stack_include）の前に実行します。</p>
           </section>
           <div class="section-divider"></div>
           <section class="question-texts" aria-labelledby="questionTextsHeading">
