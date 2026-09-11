@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- プレビューのサブパス修正: 新機能だけ `fetch("/api/stack/...")` でサイト直下へ送っていたため、Moodle配下の公開構成でHTMLの404等をJSONとして解析していた。既存の `webappUrl()` を使用し、描画・採点とも公開パスを保持するよう修正。HTML応答はHTTP状態と再起動／ログイン確認の案内を表示する。プレビューJSのキャッシュ番号も更新。
+- この修正の検証: `node scripts/tests/test_preview_ui.cjs` でサイト直下・`/mcq-webapp/`・`/moodle/mcq-webapp/` の描画／採点URL、HTML 404・ログインへの転送・既存JSONエラーを模擬応答で確認。JS構文と差分検査成功。利用者の実サーバーでの再確認は未実施。
+
 - プレビュー追加: 上部ボタンから独立したダイアログを開く。`preview.js` は明示操作時だけAPI／数式表示を利用し、編集・保存のイベントを置き換えない。Radio/Checkbox回答、得点、PRTフィードバック、全般的解説、乱数の種の切替に対応。日英UI対応。
 - `previewQuestionSnapshot()` は保存用XML生成後のコピーに、パラメータ→編集中のinclude本体を組み込む。プレビュー専用サーバー処理はローカルの共通includeを展開し、指定seedのdeployedseedを補う。描画後の展開済みXMLをクライアントへ返し、採点・別seedの表示にも同じコピーを使う。CSV・保存XML・共有ファイルには影響しない。
 - `/api/stack/preview` と `/api/stack/grade` を追加。接続先制限は既存APIと共通。includeのリポジトリ外参照／非公開ファイル／循環を拒否。描画・採点用JSONのみ最大4 MiB（展開済みXML往復用）、既存APIは512 KiBを維持。画像はサーバー経由でdata URLにして返す。

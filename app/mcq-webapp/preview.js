@@ -77,13 +77,21 @@
   }
 
   async function request(route, extra = {}) {
-    const response = await fetch(`/api/stack/${route}`, {
+    const response = await fetch(webappUrl(`/api/stack/${route}`), {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({...snapshot, seed: Number(seed.value), ...extra}),
       signal: AbortSignal.timeout(90000),
     });
-    const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    let data;
+    try {
+      data = await response.json();
+    } catch (_error) {
+      const hint = response.redirected || [401, 403].includes(response.status)
+        ? t("ログイン状態を確認してください。", "Please check your login session.")
+        : t("WebAppを更新・再起動し、ページを再読み込みしてください。", "Update and restart the WebApp, then reload the page.");
+      throw new Error(`${t("プレビューAPIからJSON以外の応答が返りました", "The preview API returned a non-JSON response")} (HTTP ${response.status})。${hint}`);
+    }
+    if (!response.ok || !data?.ok) throw new Error(data?.error || `HTTP ${response.status}`);
     return data.result;
   }
 
