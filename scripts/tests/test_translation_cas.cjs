@@ -31,6 +31,8 @@ assert.equal(payload.question_text,el.questions.ja.value);
 assert.equal(payload.rows[0].choice,state.rows[0].choice_ja);
 assert.equal(payload.rows[1].choice,null,'language-independent CAS needs no translation');
 assert.equal(payload.rows[1].feedback,state.rows[1].feedback_ja);
+const exampleLine = el.translationJson.value.split('\n').find(line=>line.startsWith('{"question_text":'));
+assert.equal(JSON.parse(exampleLine).question_text, 'sconcat("...", tex2(%_rk), " __SELTYPE__")');
 assert.match(el.translationJson.value,/"pt":\{"question_text"/);
 el.translationJson.value=JSON.stringify({translations:{pt:{
   question_text:'sconcat("Posto ", tex2(%_rk), ": __SELTYPE__")',

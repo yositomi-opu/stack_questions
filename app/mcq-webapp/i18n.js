@@ -118,6 +118,8 @@
     "入力が変更されました。もう一度評価してください": "Input changed. Evaluate again.",
     "問題変数を評価できませんでした": "Could not evaluate question variables",
     "基本言語以外の展開先言語を1つ以上選択してください": "Select at least one target language other than the base language",
+    "返答はJSONコードブロックで囲み、文字列内の二重引用符・バックスラッシュ・改行をJSONとしてエスケープしてください。プレースホルダーのアンダースコアを保持し、太字記法に変更しないでください。": "Wrap the response in a JSON code block. Escape double quotes, backslashes, and newlines inside strings as required by JSON. Keep underscores in placeholders; do not convert them to bold markup.",
+    "CAS式をJSON文字列にする例:": "Example of a CAS expression encoded as a JSON string:",
     "translations は次の言語キーと形式で返してください:": "Return translations using these language keys and structure:",
     "次のSTACK MCQ教材を target_languages に翻訳してください。": "Translate the following STACK MCQ material into target_languages.",
     "数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。": "Do not change formulas, variables, __SELPROMPT__, __SELTYPE__, {@...@}, or HTML tags.",
