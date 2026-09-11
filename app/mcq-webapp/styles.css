@@ -254,7 +254,7 @@ h3 {
 }
 
 .workspace {
-  --settings-width: 390px;
+  --settings-width: calc(40% - 5.6px);
   --data-width: 620px;
   display: grid;
   grid-template-columns: var(--settings-width) minmax(420px, 1fr);

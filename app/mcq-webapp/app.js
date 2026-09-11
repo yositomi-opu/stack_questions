@@ -111,6 +111,8 @@ const el = {
   ),
 };
 
+let settingsWidthCustomized = false;
+
 init();
 
 async function init() {
@@ -147,6 +149,7 @@ function updateCorrectCountControls() {
 function updateLayout() {
   const workspaceWidth = el.workspace.getBoundingClientRect().width || window.innerWidth;
   const settingsMax = Math.max(300, Math.floor(workspaceWidth * 0.8));
+  if (!settingsWidthCustomized) el.settingsWidth.value = String(Math.max(300, Math.round((workspaceWidth - 14) * 0.4)));
   el.settingsWidth.max = String(settingsMax);
   if (Number(el.settingsWidth.value) > settingsMax) el.settingsWidth.value = String(settingsMax);
   el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
@@ -225,7 +228,10 @@ function bindEvents() {
   el.showXml.addEventListener("change", updateLayout);
   el.xmlToggleTab.addEventListener("click", toggleXmlPane);
   el.settingsResizeHandle.addEventListener("pointerdown", beginSettingsResize);
-  el.settingsWidth.addEventListener("input", updateLayout);
+  el.settingsWidth.addEventListener("input", () => {
+    settingsWidthCustomized = true;
+    updateLayout();
+  });
   el.dataWidth.addEventListener("input", updateLayout);
   window.addEventListener("resize", updateLayout);
   Object.values(el.languageChecks).forEach((node) => {
@@ -556,6 +562,7 @@ function beginSettingsResize(event) {
     const rect = el.workspace.getBoundingClientRect();
     const maxWidth = Math.max(300, Math.floor(rect.width * 0.8));
     const nextWidth = clamp(Math.round(moveEvent.clientX - rect.left), 300, maxWidth);
+    settingsWidthCustomized = true;
     el.settingsWidth.value = String(nextWidth);
     updateLayout();
   };
