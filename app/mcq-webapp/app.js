@@ -4,8 +4,8 @@ const INITIAL_LOCALE = window.mcqI18n?.language
   || (["ja", "en"].includes(SERVER_CONFIG.locale) ? SERVER_CONFIG.locale : "ja");
 const LANGUAGE_SETTINGS_STORAGE_KEY = "mcq-webapp.question-languages";
 const DEFAULT_QUESTION_TEXTS = {
-  ja: "次の選択肢について答えよ。__SELPROMPT__",
-  en: "Consider the following options. __SELPROMPT__",
+  ja: "次の恒星・惑星・衛星に関する主張について、__SELPROMPT__",
+  en: "Consider the following statements about stars, planets, and satellites. __SELPROMPT__",
 };
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
 const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-base-url";
@@ -2932,8 +2932,8 @@ function downloadSampleCsv() {
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", el.requirePairs.checked ? "mixed" : "true"],
     ["config", "base_language", baseLang()],
-    ["qtextL", "string", "ja", DEFAULT_QUESTION_TEXTS.ja],
-    ["qtextL", "string", "en", DEFAULT_QUESTION_TEXTS.en],
+    ["qtextL", "string", "ja", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.ja : "次の方程式の解に関する主張について、__SELPROMPT__"],
+    ["qtextL", "string", "en", el.requirePairs.checked ? DEFAULT_QUESTION_TEXTS.en : "Consider the following statements about solutions of equations. __SELPROMPT__"],
     ["qvar", "cas", "n/a", "aa1:rand([1, 2, 3])"],
     ["qvar", "cas", "n/a", "aa2:rand([3, 4, 5])"],
   ];
@@ -3107,7 +3107,7 @@ function downloadIncludeFile() {
 function titleForSave() {
   let value = el.questionId.value.trim();
   if (!value) {
-    value = window.prompt(uiText("タイトルが未入力です。保存するファイルのタイトルを入力してください。"), "NurseSample001")?.trim() || "";
+    value = window.prompt(uiText("タイトルが未入力です。保存するファイルのタイトルを入力してください。"), "MCQ_sampleXYZ")?.trim() || "";
     if (!value) {
       setStatus("タイトルが未入力のため保存を中止しました", true);
       el.questionId.focus();

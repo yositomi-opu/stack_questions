@@ -10,7 +10,7 @@
     "XML保存": "Save XML",
     "問題ファイル設定": "Question file settings",
     "タイトル": "Title",
-    "例: NurseSample001": "Example: NurseSample001",
+    "例: MCQ_sampleXYZ": "Example: MCQ_sampleXYZ",
     "CSV/XLSX読込": "Load CSV/XLSX",
     "XML読込": "Load XML",
     "表示設定": "Display settings",

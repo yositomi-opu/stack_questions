@@ -8,7 +8,7 @@ config,correct_counts,"1, 2"
 config,require_pairs,true
 config,feedback_by_truth,mixed
 config,base_language,ja
-qtextL,string,ja,"次の選択肢について答えよ。__SELPROMPT__"
+qtextL,string,ja,"次の恒星・惑星・衛星に関する主張について、__SELPROMPT__"
 qvar,cas,n/a,"aa1:rand([1, 2, 3])"
 qvar,cas,n/a,"aa2:rand([3, 4, 5])"
 option1C,string,ja,"太陽は恒星である"
