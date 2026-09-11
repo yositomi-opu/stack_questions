@@ -62,7 +62,7 @@ pv:rand(pvL);
 Xflag:homo*rand([0, 0, 1]); /* Xflag = 0: have sol, 1: do not have sol. fix 0 or 1 if you want */
 /* vflag=1 -> vars:[v,w,x,y,z] =2 -> vars:[x1,x2,..] (qt=3 case only) */
 vflag:2;  /* or rand([1,2]); */
-stack_include("https://stack.mathedu.jp/sc/005/LinEqVecAns-vm.txt");]]></text>
+stack_include("https://stack.mathedu.jp/sc/005/LinEqVecAns.txt");]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
