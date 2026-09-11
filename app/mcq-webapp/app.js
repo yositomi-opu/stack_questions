@@ -1378,6 +1378,19 @@ function generateXml() {
     .replace(/<questionnote format="html">\s*<text>[\s\S]*?<\/text>\s*<\/questionnote>/, `<questionnote format="html">\n      <text>${escapeXml(id)}</text>\n    </questionnote>`);
 }
 
+// Preview takes a separate snapshot; saved XML and shared include files are unchanged.
+function previewQuestionSnapshot() {
+  let xml = generateXml();
+  if (state.includeSource) {
+    const main = [...parameterPreamble(), generateIncludeFileContent()].join("\n");
+    xml = xml.replace(
+      /(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/\s*)[\s\S]*?(\s*\/\*+\s*END OF MAIN QUESTION VARIABLES\s*\*+\/)/,
+      (_match, start, end) => `${start}\n${main}\n${end}`
+    );
+  }
+  return {questionDefinition: xml, url: el.stackApiUrl.value.trim(), lang: el.baseLanguage.value};
+}
+
 function generateVariableBlock(includePreamble = true) {
   validateTranslationCoverage();
   const numOptions = positiveInt(el.numOptions.value, "選択肢数");

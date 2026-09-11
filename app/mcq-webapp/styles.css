@@ -1112,3 +1112,13 @@ td:nth-child(5) {
 .question-text-tooltip p + p {
   margin-top: 8px;
 }
+
+/* Optional preview dialog; editor layout is unaffected. */
+.preview-dialog { width: min(1000px, 94vw); max-width: 94vw; height: min(850px, 92vh); max-height: 92vh; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; color: #202b3b; }
+.preview-dialog::backdrop { background: rgba(15, 23, 42, .45); }
+.preview-heading, .preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.preview-heading { justify-content: space-between; }
+.preview-heading h2 { margin: 0; }
+.preview-controls input { width: 120px; }
+.preview-dialog iframe { width: 100%; height: calc(100% - 210px); min-height: 250px; border: 1px solid #d9e1eb; border-radius: 8px; background: white; }
+@media (max-width: 600px) { .preview-dialog { padding: 12px; } .preview-dialog iframe { height: 55vh; } }

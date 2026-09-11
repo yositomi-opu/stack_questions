@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import locale as locale_module
 import os
@@ -16,6 +17,7 @@ import tempfile
 import threading
 import time
 import webbrowser
+import xml.etree.ElementTree as ET
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -32,6 +34,7 @@ LOCAL_DIR = WEB_ROOT / ".local"
 DOCKER_EVALUATION_DIR = LOCAL_DIR / "docker-evaluation"
 DUMP_TEMPLATE = REPO_ROOT / "dump.txt"
 MAX_BODY_BYTES = 512 * 1024
+MAX_PREVIEW_BODY_BYTES = 4 * 1024 * 1024
 MAX_EXPRESSIONS = 300
 MAXIMA_TIMEOUT_SECONDS = 12
 STACK_API_TIMEOUT_SECONDS = 30
@@ -829,6 +832,97 @@ def test_stack_question(base_url: str, question_definition: str) -> dict[str, An
     return {"ok": True, "url": normalized_url, "result": result}
 
 
+def preview_definition(xml: str, seed: int) -> str:
+    """Prepare only the preview copy, resolving repository includes without network access."""
+    if not isinstance(xml, str) or not xml.strip():
+        raise ValueError("プレビューする問題XMLがありません")
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError as exc:
+        raise ValueError("問題XMLを読み込めません") from exc
+    questions = root.findall("question")
+    if root.tag != "quiz" or len(questions) != 1 or questions[0].get("type") != "stack":
+        raise ValueError("STACK問題1問のXMLが必要です")
+    question = questions[0]
+    for deployed in question.findall("deployedseed"):
+        question.remove(deployed)
+    ET.SubElement(question, "deployedseed").text = str(seed)
+
+    # Match comments and strings first so examples inside them are not executed.
+    tokens = re.compile(r'/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\bstack_include\s*\(\s*"([^"\r\n]+)"\s*\)\s*[;$]?')
+    total = 0
+
+    def expand(source: str, chain: tuple[Path, ...] = ()) -> str:
+        def replace(match: re.Match[str]) -> str:
+            nonlocal total
+            if match.group(1) is None:
+                return match.group(0)
+            reference = match.group(1)
+            if reference.startswith("https://stack.mathedu.jp/sc/"):
+                reference = reference.removeprefix("https://stack.mathedu.jp/sc/")
+            elif reference.startswith(ACTIVE_INCLUDE_BASE_URL.rstrip("/") + "/"):
+                reference = reference[len(ACTIVE_INCLUDE_BASE_URL.rstrip("/")) + 1:]
+            path = resolve_stack_include(reference)
+            # Apply the same public-file restrictions as the repository include endpoint.
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            _, data = read_repository_include(relative)
+            if path in chain or len(chain) >= 12:
+                raise ValueError("includeの循環または過剰な入れ子があります")
+            total += len(data)
+            if total > MAX_REPOSITORY_FILE_BYTES:
+                raise ValueError("プレビューのinclude合計が大きすぎます")
+            return "\n" + expand(data.decode("utf-8-sig"), (*chain, path)) + "\n"
+        return tokens.sub(replace, source)
+
+    for node in question.findall("questionvariables/text") + question.findall("prt/feedbackvariables/text"):
+        node.text = expand(node.text or "")
+    return ET.tostring(root, encoding="unicode")
+
+
+def preview_stack_question(payload: dict[str, Any], grading: bool = False) -> dict[str, Any]:
+    seed = payload.get("seed", 1)
+    if type(seed) is not int or not 1 <= seed <= 2147483647:
+        raise ValueError("乱数の種は1〜2147483647の整数で指定してください")
+    lang = payload.get("lang", "ja")
+    if lang not in {"ja", "en", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv"}:
+        raise ValueError("言語コードが不正です")
+    definition = preview_definition(payload.get("questionDefinition", ""), seed)
+    request_data = {"questionDefinition": definition, "seed": seed, "lang": lang}
+    if grading:
+        answers = payload.get("answers")
+        if not isinstance(answers, dict) or len(answers) > 500 or any(
+            not isinstance(k, str) or not isinstance(v, str) for k, v in answers.items()
+        ):
+            raise ValueError("回答の形式が不正です")
+        request_data["answers"] = answers
+    else:
+        request_data.update({"renderInputs": "mcqpreview_", "readOnly": False})
+    normalized_url, result = request_stack_api(payload.get("url", ""), "/grade" if grading else "/render", request_data)
+    if result.get("message"):
+        raise RuntimeError(str(result["message"]))
+    if not grading:
+        result["previewDefinition"] = definition
+    # Bundle plots through the server, so remote workshop browsers never need
+    # direct access to the Docker-only API port.
+    assets = result.get("gradingassets" if grading else "questionassets", {})
+    result["previewassets"] = {}
+    asset_bytes = 0
+    for name, filename in assets.items():
+        if not isinstance(filename, str) or not re.fullmatch(r"[A-Za-z0-9_-]+\.(?:png|jpg|jpeg|gif|svg)", filename):
+            raise RuntimeError("プレビュー画像のファイル名を確認できませんでした")
+        try:
+            with urlopen(f"{normalized_url}/plot.php/{filename}", timeout=STACK_API_TIMEOUT_SECONDS) as response:
+                content = response.read(MAX_STACK_API_RESPONSE_BYTES + 1)
+                mime = response.headers.get_content_type()
+        except (URLError, TimeoutError, OSError) as exc:
+            raise RuntimeError("プレビュー画像を取得できませんでした") from exc
+        asset_bytes += len(content)
+        if asset_bytes > MAX_STACK_API_RESPONSE_BYTES or mime not in {"image/png", "image/jpeg", "image/gif", "image/svg+xml"}:
+            raise RuntimeError("プレビュー画像の形式またはサイズが不正です")
+        result["previewassets"][name] = f"data:{mime};base64,{base64.b64encode(content).decode('ascii')}"
+    return {"ok": True, "url": normalized_url, "result": result}
+
+
 def read_repository_include(raw_path: str) -> tuple[str, bytes]:
     path_text = unquote(raw_path).replace("\\", "/").lstrip("/")
     relative = Path(path_text)
@@ -854,7 +948,7 @@ def read_repository_include(raw_path: str) -> tuple[str, bytes]:
 class McqRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self) -> None:
         # Revalidate the app shell after updates, including conditional responses.
-        if urlparse(self.path).path in {"/", "/index.html", "/app.js", "/i18n.js", "/styles.css"}:
+        if urlparse(self.path).path in {"/", "/index.html", "/app.js", "/i18n.js", "/styles.css", "/preview.js"}:
             self.send_header("Cache-Control", "no-cache, must-revalidate")
         super().end_headers()
 
@@ -921,12 +1015,13 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
             self.send_json(HTTPStatus.OK, {"ok": True})
             threading.Thread(target=self.server.shutdown, daemon=True).start()
             return
-        if self.path not in {"/api/maxima/evaluate", "/api/stack/check", "/api/stack/test"}:
+        if self.path not in {"/api/maxima/evaluate", "/api/stack/check", "/api/stack/test", "/api/stack/preview", "/api/stack/grade"}:
             self.send_error(HTTPStatus.NOT_FOUND)
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
-            if length <= 0 or length > MAX_BODY_BYTES:
+            limit = MAX_PREVIEW_BODY_BYTES if self.path in {"/api/stack/preview", "/api/stack/grade"} else MAX_BODY_BYTES
+            if length <= 0 or length > limit:
                 raise ValueError("リクエストサイズが不正です")
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(payload, dict):
@@ -935,6 +1030,8 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
                 result = evaluate_payload(payload)
             elif self.path == "/api/stack/check":
                 result = check_stack_api(payload.get("url", ""))
+            elif self.path in {"/api/stack/preview", "/api/stack/grade"}:
+                result = preview_stack_question(payload, grading=self.path.endswith("/grade"))
             else:
                 result = test_stack_question(
                     payload.get("url", ""),

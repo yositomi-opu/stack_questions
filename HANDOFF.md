@@ -7,11 +7,18 @@
 ## 現在の対象と状態
 
 - 主な開発対象: `app/mcq-webapp`（CSV/XLSXや編集画面からMoodle STACK用の多肢選択問題XMLを生成）。
-- 直近の変更: バリアント用パラメータ欄を追加し、メインのstack_include前にあるrankなどの設定を読み込み・評価・保存で保持。コミット・送信状態は `git log` と `git status` で確認すること。
+- 直近の変更: インポート前の問題プレビューを追加。STACK APIで描画・採点し、編集時点のパラメータとinclude内容を反映。コミット・送信状態は `git log` と `git status` で確認すること。
 - 最新版をNextcloud外へ新規cloneして `make setup` を実行し、利用者からセットアップ完了・WebAppの起動成功の報告あり。
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- プレビュー追加: 上部ボタンから独立したダイアログを開く。`preview.js` は明示操作時だけAPI／数式表示を利用し、編集・保存のイベントを置き換えない。Radio/Checkbox回答、得点、PRTフィードバック、全般的解説、乱数の種の切替に対応。日英UI対応。
+- `previewQuestionSnapshot()` は保存用XML生成後のコピーに、パラメータ→編集中のinclude本体を組み込む。プレビュー専用サーバー処理はローカルの共通includeを展開し、指定seedのdeployedseedを補う。描画後の展開済みXMLをクライアントへ返し、採点・別seedの表示にも同じコピーを使う。CSV・保存XML・共有ファイルには影響しない。
+- `/api/stack/preview` と `/api/stack/grade` を追加。接続先制限は既存APIと共通。includeのリポジトリ外参照／非公開ファイル／循環を拒否。描画・採点用JSONのみ最大4 MiB（展開済みXML往復用）、既存APIは512 KiBを維持。画像はサーバー経由でdata URLにして返す。
+- 問題HTMLはスクリプト無効のsandbox iframeへ表示。MathJax 3.2.2のSVG版とApache 2.0ライセンスを同梱し、外部CDNは不要。JSXGraph等の対話型iframeは未対応として明示エラー。Moodleテーマとの見た目の完全一致は対象外。
+- プレビュー検証: Python単体17件、Nodeの既存XML・候補数・パラメータ／保存XML非変更・プレビュー回答／プレースホルダーの回帰テストを実施。実APIで天体Radioとrank 0/1/2のCheckboxをseed 1/2で描画し、8通りすべて模範解答100%を確認。展開済みコピーでの採点も確認。
+- 実ブラウザ: 日英UI、Radio正答100%／誤答0%と解説、既存rank 2 XMLのCAS評価→行列の数式表示→Checkbox満点、パラメータだけrank 1へ変更→再評価→問題文／選択肢の反映、seed入力直後の採点無効化、回答変更時の得点／解説消去、API接続先エラー後も生成XMLと保存操作が利用可能なことを確認。静的プロット画像、対話型図、Ubuntu実機での確認は未実施。
 
 - ルートREADMEを日英とも一般利用者向けに再構成。AI翻訳プロンプトと個別変数名への注意、未確定の公開・一括変換予定を削除。導入・サンプル・問題作成・多言語対応・管理者向けガイド・開発参加への導線を整理し、翻訳時のコード保持ルールはAGENTS.mdへ移動。
 - README整理の検証: 日英の内容対応、相対リンクの参照先、Markdownコードブロックの対応、差分チェックを確認。文書のみの変更のためアプリのテストは再実行していない。
@@ -55,6 +62,17 @@
 | `scripts/tests/test_docker_startup.py` | Docker起動の単体テスト |
 
 ## 再開と検証
+
+プレビュー機能の検証（実API確認は起動中のWebAppとSTACK APIが必要）:
+
+```sh
+node scripts/tests/test_preview_ui.cjs
+node scripts/tests/test_variant_parameters.cjs
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -v
+python3 scripts/tests/check_stack_preview_integration.py --url http://127.0.0.1:4174
+```
+
+実API確認時は既存サービスを変更せず、`python3 app/mcq-webapp/server.py --port 4174` で検証用サーバーを別に起動した。通常の4173を使う場合は検証コマンドの `--url` を省略できる。統合検証にはNode.jsが必要で、生成した一時XMLは終了時に削除される。
 
 パラメータ機能の検証:
 

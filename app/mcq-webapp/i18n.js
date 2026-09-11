@@ -8,6 +8,7 @@
     "CSV見本": "CSV sample",
     "CSV保存": "Save CSV",
     "XML保存": "Save XML",
+    "プレビュー": "Preview",
     "問題ファイル設定": "Question file settings",
     "タイトル": "Title",
     "例: MCQ_sampleXYZ": "Example: MCQ_sampleXYZ",
