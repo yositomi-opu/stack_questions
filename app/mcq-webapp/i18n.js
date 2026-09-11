@@ -32,6 +32,8 @@
     "問題変数を評価": "Evaluate question variables",
     "未評価": "Not evaluated",
     "問題文": "Question text",
+    "パラメータ": "Parameters",
+    "選択肢数の設定後、問題変数（stack_include）の前に実行します。": "Executed after the option-count settings and before the question variables (stack_include).",
     "問題文の入力について": "About entering question text",
     "__SELTYPE__ は、上の選択肢設定に応じて「1つ選べ」「すべて選べ」、正解が複数あるRadio形式では「1つ選べ（正解が複数あっても1つでよい）」に置き換わります。": "__SELTYPE__ inserts “Choose”, “Choose all”, or “Choose one of the” according to the option settings. In Japanese, Radio questions with multiple correct options also explain that selecting one is enough.",
     "何を選ぶかは問題文に書きます。例：「間違っているものを __SELTYPE__。」「rankが1であるものを __SELTYPE__。」": "Write the selection criterion in the question text. For example: “__SELTYPE__ incorrect statements.” or “__SELTYPE__ matrices of rank 1.”",
