@@ -105,3 +105,16 @@ assert.equal(el.noIdeaOption.checked,true); assert.equal(el.noCorrectOption.chec
 assert.ok(!el.parameters.value.includes('%__mcq_scmethod'));
 assert.match(el.parameters.value,/%_rk:2;/);
 console.log('Passed: legacy include wrapper flags restored without duplicate overriding assignments.');
+
+el.scoringMethodField={hidden:false};
+el.scoringMethod.value='2';
+context.setMode('rb');
+assert.equal(el.scoringMethodField.hidden,true);
+assert.equal(el.scoringMethod.disabled,true);
+assert.match(context.parameterPreamble().join('\n'),/%__mcq_scmethod:1;/);
+context.setMode('cb');
+assert.equal(el.scoringMethodField.hidden,false);
+assert.equal(el.scoringMethod.disabled,false);
+assert.equal(el.scoringMethod.value,'2');
+assert.match(context.parameterPreamble().join('\n'),/%__mcq_scmethod:2;/);
+console.log('Passed: Radio fixes scoring to Jaccard; Checkbox restores selected method and visibility.');

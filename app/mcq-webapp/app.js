@@ -40,6 +40,7 @@ const el = {
   modeCb: document.querySelector("#modeCb"),
   noCorrectOption: document.querySelector("#noCorrectOption"),
   noIdeaOption: document.querySelector("#noIdeaOption"),
+  scoringMethodField: document.querySelector("#scoringMethodField"),
   scoringMethod: document.querySelector("#scoringMethod"),
   numOptions: document.querySelector("#numOptions"),
   numCorrect: document.querySelector("#numCorrect"),
@@ -683,6 +684,8 @@ function setMode(mode) {
   state.mode = mode;
   el.modeRb.checked = mode === "rb";
   el.modeCb.checked = mode === "cb";
+  if (el.scoringMethodField) el.scoringMethodField.hidden = mode !== "cb";
+  if (el.scoringMethod) el.scoringMethod.disabled = mode !== "cb";
   updateOutput();
 }
 
@@ -1567,7 +1570,7 @@ function parameterPreamble() {
     `%_MCQ_NUM_COPTS:${expression};`,
     `%__mcq_nocorrectopt:${Boolean(el.noCorrectOption?.checked)};`,
     `%__mcq_noidea:${Boolean(el.noIdeaOption?.checked)};`,
-    `%__mcq_scmethod:${el.scoringMethod?.value || "1"};`,
+    `%__mcq_scmethod:${state.mode === "cb" ? el.scoringMethod?.value || "1" : "1"};`,
     ...(el.noCorrectOption?.checked ? ["%__mcq_nocorrecttrue:is(%_MCQ_NUM_COPTS=0);", "%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %_STACK_LANG);"] : []),
     ...(el.noIdeaOption?.checked ? ["%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %_STACK_LANG);"] : []),
     ...(parameters ? [/[;$]\s*$/.test(stripMaximaComments(parameters).trim()) ? parameters : `${parameters}\n;`] : []),
