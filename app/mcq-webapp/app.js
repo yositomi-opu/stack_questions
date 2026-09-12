@@ -847,8 +847,9 @@ function pairedPatternEditor(row, index) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ghost";
-    button.textContent = "正解・不正解を入れ替え";
-    button.title = "このパターンの全言語の選択肢とフィードバックを入れ替えます";
+    button.textContent = "正↔不";
+    button.title = "正解と不正解を入れかえます";
+    button.setAttribute("aria-label", "正解と不正解を入れかえます");
     button.addEventListener("click", () => swapPairedOptions(row.pattern));
     editor.append(button);
   }
