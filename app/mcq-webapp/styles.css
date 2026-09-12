@@ -1122,3 +1122,5 @@ td:nth-child(5) {
 .preview-controls input { width: 120px; }
 .preview-dialog iframe { width: 100%; height: calc(100% - 210px); min-height: 250px; border: 1px solid #d9e1eb; border-radius: 8px; background: white; }
 @media (max-width: 600px) { .preview-dialog { padding: 12px; } .preview-dialog iframe { height: 55vh; } }
+
+#casDiagnosticsPanel pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; padding: 10px; background: #f5f7fa; font-size: 12px; }

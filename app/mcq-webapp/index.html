@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260912-ui27">
+    <link rel="stylesheet" href="./styles.css?v=20260912-ui28">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260912-i18n18"></script>
-    <script defer src="./app.js?v=20260912-ui48"></script>
+    <script defer src="./i18n.js?v=20260912-i18n20"></script>
+    <script defer src="./app.js?v=20260912-ui50"></script>
     <script defer src="./preview.js?v=20260912-preview2"></script>
   </head>
   <body>
@@ -147,11 +147,11 @@
                 </div>
                 <label class="check-row" for="requirePairs">
                   <input id="requirePairs" type="checkbox" checked>
-                  <span>各パターンは真偽1対以上を必須とする</span>
+                  <span>各パターンは正解・不正解1対以上を必須とする</span>
                 </label>
                 <label id="feedbackByTruthRow" class="check-row nested-check-row" for="feedbackByTruth">
                   <input id="feedbackByTruth" type="checkbox">
-                  <span>追加時は真偽別フィードバック</span>
+                  <span>追加時は正解・不正解別フィードバック</span>
                 </label>
               </div>
             </div>
@@ -192,6 +192,7 @@
           <div class="panel-heading">
             <h2>選択肢データ</h2>
             <div class="row-actions">
+              <button id="swapAllPairsButton" type="button" class="ghost" title="全パターンの全言語の選択肢とフィードバックを入れ替えます">全体の正解・不正解を入れ替え</button>
               <button id="addRowButton" type="button" class="ghost">行追加</button>
               <button id="clearRowsButton" type="button" class="ghost danger">クリア</button>
             </div>
@@ -201,7 +202,7 @@
               <thead>
                 <tr>
                   <th>パターン</th>
-                  <th>真偽</th>
+                  <th>正解・不正解</th>
                   <th id="choiceLanguageHeading">選択肢 ja</th>
                   <th id="feedbackLanguageHeading">共通FB ja</th>
                   <th></th>
@@ -238,6 +239,12 @@
           </div>
           <section class="cas-evaluation-panel cas-results-panel" aria-labelledby="casEvaluationHeading">
             <h2 id="casEvaluationHeading">問題変数評価結果</h2>
+            <details id="casDiagnosticsPanel" hidden>
+              <summary>評価ログ（エラー詳細）</summary>
+              <pre id="casDiagnostics" translate="no"></pre>
+              <p>Maximaのエラー出力と評価に送ったコードです。行番号はこのコード内の番号です。include先のエラーはログ内のファイル名も確認してください。</p>
+              <details><summary>評価したコード（行番号付き）</summary><pre id="casEvaluationSource" translate="no"></pre></details>
+            </details>
             <details id="casVariablesPanel" class="cas-variables-panel" open>
               <summary>定義済み変数 <span id="casVariableCount">0</span></summary>
               <div class="cas-variable-table-wrap">

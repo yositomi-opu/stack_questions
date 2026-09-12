@@ -739,7 +739,11 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
     }
     if not qvars_ok:
         response["error"] = "問題変数の評価に失敗しました"
-        response["diagnostics"] = output[-4000:]
+    if not qvars_ok or any(not item["ok"] for item in response["variables"] + response["expressions"]):
+        # Start at question variables so later result blocks cannot hide the error.
+        start = output.find(MARKER + "QVARS_BEGIN")
+        diagnostics = output[start:] if start >= 0 else output
+        response["diagnostics"] = diagnostics[:32000] + ("\n[log truncated]" if len(diagnostics) > 32000 else "")
     return response
 
 

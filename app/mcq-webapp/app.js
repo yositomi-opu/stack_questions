@@ -62,6 +62,10 @@ const el = {
   parameters: document.querySelector("#parameters"),
   evaluateCasButton: document.querySelector("#evaluateCasButton"),
   casEvaluationStatus: document.querySelector("#casEvaluationStatus"),
+  casDiagnosticsPanel: document.querySelector("#casDiagnosticsPanel"),
+  casDiagnostics: document.querySelector("#casDiagnostics"),
+  casEvaluationSource: document.querySelector("#casEvaluationSource"),
+  swapAllPairsButton: document.querySelector("#swapAllPairsButton"),
   casVariablesPanel: document.querySelector("#casVariablesPanel"),
   casVariableCount: document.querySelector("#casVariableCount"),
   casVariablesBody: document.querySelector("#casVariablesBody"),
@@ -161,6 +165,7 @@ function updateLayout() {
 }
 
 function bindEvents() {
+  el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
   el.modeCb.addEventListener("change", () => setMode("cb"));
   el.addRowButton.addEventListener("click", () => {
@@ -173,7 +178,7 @@ function bindEvents() {
       [`feedback_${baseLang()}`]: "",
     });
     state.rows.push(row("C"), row("W"));
-    markTranslationsStale("真偽1対の選択肢行が追加されました");
+    markTranslationsStale("正解・不正解1対の選択肢行が追加されました");
     markCasEvaluationStale();
     renderRows();
     updateOutput();
@@ -217,7 +222,7 @@ function bindEvents() {
   });
   el.feedbackByTruth.addEventListener("change", () => {
     setStatus(el.feedbackByTruth.checked
-      ? "新しく追加するパターンは真偽別フィードバックになります"
+      ? "新しく追加するパターンは正解・不正解別フィードバックになります"
       : "新しく追加するパターンは共通フィードバックになります");
   });
   el.randomCorrect.addEventListener("change", () => {
@@ -396,6 +401,10 @@ function casChoiceExpressions() {
 
 async function evaluateCasLocally() {
   const expressions = casChoiceExpressions();
+  const variableSource = evaluationVariableCode();
+  el.casDiagnosticsPanel.hidden = true;
+  el.casDiagnostics.textContent = "";
+  el.casEvaluationSource.textContent = variableSource.split("\n").map((line, index) => `${index + 1}: ${line}`).join("\n");
   el.evaluateCasButton.disabled = true;
   state.casEvaluation.status = "loading";
   state.casEvaluation.stale = false;
@@ -407,12 +416,13 @@ async function evaluateCasLocally() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        variables: evaluationVariableCode(),
+        variables: variableSource,
         variableNames: problemVariableNames(),
         expressions,
       }),
     });
     const result = await response.json().catch(() => ({}));
+    showCasDiagnostics(result);
     if (!response.ok) throw new Error(result.error || `評価APIエラー (${response.status})`);
 
     state.casEvaluation.status = result.ok ? "ready" : "error";
@@ -422,6 +432,7 @@ async function evaluateCasLocally() {
     );
     state.casEvaluation.stale = false;
     const listErrors = validateCasListExpressionResults();
+    if (listErrors.length) showCasDiagnostics({ diagnostics: [el.casDiagnostics.textContent, ...listErrors].filter(Boolean).join("\n") });
     renderCasVariables();
     updateCasEvaluationBadges();
     updateOptionLimit();
@@ -440,6 +451,7 @@ async function evaluateCasLocally() {
     }
     updateOutput();
   } catch (error) {
+    if (!el.casDiagnostics.textContent) showCasDiagnostics({ error: error.message });
     state.casEvaluation.status = "error";
     state.casEvaluation.expressions = {};
     setCasEvaluationStatus(
@@ -450,6 +462,15 @@ async function evaluateCasLocally() {
   } finally {
     el.evaluateCasButton.disabled = false;
   }
+}
+
+function showCasDiagnostics(result) {
+  const failures = (result.expressions || []).filter((item) => !item.ok)
+    .map((item) => `${item.id}: ${item.error || "Error"}`);
+  const log = [result.error, result.diagnostics, ...failures].filter(Boolean).join("\n\n");
+  el.casDiagnostics.textContent = log;
+  el.casDiagnosticsPanel.hidden = !log;
+  el.casDiagnosticsPanel.open = Boolean(log);
 }
 
 function validateCasListExpressionResults() {
@@ -745,6 +766,8 @@ function renderRows() {
   el.pairedEditor.hidden = !paired;
   el.fixedEditor.hidden = paired;
   el.addRowButton.hidden = !paired;
+  el.swapAllPairsButton.hidden = !paired;
+  el.swapAllPairsButton.disabled = !state.rows.length;
   if (!paired) {
     renderFixedGroups("C", el.correctPatternsBody);
     renderFixedGroups("W", el.wrongPatternsBody);
@@ -754,7 +777,7 @@ function renderRows() {
   state.rows.forEach((row, index) => {
     const tr = document.createElement("tr");
     tr.append(
-      cell(textInput(row, index, "pattern", "01")),
+      cell(pairedPatternEditor(row, index)),
       cell(truthSelect(row, index)),
       cell(typedTextareaInput(row, index, "choice")),
       cell(feedbackTextarea(row, index)),
@@ -762,6 +785,40 @@ function renderRows() {
     );
     el.rowsBody.append(tr);
   });
+}
+
+function pairedPatternEditor(row, index) {
+  const editor = document.createElement("div");
+  editor.className = "typed-editor";
+  editor.append(textInput(row, index, "pattern", "01"));
+  if (patternRowsFor(row)[0] === row) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ghost";
+    button.textContent = "正解・不正解を入れ替え";
+    button.title = "このパターンの全言語の選択肢とフィードバックを入れ替えます";
+    button.addEventListener("click", () => swapPairedOptions(row.pattern));
+    editor.append(button);
+  }
+  return editor;
+}
+
+function swapPairedOptions(pattern = null) {
+  if (!el.requirePairs.checked) return;
+  if (state.casEvaluation.status === "loading") {
+    setStatus("評価中です。完了後に入れ替えてください");
+    return;
+  }
+  // Move each complete candidate with its feedback, types and all translations.
+  // This also supports unequal numbers of C/W candidates and CAS lists.
+  const selected = pattern === null ? state.rows : patternRowsFor(pattern);
+  selected.forEach((row) => { row.truth = normalizeTruth(row.truth) === "C" ? "W" : "C"; });
+  // Row-indexed evaluation results belong to the old arrangement.
+  state.casEvaluation = { status: "idle", stale: false, variables: [], expressions: {} };
+  setCasEvaluationStatus("正解・不正解を入れ替えました。必要に応じて再評価してください", "stale");
+  renderCasVariables();
+  renderRows();
+  updateOutput();
 }
 
 function updateOptionLimit() {
@@ -1033,11 +1090,11 @@ function cell(child) {
 
 function truthSelect(row, index) {
   const select = document.createElement("select");
-  select.innerHTML = '<option value="C">真</option><option value="W">偽</option>';
+  select.innerHTML = '<option value="C">正解</option><option value="W">不正解</option>';
   select.value = normalizeTruth(row.truth);
   select.addEventListener("change", () => {
     state.rows[index].truth = select.value;
-    markTranslationsStale("選択肢の真偽が変更されました");
+    markTranslationsStale("選択肢の正解・不正解が変更されました");
     renderRows();
     updateOutput();
   });
@@ -1121,7 +1178,7 @@ function feedbackTextarea(row, index) {
   textarea.disabled = index !== firstIndex;
   if (textarea.disabled) {
     textarea.title = patternFeedbackSeparate(row)
-      ? "フィードバックは同じパターン・真偽の先頭行で編集します"
+      ? "フィードバックは同じパターン・正解・不正解の先頭行で編集します"
       : "フィードバックは同じパターンの先頭行で編集します";
   }
   textarea.addEventListener("input", () => {
@@ -1200,7 +1257,7 @@ function feedbackModeToggle(row, index) {
     renderRows();
     updateOutput();
   });
-  label.append(input, document.createTextNode("このパターンは真偽別"));
+  label.append(input, document.createTextNode("このパターンは正解・不正解別"));
   return label;
 }
 
@@ -2845,7 +2902,7 @@ function applyCsvV2Feedback(rows, feedback, feedbackDefault, warnings) {
     const wrong = feedback.get(`${pattern}:W`);
     const separate = Boolean(correct || wrong) || (!shared && feedbackDefault === "true");
     if (shared && (correct || wrong)) {
-      warnings.push(`パターン ${Number(pattern)} に共通と真偽別のfeedbackが併記されています。真偽別を優先しました`);
+      warnings.push(`パターン ${Number(pattern)} に共通と正解・不正解別のfeedbackが併記されています。正解・不正解別を優先しました`);
     }
     rows.filter((row) => row.pattern === pattern).forEach((row) => {
       row.feedback_by_truth = separate;
