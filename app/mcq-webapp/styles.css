@@ -1211,3 +1211,10 @@ td:nth-child(5) {
 
 .interface-language { display: inline-flex; align-items: center; gap: 5px; }
 .interface-language svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+.pattern-number-select { width: 60px; min-width: 60px; padding: 6px; }
+#fixedEditor th:first-child, #fixedEditor td:first-child,
+#pairedEditor th:first-child, #pairedEditor td:first-child { width: 78px; min-width: 78px; }
+.choice-type-controls { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; }
+.choice-type-controls .cas-eval-badge { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.choice-type-controls .value-type-select { flex-shrink: 0; }

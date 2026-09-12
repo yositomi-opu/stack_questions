@@ -168,6 +168,7 @@ function bindEvents() {
   el.modeCb.addEventListener("change", () => setMode("cb"));
   el.addRowButton.addEventListener("click", () => {
     const pattern = nextPattern();
+    if (!pattern) return;
     const row = (truth) => ({
       pattern,
       truth,
@@ -601,8 +602,8 @@ function updateCasEvaluationBadge(badge) {
   const lengths = results.map((item) => item.type === "list" ? item.length : 1);
   const total = lengths.reduce((sum, value) => sum + Number(value || 0), 0);
   badge.textContent = lengths.length === 1
-    ? (results[0].type === "list" ? `CASリスト length: ${lengths[0]}` : `CAS値：1選択肢 (${results[0].type})`)
-    : `CAS lengths: ${lengths.join(" + ")} = ${total}`;
+    ? (results[0].type === "list" ? `length:${lengths[0]}` : `CAS値：1選択肢 (${results[0].type})`)
+    : `length:${total}`;
   badge.title = results.map((item) => item.value || "").join("\n");
   badge.classList.add("ok");
 }
@@ -826,7 +827,7 @@ function renderRows() {
 function pairedPatternEditor(row, index) {
   const editor = document.createElement("div");
   editor.className = "typed-editor";
-  editor.append(textInput(row, index, "pattern", "01"));
+  editor.append(patternNumberSelect(patternRowsFor(row), 5));
   if (patternRowsFor(row)[0] === row) {
     const button = document.createElement("button");
     button.type = "button";
@@ -943,17 +944,36 @@ function fixedGroups(truth) {
   );
 }
 
-function fixedPatternInput(group) {
-  const input = document.createElement("input");
-  input.value = group.pattern;
-  input.addEventListener("input", () => {
-    group.rows.forEach((row) => {
-      row.pattern = input.value;
-    });
+function patternNumberSelect(rows, maximum) {
+  const select = document.createElement("select");
+  select.className = "pattern-number-select";
+  select.setAttribute("aria-label", uiText("パターン番号"));
+  for (let n = 1; n <= maximum; n++) {
+    const option = document.createElement("option");
+    option.value = String(n).padStart(2, "0");
+    option.textContent = String(n);
+    select.append(option);
+  }
+  const current = String(Number(rows[0].pattern)).padStart(2, "0");
+  if (!(Number(current) >= 1 && Number(current) <= maximum)) {
+    const option = document.createElement("option");
+    option.value = current;
+    option.textContent = rows[0].pattern;
+    option.disabled = true;
+    select.append(option);
+  }
+  select.value = current;
+  select.addEventListener("change", () => {
+    rows.forEach(row => { row.pattern = select.value; });
+    markCasEvaluationStale();
+    renderRows();
     updateOutput();
   });
-  input.addEventListener("blur", renderRows);
-  return input;
+  return select;
+}
+
+function fixedPatternInput(group) {
+  return patternNumberSelect(group.rows, group.truth === "C" ? 5 : 9);
 }
 
 function fixedChoicesTextarea(group) {
@@ -993,7 +1013,10 @@ function fixedChoicesTextarea(group) {
     updateOutput();
   });
   editor.classList.toggle("cas", mode.value !== "text");
-  editor.append(independent, mode, badge, textarea);
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  controls.append(badge, mode);
+  editor.append(independent, controls, textarea);
   return editor;
 }
 
@@ -1121,8 +1144,10 @@ function removeFixedGroupButton(group) {
 }
 
 function addFixedPattern(truth) {
+  const pattern = nextPattern(truth);
+  if (!pattern) return;
   state.rows.push({
-    pattern: nextPattern(),
+    pattern,
     truth,
     feedback_by_truth: true,
     [`choice_${baseLang()}`]: "",
@@ -1211,7 +1236,10 @@ function typedTextareaInput(row, index, field) {
       updateOutput();
     }));
   }
-  editor.append(mode, badge, textarea);
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  controls.append(badge, mode);
+  editor.append(controls, textarea);
   return editor;
 }
 
@@ -1515,6 +1543,9 @@ function previewQuestionSnapshot() {
 }
 
 function generateVariableBlock(includePreamble = true) {
+  if (state.rows.some(row => !Number.isInteger(Number(row.pattern)) || Number(row.pattern) < 1 || Number(row.pattern) > (normalizeTruth(row.truth) === "C" ? 5 : 9))) {
+    throw new Error("パターン番号は正解1〜5・不正解1〜9で指定してください");
+  }
   validateTranslationCoverage();
   const numOptions = positiveInt(el.numOptions.value, "選択肢数");
   const counts = correctCountChoices(numOptions);
@@ -3525,9 +3556,14 @@ function upperFirst(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function nextPattern() {
-  const values = state.rows.map((row) => Number(row.pattern) || 0);
-  return String(Math.max(0, ...values) + 1).padStart(2, "0");
+function nextPattern(truth = null) {
+  const maximum = truth === "W" ? 9 : 5;
+  const used = new Set(state.rows.filter(row => !truth || normalizeTruth(row.truth) === truth).map(row => Number(row.pattern)));
+  for (let n = 1; n <= maximum; n++) {
+    if (!used.has(n)) return String(n).padStart(2, "0");
+  }
+  setStatus("パターン番号の上限です（正解1〜5・不正解1〜9）", true);
+  return null;
 }
 
 function setStatus(message, isError = false, isWarning = false) {
