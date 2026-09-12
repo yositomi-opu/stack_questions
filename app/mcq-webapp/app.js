@@ -862,10 +862,26 @@ function swapPairedOptions(pattern = null) {
     setStatus("評価中です。完了後に入れ替えてください");
     return;
   }
-  // Move each complete candidate with its feedback, types and all translations.
-  // This also supports unequal numbers of C/W candidates and CAS lists.
   const selected = pattern === null ? state.rows : patternRowsFor(pattern);
-  selected.forEach((row) => { row.truth = normalizeTruth(row.truth) === "C" ? "W" : "C"; });
+  const patterns = [...new Set(selected.map((row) => String(row.pattern || "").trim() || "01"))];
+  patterns.forEach((key) => {
+    const group = patternRowsFor(key);
+    const correct = group.filter((row) => normalizeTruth(row.truth) === "C");
+    const wrong = group.filter((row) => normalizeTruth(row.truth) === "W");
+    // Exchange complete contents, including all languages and CAS/list flags.
+    // Keep C/W positions for equal-sized pairs; resize each side for unequal groups.
+    const queues = {
+      C: wrong.map((row) => ({ ...row, truth: "C" })),
+      W: correct.map((row) => ({ ...row, truth: "W" })),
+    };
+    const replacements = correct.length === wrong.length
+      ? group.map((row) => queues[normalizeTruth(row.truth)].shift())
+      : normalizeTruth(group[0].truth) === "C" ? [...queues.C, ...queues.W] : [...queues.W, ...queues.C];
+    let index = 0;
+    state.rows.forEach((row, position) => {
+      if (group.includes(row)) state.rows[position] = replacements[index++];
+    });
+  });
   // Row-indexed evaluation results belong to the old arrangement.
   state.casEvaluation = { status: "idle", stale: false, variables: [], expressions: {} };
   setCasEvaluationStatus("正解・不正解を入れ替えました。必要に応じて再評価してください", "stale");
@@ -1001,6 +1017,7 @@ function languageIndependentToggle(rows, onChange, field = "choice") {
   const property = `${field}_language_independent`;
   const label = document.createElement("label");
   label.className = "language-independent-toggle";
+  if (field === "feedback") label.title = "このチェックをオンにすると多言語展開されません";
   const input = document.createElement("input");
   input.type = "checkbox";
   input.checked = rows.length > 0 && rows.every((row) => row[property]);
@@ -1009,7 +1026,7 @@ function languageIndependentToggle(rows, onChange, field = "choice") {
     onChange?.(input.checked);
   });
   label.append(input, document.createTextNode(field === "feedback"
-    ? "フィードバックは言語に依存しない"
+    ? "言語に依存しない"
     : "選択肢は言語に依存しない"));
   return label;
 }
@@ -1310,7 +1327,8 @@ function feedbackModeToggle(row, index) {
     renderRows();
     updateOutput();
   });
-  label.append(input, document.createTextNode("このパターンは正解・不正解別"));
+  label.title = "このチェックをオンにすると正解・不正解個別にフィードバックを設定できます";
+  label.append(input, document.createTextNode("正解・不正解別"));
   return label;
 }
 
