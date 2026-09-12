@@ -657,13 +657,13 @@ function checkResponse(response) {
   return response;
 }
 
-function setMode(mode) {
+function setMode(mode, update = true) {
   state.mode = mode;
   el.modeRb.checked = mode === "rb";
   el.modeCb.checked = mode === "cb";
   if (el.scoringMethodField) el.scoringMethodField.hidden = mode !== "cb";
   if (el.scoringMethod) el.scoringMethod.disabled = mode !== "cb";
-  updateOutput();
+  if (update) updateOutput();
 }
 
 function buildLanguageInputs() {
@@ -1445,6 +1445,11 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  if (!state.rows.length) {
+    el.xmlOutput.value = "";
+    setStatus("選択肢を入力してください");
+    return;
+  }
   try {
     const xml = generateXml();
     el.xmlOutput.value = xml;
@@ -1514,7 +1519,7 @@ function generateVariableBlock(includePreamble = true) {
   const numOptions = positiveInt(el.numOptions.value, "選択肢数");
   const counts = correctCountChoices(numOptions);
   const patterns = groupPatterns();
-  if (!patterns.length) throw new Error("命題パターンがありません");
+  if (!patterns.length) throw new Error("選択肢がありません。選択肢を追加してください");
   if (el.requirePairs.checked) {
     return generatePairedVariableBlock(patterns, numOptions, counts, includePreamble);
   }
@@ -2841,6 +2846,7 @@ function clearAllEntries() {
   updateQuestionLanguageVisibility();
   el.xmlOutput.value = "";
   setStatus("すべての問題入力をクリアしました");
+  window.mcqNotice?.("すべての問題入力をクリアしました");
 }
 
 function resetCsvImportState() {
@@ -2850,7 +2856,7 @@ function resetCsvImportState() {
   el.qvars.value = "";
   el.questionId.value = "";
   el.baseLanguage.value = INITIAL_LOCALE;
-  setMode("rb");
+  setMode("rb", false);
   el.numOptions.value = "2";
   el.numCorrect.value = "1";
   el.randomCorrect.checked = false;

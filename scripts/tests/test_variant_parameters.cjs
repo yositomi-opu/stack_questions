@@ -196,3 +196,18 @@ const resetHtml=fs.readFileSync(path.join(root,"app/mcq-webapp/index.html"),"utf
 assert.doesNotMatch(resetHtml,/id="clearRowsButton"/);
 assert.doesNotMatch(source,/el\.clearRowsButton/);
 assert.match(resetHtml,/id="clearAllButton"[^>]*>全入力クリア/);
+
+// Reset must not generate XML midway through clearing fields.
+vm.runInContext('function updateOutput(){throw new Error("Unexpected generation during reset");}',context);
+dirtyEditor();
+context.clearAllEntries();
+assert.equal(el.parameters.value,'');
+assert.equal(el.qvars.value,'');
+// Exercise the real output handler as well, including a delayed initial render.
+vm.runInContext(source.match(/^function updateOutput\([^]*?^}/m)[0],context);
+const notices=[];
+context.setStatus=(message,error)=>notices.push({message,error});
+context.updateOutput();
+assert.equal(el.xmlOutput.value,'');
+assert.ok(notices.every(item=>!item.error));
+console.log('Passed: reset never generates XML midway; empty output has no error.');
