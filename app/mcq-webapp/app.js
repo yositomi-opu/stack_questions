@@ -88,7 +88,6 @@ const el = {
   addRowButton: document.querySelector("#addRowButton"),
   addCorrectPatternButton: document.querySelector("#addCorrectPatternButton"),
   addWrongPatternButton: document.querySelector("#addWrongPatternButton"),
-  clearRowsButton: document.querySelector("#clearRowsButton"),
   sampleCsvButton: document.querySelector("#sampleCsvButton"),
   saveCsvButton: document.querySelector("#saveCsvButton"),
   downloadButton: document.querySelector("#downloadButton"),
@@ -184,13 +183,6 @@ function bindEvents() {
   });
   el.addCorrectPatternButton.addEventListener("click", () => addFixedPattern("C"));
   el.addWrongPatternButton.addEventListener("click", () => addFixedPattern("W"));
-  el.clearRowsButton.addEventListener("click", () => {
-    state.rows = [];
-    markTranslationsStale("選択肢がクリアされました");
-    markCasEvaluationStale();
-    renderRows();
-    updateOutput();
-  });
   el.dataFileInput.addEventListener("change", readSelectedFile);
   el.xmlFileInput.addEventListener("change", readSelectedXml);
   el.saveCsvButton.addEventListener("click", downloadCurrentCsv);

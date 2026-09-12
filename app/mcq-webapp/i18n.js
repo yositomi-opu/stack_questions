@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "全入力クリア": "Clear all entries",
     "クリア": "Clear",
     "読込": "Load",
     "すべての問題入力をクリアします。よろしいですか？": "Clear all question entries?",
@@ -90,6 +91,7 @@
     "正解・不正解別": "Separate correct/incorrect feedback",
     "選択肢データ": "Option data",
     "行追加": "Add row",
+    "全入力クリア": "Clear all entries",
     "クリア": "Clear",
     "パターン": "Pattern",
     "正解・不正解": "Correct/incorrect",

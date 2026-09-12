@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260913-ui34">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260913-reset1"></script>
-    <script defer src="./app.js?v=20260913-ui58"></script>
+    <script defer src="./i18n.js?v=20260913-reset2"></script>
+    <script defer src="./app.js?v=20260913-ui59"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260912-preview2"></script>
   </head>
@@ -45,7 +45,7 @@
         </div>
           <input id="dataFileInput" class="visually-hidden-file" type="file" accept=".csv,.tsv,.xlsx,.xls">
           <input id="xmlFileInput" class="visually-hidden-file" type="file" accept=".xml,application/xml,text/xml">
-        <button id="clearAllButton" type="button" class="ghost">クリア</button>
+        <button id="clearAllButton" type="button" class="ghost">全入力クリア</button>
         <details class="display-settings">
           <summary>表示設定</summary>
           <div class="display-settings-menu">
@@ -217,7 +217,6 @@
             <div class="row-actions">
               <button id="swapAllPairsButton" type="button" class="ghost" title="全パターンの正解と不正解を入れかえます" aria-label="全パターンの正解と不正解を入れかえます">全体：正↔不</button>
               <button id="addRowButton" type="button" class="ghost">行追加</button>
-              <button id="clearRowsButton" type="button" class="ghost danger">クリア</button>
             </div>
           </div>
           <div id="pairedEditor" class="table-wrap">

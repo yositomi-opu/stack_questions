@@ -191,3 +191,8 @@ pending.then(()=>{
   assert.equal(el.casEvaluationSource.dataset.source,'');
   console.log('Passed: late evaluation response is ignored after reset.');
 }).catch(error=>{console.error(error);process.exitCode=1;});
+
+const resetHtml=fs.readFileSync(path.join(root,"app/mcq-webapp/index.html"),"utf8");
+assert.doesNotMatch(resetHtml,/id="clearRowsButton"/);
+assert.doesNotMatch(source,/el\.clearRowsButton/);
+assert.match(resetHtml,/id="clearAllButton"[^>]*>全入力クリア/);
