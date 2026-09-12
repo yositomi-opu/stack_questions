@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260912-ui29">
+    <link rel="stylesheet" href="./styles.css?v=20260912-ui30">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
     <script defer src="./i18n.js?v=20260912-i18n25"></script>
@@ -124,11 +124,15 @@
                 <label><input id="modeRb" type="radio" name="mode" value="rb" checked> Radio</label>
                 <label><input id="modeCb" type="radio" name="mode" value="cb"> Checkbox</label>
               </fieldset>
+              <div class="special-options-settings">
+                <div class="special-options-checks">
               <label class="check-row" for="noCorrectOption"><input id="noCorrectOption" type="checkbox"><span>「選択肢に正解はない」オプションを使用する</span></label>
               <label class="check-row" for="noIdeaOption"><input id="noIdeaOption" type="checkbox"><span>「わからない」オプションを使用する</span></label>
-              <div class="field-row"><label for="scoringMethod">採点方式</label><select id="scoringMethod">
+                </div>
+              <div class="field-row scoring-method-field"><label for="scoringMethod">採点方式</label><select id="scoringMethod">
                 <option value="1">1: Jaccard（従来）</option><option value="2">2: MTF</option><option value="3">3: φ係数</option><option value="4">4: CFG</option>
               </select></div>
+              </div>
               <div class="number-grid">
                 <div class="field-row">
                   <label for="numOptions">選択肢数</label>

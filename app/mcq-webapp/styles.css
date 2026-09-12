@@ -1138,3 +1138,26 @@ td:nth-child(5) {
   font-size: 12px;
   padding: 7px 22px 7px 6px;
 }
+
+.special-options-settings {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.special-options-checks {
+  display: grid;
+  gap: 7px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.scoring-method-field {
+  flex: 0 0 160px;
+}
+
+.scoring-method-field select {
+  font-size: 12px;
+  padding: 7px 6px;
+}
