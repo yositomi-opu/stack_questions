@@ -642,8 +642,8 @@ function clamp(value, min, max) {
 async function loadTemplates() {
   try {
     const [rb, cb] = await Promise.all([
-      fetch("./templates/001.MCQ-rb.xml").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ-cb.xml").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-rb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-cb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
     ]);
     state.templates = { rb, cb };
     setStatus("テンプレート読込完了");

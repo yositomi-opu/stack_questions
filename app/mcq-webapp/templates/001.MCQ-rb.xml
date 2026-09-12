@@ -73,17 +73,41 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.
     <prtcorrect format="html">
       <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span>
 <span lang="ja" class="multilang">よくできました。正解です！</span>
-<span lang="en" class="multilang">Well done! Spot on!</span>]]></text>
+<span lang="en" class="multilang">Well done! Spot on!</span>
+<span lang="fr" class="multilang">Bravo ! Bonne réponse !</span>
+<span lang="it" class="multilang">Ben fatto! Risposta corretta!</span>
+<span lang="de" class="multilang">Gut gemacht! Richtig!</span>
+<span lang="pt" class="multilang">Muito bem! Resposta correta!</span>
+<span lang="zh" class="multilang">做得很好！回答正确！</span>
+<span lang="ko" class="multilang">잘했습니다! 정답입니다!</span>
+<span lang="ru" class="multilang">Отлично! Верно!</span>
+<span lang="sv" class="multilang">Bra gjort! Rätt svar!</span>]]></text>
     </prtcorrect>
     <prtpartiallycorrect format="html">
       <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
 <span lang="ja" class="multilang">部分的に正解です。</span>
-<span lang="en" class="multilang">Partially correct!</span>]]></text>
+<span lang="en" class="multilang">Partially correct!</span>
+<span lang="fr" class="multilang">Partiellement correct.</span>
+<span lang="it" class="multilang">Parzialmente corretto.</span>
+<span lang="de" class="multilang">Teilweise richtig.</span>
+<span lang="pt" class="multilang">Parcialmente correto.</span>
+<span lang="zh" class="multilang">部分正确。</span>
+<span lang="ko" class="multilang">부분적으로 맞았습니다.</span>
+<span lang="ru" class="multilang">Частично верно.</span>
+<span lang="sv" class="multilang">Delvis rätt.</span>]]></text>
     </prtpartiallycorrect>
     <prtincorrect format="html">
       <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
 <span lang="ja" class="multilang">間違いです。</span>
-<span lang="en" class="multilang">Incorrect!</span>]]></text>
+<span lang="en" class="multilang">Incorrect!</span>
+<span lang="fr" class="multilang">Incorrect.</span>
+<span lang="it" class="multilang">Errato.</span>
+<span lang="de" class="multilang">Falsch.</span>
+<span lang="pt" class="multilang">Incorreto.</span>
+<span lang="zh" class="multilang">回答错误。</span>
+<span lang="ko" class="multilang">오답입니다.</span>
+<span lang="ru" class="multilang">Неверно.</span>
+<span lang="sv" class="multilang">Felaktigt.</span>]]></text>
     </prtincorrect>
     <decimals>.</decimals>
     <scientificnotation>*10</scientificnotation>
@@ -119,7 +143,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar.txt");
+        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar.mac");
 ]]></text>
       </feedbackvariables>
       <node>

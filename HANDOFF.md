@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- ルートとapp/mcq-webapp/templatesの001.MCQ-rb.xml／001.MCQ-cb.xml（計4ファイル）のfeedbackvariables参照をmcq_template_fvar.txtから.macへ変更。prtcorrect／prtpartiallycorrect／prtincorrectは既存ja/enを保持しfr/it/de/pt/zh/ko/ru/svを追加、全10言語のmultilang spanに統一。読み込みURLとapp.jsのキャッシュ番号を更新。
+- 検証: Python XML解析で4雛形の構文、各メッセージ10言語・重複なし、ルート／アプリコピーの完全一致、.mac参照先の存在を確認。variant_parametersの既存XML生成／CSV往復テスト、JS構文・差分検査成功。実STACK APIの各言語採点表示は未確認。
+
 - CSV・XML・include保存の通知を「ファイル名 のダウンロードを開始しました。保存状況はブラウザで確認してください」へ変更。ブラウザへ保存要求を渡した時点で完了と断定しない。実際の保存処理は変更なし。日英対応・JSキャッシュ更新。JS構文／差分検査成功、ブラウザ実機確認は未実施。
 
 - 負の分数の行列表示を実STACK API（stackmaxima 2026062900／stackapi 2026062900-2）で比較。matrix([-1/4,-2/3],[1/4,2/3])についてtex1のみ負の分数に余分なleft/right括弧が付き、直接CASText・stack_disp(m,"i")・stack_disp(unary_minus_sort(m),"i")・castext("{@m@}")では付かない。複数行列＋文字列を1つの数式環境に連結する場合も、tex1をstack_disp(m,"")に替えてAPIで成功。
