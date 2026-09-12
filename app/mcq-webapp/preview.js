@@ -2,7 +2,7 @@
 (() => {
   "use strict";
   const t = (ja, en) => document.documentElement.lang === "en" ? en : ja;
-  let dialog, frame, status, seed, renderButton, gradeButton, solutionButton;
+  let dialog, frame, status, seed, renderButton, gradeButton, solutionButton, languageSelect;
   let snapshot, rendered, busy = false, mathReady;
   const prefix = "mcqpreview_";
 
@@ -15,6 +15,7 @@
     busy = value;
     renderButton.disabled = value;
     seed.disabled = value;
+    if (languageSelect) languageSelect.disabled = value;
     gradeButton.disabled = value || !rendered;
     solutionButton.disabled = value || !rendered;
     frame.style.pointerEvents = value ? "none" : "";
@@ -44,7 +45,8 @@
       <button type="button" data-render>${t("この種で表示", "Render this seed")}</button>
       <button type="button" data-next>${t("別バリエーション", "Another variant")}</button>
       <button type="button" data-grade class="primary">${t("回答を採点", "Grade answer")}</button>
-      <button type="button" data-solution>${t("解説を表示", "Show explanation")}</button></div>
+      <button type="button" data-solution>${t("解説を表示", "Show explanation")}</button>
+      <label>${t("言語", "Language")} <select data-language aria-label="${t("プレビュー言語", "Preview language")}"></select></label></div>
       <p role="status" aria-live="polite" data-status></p>
       <iframe sandbox="allow-same-origin" title="${t("問題と回答", "Question and answer")}"></iframe>`;
     document.body.append(dialog);
@@ -54,6 +56,20 @@
     renderButton = dialog.querySelector("[data-render]");
     gradeButton = dialog.querySelector("[data-grade]");
     solutionButton = dialog.querySelector("[data-solution]");
+    languageSelect = dialog.querySelector("[data-language]");
+    const names = {ja:"日本語", en:"English", fr:"Français", it:"Italiano", de:"Deutsch", pt:"Português", zh:"中文", ko:"한국어", ru:"Русский", sv:"Svenska"};
+    activeLangs().forEach(lang => {
+      const option = document.createElement("option");
+      option.value = lang;
+      option.textContent = `${names[lang] || lang} (${lang})`;
+      languageSelect.append(option);
+    });
+    languageSelect.value = baseLang();
+    languageSelect.onchange = () => {
+      if (busy || !snapshot) return;
+      snapshot = {...snapshot, lang: languageSelect.value};
+      render();
+    };
     dialog.querySelector("[data-close]").onclick = () => dialog.close();
     renderButton.onclick = render;
     dialog.querySelector("[data-next]").onclick = () => {

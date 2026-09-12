@@ -5,7 +5,7 @@ const path = require('node:path');
 let source = fs.readFileSync(path.resolve(__dirname, '../../app/mcq-webapp/preview.js'), 'utf8');
 source = source.slice(0, source.indexOf('  document.getElementById("previewButton")')) + `
   globalThis.helpers = {questionHtml, feedbackHtml, assetHtml, answers, request,
-    setRequestState: () => {snapshot = {questionDefinition:"<quiz/>",url:"http://127.0.0.1:3080",lang:"ja"}; seed = {value:"7"};},
+    setRequestState: (lang="ja") => {snapshot = {questionDefinition:"<quiz/>",url:"http://127.0.0.1:3080",lang}; seed = {value:"7"};},
     setControls: controls => {frame = {contentDocument:{querySelectorAll:()=>controls}};}};
 })();`;
 const context = vm.createContext({document:{documentElement:{lang:'ja'}}});
@@ -43,6 +43,13 @@ console.log('Passed: API input/feedback placeholders, repeated assets, Radio and
     for (const route of ['preview', 'grade']) await c.helpers.request(route);
     assert.deepEqual(requests.map(r=>r.url),['preview','grade'].map(route=>`https://example.org${prefix}api/stack/${route}`));
     assert.equal(requests[0].payload.seed,7);
+    for (const lang of ['en','pt']) {
+      c.helpers.setRequestState(lang);
+      for (const route of ['preview','grade']) await c.helpers.request(route);
+      assert.equal(requests.at(-1).payload.lang,lang);
+      assert.equal(requests.at(-2).payload.lang,lang);
+      assert.equal(requests.at(-1).payload.seed,7);
+    }
     c.fetch=async()=>({ok:false,status:404,json:async()=>{throw new SyntaxError("Unexpected token '<'");}});
     await assert.rejects(c.helpers.request('preview'), /JSON以外.*HTTP 404.*再起動/);
     c.fetch=async()=>({ok:true,status:200,redirected:true,json:async()=>{throw new SyntaxError("Unexpected token '<'");}});
