@@ -1542,11 +1542,27 @@ function correctCountChoices(numOptions) {
   return values; // Repeated entries intentionally weight rand([...]).
 }
 
+function cleanParameterStatements(value) {
+  const source = String(value || "");
+  const parts = [];
+  let start = 0;
+  while (start < source.length) {
+    const end = scanMaximaStatementEnd(source, start);
+    const statement = source.slice(start, end);
+    // Remove only empty top-level statements; preserve comments and literals.
+    parts.push(/^[;$]$/.test(stripMaximaComments(statement).trim())
+      ? statement.slice(0, -1) : statement);
+    start = end;
+  }
+  return parts.join("").trim();
+}
+
 function parameterPreamble() {
   const numOptions = positiveInt(el.numOptions.value, "選択肢数");
   const counts = correctCountChoices(numOptions);
   const expression = counts.length === 1 ? String(counts[0]) : `rand([${counts.join(", ")}])`;
-  const parameters = el.parameters.value.trim();
+  const parameters = cleanParameterStatements(el.parameters.value);
+  const code = stripMaximaComments(parameters).trim();
   return [
     `%_MCQ_NUM_OPTS:${numOptions};`,
     `%_MCQ_NUM_COPTS:${expression};`,
@@ -1555,7 +1571,7 @@ function parameterPreamble() {
     `%__mcq_scmethod:${state.mode === "cb" ? el.scoringMethod?.value || "1" : "1"};`,
     ...(el.noCorrectOption?.checked ? ["%__mcq_nocorrecttrue:is(%_MCQ_NUM_COPTS=0);", "%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %_STACK_LANG);"] : []),
     ...(el.noIdeaOption?.checked ? ["%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %_STACK_LANG);"] : []),
-    ...(parameters ? [/[;$]\s*$/.test(stripMaximaComments(parameters).trim()) ? parameters : `${parameters}\n;`] : []),
+    ...(parameters ? [!code || /[;$]$/.test(code) ? parameters : `${parameters};`] : []),
   ];
 }
 
@@ -1589,7 +1605,7 @@ function appStateSnapshot() {
     }])),
     rows: state.rows,
     qvars: el.qvars.value,
-    parameters: el.parameters.value,
+    parameters: cleanParameterStatements(el.parameters.value),
     settings: {
       noCorrectOption: Boolean(el.noCorrectOption?.checked),
       noIdeaOption: Boolean(el.noIdeaOption?.checked),
@@ -2246,7 +2262,7 @@ function applyAppStateSnapshot(snapshot) {
   });
   state.questionLanguageIndependent = Boolean(snapshot.questionLanguageIndependent);
   state.rows = structuredClone(snapshot.rows);
-  el.parameters.value = String(snapshot.parameters || "");
+  el.parameters.value = cleanParameterStatements(snapshot.parameters);
   el.qvars.value = String(snapshot.qvars || "");
   state.qvars = [el.qvars.value];
   if (el.noCorrectOption) el.noCorrectOption.checked = Boolean(snapshot.settings?.noCorrectOption);
@@ -2437,7 +2453,7 @@ function legacyIncludePreamble(xmlVariables) {
     } else parameters.push(statement);
     start = end;
   }
-  return { parameters: parameters.join("").trim(), settings };
+  return { parameters: cleanParameterStatements(parameters.join("")), settings };
 }
 
 function extractMainVariableSection(code) {
@@ -3165,7 +3181,7 @@ function applyConfig(key, value) {
     if (!["1", "2", "3", "4"].includes(value)) throw new Error("採点方式は1〜4を指定してください");
     el.scoringMethod.value = value;
   }
-  if (key === "parameters") el.parameters.value = value;
+  if (key === "parameters") el.parameters.value = cleanParameterStatements(value);
   if (key === "question_id" || key === "id") el.questionId.value = baseTitle(value);
   if (key === "mode") setMode(value.toLowerCase().startsWith("c") ? "cb" : "rb");
   if (key === "num_options") el.numOptions.value = value;
@@ -3256,7 +3272,7 @@ function currentCsvRecords(title) {
     ["config", "feedback_by_truth", feedbackModeConfigValue()],
     ["config", "base_language", baseLang()],
     ["config", "languages", activeLangs().join(",")],
-    ...(el.parameters.value.trim() ? [["config", "parameters", el.parameters.value]] : []),
+    ...(cleanParameterStatements(el.parameters.value) ? [["config", "parameters", cleanParameterStatements(el.parameters.value)]] : []),
   ];
 
   const questionLanguages = state.questionLanguageIndependent ? ["n/a"] : activeLangs();

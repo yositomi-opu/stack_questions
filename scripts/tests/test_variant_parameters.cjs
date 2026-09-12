@@ -213,3 +213,22 @@ assert.ok(notices.every(item=>!item.error));
 console.log('Passed: reset never generates XML midway; empty output has no error.');
 
 assert.doesNotMatch(resetHtml.match(/<textarea id="parameters"[^>]*>/)[0], /placeholder=/, "Empty parameters must look empty rather than showing executable example code");
+
+for (const input of ['', '  \n ', ';', '\n;\n;']) {
+  el.parameters.value=input;
+  assert.equal(context.cleanParameterStatements(input),'');
+  assert.ok(context.parameterPreamble().every(line=>line.trim()!==';'));
+}
+for (const input of ['/* parameters */', '/* outer /* nested */ comment */']) {
+  el.parameters.value=input;
+  assert.equal(context.parameterPreamble().at(-1),input,'Comments do not need a terminator');
+}
+for (const input of ['%_rk:2;', '%_rk:2$', '%_rk:2; /* comment */', 's:";";', '%_rk:2\n;']) {
+  el.parameters.value=input;
+  assert.equal(context.parameterPreamble().at(-1),input,'Existing terminator and literals must remain intact');
+}
+el.parameters.value='%_rk:2';
+assert.equal(context.parameterPreamble().at(-1),'%_rk:2;');
+assert.equal(context.cleanParameterStatements('%_rk:2;\n;\n/* keep */;'),'%_rk:2;\n\n/* keep */');
+assert.equal(context.cleanParameterStatements('s:";";'),'s:";";');
+console.log('Passed: empty/comment-only parameters, stray terminators, literals, and necessary terminators.');
