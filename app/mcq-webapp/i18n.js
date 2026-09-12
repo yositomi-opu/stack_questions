@@ -251,7 +251,7 @@
     [/^評価完了：変数 (\d+)件・CAS式 (\d+)件成功／(\d+)件失敗$/, "Evaluation completed: $1 variables, $2 CAS expressions succeeded, $3 failed"],
     [/^評価完了：変数 (\d+)件・CAS式 (\d+)件$/, "Evaluation completed: $1 variables, $2 CAS expressions"],
     [/^(.+) を読み込みました$/, "Loaded $1"],
-    [/^(.+) を保存しました$/, "Saved $1"],
+    [/^(.+) のダウンロードを開始しました。保存状況はブラウザで確認してください$/, "Download started for $1. Check your browser for the save status."],
     [/^(.+)言語の翻訳を反映しました$/, "Applied translations for $1 language(s)"],
     [/^XMLを読み込めません: (.+)$/, "Could not load XML: $1"],
     [/^XMLを保存できません: (.+)$/, "Could not save XML: $1"],

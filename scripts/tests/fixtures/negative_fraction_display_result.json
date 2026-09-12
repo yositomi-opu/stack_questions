@@ -1,0 +1,15 @@
+{
+  "questionrender": "<p>direct: \\({\\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right]}\\)</p><p>tex1: \\(\\left[\\begin{array}{cc} -\\left(\\frac{1}{4}\\right) & -\\left(\\frac{2}{3}\\right) \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right]\\)</p><p>stack_disp: \\(\\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right]\\)</p><p>sorted: \\(\\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right]\\)</p><p>castext: \\({\\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right]}\\)</p><p>product: \\(\\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right] = \\left[\\begin{array}{cc} -\\frac{1}{4} & -\\frac{2}{3} \\\\ \\frac{1}{4} & \\frac{2}{3} \\end{array}\\right] \\)</p><p>needed grouping: \\(\\frac{-x-1}{3}\\)</p>",
+  "questionsamplesolutiontext": "",
+  "questioninputs": {},
+  "questionassets": {},
+  "questionseed": -1,
+  "questionvariants": [],
+  "iframes": [],
+  "isinteractive": false,
+  "questionnote": "<p>\\({{\\it ta}_{1}}\\)</p>",
+  "aboutapi": {
+    "stackmaxima": "2026062900",
+    "stackapi": "2026062900-2"
+  }
+}

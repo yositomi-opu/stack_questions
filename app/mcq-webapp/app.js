@@ -3281,7 +3281,7 @@ function downloadCurrentCsv() {
     const records = currentCsvRecords(title);
     const filename = `${title}.csv`;
     downloadText(filename, csvText(records), "text/csv;charset=utf-8");
-    setStatus(`${filename} を保存しました`);
+    setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
   } catch (error) {
     setStatus(`CSVを保存できません: ${error.message}`, true);
   }
@@ -3402,7 +3402,7 @@ function downloadXml() {
     el.xmlOutput.value = xml;
     const filename = `${xmlFileStem(title)}.xml`;
     downloadText(filename, xml, "application/xml;charset=utf-8");
-    setStatus(`${filename} を保存しました`);
+    setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
   } catch (error) {
     setStatus(`XMLを保存できません: ${error.message}`, true);
   }
@@ -3418,7 +3418,7 @@ function downloadIncludeFile() {
     if (!title) return;
     const filename = `${title}.txt`;
     downloadText(filename, generateIncludeFileContent(), "text/plain;charset=utf-8");
-    setStatus(`${filename} を保存しました。XML内のstack_includeは維持されます`);
+    setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
   } catch (error) {
     setStatus(`includeファイルを保存できません: ${error.message}`, true);
   }

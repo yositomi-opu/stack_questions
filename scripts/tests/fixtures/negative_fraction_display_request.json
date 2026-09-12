@@ -1,0 +1,6 @@
+{
+  "questionDefinition": "<quiz><question type=\"stack\"><name><text>Fraction display comparison</text></name><questionvariables><text>m:matrix([-1/4,-2/3],[1/4,2/3]);\na:sconcat(\"\\\\(\",tex1(m),\"\\\\)\");\nb:stack_disp(m,\"i\");\nc:stack_disp(unary_minus_sort(m),\"i\");\nd:castext(\"{@m@}\");\ntex2new(s):=stack_disp(s,\"i\");\ntex2Lnew(L):=block([s:\"\\\\(\",k],for k:1 thru length(L) do s:sconcat(s,if stringp(L[k]) then L[k] else stack_disp(L[k],\"\"),\" \"),sconcat(s,\"\\\\)\"));\nprod:tex2Lnew([m,\"=\",m]);\nsafe:stack_disp(-(x+1)/3,\"i\");\n</text></questionvariables><questiontext><text>&lt;p&gt;direct: {@m@}&lt;/p&gt;&lt;p&gt;tex1: {@a@}&lt;/p&gt;&lt;p&gt;stack_disp: {@b@}&lt;/p&gt;&lt;p&gt;sorted: {@c@}&lt;/p&gt;&lt;p&gt;castext: {@d@}&lt;/p&gt;&lt;p&gt;product: {@prod@}&lt;/p&gt;&lt;p&gt;needed grouping: {@safe@}&lt;/p&gt;</text></questiontext><generalfeedback><text /></generalfeedback><questionnote>fraction comparison</questionnote></question></quiz>",
+  "seed": 1,
+  "lang": "ja",
+  "renderInputs": true
+}

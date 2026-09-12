@@ -13,6 +13,11 @@
 
 ## 直近の変更と決定事項
 
+- CSV・XML・include保存の通知を「ファイル名 のダウンロードを開始しました。保存状況はブラウザで確認してください」へ変更。ブラウザへ保存要求を渡した時点で完了と断定しない。実際の保存処理は変更なし。日英対応・JSキャッシュ更新。JS構文／差分検査成功、ブラウザ実機確認は未実施。
+
+- 負の分数の行列表示を実STACK API（stackmaxima 2026062900／stackapi 2026062900-2）で比較。matrix([-1/4,-2/3],[1/4,2/3])についてtex1のみ負の分数に余分なleft/right括弧が付き、直接CASText・stack_disp(m,"i")・stack_disp(unary_minus_sort(m),"i")・castext("{@m@}")では付かない。複数行列＋文字列を1つの数式環境に連結する場合も、tex1をstack_disp(m,"")に替えてAPIで成功。
+- APIの比較入力／生の結果をscripts/tests/fixtures/negative_fraction_display_{request,result}.jsonへ保存。既存001/GaussElimInverseElemMatProd-A.txtは未変更。文字列選択肢にはstack_dispを提案（castextオブジェクトは単純なsconcat文字列置換用ではない）。公式資料はSTACK DocsのAuthoring/Inputs/Multiple_choice_inputおよびAuthoring/CASText。
+
 - プレビュー言語選択を地球SVG＋右横のselectへ変更し、inline-flexで一体の横並びにした。日英のaria-labelとホバー説明を保持。JS/CSSキャッシュ更新。JS構文・差分検査成功。配置のみの変更でブラウザ確認は未実施。
 
 - プレビュー「解説を表示」の右へ言語selectを追加。activeLangsの言語名＋コードを表示、基本言語から開始。変更時はsnapshot.langを更新して同じseedで再生成、以前の回答／結果を破棄。処理中は言語selectを無効化。保存用XMLや編集基本言語は変更しない。既存server.pyがrender／gradeへ渡すlangを使用し、問題変数へ手書き代入は挿入しない。
