@@ -64,6 +64,7 @@ const el = {
   casEvaluationStatus: document.querySelector("#casEvaluationStatus"),
   casDiagnosticsPanel: document.querySelector("#casDiagnosticsPanel"),
   casDiagnostics: document.querySelector("#casDiagnostics"),
+  casDiagnosticSummary: document.querySelector("#casDiagnosticSummary"),
   casEvaluationSource: document.querySelector("#casEvaluationSource"),
   swapAllPairsButton: document.querySelector("#swapAllPairsButton"),
   casVariablesPanel: document.querySelector("#casVariablesPanel"),
@@ -404,6 +405,8 @@ async function evaluateCasLocally() {
   const variableSource = evaluationVariableCode();
   el.casDiagnosticsPanel.hidden = true;
   el.casDiagnostics.textContent = "";
+  el.casDiagnosticSummary.textContent = "";
+  el.casEvaluationSource.dataset.source = variableSource;
   el.casEvaluationSource.textContent = variableSource.split("\n").map((line, index) => `${index + 1}: ${line}`).join("\n");
   el.evaluateCasButton.disabled = true;
   state.casEvaluation.status = "loading";
@@ -464,11 +467,60 @@ async function evaluateCasLocally() {
   }
 }
 
+// Conservative hints only: never alter or complete the user's Maxima code.
+function inferMaximaError(source, log) {
+  if (!/end of file|unexpected end|unterminated|incorrect syntax|parser:/i.test(log)) return [];
+  const lines = source.split("\n");
+  const hint = (message, line) => ({ message, line, excerpt: line ? (lines[line - 1] || "").trim() : "" });
+  let line = 1, quoteLine = 0, escaped = false, last = "", lastLine = 0;
+  const comments = [], brackets = [];
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i], next = source[i + 1];
+    if (comments.length) {
+      if (ch === "/" && next === "*") { comments.push(line); i++; }
+      else if (ch === "*" && next === "/") { comments.pop(); i++; }
+    } else if (quoteLine) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') { quoteLine = 0; last = ch; lastLine = line; }
+    } else if (ch === "/" && next === "*") { comments.push(line); i++; }
+    else if (ch === "\\") { last = next; lastLine = line; i++; }
+    else if (ch === '"') { quoteLine = line; }
+    else if (!/\s/.test(ch)) {
+      last = ch; lastLine = line;
+      if (ch === "(" || ch === "[") brackets.push({ch, line});
+      else if (ch === ")" || ch === "]") {
+        const open = brackets.pop();
+        if (!open || (ch === ")" ? open.ch !== "(" : open.ch !== "["))
+          return [hint("括弧の対応が合っていない可能性があります。丸括弧と角括弧を確認してください。", line)];
+      }
+    }
+    if (ch === "\n") line++;
+  }
+  if (quoteLine) return [hint('文字列の閉じ引用符（"）が不足している可能性があります。', quoteLine)];
+  if (comments.length) return [hint("コメントの終わり（*/）が不足している可能性があります。", comments[0])];
+  if (brackets.length) return [hint("この行で開いた括弧が閉じられていない可能性があります。", brackets[brackets.length - 1].line)];
+  if (/end of file|unexpected end/i.test(log) && last && ![";", "$"].includes(last))
+    return [hint("文末の ; または $ が不足している可能性があります。式の末尾を確認してください。", lastLine)];
+  return [hint("式が途中で終わっているか、区切り記号が不足している可能性があります。includeを使っている場合は読み込み先も確認してください。", null)];
+}
+
 function showCasDiagnostics(result) {
   const failures = (result.expressions || []).filter((item) => !item.ok)
     .map((item) => `${item.id}: ${item.error || "Error"}`);
   const log = [result.error, result.diagnostics, ...failures].filter(Boolean).join("\n\n");
   el.casDiagnostics.textContent = log;
+  const source = el.casEvaluationSource?.dataset?.source || "";
+  const hints = result.ok === true ? [] : inferMaximaError(source, log);
+  const messages = hints.map((hint) => {
+    const message = uiText(hint.message);
+    return hint.line ? `${uiText("評価コードの行")} ${hint.line}: ${message}\n${hint.excerpt}` : message;
+  });
+  const qvars = log.match(/__MCQ_EVAL_\w+__QVARS_BEGIN([\s\S]*?)__MCQ_EVAL_\w+__QVARS_END/);
+  const readable = (qvars ? qvars[1] : log).split("\n")
+    .filter((line) => !line.includes("__MCQ_EVAL_")).join("\n").trim();
+  if (el.casDiagnosticSummary) el.casDiagnosticSummary.textContent =
+    [...messages, readable].filter(Boolean).join("\n\n");
   el.casDiagnosticsPanel.hidden = !log;
   el.casDiagnosticsPanel.open = Boolean(log);
 }
