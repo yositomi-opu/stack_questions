@@ -118,3 +118,76 @@ assert.equal(el.scoringMethod.disabled,false);
 assert.equal(el.scoringMethod.value,'2');
 assert.match(context.parameterPreamble().join('\n'),/%__mcq_scmethod:2;/);
 console.log('Passed: Radio fixes scoring to Jaccard; Checkbox restores selected method and visibility.');
+
+// Loading a new document must not inherit derived results or omitted settings.
+for (const key of ['casDiagnostics','casDiagnosticSummary','casEvaluationSource','translationStatus','stackApiResult','stackApiStatus','casDiagnosticsPanel','casVariablesPanel','translationPanel','stackApiResultPanel','translationJson','evaluateCasButton','casEvaluationStatus','xmlOutput']) {
+  el[key]={value:'old',textContent:'old',dataset:{source:'old'},open:true,hidden:false,disabled:true};
+}
+function dirtyEditor() {
+  el.parameters.value='%_rk:99;';
+  el.translationJson.value='old translation';
+  el.casDiagnostics.textContent='old error';
+  el.casEvaluationSource.dataset.source='old code';
+  el.requirePairs.checked=true;
+  el.randomCorrect.checked=true;
+  el.questionId.value='old title';
+  state.casEvaluation={status:'ready',variables:[{name:'old'}],expressions:{old:{length:13}}};
+}
+dirtyEditor();
+context.applyRecords([['qtextL','string','ja','new question'],['option1C','string','ja','new choice']]);
+assert.equal(el.parameters.value,'');
+assert.equal(el.qvars.value,'');
+assert.equal(el.questionId.value,'');
+assert.equal(el.requirePairs.checked,false);
+assert.equal(el.randomCorrect.checked,false);
+assert.equal(el.translationJson.value,'');
+assert.equal(el.casDiagnostics.textContent,'');
+assert.equal(el.casEvaluationSource.dataset.source,'');
+assert.equal(state.casEvaluation.status,'idle');
+assert.equal(state.casEvaluation.variables.length,0);
+assert.equal(Object.keys(state.casEvaluation.expressions).length,0);
+assert.equal(el.questions.ja.value,'new question');
+// Explicit file parameters and pair settings still take precedence.
+context.applyRecords([['config','parameters','%_rk:2;'],['config','require_pairs','true'],['option1C','string','ja','choice'],['option1W','string','ja','wrong']]);
+assert.equal(el.parameters.value,'%_rk:2;');
+assert.equal(el.requirePairs.checked,true);
+// XML metadata import uses the same cleanup, without losing imported parameters.
+context.setMode("cb");
+el.numOptions.value="1";
+const xml=context.generateXml();
+context.DOMParser=class {parseFromString(){return {querySelector(selector){
+  return selector==='questionvariables > text'?{textContent:xml.match(/<questionvariables>\s*<text><!\[CDATA\[([^]*?)\]\]>/)[1]}:null;
+}};}};
+vm.runInContext('function renderRows(){}',context);
+dirtyEditor();
+context.importXmlText(xml);
+assert.equal(el.parameters.value,'%_rk:2;');
+assert.equal(el.casDiagnostics.textContent,'');
+assert.equal(state.casEvaluation.status,'idle');
+context.window={confirm:()=>false};
+context.document={getElementById:()=>null};
+vm.runInContext('function setStatus(){}',context);
+dirtyEditor();context.clearAllEntries();assert.equal(el.parameters.value,'%_rk:99;');
+context.window.confirm=()=>true;
+context.clearAllEntries();
+assert.equal(state.rows.length,0);
+assert.equal(el.parameters.value,'');
+assert.equal(el.requirePairs.checked,false);
+assert.ok(langs.every(lang=>el.questions[lang].value===''));
+assert.equal(el.xmlOutput.value,'');
+console.log('Passed: CSV/XML reset old results, retain explicit settings, and clear all with cancel support.');
+
+// An evaluation finishing after reset must not repopulate the cleared editor.
+vm.runInContext(source.match(/^async function evaluateCasLocally\([^]*?^}/m)[0],context);
+vm.runInContext('function casChoiceExpressions(){return [];} function evaluationVariableCode(){return "x:1;";} function problemVariableNames(){return [];} function updateCasEvaluationBadges(){} function webappUrl(p){return p;}',context);
+let finishEvaluation;
+context.fetch=()=>new Promise(resolve=>{finishEvaluation=resolve;});
+const pending=context.evaluateCasLocally();
+context.resetDerivedResults();
+finishEvaluation({ok:true,json:async()=>({ok:true,variables:[{name:'old'}]})});
+pending.then(()=>{
+  assert.equal(state.casEvaluation.status,'idle');
+  assert.equal(state.casEvaluation.variables.length,0);
+  assert.equal(el.casEvaluationSource.dataset.source,'');
+  console.log('Passed: late evaluation response is ignored after reset.');
+}).catch(error=>{console.error(error);process.exitCode=1;});

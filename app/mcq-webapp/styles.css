@@ -115,7 +115,7 @@ select:focus {
 
 .title-toolbar {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) auto;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -1196,7 +1196,7 @@ td:nth-child(5) {
 
 .file-menu { position: relative; border: 0; padding: 0; }
 .file-menu > summary { padding: 8px 14px; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; color: var(--ink); }
-.file-menu-list { position: absolute; right: 0; top: 100%; z-index: 40; min-width: 140px; padding: 6px; background: white; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 5px 18px #0002; display: grid; gap: 4px; }
+.file-menu-list { position: absolute; right: 0; top: 100%; z-index: 40; min-width: 5em; width: max-content; padding: 6px; background: white; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 5px 18px #0002; display: grid; gap: 4px; }
 .file-menu-list button { text-align: left; background: white; color: var(--ink); }
 #uiLanguageSelect { width: auto; }
 .icon-copy { display: inline-grid; place-items: center; padding: 6px; min-width: 30px; }
@@ -1208,3 +1208,6 @@ td:nth-child(5) {
 #samplesList button { text-align: left; overflow-wrap: anywhere; background: var(--paper); color: var(--ink); }
 .action-notice { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: min(650px,90vw); padding: 12px 18px; border-radius: 8px; background: #146c5c; color: white; box-shadow: 0 4px 16px #0003; }
 .action-notice.error { background: #9d3f4b; }
+
+.interface-language { display: inline-flex; align-items: center; gap: 5px; }
+.interface-language svg { width: 22px; height: 22px; flex-shrink: 0; }

@@ -3,6 +3,10 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "クリア": "Clear",
+    "読込": "Load",
+    "すべての問題入力をクリアします。よろしいですか？": "Clear all question entries?",
+    "すべての問題入力をクリアしました": "All question entries cleared",
     "見本": "Samples",
     "読み込み": "Load",
     "表示": "View",

@@ -162,6 +162,7 @@ function updateLayout() {
 }
 
 function bindEvents() {
+  document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
   [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
@@ -392,6 +393,7 @@ function casChoiceExpressions() {
 }
 
 async function evaluateCasLocally() {
+  const requestId = state.evaluationRequestId = (state.evaluationRequestId || 0) + 1;
   const expressions = casChoiceExpressions();
   const variableSource = evaluationVariableCode();
   el.casDiagnosticsPanel.hidden = true;
@@ -416,6 +418,7 @@ async function evaluateCasLocally() {
       }),
     });
     const result = await response.json().catch(() => ({}));
+    if (requestId !== state.evaluationRequestId) return;
     showCasDiagnostics(result);
     if (!response.ok) throw new Error(result.error || `評価APIエラー (${response.status})`);
 
@@ -445,6 +448,7 @@ async function evaluateCasLocally() {
     }
     updateOutput();
   } catch (error) {
+    if (requestId !== state.evaluationRequestId) return;
     if (!el.casDiagnostics.textContent) showCasDiagnostics({ error: error.message });
     state.casEvaluation.status = "error";
     state.casEvaluation.expressions = {};
@@ -454,7 +458,7 @@ async function evaluateCasLocally() {
     );
     updateCasEvaluationBadges();
   } finally {
-    el.evaluateCasButton.disabled = false;
+    if (requestId === state.evaluationRequestId) el.evaluateCasButton.disabled = false;
   }
 }
 
@@ -2217,9 +2221,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     state.includeSource = includeSource;
     syncIncludeControls();
   }
-  state.casEvaluation = { status: "idle", stale: false, variables: [], expressions: {} };
-  renderCasVariables();
-  setCasEvaluationStatus("未評価", "idle");
+  resetDerivedResults();
   renderRows();
   updateCorrectCountControls();
   updateQuestionLanguageVisibility();
@@ -2815,7 +2817,53 @@ function csvRecordKind(record) {
   return String(record[0] || "").replace(/^\uFEFF/, "").trim().toLowerCase();
 }
 
+function resetDerivedResults() {
+  state.evaluationRequestId = (state.evaluationRequestId || 0) + 1;
+  state.casEvaluation = { status: "idle", stale: false, variables: [], expressions: {} };
+  state.translationsStale = false;
+  for (const key of ["casDiagnostics", "casDiagnosticSummary", "casEvaluationSource", "translationStatus", "stackApiResult", "stackApiStatus"]) {
+    if (el[key]) el[key].textContent = "";
+  }
+  if (el.casEvaluationSource) el.casEvaluationSource.dataset.source = "";
+  for (const key of ["casDiagnosticsPanel", "casVariablesPanel", "translationPanel", "stackApiResultPanel"]) {
+    if (el[key]) el[key].open = false;
+  }
+  if (el.casDiagnosticsPanel) el.casDiagnosticsPanel.hidden = true;
+  if (el.translationJson) el.translationJson.value = "";
+  if (el.xmlOutput) el.xmlOutput.value = "";
+  if (el.evaluateCasButton) el.evaluateCasButton.disabled = false;
+  if (el.casVariablesBody) renderCasVariables();
+  if (el.casEvaluationStatus) setCasEvaluationStatus("未評価", "idle");
+}
+
+function clearAllEntries() {
+  if (!window.confirm(uiText("すべての問題入力をクリアします。よろしいですか？"))) return;
+  resetCsvImportState();
+  el.languageChecks[baseLang()].checked = true;
+  for (const id of ["sourceText", "sampleSearch", "dataFileInput", "xmlFileInput"]) {
+    const field = document.getElementById(id);
+    if (field) field.value = "";
+  }
+  renderRows();
+  updateCorrectCountControls();
+  updateQuestionLanguageVisibility();
+  el.xmlOutput.value = "";
+  setStatus("すべての問題入力をクリアしました");
+}
+
 function resetCsvImportState() {
+  resetDerivedResults();
+  state.rows = [];
+  state.qvars = [];
+  el.qvars.value = "";
+  el.questionId.value = "";
+  el.baseLanguage.value = INITIAL_LOCALE;
+  setMode("rb");
+  el.numOptions.value = "2";
+  el.numCorrect.value = "1";
+  el.randomCorrect.checked = false;
+  el.correctCounts.value = "";
+  el.requirePairs.checked = false;
   if (el.noCorrectOption) el.noCorrectOption.checked = false;
   if (el.noIdeaOption) el.noIdeaOption.checked = false;
   if (el.scoringMethod) el.scoringMethod.value = "1";
