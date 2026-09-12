@@ -13,6 +13,8 @@
 
 ## 直近の変更と決定事項
 
+- 「クリア後も %_rk:2; だけ残る」の原因はparameters textareaのplaceholderだった。値は空でも同じコード例が表示されていたため、placeholderを削除。例は「？」の説明内だけに残す。以前の実ブラウザ検証はvalueの空文字だけを確認し、placeholder表示を見落としていた。HTMLにplaceholderがないことを回帰テストへ追加し、variant_parameters／差分検査成功。
+
 - 全入力クリアの途中でsetModeがXML生成を呼び、空の選択肢のエラー通知を出していた。初期化時は生成を抑制。空データのupdateOutputもエラーにせず入力案内とし、完了通知を表示。「命題パターンがありません」を「選択肢がありません。選択肢を追加してください」へ変更。
 - 検証: variant_parametersの回帰テストへ途中生成禁止と実updateOutputによる空状態の確認を追加、成功。JS構文／差分検査成功。実ブラウザで初期画面に `%_rk:2;` を入力後、全入力クリアを押し、parameters・questionJaが空、statusLine・通知が「すべての問題入力をクリアしました」となることをDOMで確認。以前のテストはupdateOutputを代替していたため途中のエラー通知を検出できなかった。
 

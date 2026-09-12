@@ -211,3 +211,5 @@ context.updateOutput();
 assert.equal(el.xmlOutput.value,'');
 assert.ok(notices.every(item=>!item.error));
 console.log('Passed: reset never generates XML midway; empty output has no error.');
+
+assert.doesNotMatch(resetHtml.match(/<textarea id="parameters"[^>]*>/)[0], /placeholder=/, "Empty parameters must look empty rather than showing executable example code");
