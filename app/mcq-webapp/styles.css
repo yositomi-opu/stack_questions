@@ -1124,3 +1124,17 @@ td:nth-child(5) {
 @media (max-width: 600px) { .preview-dialog { padding: 12px; } .preview-dialog iframe { height: 55vh; } }
 
 #casDiagnosticsPanel pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; padding: 10px; background: #f5f7fa; font-size: 12px; }
+
+/* Reserve room for the complete correctness label and the native select arrow. */
+#pairedEditor th:nth-child(2),
+#pairedEditor td:nth-child(2) {
+  width: 104px;
+  min-width: 104px;
+  font-size: 12px;
+}
+
+#pairedEditor td:nth-child(2) select {
+  min-width: 88px;
+  font-size: 12px;
+  padding: 7px 22px 7px 6px;
+}
