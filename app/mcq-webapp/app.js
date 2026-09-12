@@ -1025,9 +1025,7 @@ function languageIndependentToggle(rows, onChange, field = "choice") {
     rows.forEach((row) => { row[property] = input.checked; });
     onChange?.(input.checked);
   });
-  label.append(input, document.createTextNode(field === "feedback"
-    ? "言語に依存しない"
-    : "選択肢は言語に依存しない"));
+  label.append(input, document.createTextNode("言語に依存しない"));
   return label;
 }
 

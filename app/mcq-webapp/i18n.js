@@ -110,7 +110,6 @@
     "式が途中で終わっているか、区切り記号が不足している可能性があります。includeを使っている場合は読み込み先も確認してください。": "An expression may be incomplete or a separator may be missing. If using include, also check the included file.",
     "正解": "Correct",
     "不正解": "Incorrect",
-    "選択肢は言語に依存しない": "Options are language-independent",
     "このチェックをオンにすると多言語展開されません": "When checked, this feedback is not translated into other languages.",
     "このチェックをオンにすると正解・不正解個別にフィードバックを設定できます": "When checked, you can set separate feedback for correct and incorrect options.",
     "言語に依存しない": "Language-independent",
