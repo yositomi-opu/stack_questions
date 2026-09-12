@@ -50,14 +50,10 @@ const el = {
   requirePairs: document.querySelector("#requirePairs"),
   feedbackByTruth: document.querySelector("#feedbackByTruth"),
   feedbackByTruthRow: document.querySelector("#feedbackByTruthRow"),
-  showXml: document.querySelector("#showXml"),
   settingsWidth: document.querySelector("#settingsWidth"),
   dataWidth: document.querySelector("#dataWidth"),
   settingsResizeHandle: document.querySelector("#settingsResizeHandle"),
   workspace: document.querySelector(".workspace"),
-  xmlPane: document.querySelector("#xmlPane"),
-  xmlToggleTab: document.querySelector("#xmlToggleTab"),
-  outputPanel: document.querySelector("#outputPanel"),
   dataFileButton: document.querySelector("#dataFileButton"),
   xmlFileButton: document.querySelector("#xmlFileButton"),
   dataFileInput: document.querySelector("#dataFileInput"),
@@ -96,7 +92,6 @@ const el = {
   sampleCsvButton: document.querySelector("#sampleCsvButton"),
   saveCsvButton: document.querySelector("#saveCsvButton"),
   downloadButton: document.querySelector("#downloadButton"),
-  copyButton: document.querySelector("#copyButton"),
   copyCasButton: document.querySelector("#copyCasButton"),
   downloadIncludeButton: document.querySelector("#downloadIncludeButton"),
   languageChoices: document.querySelector("#languageChoices"),
@@ -163,10 +158,7 @@ function updateLayout() {
   if (Number(el.settingsWidth.value) > settingsMax) el.settingsWidth.value = String(settingsMax);
   el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
   el.workspace.style.setProperty("--data-width", `${el.dataWidth.value}px`);
-  el.outputPanel.hidden = !el.showXml.checked;
-  el.xmlPane.classList.toggle("closed", !el.showXml.checked);
-  el.xmlToggleTab.setAttribute("aria-pressed", String(el.showXml.checked));
-  el.xmlToggleTab.title = uiText(el.showXml.checked ? "生成XMLを閉じる" : "生成XMLを開く");
+
 }
 
 function bindEvents() {
@@ -198,14 +190,10 @@ function bindEvents() {
     renderRows();
     updateOutput();
   });
-  el.dataFileButton.addEventListener("click", () => el.dataFileInput.click());
-  el.xmlFileButton.addEventListener("click", () => el.xmlFileInput.click());
   el.dataFileInput.addEventListener("change", readSelectedFile);
   el.xmlFileInput.addEventListener("change", readSelectedXml);
-  el.sampleCsvButton.addEventListener("click", downloadSampleCsv);
   el.saveCsvButton.addEventListener("click", downloadCurrentCsv);
   el.downloadButton.addEventListener("click", downloadXml);
-  el.copyButton.addEventListener("click", copyXml);
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
   el.evaluateCasButton.addEventListener("click", evaluateCasLocally);
   el.checkStackApiButton.addEventListener("click", checkStackApiConnection);
@@ -236,8 +224,6 @@ function bindEvents() {
     updateOutput();
   });
   el.correctCounts.addEventListener("input", updateOutput);
-  el.showXml.addEventListener("change", updateLayout);
-  el.xmlToggleTab.addEventListener("click", toggleXmlPane);
   el.settingsResizeHandle.addEventListener("pointerdown", beginSettingsResize);
   el.settingsWidth.addEventListener("input", () => {
     settingsWidthCustomized = true;
@@ -623,11 +609,6 @@ function updateCasEvaluationBadge(badge) {
     : `CAS lengths: ${lengths.join(" + ")} = ${total}`;
   badge.title = results.map((item) => item.value || "").join("\n");
   badge.classList.add("ok");
-}
-
-function toggleXmlPane() {
-  el.showXml.checked = !el.showXml.checked;
-  updateLayout();
 }
 
 function beginSettingsResize(event) {
@@ -3375,21 +3356,8 @@ function titleForSave() {
   return title;
 }
 
-async function copyXml() {
-  await navigator.clipboard.writeText(el.xmlOutput.value);
-  setStatus("コピーしました");
-}
-
 async function copyCasDebugCode() {
-  try {
-    const code = state.includeSource
-      ? [...parameterPreamble(), generateIncludeFileContent()].join("\n")
-      : generateVariableBlock();
-    await navigator.clipboard.writeText(code);
-    setStatus("XMLへ記述するCAS検証用コードをコピーしました");
-  } catch (error) {
-    setStatus(`CAS検証用コードをコピーできません: ${error.message}`, true);
-  }
+  await window.mcqCopyText(el.qvars.value);
 }
 
 function generateIncludeFileContent() {
@@ -3502,6 +3470,7 @@ function nextPattern() {
 
 function setStatus(message, isError = false, isWarning = false) {
   el.statusLine.textContent = message;
+  if (isError || /コピー|読み込|保存/.test(message)) window.mcqNotice?.(message, isError);
   el.statusLine.classList.toggle("error", isError);
   el.statusLine.classList.toggle("warning", !isError && isWarning);
 }

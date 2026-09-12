@@ -1,0 +1,357 @@
+{
+  "csv": [
+    {
+      "path": "app/mcq-webapp/sample.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/CIV10.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ECO10.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ETH10.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/ICT10.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/NUR10.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA01.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA02.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA03.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA04.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA05.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA06.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA07.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA08.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA09.csv"
+    },
+    {
+      "path": "app/mcq-webapp/samples.ja/STA10.csv"
+    }
+  ],
+  "xml": [
+    {
+      "path": "001/001.CalConcept101-cb.xml"
+    },
+    {
+      "path": "001/001.GaussElimCoeffMat-A-rb.xml"
+    },
+    {
+      "path": "001/001.GaussElimElemMatOp-A-rb.xml"
+    },
+    {
+      "path": "001/001.GaussElimElemMatOp-B-rb.xml"
+    },
+    {
+      "path": "001/001.GaussElimInverseElemMatProd-A-rb.xml"
+    },
+    {
+      "path": "001/001.GaussElimMatrixGivenRank-A-rk0-cb.xml"
+    },
+    {
+      "path": "001/001.GaussElimMatrixGivenRank-A-rk1-cb.xml"
+    },
+    {
+      "path": "001/001.GaussElimMatrixGivenRank-A-rk2-cb.xml"
+    },
+    {
+      "path": "001/001.GaussElimRowReducedCheck-A-rb-3x4rk2.xml"
+    },
+    {
+      "path": "001/001.GaussElimRowReducedCheck-A-rb-4x5rk3.xml"
+    },
+    {
+      "path": "001/001.MapDefA-cb.xml"
+    },
+    {
+      "path": "001/001.MapSurInjA-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapComposite-A-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapDef-A-cb.xml"
+    },
+    {
+      "path": "001/001.MatMapFindImageA-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapFindImageB-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapFindRepMat-A-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapFindRepMat-B-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapImagePlaneR3-A-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapImagePlaneR3-B-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapPlaneMapsto-A-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapPlaneMapsto-B-rb.xml"
+    },
+    {
+      "path": "001/001.MatMapToMatA-cb.xml"
+    },
+    {
+      "path": "001/001.MatMatToMapA-cb.xml"
+    },
+    {
+      "path": "001/001.MatProdDefA-cb.xml"
+    },
+    {
+      "path": "001/001.MatProdDefB-cb.xml"
+    },
+    {
+      "path": "001/001.MatProdRecoverFromElematR-rb.xml"
+    },
+    {
+      "path": "001/001.MatProdStdBasisVecA-rb.xml"
+    },
+    {
+      "path": "001/001.MatProdVecA-rb.xml"
+    },
+    {
+      "path": "001/001.MatProdVecLinCombA-rb.xml"
+    },
+    {
+      "path": "001/001.PropCompoundA-rb.xml"
+    },
+    {
+      "path": "001/001.PropCompoundB-rb.xml"
+    },
+    {
+      "path": "001/001.PropCompoundC-cb.xml"
+    },
+    {
+      "path": "001/001.PropCompoundC-rb.xml"
+    },
+    {
+      "path": "001/001.SetContainIncludeA-cb.xml"
+    },
+    {
+      "path": "001/001.SetContainIncludeB-cb.xml"
+    },
+    {
+      "path": "001/001.SetDescribe-rb.xml"
+    },
+    {
+      "path": "001/001.SetDescribe.xml"
+    },
+    {
+      "path": "001/001.SetListDiff-cb.xml"
+    },
+    {
+      "path": "001/001.SetListDiff-rb.xml"
+    },
+    {
+      "path": "001/001.SpaceLineParaEq-rb.xml"
+    },
+    {
+      "path": "001/001.SpaceLineParaPara-rb.xml"
+    },
+    {
+      "path": "001/001.SpaceLineParaPerpToPlane-rb.xml"
+    },
+    {
+      "path": "001/001.SpaceLineParaPt-rb.xml"
+    },
+    {
+      "path": "001/001.SpaceLineSelPtsPara-cb.xml"
+    },
+    {
+      "path": "001/001.SpacePlaneEqPara-rb.xml"
+    },
+    {
+      "path": "001/001.SpacePlaneParaEq-rb.xml"
+    },
+    {
+      "path": "001/001.SpacePlaneParaPara-cb.xml"
+    },
+    {
+      "path": "001/001.SpacePlaneParaParaNum-cb.xml"
+    },
+    {
+      "path": "001/001.SpacePlaneParaPt-rb.xml"
+    },
+    {
+      "path": "001/001.VecEquationA-rb.xml"
+    },
+    {
+      "path": "001/001.VecLinCombA-cb.xml"
+    },
+    {
+      "path": "001/001.VecNumVecDefA-cb.xml"
+    },
+    {
+      "path": "001/CL023MR-c.xml"
+    },
+    {
+      "path": "001/CL023MR-d.xml"
+    },
+    {
+      "path": "app/mcq-webapp/samples/001.mcq_sample01.xml"
+    }
+  ]
+}

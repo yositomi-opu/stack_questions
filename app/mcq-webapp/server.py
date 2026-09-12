@@ -927,6 +927,34 @@ def preview_stack_question(payload: dict[str, Any], grading: bool = False) -> di
     return {"ok": True, "url": normalized_url, "result": result}
 
 
+def repository_samples(kind: str) -> list[dict[str, str]]:
+    """List only the public sample collections, never arbitrary repository paths."""
+    if kind == "csv":
+        candidates = [REPO_ROOT / "app/mcq-webapp/sample.csv"]
+        candidates += sorted((REPO_ROOT / "app/mcq-webapp/samples.ja").glob("*.csv"))
+    elif kind == "xml":
+        candidates = sorted((REPO_ROOT / "001").glob("*.xml"))
+        candidates += sorted((REPO_ROOT / "app/mcq-webapp/samples").glob("*.xml"))
+    else:
+        raise ValueError("Unknown sample format")
+    files = []
+    for path in candidates:
+        if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(REPO_ROOT.resolve()):
+            continue
+        if kind == "xml":
+            content = path.read_text(encoding="utf-8-sig")
+            if "mcq_template" not in content and "%__mcq" not in content:
+                continue
+        files.append({"path": path.relative_to(REPO_ROOT).as_posix()})
+    return files
+
+
+def read_repository_sample(kind: str, name: str) -> bytes:
+    if name not in {item["path"] for item in repository_samples(kind)}:
+        raise ValueError("Sample not found")
+    return (REPO_ROOT / name).read_bytes()
+
+
 def read_repository_include(raw_path: str) -> tuple[str, bytes]:
     path_text = unquote(raw_path).replace("\\", "/").lstrip("/")
     relative = Path(path_text)
@@ -993,6 +1021,24 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
                     "includeBaseUrl": ACTIVE_INCLUDE_BASE_URL,
                 },
             )
+            return
+        if parsed.path == "/api/repository/samples":
+            try:
+                query = parse_qs(parsed.query)
+                kind = query.get("format", ["csv"])[0]
+                name = query.get("path", [""])[0]
+                if not name:
+                    self.send_json(HTTPStatus.OK, {"files": repository_samples(kind)})
+                else:
+                    body = read_repository_sample(kind, name)
+                    self.send_response(HTTPStatus.OK)
+                    self.send_header("Content-Type", "text/plain; charset=utf-8")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.send_header("Cache-Control", "no-store")
+                    self.end_headers()
+                    self.wfile.write(body)
+            except (ValueError, OSError, UnicodeError) as exc:
+                self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
             return
         if parsed.path == "/api/repository/include":
             try:

@@ -3,6 +3,22 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "見本": "Samples",
+    "読み込み": "Load",
+    "表示": "View",
+    "保存": "Save",
+    "表示言語": "Interface language",
+    "問題変数をコピー": "Copy question variables",
+    "表示内容をコピー": "Copy displayed content",
+    "コピーする内容がありません": "There is nothing to copy",
+    "コピーする内容": "Content to copy",
+    "見本を読み込む": "Load a sample",
+    "ファイル名で検索": "Search file names",
+    "見本を取得しています…": "Loading samples…",
+    "見本を取得できません。サーバーを更新・再起動してください。": "Could not load samples. Update and restart the server.",
+    "見本を読み込みます。現在の入力内容は置き換えられます。": "Load this sample and replace the current input?",
+    "自動コピーできませんでした。内容を選択しました。⌘C／Ctrl+Cでコピーしてください。": "Automatic copying failed. The content is selected. Press Command+C or Ctrl+C to copy.",
+    "自動コピーできませんでした。⌘C／Ctrl+Cでコピーしてください。": "Automatic copying failed. Press Command+C or Ctrl+C to copy.",
     "CAS検証用コピー": "Copy CAS test code",
     "include保存": "Save include",
     "CSV見本": "CSV sample",
@@ -282,13 +298,8 @@
       else translateAttributes(walker.currentNode);
     }
     document.documentElement.lang = language;
-    const toggle = document.querySelector("#uiLanguageToggle");
-    if (toggle) {
-      const label = language === "ja" ? "English" : "日本語";
-      const ariaLabel = language === "ja" ? "表示言語を英語に切り替える" : "Switch the interface language to Japanese";
-      if (toggle.textContent !== label) toggle.textContent = label;
-      if (toggle.getAttribute("aria-label") !== ariaLabel) toggle.setAttribute("aria-label", ariaLabel);
-    }
+    const select = document.querySelector("#uiLanguageSelect");
+    if (select) select.value = language;
   }
 
   function setLanguage(next) {
@@ -302,7 +313,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     translateTree();
-    document.querySelector("#uiLanguageToggle")?.addEventListener("click", () => setLanguage(language === "ja" ? "en" : "ja"));
+    document.querySelector("#uiLanguageSelect")?.addEventListener("change", (event) => setLanguage(event.target.value));
     new MutationObserver((mutations) => {
       mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => translateTree(node)));
     }).observe(document.body, { childList: true, subtree: true });
