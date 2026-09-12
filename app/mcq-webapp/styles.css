@@ -1218,3 +1218,7 @@ td:nth-child(5) {
 .choice-type-controls { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; }
 .choice-type-controls .cas-eval-badge { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .choice-type-controls .value-type-select { flex-shrink: 0; }
+
+.preview-controls .preview-language { display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 6px; margin: 0; }
+.preview-language svg { width: 22px; height: 22px; flex-shrink: 0; }
+.preview-language select { width: auto; margin: 0; }

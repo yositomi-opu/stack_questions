@@ -13,6 +13,8 @@
 
 ## 直近の変更と決定事項
 
+- プレビュー言語選択を地球SVG＋右横のselectへ変更し、inline-flexで一体の横並びにした。日英のaria-labelとホバー説明を保持。JS/CSSキャッシュ更新。JS構文・差分検査成功。配置のみの変更でブラウザ確認は未実施。
+
 - プレビュー「解説を表示」の右へ言語selectを追加。activeLangsの言語名＋コードを表示、基本言語から開始。変更時はsnapshot.langを更新して同じseedで再生成、以前の回答／結果を破棄。処理中は言語selectを無効化。保存用XMLや編集基本言語は変更しない。既存server.pyがrender／gradeへ渡すlangを使用し、問題変数へ手書き代入は挿入しない。
 - 検証: `node scripts/tests/test_preview_ui.cjs` でen／ptが表示・採点の両要求へ入りseed保持されることを追加、既存の入力・フィードバック・プロキシ経路検証も成功。JS構文・差分検査成功。実STACK APIでの言語別表示およびブラウザ操作は未確認。
 
