@@ -35,7 +35,15 @@ if flgC0 then msg:sconcat(msg, msgC0, "<br>");
 if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
 cN:%__mcq_num_copts;
 wN:%__mcq_num_wopts;
-sc:cAN/(cN+wAN)*%__mcq_ssc;
+sc:if flgNOID then 0
+   elseif cN=0 then (if chk1 then %__mcq_ssc else 0)
+   elseif %__mcq_scmethod=2 then (cAN+wN-wAN)/(cN+wN)*%__mcq_ssc
+   elseif %__mcq_scmethod=3 then
+     (if cN*wN*(cAN+wAN)*(cN+wN-cAN-wAN)>0 then
+       (cAN*(wN-wAN)-(cN-cAN)*wAN)/sqrt(cN*wN*(cAN+wAN)*(cN+wN-cAN-wAN))*%__mcq_ssc
+      else 0)
+   elseif %__mcq_scmethod=4 then (2*(cAN+wN-wAN)/(cN+wN)-1)*%__mcq_ssc
+   else cAN/(cN+wAN)*%__mcq_ssc;
 
 if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
 

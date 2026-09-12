@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(root,'app/mcq-webapp/app.js'),'utf8');
 const functions = [...source.matchAll(/^function \w+\([^]*?^}/gm)].map(m=>m[0]).join('\n');
 const langs = ['en','ja','fr','it','de','pt','zh','ko','ru','sv'];
 const field = (value='')=>({value,checked:false,hidden:false,closest:()=>({classList:{toggle(){},remove(){}}})});
-const el = Object.fromEntries(['stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
+const el = Object.fromEntries(['noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
 el.baseLanguage.value='ja';
 el.includeBaseUrl.value='https://example.org/';
 el.questions=Object.fromEntries(langs.map(l=>[l,field()]));
@@ -77,3 +77,31 @@ const changed=context.legacyIncludePreamble('%_MCQ_NUM_OPTS:10; %_MCQ_NUM_COPTS:
 assert.equal(changed.settings['%_MCQ_NUM_OPTS'],'10');assert.equal(changed.settings['%_MCQ_NUM_COPTS'],'0');assert.match(changed.parameters,/%_rk:0;/);
 const snapshot=context.appStateSnapshot();delete snapshot.parameters;el.parameters.value='stale';context.applyAppStateSnapshot(snapshot);assert.equal(el.parameters.value,'');
 console.log('Passed: rank 0/1/2 XML preambles, weighted counts, metadata and CSV round trips, evaluation order, shared/generated include isolation, old metadata.');
+
+// Extra options and scoring method persist through XML metadata and CSV.
+for (const method of ['1','2','3','4']) {
+ el.noCorrectOption.checked=true; el.noIdeaOption.checked=true; el.scoringMethod.value=method;
+ const pre=context.parameterPreamble().join('\n');
+ assert.match(pre,/%__mcq_nocorrectopt:true;/);
+ assert.match(pre,/%__mcq_noidea:true;/);
+ assert.ok(pre.includes(`%__mcq_scmethod:${method};`));
+ assert.match(pre,/%__mcq_nocorrecttrue:is\(%_MCQ_NUM_COPTS=0\);/);
+ const snap=context.appStateSnapshot();
+ el.noCorrectOption.checked=false; el.noIdeaOption.checked=false; el.scoringMethod.value='1';
+ context.applyAppStateSnapshot(snap);
+ assert.equal(el.noCorrectOption.checked,true); assert.equal(el.noIdeaOption.checked,true); assert.equal(el.scoringMethod.value,method);
+ const csv=context.csvText(context.currentCsvRecords('settings'));
+ context.applyRecords(context.parseDelimited(csv,','));
+ assert.equal(el.noCorrectOption.checked,true); assert.equal(el.noIdeaOption.checked,true); assert.equal(el.scoringMethod.value,method);
+}
+const old=context.appStateSnapshot(); delete old.settings.noCorrectOption; delete old.settings.noIdeaOption; delete old.settings.scoringMethod;
+context.applyAppStateSnapshot(old);
+assert.equal(el.noCorrectOption.checked,false); assert.equal(el.noIdeaOption.checked,false); assert.equal(el.scoringMethod.value,'1');
+console.log('Passed: extra options and scoring method XML/CSV settings round trips and old defaults.');
+const originalXml=fs.readFileSync(path.join(root,'001/001.GaussElimMatrixGivenRank-A-rk2-cb.xml'),'utf8');
+const withFlags=originalXml.replace('%_rk:2;', '%_rk:2; %__mcq_noidea:true; %__mcq_nocorrectopt:true; %__mcq_scmethod:4;');
+context.importLegacyQuestionVariables(includeText,doc(withFlags),'',withFlags.match(/<questionvariables>\s*<text><!\[CDATA\[([^]*?)\]\]>/)[1]);
+assert.equal(el.noIdeaOption.checked,true); assert.equal(el.noCorrectOption.checked,true); assert.equal(el.scoringMethod.value,'4');
+assert.ok(!el.parameters.value.includes('%__mcq_scmethod'));
+assert.match(el.parameters.value,/%_rk:2;/);
+console.log('Passed: legacy include wrapper flags restored without duplicate overriding assignments.');

@@ -38,6 +38,9 @@ const el = {
   questionId: document.querySelector("#questionId"),
   modeRb: document.querySelector("#modeRb"),
   modeCb: document.querySelector("#modeCb"),
+  noCorrectOption: document.querySelector("#noCorrectOption"),
+  noIdeaOption: document.querySelector("#noIdeaOption"),
+  scoringMethod: document.querySelector("#scoringMethod"),
   numOptions: document.querySelector("#numOptions"),
   numCorrect: document.querySelector("#numCorrect"),
   randomCorrect: document.querySelector("#randomCorrect"),
@@ -166,6 +169,7 @@ function updateLayout() {
 }
 
 function bindEvents() {
+  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
   el.modeCb.addEventListener("change", () => setMode("cb"));
@@ -1495,6 +1499,7 @@ function generateXml() {
     ? patternCount - minSelectedCorrect
     : patterns.filter((pattern) => pattern.W.length).length;
   return template
+    .replace(/\{@__mcq_noidea_checked@\}/g, "{@%__mcq_noidea_checked@}")
     .replace(/(?:\[\[lang code=['"][^'"]+['"]\]\]\[\[\/lang\]\])+/g, languageBlocks())
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
     .replace(/%__mcq_rb_cb:"(?:rb|cb)";/, `%__mcq_rb_cb:"${state.mode}";`)
@@ -1560,6 +1565,11 @@ function parameterPreamble() {
   return [
     `%_MCQ_NUM_OPTS:${numOptions};`,
     `%_MCQ_NUM_COPTS:${expression};`,
+    `%__mcq_nocorrectopt:${Boolean(el.noCorrectOption?.checked)};`,
+    `%__mcq_noidea:${Boolean(el.noIdeaOption?.checked)};`,
+    `%__mcq_scmethod:${el.scoringMethod?.value || "1"};`,
+    ...(el.noCorrectOption?.checked ? ["%__mcq_nocorrecttrue:is(%_MCQ_NUM_COPTS=0);", "%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %_STACK_LANG);"] : []),
+    ...(el.noIdeaOption?.checked ? ["%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %_STACK_LANG);"] : []),
     ...(parameters ? [/[;$]\s*$/.test(stripMaximaComments(parameters).trim()) ? parameters : `${parameters}\n;`] : []),
   ];
 }
@@ -1596,6 +1606,9 @@ function appStateSnapshot() {
     qvars: el.qvars.value,
     parameters: el.parameters.value,
     settings: {
+      noCorrectOption: Boolean(el.noCorrectOption?.checked),
+      noIdeaOption: Boolean(el.noIdeaOption?.checked),
+      scoringMethod: el.scoringMethod?.value || "1",
       numOptions: el.numOptions.value,
       numCorrect: el.numCorrect.value,
       randomCorrect: el.randomCorrect.checked,
@@ -2253,6 +2266,9 @@ function applyAppStateSnapshot(snapshot) {
   el.parameters.value = String(snapshot.parameters || "");
   el.qvars.value = String(snapshot.qvars || "");
   state.qvars = [el.qvars.value];
+  if (el.noCorrectOption) el.noCorrectOption.checked = Boolean(snapshot.settings?.noCorrectOption);
+  if (el.noIdeaOption) el.noIdeaOption.checked = Boolean(snapshot.settings?.noIdeaOption);
+  if (el.scoringMethod) el.scoringMethod.value = String(snapshot.settings?.scoringMethod || "1");
   el.numOptions.value = String(snapshot.settings?.numOptions || 2);
   el.numCorrect.value = String(snapshot.settings?.numCorrect ?? 1);
   el.randomCorrect.checked = Boolean(snapshot.settings?.randomCorrect);
@@ -2330,6 +2346,13 @@ function refreshGeneratedIncludeSource() {
 function importLegacyQuestionVariables(variables, documentNode, filename, xmlVariables = variables) {
   const preamble = variables !== xmlVariables ? legacyIncludePreamble(xmlVariables) : { parameters: "", settings: {} };
   el.parameters.value = preamble.parameters;
+  const flags = stripMaximaComments(xmlVariables).match(/%_MCQ_FLAGS\s*:\s*\[\s*(?:true|false)\s*,\s*(?:true|false)\s*,\s*(true|false)\s*,\s*(true|false)/);
+  const settingsSource = stripMaximaComments(xmlVariables);
+  const literal = (name) => [...settingsSource.matchAll(new RegExp(name + "\\s*:\\s*(true|false|[1-4])\\s*[;$]", "g"))].at(-1)?.[1];
+  if (el.noCorrectOption) el.noCorrectOption.checked = (literal("%__mcq_nocorrectopt") || flags?.[2]) === "true";
+  if (el.noIdeaOption) el.noIdeaOption.checked = (literal("%__mcq_noidea") || flags?.[1]) === "true";
+  if (el.scoringMethod) el.scoringMethod.value = literal("%__mcq_scmethod") || "1";
+  el.parameters.value = el.parameters.value.replace(/%__mcq_(?:nocorrectopt|noidea|scmethod)\s*:\s*(?:true|false|[1-4])\s*[;$]/g, "").replace(/%__mcq_nocorrecttrue:is\(%_MCQ_NUM_COPTS=0\);/g, "").trim();
   const main = extractMainVariableSection(variables);
   const uncommented = stripMaximaComments(main);
   const statements = splitMaximaStatements(uncommented);
@@ -2384,6 +2407,8 @@ function importLegacyQuestionVariables(variables, documentNode, filename, xmlVar
       const parsed = parseMaximaAssignment(statement);
       if (!parsed) return statement.trim();
       if (managed.test(parsed.name)) return false;
+      if (/^%__mcq_(nocorrectopt|noidea|scmethod)$/.test(parsed.name) && /^(true|false|[1-4])$/.test(parsed.expression)) return false;
+      if (parsed.name === "%__mcq_nocorrecttrue" && parsed.expression === "is(%_MCQ_NUM_COPTS=0)") return false;
       return true;
     });
     el.qvars.value = qvarStatements.map((item) => item.trim()).filter(Boolean).join("\n");
@@ -2807,6 +2832,9 @@ function csvRecordKind(record) {
 }
 
 function resetCsvImportState() {
+  if (el.noCorrectOption) el.noCorrectOption.checked = false;
+  if (el.noIdeaOption) el.noIdeaOption.checked = false;
+  if (el.scoringMethod) el.scoringMethod.value = "1";
   el.parameters.value = "";
   state.includeSource = null;
   syncIncludeControls();
@@ -3101,6 +3129,12 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "nocorrectopt") el.noCorrectOption.checked = parseBoolean(value);
+  if (key === "noidea") el.noIdeaOption.checked = parseBoolean(value);
+  if (key === "scmethod") {
+    if (!["1", "2", "3", "4"].includes(value)) throw new Error("採点方式は1〜4を指定してください");
+    el.scoringMethod.value = value;
+  }
   if (key === "parameters") el.parameters.value = value;
   if (key === "question_id" || key === "id") el.questionId.value = baseTitle(value);
   if (key === "mode") setMode(value.toLowerCase().startsWith("c") ? "cb" : "rb");
@@ -3131,6 +3165,9 @@ function downloadSampleCsv() {
     ["config", "num_correct", "1"],
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
+    ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", el.requirePairs.checked ? "mixed" : "true"],
     ["config", "base_language", baseLang()],
@@ -3182,6 +3219,9 @@ function currentCsvRecords(title) {
     ["config", "num_correct", el.numCorrect.value],
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
+    ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", feedbackModeConfigValue()],
     ["config", "base_language", baseLang()],
