@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260913-ui36">
+    <link rel="stylesheet" href="./styles.css?v=20260913-ui37">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260913-convert2"></script>
-    <script defer src="./app.js?v=20260913-ui66"></script>
+    <script defer src="./i18n.js?v=20260913-insert1"></script>
+    <script defer src="./app.js?v=20260913-ui67"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260913-preview4"></script>
   </head>
@@ -198,23 +198,41 @@
           <div class="section-divider"></div>
           <section class="question-texts" aria-labelledby="questionTextsHeading">
             <div class="question-text-heading">
-              <h2 id="questionTextsHeading">問題文</h2>
               <div class="row-actions">
-                <div class="question-text-help">
-                  <button id="convertQuestionButton" type="button" class="ghost" aria-describedby="convertQuestionHelp">CAS式変換</button>
-                  <div id="convertQuestionHelp" class="question-text-tooltip" role="tooltip">
-                    <p>文字列形式の {@a@} などはXML生成・プレビュー時に自動変換されます。このボタンは現在の問題文を明示的にCAS式へ書き換え、形式もCAS式に切り替えます。</p>
-                    <p>例：値は {@a@} → sconcat("値は ", stack_disp(a, "i"))</p>
-                    <p>文章・HTML・LaTeX・__SELPROMPT__・__SELTYPE__を保ちます。すでに数式環境の中にある埋め込みには、数式環境を重ねません。CASTextのブロック構文は対象外です。</p>
-                  </div>
-                </div>
+                <h2 id="questionTextsHeading">問題文</h2>
                 <div class="question-text-help">
                   <button type="button" class="question-text-help-button" aria-label="問題文の入力について" aria-describedby="questionTextHelp">?</button>
                   <div id="questionTextHelp" class="question-text-tooltip" role="tooltip">
+                    <p>文字列形式では、STACKの問題文書式のうち、文章と {@a@} などの式の埋め込みが使えます。HTML・LaTeXも文章に含められます。条件分岐・繰り返しなどのブロック構文は使えません。</p>
+                    <p>CAS式形式では、問題文用の変数に代入する式を入力します。sconcatなどで問題文を表す文字列を返す式を書いてください。変数名や代入記号は不要です。</p>
+                    <p>例：sconcat("値は ", stack_disp(a, "i"))</p>
+                  </div>
+                </div>
+              </div>
+              <div class="row-actions">
+                <div class="question-text-help question-insert-menu">
+                  <details class="file-menu">
+                  <summary aria-describedby="questionInsertHelp">挿入</summary>
+                  <div class="file-menu-list">
+                    <button type="button" data-question-insert="__SELTYPE__">SELTYPE</button>
+                    <button type="button" data-question-insert="__SELPROMPT__">SELPROMPT</button>
+                  </div>
+                  </details>
+                  <div id="questionInsertHelp" class="question-text-tooltip" role="tooltip">
                     <p>__SELTYPE__ は、上の選択肢設定に応じて「1つ選べ」「すべて選べ」、正解が複数あるRadio形式では「1つ選べ（正解が複数あっても1つでよい）」に置き換わります。</p>
                     <p>何を選ぶかは問題文に書きます。例：「間違っているものを __SELTYPE__。」「rankが1であるものを __SELTYPE__。」</p>
                     <p>__SELPROMPT__ は「正しいものを1つ選べ。」などの指示文全体を挿入します。「正しいものを」を前に重ねないでください。</p>
                     <p>どちらも使わず、自分で好きな指示文を書いても問題ありません。</p>
+
+                    <p>選ぶと現在の問題文のカーソル位置に挿入します。文字を選択している場合は置き換えます。CAS式では文字列の中に挿入してください。</p>
+                  </div>
+                </div>
+                <div class="question-text-help">
+                  <button id="convertQuestionButton" type="button" class="ghost" aria-describedby="convertQuestionHelp">CAS変換</button>
+                  <div id="convertQuestionHelp" class="question-text-tooltip" role="tooltip">
+                    <p>文字列形式の {@a@} などはXML生成・プレビュー時に自動変換されます。このボタンは現在の問題文を明示的にCAS式へ書き換え、形式もCAS式に切り替えます。</p>
+                    <p>例：値は {@a@} → sconcat("値は ", stack_disp(a, "i"))</p>
+                    <p>文章・HTML・LaTeX・__SELPROMPT__・__SELTYPE__を保ちます。すでに数式環境の中にある埋め込みには、数式環境を重ねません。CASTextのブロック構文は対象外です。</p>
                   </div>
                 </div>
               </div>

@@ -37,3 +37,21 @@ assert.equal(context.langAssocFromFields(),generated,'Explicit and automatic con
 state.questionTypes.ja='text';el.questions.ja.value='{@a';
 assert.throws(()=>context.langAssocFromFields());assert.equal(el.questions.ja.value,'{@a');
 console.log('Passed: automatic output conversion equals explicit conversion, preserves editor types/text, and rejects malformed input.');
+
+context.Event=class {constructor(type,options){this.type=type;this.bubbles=options.bubbles;}};
+const editor=el.questions.ja;
+editor.setRangeText=function(text,start,end){this.value=this.value.slice(0,start)+text+this.value.slice(end);this.selectionStart=this.selectionEnd=start+text.length;};
+editor.focus=()=>{editor.focused=true;};
+editor.dispatchEvent=event=>{editor.lastEvent=event;};
+editor.value='行列を 選択';editor.selectionStart=editor.selectionEnd=4;
+context.insertQuestionPlaceholder('__SELTYPE__');
+assert.equal(editor.value,'行列を __SELTYPE__選択');
+assert.equal(editor.selectionStart,15);assert.equal(editor.selectionEnd,15);
+assert.ok(editor.focused);assert.equal(editor.lastEvent.type,'input');assert.equal(editor.lastEvent.bubbles,true);
+editor.value='前😀後';editor.selectionStart=1;editor.selectionEnd=3;
+context.insertQuestionPlaceholder('__SELPROMPT__');assert.equal(editor.value,'前__SELPROMPT__後');
+assert.equal(el.questions.en.value,'English');
+editor.value='sconcat("選べ ")';editor.selectionStart=editor.selectionEnd=12;
+state.questionTypes.ja='cas';context.insertQuestionPlaceholder('__SELTYPE__');
+assert.equal(editor.value,'sconcat("選べ __SELTYPE__")');assert.equal(state.questionTypes.ja,'cas');
+console.log('Passed: caret insertion, selection replacement, Unicode, input event, CAS literal and other-language isolation.');

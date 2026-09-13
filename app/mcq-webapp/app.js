@@ -161,6 +161,9 @@ function updateLayout() {
 }
 
 function bindEvents() {
+  document.querySelectorAll("[data-question-insert]").forEach(button => {
+    button.addEventListener("click", () => insertQuestionPlaceholder(button.dataset.questionInsert));
+  });
   document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
   [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
@@ -666,6 +669,17 @@ function setMode(mode, update = true) {
   if (el.scoringMethodField) el.scoringMethodField.hidden = mode !== "cb";
   if (el.scoringMethod) el.scoringMethod.disabled = mode !== "cb";
   if (update) updateOutput();
+}
+
+function insertQuestionPlaceholder(token) {
+  if (!["__SELTYPE__", "__SELPROMPT__"].includes(token)) return;
+  const textarea = el.questions[baseLang()];
+  // Textarea selection survives focus moving to the insertion menu.
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  textarea.setRangeText(token, start, end, "end");
+  textarea.focus();
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function questionTextToCas(source) {
