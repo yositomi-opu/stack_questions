@@ -1,0 +1,123 @@
+/* You can find latest version in github/yositomi-opu/stack_questions  */
+/* setup lists to decide the list of options */
+/* %__mcq_lang is defined in pre.txt */
+if listp(%__Cmsg1L) then %__Cmsg1:%__mcq_lang(%__Cmsg1L, %_STACK_LANG);
+if listp(%__Cmsg2L) then %__Cmsg2:%__mcq_lang(%__Cmsg2L, %_STACK_LANG);
+if listp(%__Cmsg3L) then %__Cmsg3:%__mcq_lang(%__Cmsg3L, %_STACK_LANG);
+if listp(%__Cmsg4L) then %__Cmsg4:%__mcq_lang(%__Cmsg4L, %_STACK_LANG);
+if listp(%__Cmsg5L) then %__Cmsg5:%__mcq_lang(%__Cmsg5L, %_STACK_LANG);
+if listp(%__Cmsg6L) then %__Cmsg6:%__mcq_lang(%__Cmsg6L, %_STACK_LANG);
+if listp(%__Cmsg7L) then %__Cmsg7:%__mcq_lang(%__Cmsg7L, %_STACK_LANG);
+if listp(%__Cmsg8L) then %__Cmsg8:%__mcq_lang(%__Cmsg8L, %_STACK_LANG);
+if listp(%__Wmsg1L) then %__Wmsg1:%__mcq_lang(%__Wmsg1L, %_STACK_LANG);
+if listp(%__Wmsg2L) then %__Wmsg2:%__mcq_lang(%__Wmsg2L, %_STACK_LANG);
+if listp(%__Wmsg3L) then %__Wmsg3:%__mcq_lang(%__Wmsg3L, %_STACK_LANG);
+if listp(%__Wmsg4L) then %__Wmsg4:%__mcq_lang(%__Wmsg4L, %_STACK_LANG);
+if listp(%__Wmsg5L) then %__Wmsg5:%__mcq_lang(%__Wmsg5L, %_STACK_LANG);
+if listp(%__Wmsg6L) then %__Wmsg6:%__mcq_lang(%__Wmsg6L, %_STACK_LANG);
+if listp(%__Wmsg7L) then %__Wmsg7:%__mcq_lang(%__Wmsg7L, %_STACK_LANG);
+if listp(%__Wmsg8L) then %__Wmsg8:%__mcq_lang(%__Wmsg8L, %_STACK_LANG);
+if listp(%__Wmsg9L) then %__Wmsg9:%__mcq_lang(%__Wmsg9L, %_STACK_LANG);
+if listp(%__CoptL1L) then %__CoptL1:%__mcq_lang(%__CoptL1L, %_STACK_LANG);
+if listp(%__CoptL2L) then %__CoptL2:%__mcq_lang(%__CoptL2L, %_STACK_LANG);
+if listp(%__CoptL3L) then %__CoptL3:%__mcq_lang(%__CoptL3L, %_STACK_LANG);
+if listp(%__CoptL4L) then %__CoptL4:%__mcq_lang(%__CoptL4L, %_STACK_LANG);
+if listp(%__CoptL5L) then %__CoptL5:%__mcq_lang(%__CoptL5L, %_STACK_LANG);
+if listp(%__CoptL6L) then %__CoptL6:%__mcq_lang(%__CoptL6L, %_STACK_LANG);
+if listp(%__CoptL7L) then %__CoptL7:%__mcq_lang(%__CoptL7L, %_STACK_LANG);
+if listp(%__CoptL8L) then %__CoptL8:%__mcq_lang(%__CoptL8L, %_STACK_LANG);
+if listp(%__WoptL1L) then %__WoptL1:%__mcq_lang(%__WoptL1L, %_STACK_LANG);
+if listp(%__WoptL2L) then %__WoptL2:%__mcq_lang(%__WoptL2L, %_STACK_LANG);
+if listp(%__WoptL3L) then %__WoptL3:%__mcq_lang(%__WoptL3L, %_STACK_LANG);
+if listp(%__WoptL4L) then %__WoptL4:%__mcq_lang(%__WoptL4L, %_STACK_LANG);
+if listp(%__WoptL5L) then %__WoptL5:%__mcq_lang(%__WoptL5L, %_STACK_LANG);
+if listp(%__WoptL6L) then %__WoptL6:%__mcq_lang(%__WoptL6L, %_STACK_LANG);
+if listp(%__WoptL7L) then %__WoptL7:%__mcq_lang(%__WoptL7L, %_STACK_LANG);
+if listp(%__WoptL8L) then %__WoptL8:%__mcq_lang(%__WoptL8L, %_STACK_LANG);
+if listp(%__WoptL9L) then %__WoptL9:%__mcq_lang(%__WoptL9L, %_STACK_LANG);
+%__mcq_addCopt(%__CoptL1, %__Cmsg1);
+%__mcq_addCopt(%__CoptL2, %__Cmsg2);
+%__mcq_addCopt(%__CoptL3, %__Cmsg3);
+%__mcq_addCopt(%__CoptL4, %__Cmsg4);
+%__mcq_addCopt(%__CoptL5, %__Cmsg5);
+%__mcq_addCopt(%__CoptL6, %__Cmsg6);
+%__mcq_addCopt(%__CoptL7, %__Cmsg7);
+%__mcq_addCopt(%__CoptL8, %__Cmsg8);
+%__mcq_addWopt(%__WoptL1, %__Wmsg1);
+%__mcq_addWopt(%__WoptL2, %__Wmsg2);
+%__mcq_addWopt(%__WoptL3, %__Wmsg3);
+%__mcq_addWopt(%__WoptL4, %__Wmsg4);
+%__mcq_addWopt(%__WoptL5, %__Wmsg5);
+%__mcq_addWopt(%__WoptL6, %__Wmsg6);
+%__mcq_addWopt(%__WoptL7, %__Wmsg7);
+%__mcq_addWopt(%__WoptL8, %__Wmsg8);
+%__mcq_addWopt(%__WoptL9, %__Wmsg9);
+
+/* moved from mcq_template_pre and forward compatibility */
+if numberp(%_MCQ_NUM_OPTS) then %__mcq_num_opts:%_MCQ_NUM_OPTS;
+if numberp(%_MCQ_NUM_COPTS) then %__mcq_num_copts:%_MCQ_NUM_COPTS;
+if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
+%__mcq_num_wopts:%__mcq_num_opts-%__mcq_num_copts;/* nW:nO-nC */
+
+%__mcq_max_opts:10; /* max num of opts of each pattern */
+%__mcq_max_patterns:99; /* max num of opts of each pattern */
+/* number of patterns of correct/incorrect(wrong) options(auto-gen) */
+/* correct/incorrect boundary value of id of options list */
+%__mcq_cw_delimiter:%__mcq_max_opts*(%__mcq_max_patterns+1);
+%__mcq_CLlen:map(length, %__mcq_CLbase);
+%__mcq_WLlen:map(length, %__mcq_WLbase);
+%__mcq_nC:%__mcq_min_max(%__mcq_num_copts, length(flatten(%__mcq_CLbase)));
+%__mcq_nW:%__mcq_min_max(%__mcq_num_wopts, length(flatten(%__mcq_WLbase)));
+/* number of patterns of correct/incorrect(wrong) options(auto-gen) */
+/* on: number of options, bsL: list of all correct or incorrect patterns */
+/* if on>=number of patterns, pick up more than one opt from each pattern */
+/* if on<number of patterns, pick up one opt from randomly chosen on-patterns */
+%_rp(L):=random_permutation(L);
+%__mcq_make_pattern(on, bsL):=block([l:length(bsL), k, ptL:map(length,bsL), pt], if on=0 then return([]) 
+else if on>=l then while apply("+",ptL)>on do (k:rand(l)+1, if ptL[k]>1 then ptL[k]:ptL[k]-1) 
+else (ptL:makelist(0, l),while apply("+", ptL)<on do (k:rand(l)+1, if ptL[k]=0 then ptL[k]:1)), return(ptL));
+%__mcq_nCL:%__mcq_make_pattern(%__mcq_nC, %__mcq_CLbase);
+%__mcq_nWL:%__mcq_make_pattern(%__mcq_nW, %__mcq_WLbase);
+%__mcq_CLL:makelist(makelist(%__mcq_CLbase[k][j], j, 1, min(%__mcq_nCL[k], length(%__mcq_CLbase[k]))), k, 1, length(%__mcq_nCL));
+%__mcq_WLL:makelist(makelist(%__mcq_WLbase[k][j], j, 1, min(%__mcq_nWL[k], length(%__mcq_WLbase[k]))), k, 1, length(%__mcq_nWL));
+/* "no correct options above" */
+%__mcq_nocorrect_id:%__mcq_max_patterns+1;
+%__mcq_noc_id:%__mcq_nocorrect_id*%__mcq_cw_delimiter;
+%__mcq_noidea_flag:%__mcq_max_patterns*10+1;
+%__mcq_noi_id:%__mcq_noidea_flag*%__mcq_cw_delimiter;
+%__mcq_NCL:if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then [[1, true, %__mcq_nocoptS]] else [[%__mcq_noc_id, false, %__mcq_nocoptS]];
+/* "I have no idea" */
+%__mcq_NOI:[[%__mcq_noi_id, false, %__mcq_noidS]];
+%__mcq_ListCL0:apply(append, makelist(makelist([%__mcq_max_opts*k+j, true, %__mcq_CLL[k][j]], j, 1, length(%__mcq_CLL[k])), k, 1, length(%__mcq_CLL)));
+%__mcq_ListWL0:apply(append, makelist(makelist([%__mcq_cw_delimiter*k+j, false, %__mcq_WLL[k][j]], j, 1, length(%__mcq_WLL[k])), k, 1, length(%__mcq_WLL)));
+%__mcq_ListCL1:%_rp(%__mcq_ListCL0);
+%__mcq_ListWL1:%_rp(%__mcq_ListWL0);
+%__mcq_taC:%_rp(makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts));
+%__mcq_taW:%_rp(append(makelist(%__mcq_ListCL1[k], k, 1, %__mcq_num_copts), makelist(%__mcq_ListWL1[k], k, 1, %__mcq_num_wopts)));
+ta1:%__mcq_taW;
+if %__mcq_nocorrectopt then (if %__mcq_nocorrecttrue then ta1:append(%__mcq_taC, %__mcq_NCL) else ta1:append(%__mcq_taW, %__mcq_NCL));
+if %__mcq_noidea then ta1:append(ta1, %__mcq_NOI);
+Cans1:mcq_correct(ta1);/* formal defintion. not used */
+/********** __SELPROMPT__ / legacy __SELTYPE__ (%__mcq_qtext_auto) **********/
+%__mcq_qtext:%__mcq_lang(%__mcq_qtextL, %_STACK_LANG);
+/* Legacy fragment for question texts which put __SELTYPE__ next to the object. */
+%__mcq_SELL:[["en", "Choose"], ["fr", "Choisissez"], ["de", "Wählen Sie"], ["it", "Scegli"], ["ja", "1つ選べ"], ["pt", "Escolha"], ["zh", "选择"], ["ko", "선택하시오"], ["ru", "Выберите"], ["sv", "Välj"]];
+%__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
+%__mcq_SELALLL:[["en", "Choose all"], ["fr", "Choisissez toutes les"], ["de", "Wählen Sie alle"], ["it", "Scegli tutte le"], ["ja", "すべて選べ"], ["pt", "Escolha todas as"], ["zh", "选择所有"], ["ko", "모두 선택하시오"], ["ru", "Выберите все"], ["sv", "Välj alla"]];
+%__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
+%__mcq_SELONEANYL:[
+ ["en", "Choose one of the"], ["fr", "Choisissez une des"], ["de", "Wählen Sie eine der"], ["it", "Scegli una delle"], ["ja", "1つ選べ（正解が複数あっても1つでよい）"], ["pt", "Escolha uma das"], ["zh", "选择其中一个"], ["ko", "그중 하나를 선택하시오"], ["ru", "Выберите один из"], ["sv", "Välj ett av"]];
+%__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
+if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
+
+/* New full-sentence prompt. Prefer __SELPROMPT__ in newly authored questions. */
+%__mcq_SELPROMPT_ONE_L:[
+ ["en", "Select the correct answer."], ["fr", "Sélectionnez la bonne réponse."], ["de", "Wählen Sie die richtige Antwort aus."], ["it", "Seleziona la risposta corretta."], ["ja", "正しいものを1つ選べ。"], ["pt", "Selecione a resposta correta."], ["zh", "请选择一个正确答案。"], ["ko", "정답 하나를 선택하시오."], ["ru", "Выберите правильный ответ."], ["sv", "Välj rätt svar."]];
+%__mcq_SELPROMPT_ALL_L:[
+ ["en", "Select all correct answers."], ["fr", "Sélectionnez toutes les bonnes réponses."], ["de", "Wählen Sie alle richtigen Antworten aus."], ["it", "Seleziona tutte le risposte corrette."], ["ja", "正しいものをすべて選べ。"], ["pt", "Selecione todas as respostas corretas."], ["zh", "请选择所有正确答案。"], ["ko", "정답을 모두 선택하시오."], ["ru", "Выберите все правильные ответы."], ["sv", "Välj alla rätta svar."]];
+%__mcq_SELPROMPT_ANY_L:[
+ ["en", "Select one correct answer, even if more than one is correct."], ["fr", "Sélectionnez une bonne réponse, même s’il y en a plusieurs."], ["de", "Wählen Sie eine richtige Antwort aus, auch wenn es mehrere gibt."], ["it", "Seleziona una risposta corretta, anche se ce n’è più di una."], ["ja", "正しいものを1つ選べ（複数ある場合も1つでよい）。"], ["pt", "Selecione uma resposta correta, mesmo que haja mais de uma."], ["zh", "请选择一个正确答案，即使正确答案不止一个。"], ["ko", "정답이 여러 개여도 하나만 선택하시오."], ["ru", "Выберите один правильный ответ, даже если их несколько."], ["sv", "Välj ett rätt svar, även om det finns flera."]];
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG) else if %__mcq_num_copts>1 then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG) else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
+qtext:ssubst(%__mcq_selprompt, "__SELPROMPT__", ssubst(%__mcq_seltype, "__SELTYPE__", %__mcq_qtext));
+
+/***** EOF *****/

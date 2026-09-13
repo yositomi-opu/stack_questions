@@ -41,6 +41,7 @@ const el = {
   noCorrectOption: document.querySelector("#noCorrectOption"),
   noIdeaOption: document.querySelector("#noIdeaOption"),
   scoringMethodField: document.querySelector("#scoringMethodField"),
+  castextTemplate: document.querySelector("#castextTemplate"),
   scoringMethod: document.querySelector("#scoringMethod"),
   numOptions: document.querySelector("#numOptions"),
   numCorrect: document.querySelector("#numCorrect"),
@@ -166,7 +167,7 @@ function bindEvents() {
   });
   document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
-  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
+  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.castextTemplate].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
   el.modeCb.addEventListener("change", () => setMode("cb"));
@@ -645,11 +646,13 @@ function clamp(value, min, max) {
 
 async function loadTemplates() {
   try {
-    const [rb, cb] = await Promise.all([
+    const [rb, cb, rbCas, cbCas] = await Promise.all([
       fetch("./templates/001.MCQ-rb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
       fetch("./templates/001.MCQ-cb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-rb.xml?v=20260913-cas1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-cb.xml?v=20260913-cas1").then(checkResponse).then((r) => r.text()),
     ]);
-    state.templates = { rb, cb };
+    state.templates = { rb, cb, rbCas, cbCas };
     setStatus("テンプレート読込完了");
   } catch (error) {
     setStatus("アプリ内のXMLテンプレートを読み込めませんでした。ページを再読み込みしてください。", true);
@@ -1574,7 +1577,7 @@ function updateOutput() {
 }
 
 function generateXml() {
-  const sourceTemplate = state.templates[state.mode];
+  const sourceTemplate = state.templates[el.castextTemplate?.checked ? `${state.mode}Cas` : state.mode];
   if (!sourceTemplate) throw new Error("テンプレート読込待ち");
   const template = rewriteTemplateIncludeUrls(sourceTemplate);
   refreshGeneratedIncludeSource();
@@ -1724,6 +1727,7 @@ function appStateSnapshot() {
     settings: {
       noCorrectOption: Boolean(el.noCorrectOption?.checked),
       noIdeaOption: Boolean(el.noIdeaOption?.checked),
+      castextTemplate: Boolean(el.castextTemplate?.checked),
       scoringMethod: el.scoringMethod?.value || "1",
       numOptions: el.numOptions.value,
       numCorrect: el.numCorrect.value,
@@ -2352,6 +2356,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     applyAppStateSnapshot(decodeAppMetadata(metadata));
   } else {
     importLegacyQuestionVariables(includeSource?.content || variables, documentNode, filename, variables);
+    if (el.castextTemplate) el.castextTemplate.checked = /mcq_template_pre_cas\.(?:mac|txt)/.test(variables);
     state.includeSource = includeSource;
     syncIncludeControls();
   }
@@ -2388,6 +2393,7 @@ function applyAppStateSnapshot(snapshot) {
   state.qvars = [el.qvars.value];
   if (el.noCorrectOption) el.noCorrectOption.checked = Boolean(snapshot.settings?.noCorrectOption);
   if (el.noIdeaOption) el.noIdeaOption.checked = Boolean(snapshot.settings?.noIdeaOption);
+  if (el.castextTemplate) el.castextTemplate.checked = Boolean(snapshot.settings?.castextTemplate);
   if (el.scoringMethod) el.scoringMethod.value = String(snapshot.settings?.scoringMethod || "1");
   el.numOptions.value = String(snapshot.settings?.numOptions || 2);
   el.numCorrect.value = String(snapshot.settings?.numCorrect ?? 1);
@@ -3001,6 +3007,7 @@ function resetCsvImportState() {
   el.requirePairs.checked = false;
   if (el.noCorrectOption) el.noCorrectOption.checked = false;
   if (el.noIdeaOption) el.noIdeaOption.checked = false;
+  if (el.castextTemplate) el.castextTemplate.checked = false;
   if (el.scoringMethod) el.scoringMethod.value = "1";
   el.parameters.value = "";
   state.includeSource = null;
@@ -3297,6 +3304,7 @@ function applyLegacyRecords(records) {
 
 function applyConfig(key, value) {
   if (key === "nocorrectopt") el.noCorrectOption.checked = parseBoolean(value);
+  if (key === "castext_template" && el.castextTemplate) el.castextTemplate.checked = parseBoolean(value);
   if (key === "noidea") el.noIdeaOption.checked = parseBoolean(value);
   if (key === "scmethod") {
     if (!["1", "2", "3", "4"].includes(value)) throw new Error("採点方式は1〜4を指定してください");
@@ -3334,6 +3342,7 @@ function downloadSampleCsv() {
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", el.requirePairs.checked ? "mixed" : "true"],
@@ -3388,6 +3397,7 @@ function currentCsvRecords(title) {
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
     ["config", "feedback_by_truth", feedbackModeConfigValue()],

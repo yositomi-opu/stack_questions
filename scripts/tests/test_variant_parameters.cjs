@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(root,'app/mcq-webapp/app.js'),'utf8');
 const functions = [...source.matchAll(/^function \w+\([^]*?^}/gm)].map(m=>m[0]).join('\n');
 const langs = ['en','ja','fr','it','de','pt','zh','ko','ru','sv'];
 const field = (value='')=>({value,checked:false,hidden:false,closest:()=>({classList:{toggle(){},remove(){}}})});
-const el = Object.fromEntries(['noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
+const el = Object.fromEntries(['castextTemplate','noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
 el.baseLanguage.value='ja';
 el.includeBaseUrl.value='https://example.org/';
 el.questions=Object.fromEntries(langs.map(l=>[l,field()]));
@@ -256,3 +256,24 @@ state.casEvaluation=priorEvaluation;
 state.rows=[{pattern:'06',truth:'C'}];
 assert.throws(()=>context.generateVariableBlock(),/正解1〜5/);
 console.log('Passed: pattern dropdown limits, free number reuse, invalid export rejection, compact list length.');
+
+// Template selection survives metadata and CSV round trips; reset returns to legacy.
+context.applyRecords(context.parseDelimited(fs.readFileSync(path.join(root,"app/mcq-webapp/sample.csv"),"utf8"),","));
+for (const mode of ['rb', 'cb']) {
+ state.mode=mode;
+ for (const suffix of ['', 'Cas']) state.templates[mode+suffix]=fs.readFileSync(path.join(root,`app/mcq-webapp/templates/001.MCQ${suffix ? '_cas' : ''}-${mode}.xml`),'utf8');
+ for (const enabled of [false,true]) {
+  el.castextTemplate.checked=enabled;
+  evaluateLists();
+  const xml=context.generateXml();
+  for (const stem of ['pre','post','fvar']) assert.ok(xml.includes(`mcq_template_${stem}${enabled ? '_cas' : ''}.mac`));
+  const snap=context.decodeAppMetadata(xml.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)[1]);
+  el.castextTemplate.checked=!enabled;context.applyAppStateSnapshot(snap);
+  assert.equal(el.castextTemplate.checked,enabled);
+  const records=context.currentCsvRecords('variant');
+  el.castextTemplate.checked=!enabled;context.applyRecords(records);
+  assert.equal(el.castextTemplate.checked,enabled);
+ }
+}
+el.castextTemplate.checked=true;context.resetCsvImportState();assert.equal(el.castextTemplate.checked,false);
+console.log('Passed: legacy/CASText template selection, metadata/CSV round trips, clear default.');

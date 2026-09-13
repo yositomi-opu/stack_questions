@@ -18,15 +18,31 @@ if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 
-%__mcq_nocoptSL:[["en", "None of the above."]];
-%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["ja", "選択肢に正解はない."]]);
-%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["fr", "Aucune des réponses ci-dessus."]]);
-%__mcq_nocoptSL:append(%__mcq_nocoptSL, [["de", "Keine der oben genannten Antworten."]]);
+%__mcq_nocoptSL:[
+ ["en", "None of the above."],
+ ["ja", "選択肢に正解はない."],
+ ["fr", "Aucune des réponses ci-dessus."],
+ ["it", "Nessuna delle risposte precedenti."],
+ ["de", "Keine der oben genannten Antworten."],
+ ["pt", "Nenhuma das opções acima."],
+ ["zh", "以上选项均不正确。"],
+ ["ko", "위 선택지 중 정답이 없습니다."],
+ ["ru", "Ни один из предложенных вариантов."],
+ ["sv", "Inget av ovanstående."]
+];
 %__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
-%__mcq_noidSL:[["en", "I don't know yet."]];
-%__mcq_noidSL:append(%__mcq_noidSL, [["ja", "まだわからない."]]);
-%__mcq_noidSL:append(%__mcq_noidSL, [["fr", "Je ne sait pas encore."]]);
-%__mcq_noidSL:append(%__mcq_noidSL, [["de", "Ich weiß es noch nicht."]]);
+%__mcq_noidSL:[
+ ["en", "I don't know yet."],
+ ["ja", "まだわからない."],
+ ["fr", "Je ne sais pas encore."],
+ ["it", "Non lo so ancora."],
+ ["de", "Ich weiß es noch nicht."],
+ ["pt", "Ainda não sei."],
+ ["zh", "还不知道。"],
+ ["ko", "아직 모르겠습니다."],
+ ["ru", "Пока не знаю."],
+ ["sv", "Jag vet inte ännu."]
+];
 %__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %__STACK_LANG);
 %__mcq_CLbase:[];
 %__mcq_WLbase:[];
@@ -35,10 +51,15 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
 %__mcq_noidea_checkedL:[
- ["en", "The option \"I don't know yet. \" is selected/checked. Score is 0."],
+ ["en", "\"I don't know yet\" was selected/checked. The score is 0."],
  ["ja", "「まだわからない」が選択/チェックされました. 得点は0です."],
- ["fr", "« Je ne sais pas » a été sélectionné. Le score est de 0."],
- ["de", "„Ich weiß es nicht“ wurde ausgewählt. Die Punktzahl beträgt 0."],
- ["other", ""]
+ ["fr", "« Je ne sais pas encore » a été sélectionné/coché. Le score est de 0."],
+ ["it", "È stata selezionata/segnata l’opzione «Non lo so ancora». Il punteggio è 0."],
+ ["de", "„Ich weiß es noch nicht“ wurde ausgewählt/angekreuzt. Die Punktzahl ist 0."],
+ ["pt", "A opção «Ainda não sei» foi selecionada/marcada. A pontuação é 0."],
+ ["zh", "选择/勾选了“还不知道”。得分为0分。"],
+ ["ko", "‘아직 모르겠습니다’가 선택/체크되었습니다. 점수는 0점입니다."],
+ ["ru", "Был выбран/отмечен вариант «Пока не знаю». Оценка — 0 баллов."],
+ ["sv", "Alternativet ”Jag vet inte ännu” valdes/markerades. Poängen är 0."]
 ];
 %__mcq_noidea_checked:%__mcq_lang(%__mcq_noidea_checkedL, %_STACK_LANG);

@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "CASText版（試験運用）": "CASText version (experimental)",
     "全入力クリア": "Clear all entries",
     "クリア": "Clear",
     "読込": "Load",

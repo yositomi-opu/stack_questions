@@ -1,0 +1,52 @@
+
+if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
+if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
+ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
+ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));
+countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
+cAN:countL(ans1WL, 0);
+wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
+flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(%__mcq_CLbase)));
+flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(%__mcq_WLbase)));
+flgWnc:member(%__mcq_nocorrect_id, ans1WL);
+flgC0:member(0, ans1CL);
+flgNOID:member(%__mcq_noidea_flag, ans1WL);
+msg:"";
+
+for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
+for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
+msgC0L:[
+  ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."],
+  ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], 
+  ["fr", "Aucune des réponses proposées n’est correcte. Vous avez la bonne réponse si vous n’avez sélectionné aucune autre option."],
+  ["de", "Keine der angebotenen Antworten ist richtig. Sie liegen richtig, wenn Sie keine andere Option ausgewählt haben."],
+  ["other", ""]
+];
+msgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
+msgWncL:[
+ ["en", "There is a correct answer option(s)!"],
+ ["ja", "正解の選択肢があります!"],
+ ["fr", "Il y a au moins une réponse correcte."],
+ ["de", "Es gibt mindestens eine richtige Antwort."],
+ ["other", ""]
+];
+msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
+if flgC0 then msg:sconcat(msg, msgC0, "<br>");
+if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
+cN:%__mcq_num_copts;
+wN:%__mcq_num_wopts;
+sc:if flgNOID then 0
+   elseif cN=0 then (if chk1 then %__mcq_ssc else 0)
+   elseif %__mcq_scmethod=2 then (cAN+wN-wAN)/(cN+wN)*%__mcq_ssc
+   elseif %__mcq_scmethod=3 then
+     (if cN*wN*(cAN+wAN)*(cN+wN-cAN-wAN)>0 then
+       (cAN*(wN-wAN)-(cN-cAN)*wAN)/sqrt(cN*wN*(cAN+wAN)*(cN+wN-cAN-wAN))*%__mcq_ssc
+      else 0)
+   elseif %__mcq_scmethod=4 then (2*(cAN+wN-wAN)/(cN+wN)-1)*%__mcq_ssc
+   else cAN/(cN+wAN)*%__mcq_ssc;
+
+if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
+
+
+if %__mcq_nocorrecttrue and %__mcq_nocorrectopt and apply("or", flgWL) then sc:0;
+if not %__mcq_fbp then msg:"";

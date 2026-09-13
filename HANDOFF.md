@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- CASText対応を別テンプレート系列へ分離。mcq_template_{pre,post,fvar}_cas.txt/.mac、001.MCQ_cas-{rb,cb}.xmlとアプリ内コピーを追加。通常preは10言語の文字列配列のみ、pre_casは同名変数にcastextリテラル配列を定義。変数名の_cas別名は撤去。post/fvarのCAS版は現段階では通常版の完全コピー。通常XMLは変更なし。
+- アプリの選択肢設定にCASText版（試験運用）のチェック（日英）を追加。既定オフ、XML生成／プレビューのテンプレート3参照をまとめて切替。CSV config,castext_templateとXMLメタデータへ保存、旧XMLはpre_cas参照で判定、旧CSV・旧メタデータ・クリアはオフ。問題文等の全面CASText化は今後の作業。通常のローカル問題変数評価は既存preを使用するまま。
+- makeにCAS版3ファイルを登録し.mac生成。配列内容・10言語順・生成物・XMLコピー／参照の検査、JSのテンプレート選択とCSV／メタデータ往復・クリアの回帰検査を追加。実STACK APIでCAS版Radio／Checkboxの2選択肢＋特殊選択肢2つの描画を確認。公開先include取得と実ブラウザの配置確認は未実施。 検証コマンド: python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（4件成功）、node scripts/tests/test_variant_parameters.cjs、node scripts/tests/test_question_text_conversion.cjs、node scripts/tests/test_pair_swap.cjs（すべて成功）、JS構文検査、git diff --check。
+
 - 評価状態（未評価／評価中／結果）を問題変数欄の下から評価ボタン右へ移動。同じflex行にまとめ、aria-liveと既存更新処理を保持。空になった下部コンテナを撤去。HTMLで状態表示の一意性・配置、差分検査を確認。実ブラウザ確認は未実施。
 
 - 問題文の挿入・変換・型selectを高さ32px、同じ文字サイズ／余白へ統一し、見出し内の間隔を10pxへ調整。基本言語ラベルと64pxのselectを多言語設定見出しの右端へ移動。各言語チェック項目は62pxから48pxへ縮小し、余白・間隔も縮小。
