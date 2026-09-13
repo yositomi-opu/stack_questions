@@ -2456,7 +2456,8 @@ function changeIncludeMode() {
 function syncIncludeControls() {
   const enabled = Boolean(state.includeSource);
   el.saveVariablesSeparately.checked = enabled;
-  el.downloadIncludeButton.hidden = !enabled;
+  el.downloadIncludeButton.hidden = false;
+  el.downloadIncludeButton.disabled = !enabled;
 }
 
 function refreshGeneratedIncludeSource() {

@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- CASText切替チェックを選択肢設定からアプリタイトルXML Generatorの右へ移動し「castext 版を使用する」と表示（日英対応）。既存IDと切替・保存処理を維持。通常は横並び、狭い画面では折返し。ルートとアプリ内のCAS版rb/cb全4雛形のpre/post/fvar参照が_cas.macであることを検査。HTMLのチェック一意性・タイトル内配置、test_mcq_pre_castext.py（4件）、variant_parameters回帰検査、JS構文・差分検査成功。実ブラウザ確認は未実施。
+
+- include保存ボタンを左欄の問題変数の下に常時表示。別ファイル保存オフでは非表示にせず無効化し、オンで有効化する。日英のtitleで有効化方法を案内。保存処理は変更なし。JS構文検査・variant_parameters回帰検査と表示状態の確認、git diff --check成功。実ブラウザ確認は未実施。
+
 - CASText対応を別テンプレート系列へ分離。mcq_template_{pre,post,fvar}_cas.txt/.mac、001.MCQ_cas-{rb,cb}.xmlとアプリ内コピーを追加。通常preは10言語の文字列配列のみ、pre_casは同名変数にcastextリテラル配列を定義。変数名の_cas別名は撤去。post/fvarのCAS版は現段階では通常版の完全コピー。通常XMLは変更なし。
 - アプリの選択肢設定にCASText版（試験運用）のチェック（日英）を追加。既定オフ、XML生成／プレビューのテンプレート3参照をまとめて切替。CSV config,castext_templateとXMLメタデータへ保存、旧XMLはpre_cas参照で判定、旧CSV・旧メタデータ・クリアはオフ。問題文等の全面CASText化は今後の作業。通常のローカル問題変数評価は既存preを使用するまま。
 - makeにCAS版3ファイルを登録し.mac生成。配列内容・10言語順・生成物・XMLコピー／参照の検査、JSのテンプレート選択とCSV／メタデータ往復・クリアの回帰検査を追加。実STACK APIでCAS版Radio／Checkboxの2選択肢＋特殊選択肢2つの描画を確認。公開先include取得と実ブラウザの配置確認は未実施。 検証コマンド: python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（4件成功）、node scripts/tests/test_variant_parameters.cjs、node scripts/tests/test_question_text_conversion.cjs、node scripts/tests/test_pair_swap.cjs（すべて成功）、JS構文検査、git diff --check。

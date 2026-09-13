@@ -3,7 +3,8 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
-    "CASText版（試験運用）": "CASText version (experimental)",
+    "castext 版を使用する": "Use CASText templates",
+    "「問題変数を別ファイルに保存する」をオンにすると保存できます": "Enable Save question variables in a separate file to save the include file",
     "全入力クリア": "Clear all entries",
     "クリア": "Clear",
     "読込": "Load",

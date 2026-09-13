@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260913-ui42">
+    <link rel="stylesheet" href="./styles.css?v=20260913-castitle1">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260913-cas1"></script>
-    <script defer src="./app.js?v=20260913-cas1"></script>
+    <script defer src="./i18n.js?v=20260913-castitle1"></script>
+    <script defer src="./app.js?v=20260913-include2"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260913-preview4"></script>
   </head>
@@ -17,7 +17,10 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">STACK / MCQ</p>
-          <h1>XML Generator</h1>
+          <div class="app-title-row">
+            <h1>XML Generator</h1>
+            <label class="check-row castext-template-toggle"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span></label>
+          </div>
         </div>
         <div class="actions">
           <details class="file-menu"><summary>CSV</summary><div class="file-menu-list">
@@ -123,7 +126,7 @@
                   <p>XMLとincludeファイルは別々に保存します。「include保存」で取得したファイルを、XMLのstack_includeに記載されたURLで取得できる場所へ配置してください。保存操作だけでは公開先へアップロードされません。</p>
                 </div>
               </div>
-              <button id="downloadIncludeButton" type="button" class="ghost" hidden>include保存</button>
+              <button id="downloadIncludeButton" type="button" class="ghost" disabled title="「問題変数を別ファイルに保存する」をオンにすると保存できます">include保存</button>
             </div>
             <div class="field-row include-base-field">
               <label for="includeBaseUrl">include URLベース</label>
@@ -140,7 +143,6 @@
             <div class="choice-settings-grid">
               <fieldset class="mode-options">
                 <legend>形式</legend>
-                <label><input id="castextTemplate" type="checkbox"><span>CASText版（試験運用）</span></label>
                 <label><input id="modeRb" type="radio" name="mode" value="rb" checked> Radio</label>
                 <label><input id="modeCb" type="radio" name="mode" value="cb"> Checkbox</label>
               <div id="scoringMethodField" class="field-row scoring-method-field question-text-help" hidden><label for="scoringMethod">採点方式</label><select id="scoringMethod" disabled aria-describedby="scoringMethodHelp">

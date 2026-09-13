@@ -411,6 +411,6 @@ Checkboxのときだけ、形式の右に採点方式を表示します。Radio�
 
 ### CASText版テンプレートの試験運用
 
-選択肢設定の「CASText版（試験運用）」をオンにすると、`001.MCQ_cas-rb.xml`／`001.MCQ_cas-cb.xml`と`mcq_template_*_cas.mac`を使用します。既定はオフ（通常版）です。設定はCSVとXMLの再編集用データに保存され、全入力クリアでオフに戻ります。
+アプリタイトル「XML Generator」右側の「castext 版を使用する」をオンにすると、`001.MCQ_cas-rb.xml`／`001.MCQ_cas-cb.xml`と`mcq_template_*_cas.mac`を使用します。既定はオフ（通常版）です。設定はCSVとXMLの再編集用データに保存され、全入力クリアでオフに戻ります。
 
 現段階では、`pre_cas`内の「選択肢に正解はない」「まだわからない」とその選択時メッセージの多言語配列をCASText化しています。変数名は通常版と共通です。`post_cas`と`fvar_cas`は通常版のコピーを出発点とし、今後別々に改修できます。問題文やフィードバック全体のCASText対応を完了した版ではありません。Moodleで使う前に、追加した`*_cas.mac`もinclude URLベースの公開先へ配置してください。

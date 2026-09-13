@@ -1273,3 +1273,6 @@ td:nth-child(5) {
 .qvars-evaluation-action { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .qvars-evaluation-action button { flex-shrink: 0; }
 .qvars-evaluation-action .cas-evaluation-status { min-width: 3em; overflow-wrap: anywhere; }
+
+.app-title-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.app-title-row .castext-template-toggle { margin: 0; font-size: 13px; white-space: nowrap; }
