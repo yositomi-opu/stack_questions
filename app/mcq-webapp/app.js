@@ -161,6 +161,7 @@ function updateLayout() {
 }
 
 function bindEvents() {
+  document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
   [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
@@ -665,6 +666,63 @@ function setMode(mode, update = true) {
   if (el.scoringMethodField) el.scoringMethodField.hidden = mode !== "cb";
   if (el.scoringMethod) el.scoringMethod.disabled = mode !== "cb";
   if (update) updateOutput();
+}
+
+function questionTextToCas(source) {
+  if (/\[\[\s*\/?[a-z]/i.test(source)) throw new Error("CASTextのブロック構文は変換できません。{@式@} の埋め込みに対応しています");
+  const parts = [];
+  let start = 0;
+  let math = false;
+  let count = 0;
+  const addText = (text) => {
+    if (text.includes("@}")) throw new Error("{@ と @} の対応を確認してください");
+    if (text) parts.push(maximaString(text));
+    for (let k = 0; k < text.length - 1; k++) {
+      if (text.charCodeAt(k) === 92 && "()[]".includes(text[k + 1])) {
+        math = "([".includes(text[k + 1]);
+        k++;
+      }
+    }
+  };
+  while (start < source.length) {
+    const open = source.indexOf("{@", start);
+    if (open < 0) { addText(source.slice(start)); break; }
+    addText(source.slice(start, open));
+    const rest = source.slice(open + 2);
+    const end = maskMaximaCommentsAndStrings(rest).indexOf("@}");
+    if (end < 0) throw new Error("{@ と @} の対応を確認してください");
+    const expression = rest.slice(0, end).trim();
+    if (!stripMaximaComments(expression).trim() || maskMaximaCommentsAndStrings(expression).includes("{@")) {
+      throw new Error("{@式@} の中に有効な式を入力してください");
+    }
+    const argument = /^[%\w]+$/.test(expression) ? expression : `(${expression})`;
+    parts.push(`stack_disp(${argument}, "${math ? "" : "i"}")`);
+    count++;
+    start = open + 2 + end + 2;
+  }
+  if (!count) throw new Error("変換する {@式@} がありません");
+  return `sconcat(${parts.join(", ")})`;
+}
+
+function convertQuestionToCas() {
+  const lang = baseLang();
+  if (state.questionTypes[lang] === "cas") {
+    setStatus("すでにCAS式です。文字列形式の問題文を変換してください", true);
+    return;
+  }
+  try {
+    const converted = questionTextToCas(el.questions[lang].value);
+    el.questions[lang].value = converted;
+    state.questionTypes[lang] = "cas";
+    el.questionModes[lang].value = "cas";
+    el.questionModes[lang].closest(".question-language-field")?.classList.add("cas");
+    markTranslationsStale("問題文の入力形式が変更されました");
+    updateOutput();
+    setStatus("問題文をCAS式に変換しました");
+    window.mcqNotice?.("問題文をCAS式に変換しました");
+  } catch (error) {
+    setStatus(error.message, true);
+  }
 }
 
 function buildLanguageInputs() {
@@ -1900,7 +1958,13 @@ function langAssocFromFields() {
   return maximaAssoc(
     activeLangs().map((lang) => {
       const source = state.questionLanguageIndependent ? baseLang() : lang;
-      return [lang, { value: el.questions[source].value.trim(), type: state.questionTypes[source] || "text" }];
+      const value = el.questions[source].value.trim();
+      const type = state.questionTypes[source] || "text";
+      // Compile only for output; retain the original editable text and metadata.
+      if (type === "text" && (value.includes("{@") || value.includes("@}"))) {
+        return [lang, { value: questionTextToCas(value), type: "cas" }];
+      }
+      return [lang, { value, type }];
     }),
     "string"
   );

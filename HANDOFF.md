@@ -13,6 +13,13 @@
 
 ## 直近の変更と決定事項
 
+- 文字列問題文の{@…@}をlangAssocFromFieldsで内部自動変換。XML／include生成・プレビューの共通経路に適用し、入力欄・型・CSV・XMLメタデータは元の文字列を保持。明示ボタンも残し説明を更新。問題文以外の選択肢・フィードバックの変換は追加していない。
+- 検証: question_text_conversionで自動／明示生成コードの一致、元入力・型保持、通常文章／CAS式の既存動作、異常時の未変更を確認。variant_parameters／translation_cas、JS構文・差分検査成功。先の実API確認で検証した同じ変換関数を使用。今回のブラウザ確認は未実施。
+
+- 問題文に「CAS式変換」ボタン＋ホバー／フォーカス説明を追加（日英）。現在の基本言語の文字列のみ、{@式@}をstack_dispとsconcatの式へ変換しCAS型に切替。通常はi、既存の\(…\)／\[…\]内は空文字の表示モードを使い二重数式環境を防ぐ。文章は既存maximaStringでエスケープ（改行はbr）。他言語、LaTeX、選択指示プレースホルダーを保持。
+- 引用符／コメント内の@}は区切りとみなさない。閉じ忘れ・空埋込・CASTextブロックは未変更でエラー通知。CAS型の再変換は拒否。変換後は翻訳を更新必要とする。
+- 検証: test_question_text_conversion.cjsで例文、既存数式環境、複数式、引用符／コメント、異常入力、型変更・二重変換・他言語不変を確認。variant_parameters／translation_cas、JS構文・差分検査成功。実STACK APIにa=-1/4を与え、元のCASTextと生成式で文章・負の分数・プレースホルダーの一致、数式環境内の二重ラップなしを確認。ブラウザのボタン・説明表示は未確認。
+
 - ルートとapp/mcq-webapp/templatesの001.MCQ-rb.xml／001.MCQ-cb.xml（計4ファイル）のfeedbackvariables参照をmcq_template_fvar.txtから.macへ変更。prtcorrect／prtpartiallycorrect／prtincorrectは既存ja/enを保持しfr/it/de/pt/zh/ko/ru/svを追加、全10言語のmultilang spanに統一。読み込みURLとapp.jsのキャッシュ番号を更新。
 - 検証: Python XML解析で4雛形の構文、各メッセージ10言語・重複なし、ルート／アプリコピーの完全一致、.mac参照先の存在を確認。variant_parametersの既存XML生成／CSV往復テスト、JS構文・差分検査成功。実STACK APIの各言語採点表示は未確認。
 
