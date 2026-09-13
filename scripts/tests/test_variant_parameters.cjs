@@ -298,3 +298,29 @@ for (const lang of ['ja','es','en']) {
  assert.ok(context.activeLangs().includes(lang));
 }
 console.log('Passed: Spanish CSV/XML and locked base-language checkbox switching.');
+
+// Include filenames follow titles until explicitly supplied and survive saves.
+context.resetCsvImportState();
+el.includeFilename={value:''};
+for (const title of ['Example','Example-rb','Example-cb']) {
+ el.questionId.value=title;context.syncIncludeFilename();
+ assert.equal(el.includeFilename.value,'Example.txt');
+}
+state.includeFilename=context.normalizeIncludeFilename('shared');
+state.includeSource={generated:true,autoUrl:true};el.questionId.value='Other-rb';
+context.refreshGeneratedIncludeSource();
+assert.equal(state.includeSource.filename,'shared.txt');
+assert.equal(state.includeSource.path,'001/shared.txt');
+assert.match(state.includeSource.url,/\/001\/shared.txt$/);
+const nameSnapshot=context.appStateSnapshot();
+state.includeFilename='';context.applyAppStateSnapshot(nameSnapshot);
+assert.equal(state.includeFilename,'shared.txt');
+assert.deepEqual(Array.from(context.currentCsvRecords('name').find(r=>r[1]==='include_filename')),['config','include_filename','shared.txt']);
+context.applyConfig('include_filename','manual.txt');assert.equal(state.includeFilename,'manual.txt');
+state.includeFilename='';context.refreshGeneratedIncludeSource();assert.equal(state.includeSource.filename,'Other.txt');
+state.includeSource={generated:false,autoUrl:false,url:'https://example.org/005/original.txt',path:'005/original.txt',filename:'original.txt'};
+state.includeFilename='renamed.txt';context.refreshGeneratedIncludeSource();
+assert.equal(state.includeSource.url,'https://example.org/005/renamed.txt');
+assert.equal(state.includeSource.path,'005/renamed.txt');
+context.resetCsvImportState();assert.equal(state.includeFilename,'');assert.equal(el.includeFilename.value,'');
+console.log('Passed: default/manual include names, rb/cb suffixes, metadata/CSV, URL consistency, reset.');

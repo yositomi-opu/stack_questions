@@ -1240,7 +1240,7 @@ td:nth-child(5) {
 
 .qvars-heading { margin-bottom: 0; gap: 5px; }
 .qvars-heading-actions { gap: 5px; }
-.qvars-heading-actions label { margin: 0; }
+.qvars-heading-actions h2 label { margin: 0; font: inherit; color: inherit; }
 .qvars-heading #evaluateCasButton { padding: 5px 7px; font-size: 12px; white-space: nowrap; }
 .include-settings { display: grid; gap: 8px; }
 .include-settings-heading { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -1261,6 +1261,7 @@ td:nth-child(5) {
 .question-editor-heading { gap: 10px; }
 .question-editor-heading .file-menu > summary,
 .question-editor-heading #convertQuestionButton,
+.qvars-heading #evaluateCasButton,
 #questionTypeControls .value-type-select {
   box-sizing: border-box; height: 32px; min-height: 32px;
   margin: 0; padding: 5px 10px; font-size: 12px; line-height: 20px;
@@ -1276,3 +1277,5 @@ td:nth-child(5) {
 
 .app-title-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .app-title-row .castext-template-toggle { margin: 0; font-size: 13px; white-space: nowrap; }
+
+.include-settings-heading .include-filename { width: 200px; min-width: 100px; max-width: 100%; padding: 6px 8px; }

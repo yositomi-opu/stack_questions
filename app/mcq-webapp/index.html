@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260913-castitle1">
+    <link rel="stylesheet" href="./styles.css?v=20260914-qvars1">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260913-castitle1"></script>
-    <script defer src="./app.js?v=20260914-es1"></script>
+    <script defer src="./i18n.js?v=20260914-qvars1"></script>
+    <script defer src="./app.js?v=20260914-includename1"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -92,17 +92,17 @@
           <div class="field-row qvars-field">
             <div class="panel-heading qvars-heading">
               <div class="row-actions qvars-heading-actions">
-                <label for="qvars">問題変数（ランダム変数）</label>
+                <h2><label for="qvars">問題変数</label></h2>
                 <div class="question-text-help">
                   <button type="button" class="question-text-help-button" aria-label="問題変数について" aria-describedby="qvarsHelp">?</button>
                   <div id="qvarsHelp" class="question-text-tooltip" role="tooltip">
                     <p>乱数や行列など、問題文・選択肢・フィードバックで使う変数をMaximaの代入文で定義します。例：a:rand([1, 2, 3]);</p>
                     <p>評価順は「選択肢設定 → パラメータ → 問題変数」です。選択肢数や採点方式は選択肢設定、問題ごとに変える値はパラメータ、共通の計算は問題変数に設定します。</p>
-                    <p>「問題変数を評価」で現在の設定を使って計算し、右側の評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。</p>
+                    <p>「評価」で現在の設定を使って計算し、右側の評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。</p>
                   </div>
                 </div>
                 <div class="qvars-evaluation-action">
-                  <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
+                  <button id="evaluateCasButton" type="button" class="primary">評価</button>
                   <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
                 </div>
               </div>
@@ -127,6 +127,7 @@
                 </div>
               </div>
               <button id="downloadIncludeButton" type="button" class="ghost" disabled title="「問題変数を別ファイルに保存する」をオンにすると保存できます">include保存</button>
+              <input id="includeFilename" class="include-filename" type="text" aria-label="includeファイル名" placeholder="ファイル名.txt" spellcheck="false">
             </div>
             <div class="field-row include-base-field">
               <label for="includeBaseUrl">include URLベース</label>

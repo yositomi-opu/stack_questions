@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- 問題変数見出しをh2＋入力ラベルに変更し「（ランダム変数）」を削除。他の設定見出しと同じフォント16pxを使用。評価ボタンを「評価」（英語Evaluate）へ短縮し、挿入・変換と同じ高さ32pxの共通スタイルを適用。ヘルプのボタン名も更新。HTML要素・共通スタイル、JS構文とgit diff --checkを確認。実ブラウザ確認は未実施。
+
+- include保存ボタン横にファイル名入力欄を追加。既定はbaseTitle（末尾-rb/-cb等を除去）+.txt、手動指定はタイトル変更後も維持。拡張子なしは.txt補完、名前はCSV config,include_filenameとXMLメタデータに保存しクリアでリセット。生成includeの参照URL・pathとダウンロード名を一致させ、読込済みincludeの名前変更時は元のURLディレクトリを保持。検証: test_variant_parameters.cjsに既定名／手動名・rb/cb除去・メタデータ／CSV・URL一致・クリアの回帰検査を追加し成功。JS構文・git diff --check成功。実ブラウザの保存操作は未確認。
+
 - 基本言語のチェックをcheckedかつdisabledへ固定し、基本言語変更時に旧言語は操作可能へ戻す。スペイン語esを編集・翻訳JSON・CSV/XML・プレビュー言語へ追加。通常/CAS両系列のpre/post/fvar定型文とrb/cb全雛形のPRT結果文をスペイン語に対応し.mac生成。利用者のpre_cas内の言語一覧追加は保持してesを追加。CAS版fvarは既に独自実装になっているため、通常版との完全コピー一致という古いテスト条件を撤去。検証: test_variant_parameters.cjs（esのCSV/XML往復・基本言語固定追加）、test_mcq_pre_castext.py（4件）、test_stack_preview.py（7件）、test_preview_ui.cjs成功。全8雛形のPRT3結果文にesがあることとJS構文・差分検査を確認。今回の実ブラウザ／実APIのes描画は未実施。
 
 - CASText切替チェックを選択肢設定からアプリタイトルXML Generatorの右へ移動し「castext 版を使用する」と表示（日英対応）。既存IDと切替・保存処理を維持。通常は横並び、狭い画面では折返し。ルートとアプリ内のCAS版rb/cb全4雛形のpre/post/fvar参照が_cas.macであることを検査。HTMLのチェック一意性・タイトル内配置、test_mcq_pre_castext.py（4件）、variant_parameters回帰検査、JS構文・差分検査成功。実ブラウザ確認は未実施。

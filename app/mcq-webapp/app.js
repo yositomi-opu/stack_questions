@@ -29,6 +29,7 @@ const state = {
   questionTypes: Object.fromEntries(LANGS.map((lang) => [lang, "text"])),
   questionLanguageIndependent: false,
   includeSource: null,
+  includeFilename: "",
   casEvaluation: { status: "idle", stale: false, variables: [], expressions: {} },
 };
 
@@ -93,6 +94,7 @@ const el = {
   saveCsvButton: document.querySelector("#saveCsvButton"),
   downloadButton: document.querySelector("#downloadButton"),
   copyCasButton: document.querySelector("#copyCasButton"),
+  includeFilename: document.querySelector("#includeFilename"),
   downloadIncludeButton: document.querySelector("#downloadIncludeButton"),
   languageChoices: document.querySelector("#languageChoices"),
   baseLanguage: document.querySelector("#baseLanguage"),
@@ -205,6 +207,11 @@ function bindEvents() {
     updateOutput();
   });
   el.includeBaseUrl.addEventListener("change", changeIncludeBaseUrl);
+  el.includeFilename.addEventListener("change", () => {
+    state.includeFilename = normalizeIncludeFilename(el.includeFilename.value);
+    updateOutput();
+    syncIncludeControls();
+  });
   el.downloadIncludeButton.addEventListener("click", downloadIncludeFile);
   el.saveVariablesSeparately.addEventListener("change", changeIncludeMode);
   el.requirePairs.addEventListener("change", () => {
@@ -1564,6 +1571,7 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  syncIncludeFilename();
   if (!state.rows.length) {
     el.xmlOutput.value = "";
     setStatus("選択肢を入力してください");
@@ -1741,6 +1749,7 @@ function appStateSnapshot() {
       feedbackByTruth: el.feedbackByTruth.checked,
       feedbackMode: feedbackModeConfigValue(),
     },
+    includeFilename: state.includeFilename || "",
     includeSource: state.includeSource ? {
       url: state.includeSource.url,
       path: state.includeSource.path,
@@ -2362,6 +2371,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     importLegacyQuestionVariables(includeSource?.content || variables, documentNode, filename, variables);
     if (el.castextTemplate) el.castextTemplate.checked = /mcq_template_pre_cas\.(?:mac|txt)/.test(variables);
     state.includeSource = includeSource;
+    state.includeFilename = includeSource?.filename || basenameFromPath(includeSource?.path) || "";
     syncIncludeControls();
   }
   resetDerivedResults();
@@ -2412,6 +2422,7 @@ function applyAppStateSnapshot(snapshot) {
   });
   if (el.requirePairs.checked) synchronizeSharedFeedback();
   state.translationsStale = false;
+  state.includeFilename = String(snapshot.includeFilename || (snapshot.includeSource?.autoUrl ? "" : snapshot.includeSource?.filename) || "");
   state.includeSource = snapshot.includeSource ? {
     url: String(snapshot.includeSource.url || ""),
     path: String(snapshot.includeSource.path || ""),
@@ -2435,7 +2446,8 @@ function changeIncludeMode() {
     el.saveVariablesSeparately.checked = false;
     return;
   }
-  const path = `001/${title}.txt`;
+  const filename = selectedIncludeFilename();
+  const path = `001/${filename}`;
   let defaultUrl;
   try {
     defaultUrl = publicIncludeUrl(path);
@@ -2448,30 +2460,52 @@ function changeIncludeMode() {
   state.includeSource = {
     url: defaultUrl,
     path,
-    filename: `${title}.txt`,
+    filename,
     generated: true,
     autoUrl: true,
   };
   syncIncludeControls();
   updateOutput();
-  setStatus(`問題変数を ${title}.txt として保存する設定にしました`);
+  setStatus(`問題変数を ${filename} として保存する設定にしました`);
 }
 
 function syncIncludeControls() {
+  syncIncludeFilename();
   const enabled = Boolean(state.includeSource);
   el.saveVariablesSeparately.checked = enabled;
   el.downloadIncludeButton.hidden = false;
   el.downloadIncludeButton.disabled = !enabled;
 }
 
+function normalizeIncludeFilename(value) {
+  const stem = cleanId(basenameFromPath(value || "")).replace(/\.txt$/i, "");
+  return stem ? `${stem}.txt` : "";
+}
+
+function selectedIncludeFilename() {
+  return state.includeFilename || (!state.includeSource?.autoUrl && state.includeSource?.filename)
+    || (baseTitle(el.questionId.value) ? `${baseTitle(el.questionId.value)}.txt` : "");
+}
+
+function syncIncludeFilename() {
+  if (el.includeFilename) el.includeFilename.value = selectedIncludeFilename();
+}
+
 function refreshGeneratedIncludeSource() {
-  if (!state.includeSource?.generated || !state.includeSource.autoUrl) return;
-  const title = baseTitle(el.questionId.value);
-  if (!title) return;
-  const path = `001/${title}.txt`;
-  state.includeSource.url = publicIncludeUrl(path);
-  state.includeSource.path = path;
-  state.includeSource.filename = `${title}.txt`;
+  if (!state.includeSource) return;
+  const filename = selectedIncludeFilename();
+  if (!filename) return;
+  if (state.includeSource.generated && state.includeSource.autoUrl) {
+    const path = `001/${filename}`;
+    state.includeSource.url = publicIncludeUrl(path);
+    state.includeSource.path = path;
+  } else if (filename !== state.includeSource.filename) {
+    const url = new URL(state.includeSource.url);
+    url.pathname = url.pathname.replace(/[^/]*$/, encodeURIComponent(filename));
+    state.includeSource.url = url.href;
+    state.includeSource.path = (state.includeSource.path || "").replace(/[^/]*$/, filename);
+  }
+  state.includeSource.filename = filename;
 }
 
 function importLegacyQuestionVariables(variables, documentNode, filename, xmlVariables = variables) {
@@ -2998,6 +3032,7 @@ function clearAllEntries() {
 }
 
 function resetCsvImportState() {
+  state.includeFilename = "";
   resetDerivedResults();
   state.rows = [];
   state.qvars = [];
@@ -3308,6 +3343,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "include_filename") state.includeFilename = normalizeIncludeFilename(value);
   if (key === "nocorrectopt") el.noCorrectOption.checked = parseBoolean(value);
   if (key === "castext_template" && el.castextTemplate) el.castextTemplate.checked = parseBoolean(value);
   if (key === "noidea") el.noIdeaOption.checked = parseBoolean(value);
@@ -3347,6 +3383,7 @@ function downloadSampleCsv() {
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "include_filename", state.includeFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
@@ -3402,6 +3439,7 @@ function currentCsvRecords(title) {
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
+    ["config", "include_filename", state.includeFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
@@ -3519,9 +3557,9 @@ function downloadIncludeFile() {
     return;
   }
   try {
-    const title = titleForSave();
-    if (!title) return;
-    const filename = `${title}.txt`;
+    if (!selectedIncludeFilename() && !titleForSave()) return;
+    refreshGeneratedIncludeSource();
+    const filename = selectedIncludeFilename();
     downloadText(filename, generateIncludeFileContent(), "text/plain;charset=utf-8");
     setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
   } catch (error) {
