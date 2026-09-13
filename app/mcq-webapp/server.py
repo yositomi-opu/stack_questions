@@ -888,7 +888,7 @@ def preview_stack_question(payload: dict[str, Any], grading: bool = False) -> di
     if type(seed) is not int or not 1 <= seed <= 2147483647:
         raise ValueError("乱数の種は1〜2147483647の整数で指定してください")
     lang = payload.get("lang", "ja")
-    if lang not in {"ja", "en", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv"}:
+    if lang not in {"ja", "en", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"}:
         raise ValueError("言語コードが不正です")
     definition = preview_definition(payload.get("questionDefinition", ""), seed)
     request_data = {"questionDefinition": definition, "seed": seed, "lang": lang}

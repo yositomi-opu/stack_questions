@@ -16,7 +16,7 @@ msg:"";
 for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
 for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
 msgC0L:[
- ["en", castext("There is no correct option among the choices. If you have not selected any other option, your answer is correct.")],
+ ["en", castext("There is no correct option among the choices. If you have not selected any other option, your answer is correct.")], ["es", castext("Ninguna de las opciones es correcta. La respuesta es correcta si no has seleccionado ninguna otra opción.")],
  ["ja", castext("選択肢に正解はありません. 他を選択していなければ正解です.")],
  ["fr", castext("Il n'y a aucune option correcte parmi les choix. Si vous n'avez sélectionné aucune autre option, votre réponse est correcte.")],
  ["it", castext("Non c'è alcuna opzione corretta tra le scelte. Se non hai selezionato nessun'altra opzione, la risposta è corretta.")],
@@ -29,7 +29,7 @@ msgC0L:[
 ];
 msgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
 msgWncL:[
- ["en", castext("There is a correct option!")],
+ ["en", castext("There is a correct option!")], ["es", castext("¡Hay al menos una opción correcta!")],
  ["ja", castext("正解の選択肢があります!")],
  ["fr", castext("Il y a une option correcte !")],
  ["it", castext("C'è un'opzione corretta!")],

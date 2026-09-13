@@ -1,4 +1,4 @@
-const LANGS = ["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv"];
+const LANGS = ["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"];
 const SERVER_CONFIG = window.MCQ_WEBAPP_CONFIG || {};
 const INITIAL_LOCALE = window.mcqI18n?.language
   || (["ja", "en"].includes(SERVER_CONFIG.locale) ? SERVER_CONFIG.locale : "ja");
@@ -647,10 +647,10 @@ function clamp(value, min, max) {
 async function loadTemplates() {
   try {
     const [rb, cb, rbCas, cbCas] = await Promise.all([
-      fetch("./templates/001.MCQ-rb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ-cb.xml?v=20260913-prt10").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-rb.xml?v=20260913-cas1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-cb.xml?v=20260913-cas1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-rb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-cb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-rb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-cb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
     ]);
     state.templates = { rb, cb, rbCas, cbCas };
     setStatus("テンプレート読込完了");
@@ -842,6 +842,10 @@ function changeBaseLanguage() {
 
 function updateBaseLanguageUi() {
   const lang = baseLang();
+  LANGS.forEach((code) => {
+    el.languageChecks[code].disabled = code === lang;
+    if (code === lang) el.languageChecks[code].checked = true;
+  });
   el.choiceLanguageHeading.textContent = `選択肢 ${lang}`;
   el.feedbackLanguageHeading.textContent = el.requirePairs.checked
     ? `フィードバック ${lang}`

@@ -57,7 +57,7 @@
     gradeButton = dialog.querySelector("[data-grade]");
     solutionButton = dialog.querySelector("[data-solution]");
     languageSelect = dialog.querySelector("[data-language]");
-    const names = {ja:"日本語", en:"English", fr:"Français", it:"Italiano", de:"Deutsch", pt:"Português", zh:"中文", ko:"한국어", ru:"Русский", sv:"Svenska"};
+    const names = {ja:"日本語", en:"English", fr:"Français", it:"Italiano", de:"Deutsch", pt:"Português", zh:"中文", ko:"한국어", ru:"Русский", sv:"Svenska", es:"Español"};
     activeLangs().forEach(lang => {
       const option = document.createElement("option");
       option.value = lang;

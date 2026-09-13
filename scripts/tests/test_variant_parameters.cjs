@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 const source = fs.readFileSync(path.join(root,'app/mcq-webapp/app.js'),'utf8');
 const functions = [...source.matchAll(/^function \w+\([^]*?^}/gm)].map(m=>m[0]).join('\n');
-const langs = ['en','ja','fr','it','de','pt','zh','ko','ru','sv'];
+const langs = ['en','ja','fr','it','de','pt','zh','ko','ru','sv','es'];
 const field = (value='')=>({value,checked:false,hidden:false,closest:()=>({classList:{toggle(){},remove(){}}})});
 const el = Object.fromEntries(['castextTemplate','noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
 el.baseLanguage.value='ja';
@@ -277,3 +277,24 @@ for (const mode of ['rb', 'cb']) {
 }
 el.castextTemplate.checked=true;context.resetCsvImportState();assert.equal(el.castextTemplate.checked,false);
 console.log('Passed: legacy/CASText template selection, metadata/CSV round trips, clear default.');
+
+// Spanish content is preserved in CSV and XML; base-language checks cannot be cleared.
+context.applyRecords(context.parseDelimited(fs.readFileSync(path.join(root,'app/mcq-webapp/sample.csv'),'utf8'),','));
+el.baseLanguage.value='es';el.languageChecks.es.checked=true;
+el.questions.es.value='Selecciona __SELTYPE__.';
+state.rows.forEach(r=>{r.choice_es='Opción';r.feedback_es='Comentario';});
+const esRecords=context.currentCsvRecords('Spanish');
+context.applyRecords(esRecords);
+assert.equal(el.baseLanguage.value,'es');assert.equal(el.questions.es.value,'Selecciona __SELTYPE__.');
+assert.match(context.generateXml(),/Selecciona/);
+vm.runInContext(source.match(/^function updateBaseLanguageUi\(\) \{[^]*?^}/m)[0],context);
+el.choiceLanguageHeading={};el.feedbackLanguageHeading={};
+context.document.querySelectorAll=()=>[];
+for (const lang of ['ja','es','en']) {
+ el.baseLanguage.value=lang;el.languageChecks[lang].checked=false;
+ context.updateBaseLanguageUi();
+ for(const code of langs) assert.equal(el.languageChecks[code].disabled,code===lang);
+ assert.equal(el.languageChecks[lang].checked,true);
+ assert.ok(context.activeLangs().includes(lang));
+}
+console.log('Passed: Spanish CSV/XML and locked base-language checkbox switching.');

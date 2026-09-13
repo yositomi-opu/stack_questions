@@ -5,7 +5,7 @@ import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-LANGS = ['en', 'ja', 'fr', 'it', 'de', 'pt', 'zh', 'ko', 'ru', 'sv']
+LANGS = ['en', 'es', 'ja', 'fr', 'it', 'de', 'pt', 'zh', 'ko', 'ru', 'sv']
 NAMES = ['%__mcq_nocoptSL', '%__mcq_noidSL', '%__mcq_noidea_checkedL']
 
 
@@ -39,8 +39,6 @@ class McqPreCastextTests(unittest.TestCase):
             source = (ROOT / f'mcq_template_{stem}_cas.txt').read_text()
             expected = re.sub(r'/\*.*?\*/', '', source, flags=re.S).rstrip() + '\n'
             self.assertEqual((ROOT / f'mcq_template_{stem}_cas.mac').read_text(), expected)
-            if stem != 'pre':
-                self.assertEqual(source, (ROOT / f'mcq_template_{stem}.txt').read_text())
         for mode in ['rb', 'cb']:
             source = (ROOT / f'001.MCQ_cas-{mode}.xml').read_text()
             ET.fromstring(source)

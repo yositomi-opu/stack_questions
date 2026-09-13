@@ -74,6 +74,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.
       <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span>
 <span lang="ja" class="multilang">よくできました。正解です！</span>
 <span lang="en" class="multilang">Well done! Spot on!</span>
+<span lang="es" class="multilang">¡Muy bien! ¡Respuesta correcta!</span>
 <span lang="fr" class="multilang">Bravo ! Bonne réponse !</span>
 <span lang="it" class="multilang">Ben fatto! Risposta corretta!</span>
 <span lang="de" class="multilang">Gut gemacht! Richtig!</span>
@@ -87,6 +88,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.
       <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
 <span lang="ja" class="multilang">部分的に正解です。</span>
 <span lang="en" class="multilang">Partially correct!</span>
+<span lang="es" class="multilang">Parcialmente correcto.</span>
 <span lang="fr" class="multilang">Partiellement correct.</span>
 <span lang="it" class="multilang">Parzialmente corretto.</span>
 <span lang="de" class="multilang">Teilweise richtig.</span>
@@ -100,6 +102,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post.
       <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
 <span lang="ja" class="multilang">間違いです。</span>
 <span lang="en" class="multilang">Incorrect!</span>
+<span lang="es" class="multilang">Respuesta incorrecta.</span>
 <span lang="fr" class="multilang">Incorrect.</span>
 <span lang="it" class="multilang">Errato.</span>
 <span lang="de" class="multilang">Falsch.</span>

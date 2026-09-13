@@ -19,7 +19,7 @@ if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 
 %__mcq_nocoptSL:[
- ["en", "None of the above."],
+ ["en", "None of the above."], ["es", "Ninguna de las opciones anteriores."],
  ["ja", "選択肢に正解はない."],
  ["fr", "Aucune des réponses ci-dessus."],
  ["it", "Nessuna delle risposte precedenti."],
@@ -32,7 +32,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 ];
 %__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
 %__mcq_noidSL:[
- ["en", "I don't know yet."],
+ ["en", "I don't know yet."], ["es", "Todavía no lo sé."],
  ["ja", "まだわからない."],
  ["fr", "Je ne sais pas encore."],
  ["it", "Non lo so ancora."],
@@ -51,7 +51,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
 %__mcq_noidea_checkedL:[
- ["en", "\"I don't know yet\" was selected/checked. The score is 0."],
+ ["en", "\"I don't know yet\" was selected/checked. The score is 0."], ["es", "Se ha seleccionado «Todavía no lo sé». La puntuación es 0."],
  ["ja", "「まだわからない」が選択/チェックされました. 得点は0です."],
  ["fr", "« Je ne sais pas encore » a été sélectionné/coché. Le score est de 0."],
  ["it", "È stata selezionata/segnata l’opzione «Non lo so ancora». Il punteggio è 0."],

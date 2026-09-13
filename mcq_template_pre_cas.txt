@@ -18,8 +18,13 @@ if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
 if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 
+/* only castext case definitions */
+%__mcq_lang_list:["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"];
+
+/*********************************/
+
 %__mcq_nocoptSL:[
- ["en", castext("None of the above.")],
+ ["en", castext("None of the above.")], ["es", castext("Ninguna de las opciones anteriores.")],
  ["ja", castext("選択肢に正解はない.")],
  ["fr", castext("Aucune des réponses ci-dessus.")],
  ["it", castext("Nessuna delle risposte precedenti.")],
@@ -32,7 +37,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 ];
 %__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
 %__mcq_noidSL:[
- ["en", castext("I don't know yet.")],
+ ["en", castext("I don't know yet.")], ["es", castext("Todavía no lo sé.")],
  ["ja", castext("まだわからない.")],
  ["fr", castext("Je ne sais pas encore.")],
  ["it", castext("Non lo so ancora.")],
@@ -51,7 +56,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
 %__mcq_noidea_checkedL:[
- ["en", castext("\"I don't know yet\" was selected/checked. The score is 0.")],
+ ["en", castext("\"I don't know yet\" was selected/checked. The score is 0.")], ["es", castext("Se ha seleccionado «Todavía no lo sé». La puntuación es 0.")],
  ["ja", castext("「まだわからない」が選択/チェックされました. 得点は0です.")],
  ["fr", castext("« Je ne sais pas encore » a été sélectionné/coché. Le score est de 0.")],
  ["it", castext("È stata selezionata/segnata l’opzione «Non lo so ancora». Il punteggio è 0.")],
