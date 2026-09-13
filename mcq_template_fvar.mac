@@ -16,11 +16,16 @@ msg:"";
 for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
 for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
 msgC0L:[
-  ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."],
-  ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], 
-  ["fr", "Aucune des réponses proposées n’est correcte. Vous avez la bonne réponse si vous n’avez sélectionné aucune autre option."],
-  ["de", "Keine der angebotenen Antworten ist richtig. Sie liegen richtig, wenn Sie keine andere Option ausgewählt haben."],
-  ["other", ""]
+ ["en", "There is no correct option among the choices. If you have not selected any other option, your answer is correct."],
+ ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."],
+ ["fr", "Il n'y a aucune option correcte parmi les choix. Si vous n'avez sélectionné aucune autre option, votre réponse est correcte."],
+ ["it", "Non c'è alcuna opzione corretta tra le scelte. Se non hai selezionato nessun'altra opzione, la risposta è corretta."],
+ ["de", "Unter den Antwortoptionen gibt es keine richtige. Wenn Sie keine andere Option ausgewählt haben, ist Ihre Antwort richtig."],
+ ["pt", "Não há nenhuma opção correta entre as alternativas. Se você não selecionou nenhuma outra opção, sua resposta está correta."],
+ ["zh", "这些选项中没有正确答案。如果没有选择其他选项，则回答正确。"],
+ ["ko", "선택지 중에는 정답이 없습니다. 다른 선택지를 선택하지 않았다면 정답입니다."],
+ ["ru", "Среди вариантов нет правильного ответа. Если вы не выбрали никакой другой вариант, ваш ответ верен."],
+ ["sv", "Det finns inget korrekt svar bland alternativen. Om du inte har valt något annat alternativ är ditt svar korrekt."]
 ];
 msgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
 msgWncL:[

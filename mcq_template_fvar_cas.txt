@@ -3,9 +3,9 @@ if listp(ans1) then chk1:is(ans1=Cans1) else chk1:member(ans1, Cans1);
 if listp(ans1) then ans1L:ans1 else ans1L:[ans1];
 ans1WL:makelist(floor(ans1L[k]/%__mcq_cw_delimiter), k, 1, length(ans1L));
 ans1CL:makelist(if ans1L[k]<%__mcq_cw_delimiter then floor(ans1L[k]/%__mcq_max_opts) else -1, k, 1, length(ans1L));
-countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
-cAN:countL(ans1WL, 0);
-wAN:apply("+", makelist(countL(ans1WL, k), k, 1, %__mcq_max_patterns));
+%_countL(L,t):=block([k,rt:0], for k:1 thru length(L) do if L[k]=t then rt:rt+1, return(rt));
+cAN:%_countL(ans1WL, 0);
+wAN:apply("+", makelist(%_countL(ans1WL, k), k, 1, %__mcq_max_patterns));
 flgCL:makelist(member(k, ans1CL), k, 1, max(%__mcq_max_cp, length(%__mcq_CLbase)));
 flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(%__mcq_WLbase)));
 flgWnc:member(%__mcq_nocorrect_id, ans1WL);
@@ -16,23 +16,33 @@ msg:"";
 for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
 for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
 msgC0L:[
-  ["en", "There is no correct answer among the options. It is correct if you haven't selected any of the other options."],
-  ["ja", "選択肢に正解はありません. 他を選択していなければ正解です."], 
-  ["fr", "Aucune des réponses proposées n’est correcte. Vous avez la bonne réponse si vous n’avez sélectionné aucune autre option."],
-  ["de", "Keine der angebotenen Antworten ist richtig. Sie liegen richtig, wenn Sie keine andere Option ausgewählt haben."],
-  ["other", ""]
+ ["en", castext("There is no correct option among the choices. If you have not selected any other option, your answer is correct.")],
+ ["ja", castext("選択肢に正解はありません. 他を選択していなければ正解です.")],
+ ["fr", castext("Il n'y a aucune option correcte parmi les choix. Si vous n'avez sélectionné aucune autre option, votre réponse est correcte.")],
+ ["it", castext("Non c'è alcuna opzione corretta tra le scelte. Se non hai selezionato nessun'altra opzione, la risposta è corretta.")],
+ ["de", castext("Unter den Antwortoptionen gibt es keine richtige. Wenn Sie keine andere Option ausgewählt haben, ist Ihre Antwort richtig.")],
+ ["pt", castext("Não há nenhuma opção correta entre as alternativas. Se você não selecionou nenhuma outra opção, sua resposta está correta.")],
+ ["zh", castext("这些选项中没有正确答案。如果没有选择其他选项，则回答正确。")],
+ ["ko", castext("선택지 중에는 정답이 없습니다. 다른 선택지를 선택하지 않았다면 정답입니다.")],
+ ["ru", castext("Среди вариантов нет правильного ответа. Если вы не выбрали никакой другой вариант, ваш ответ верен.")],
+ ["sv", castext("Det finns inget korrekt svar bland alternativen. Om du inte har valt något annat alternativ är ditt svar korrekt.")]
 ];
 msgC0:%__mcq_lang(msgC0L, %_STACK_LANG);
 msgWncL:[
- ["en", "There is a correct answer option(s)!"],
- ["ja", "正解の選択肢があります!"],
- ["fr", "Il y a au moins une réponse correcte."],
- ["de", "Es gibt mindestens eine richtige Antwort."],
- ["other", ""]
+ ["en", castext("There is a correct option!")],
+ ["ja", castext("正解の選択肢があります!")],
+ ["fr", castext("Il y a une option correcte !")],
+ ["it", castext("C'è un'opzione corretta!")],
+ ["de", castext("Es gibt eine richtige Antwortoption!")],
+ ["pt", castext("Há uma opção correta!")],
+ ["zh", castext("有一个正确选项！")],
+ ["ko", castext("정답인 선택지가 있습니다!")],
+ ["ru", castext("Есть правильный вариант ответа!")],
+ ["sv", castext("Det finns ett korrekt svarsalternativ!")]
 ];
 msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
-if flgC0 then msg:sconcat(msg, msgC0, "<br>");
-if flgWnc then msg:sconcat(msg, msgWnc, "<br>");
+if flgC0 then msg:castext_concat(msg, msgC0, "<br>");
+if flgWnc then msg:castext_concat(msg, msgWnc, "<br>");
 cN:%__mcq_num_copts;
 wN:%__mcq_num_wopts;
 sc:if flgNOID then 0
