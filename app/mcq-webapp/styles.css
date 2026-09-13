@@ -388,8 +388,8 @@ h3 {
   color: var(--ink);
   font-size: 12px;
   cursor: pointer;
-  flex: 0 0 62px;
-  width: 62px;
+  flex: 0 0 48px;
+  width: 48px;
 }
 
 .language-choice:has(input:checked) {
@@ -1223,4 +1223,53 @@ td:nth-child(5) {
 .preview-language svg { width: 22px; height: 22px; flex-shrink: 0; }
 .preview-language select { width: auto; margin: 0; }
 
-.question-insert-menu details[open] + .question-text-tooltip { display: none; }
+
+.question-text-help-button {
+  width: 18px; height: 18px; min-width: 18px; min-height: 18px;
+  max-width: 18px; max-height: 18px; flex: 0 0 18px;
+  padding: 0; aspect-ratio: 1; line-height: 1; font-size: 12px;
+}
+.question-editor-heading { display: flex; align-items: center; gap: 7px; flex-wrap: nowrap; margin-bottom: 8px; }
+.question-editor-heading > * { flex-shrink: 0; }
+.question-editor-heading h2 { margin: 0; white-space: nowrap; }
+.question-editor-language { display: inline-flex; align-items: center; gap: 4px; }
+.question-editor-language svg { width: 18px; height: 18px; }
+#questionLanguageLabels label { margin: 0; }
+.question-editor-heading button:not(.question-text-help-button), .question-editor-heading .file-menu > summary { padding: 5px 7px; white-space: nowrap; }
+.question-overview-help .question-text-tooltip { left: 0; right: auto; max-height: 65vh; overflow-y: auto; }
+
+.qvars-heading { margin-bottom: 0; gap: 5px; }
+.qvars-heading-actions { gap: 5px; }
+.qvars-heading-actions label { margin: 0; }
+.qvars-heading #evaluateCasButton { padding: 5px 7px; font-size: 12px; white-space: nowrap; }
+.include-settings { display: grid; gap: 8px; }
+.include-settings-heading { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.include-settings-heading .check-row { margin: 0; }
+.include-settings .question-text-tooltip { top: auto; bottom: 100%; }
+.qvars-heading .question-text-tooltip, .include-settings .question-text-tooltip { left: 0; right: auto; }
+
+.choice-type-controls { flex-wrap: nowrap; }
+.choice-type-controls .language-independent-toggle { margin-right: auto; flex-shrink: 0; }
+
+.language-settings-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.language-settings-heading h2 { margin: 0; }
+.language-settings-heading .base-language-row { display: inline-flex; align-items: center; gap: 6px; }
+.language-settings-heading .base-language-row label { margin: 0; font-size: 12px; white-space: nowrap; }
+#baseLanguage { width: 64px; min-width: 64px; height: 32px; padding: 4px 7px; }
+.language-choice { gap: 3px; padding: 4px; min-height: 30px; }
+.language-choices { gap: 5px; }
+.question-editor-heading { gap: 10px; }
+.question-editor-heading .file-menu > summary,
+.question-editor-heading #convertQuestionButton,
+#questionTypeControls .value-type-select {
+  box-sizing: border-box; height: 32px; min-height: 32px;
+  margin: 0; padding: 5px 10px; font-size: 12px; line-height: 20px;
+  border-radius: 6px;
+}
+.question-editor-heading .file-menu > summary,
+.question-editor-heading #convertQuestionButton { display: flex; align-items: center; justify-content: center; }
+#questionTypeControls { display: flex; align-items: center; }
+
+.qvars-evaluation-action { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.qvars-evaluation-action button { flex-shrink: 0; }
+.qvars-evaluation-action .cas-evaluation-status { min-width: 3em; overflow-wrap: anywhere; }

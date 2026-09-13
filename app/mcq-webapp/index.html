@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260913-ui37">
+    <link rel="stylesheet" href="./styles.css?v=20260913-ui42">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260913-insert1"></script>
-    <script defer src="./app.js?v=20260913-ui67"></script>
+    <script defer src="./i18n.js?v=20260913-qvarshelp1"></script>
+    <script defer src="./app.js?v=20260913-ui69"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260913-preview4"></script>
   </head>
@@ -64,10 +64,12 @@
       <section class="workspace">
         <aside class="panel settings-panel">
           <section class="language-settings" aria-labelledby="languageHeading">
-            <h2 id="languageHeading">多言語設定</h2>
-            <div class="field-row base-language-row">
-              <label for="baseLanguage">基本言語</label>
-              <select id="baseLanguage"></select>
+            <div class="language-settings-heading">
+              <h2 id="languageHeading">多言語設定</h2>
+              <div class="base-language-row">
+                <label for="baseLanguage">基本言語</label>
+                <select id="baseLanguage"></select>
+              </div>
             </div>
             <p class="language-help">XMLに展開する言語を選択</p>
             <div id="languageChoices" class="language-choices"></div>
@@ -84,38 +86,50 @@
             </details>
           </section>
 
-          <label
-            class="check-row include-mode-row"
-            for="saveVariablesSeparately"
-            title="問題変数の設定を stack_include して複数の問題で共通設定を保存する場合に使用します。公開先はinclude URLベースで設定します。"
-          >
-            <input id="saveVariablesSeparately" type="checkbox">
-            <span>問題変数を別ファイルに保存する</span>
-          </label>
-
-          <div class="field-row include-base-field">
-            <label for="includeBaseUrl">include URLベース</label>
-            <input
-              id="includeBaseUrl"
-              type="url"
-              placeholder="https://username.github.io/repository/"
-              spellcheck="false"
-            >
-            <p class="language-help">Moodle/STACKサーバーから取得できる公開URLを指定します。</p>
-          </div>
-
           <div class="field-row qvars-field">
-            <div class="panel-heading"><label for="qvars">問題変数（ランダム変数）</label>
-              <div class="row-actions"><button id="downloadIncludeButton" type="button" class="ghost" hidden>include保存</button>
+            <div class="panel-heading qvars-heading">
+              <div class="row-actions qvars-heading-actions">
+                <label for="qvars">問題変数（ランダム変数）</label>
+                <div class="question-text-help">
+                  <button type="button" class="question-text-help-button" aria-label="問題変数について" aria-describedby="qvarsHelp">?</button>
+                  <div id="qvarsHelp" class="question-text-tooltip" role="tooltip">
+                    <p>乱数や行列など、問題文・選択肢・フィードバックで使う変数をMaximaの代入文で定義します。例：a:rand([1, 2, 3]);</p>
+                    <p>評価順は「選択肢設定 → パラメータ → 問題変数」です。選択肢数や採点方式は選択肢設定、問題ごとに変える値はパラメータ、共通の計算は問題変数に設定します。</p>
+                    <p>「問題変数を評価」で現在の設定を使って計算し、右側の評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。</p>
+                  </div>
+                </div>
+                <div class="qvars-evaluation-action">
+                  <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
+                  <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
+                </div>
+              </div>
+              <div class="row-actions">
               <button id="copyCasButton" type="button" class="ghost icon-copy" aria-label="問題変数をコピー" title="問題変数をコピー"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button></div>
             </div>
             <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 
-          <div class="cas-evaluation-controls">
-            <button id="evaluateCasButton" type="button" class="primary">問題変数を評価</button>
-            <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
-          </div>
+          <section class="include-settings">
+            <div class="include-settings-heading">
+              <label class="check-row" for="saveVariablesSeparately">
+                <input id="saveVariablesSeparately" type="checkbox">
+                <span>問題変数を別ファイルに保存する</span>
+              </label>
+              <div class="question-text-help">
+                <button type="button" class="question-text-help-button" aria-label="別ファイル保存について" aria-describedby="includeSaveHelp">?</button>
+                <div id="includeSaveHelp" class="question-text-tooltip" role="tooltip">
+                  <p>オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、パラメータだけを変えた問題を作るときに便利です。</p>
+                  <p>Moodle/STACKから取得できるURLを指定します。include URLベースには公開先の基準URLを入力してください。</p>
+                  <p>XMLとincludeファイルは別々に保存します。「include保存」で取得したファイルを、XMLのstack_includeに記載されたURLで取得できる場所へ配置してください。保存操作だけでは公開先へアップロードされません。</p>
+                </div>
+              </div>
+              <button id="downloadIncludeButton" type="button" class="ghost" hidden>include保存</button>
+            </div>
+            <div class="field-row include-base-field">
+              <label for="includeBaseUrl">include URLベース</label>
+              <input id="includeBaseUrl" type="url" placeholder="https://username.github.io/repository/" spellcheck="false">
+            </div>
+          </section>
         </aside>
 
         <div id="settingsResizeHandle" class="settings-resize-handle" role="separator" aria-orientation="vertical" aria-label="左欄の幅を変更" title="左右にドラッグして左欄の幅を変更"></div>
@@ -197,45 +211,41 @@
           </section>
           <div class="section-divider"></div>
           <section class="question-texts" aria-labelledby="questionTextsHeading">
-            <div class="question-text-heading">
-              <div class="row-actions">
-                <h2 id="questionTextsHeading">問題文</h2>
-                <div class="question-text-help">
-                  <button type="button" class="question-text-help-button" aria-label="問題文の入力について" aria-describedby="questionTextHelp">?</button>
-                  <div id="questionTextHelp" class="question-text-tooltip" role="tooltip">
+            <div class="question-editor-heading">
+              <h2 id="questionTextsHeading">問題文</h2>
+              <div class="question-text-help question-overview-help">
+                <button type="button" class="question-text-help-button" aria-label="問題文の入力について" aria-describedby="questionTextHelp">?</button>
+                <div id="questionTextHelp" class="question-text-tooltip" role="tooltip">
                     <p>文字列形式では、STACKの問題文書式のうち、文章と {@a@} などの式の埋め込みが使えます。HTML・LaTeXも文章に含められます。条件分岐・繰り返しなどのブロック構文は使えません。</p>
-                    <p>CAS式形式では、問題文用の変数に代入する式を入力します。sconcatなどで問題文を表す文字列を返す式を書いてください。変数名や代入記号は不要です。</p>
+                    <p>CAS式形式では、問題文を表す文字列を返す式だけを入力してください。qtext: sconcat(...); のような代入文ではなく、右辺の sconcat(...) だけを書きます。</p>
                     <p>例：sconcat("値は ", stack_disp(a, "i"))</p>
-                  </div>
-                </div>
-              </div>
-              <div class="row-actions">
-                <div class="question-text-help question-insert-menu">
-                  <details class="file-menu">
-                  <summary aria-describedby="questionInsertHelp">挿入</summary>
-                  <div class="file-menu-list">
-                    <button type="button" data-question-insert="__SELTYPE__">SELTYPE</button>
-                    <button type="button" data-question-insert="__SELPROMPT__">SELPROMPT</button>
-                  </div>
-                  </details>
-                  <div id="questionInsertHelp" class="question-text-tooltip" role="tooltip">
+
                     <p>__SELTYPE__ は、上の選択肢設定に応じて「1つ選べ」「すべて選べ」、正解が複数あるRadio形式では「1つ選べ（正解が複数あっても1つでよい）」に置き換わります。</p>
                     <p>何を選ぶかは問題文に書きます。例：「間違っているものを __SELTYPE__。」「rankが1であるものを __SELTYPE__。」</p>
                     <p>__SELPROMPT__ は「正しいものを1つ選べ。」などの指示文全体を挿入します。「正しいものを」を前に重ねないでください。</p>
                     <p>どちらも使わず、自分で好きな指示文を書いても問題ありません。</p>
 
                     <p>選ぶと現在の問題文のカーソル位置に挿入します。文字を選択している場合は置き換えます。CAS式では文字列の中に挿入してください。</p>
-                  </div>
+
                 </div>
-                <div class="question-text-help">
-                  <button id="convertQuestionButton" type="button" class="ghost" aria-describedby="convertQuestionHelp">CAS変換</button>
+              </div>
+              <div class="question-editor-language"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6h14M5 18h14"/></svg><span id="questionLanguageLabels"></span></div>
+              <details class="file-menu">
+                <summary>挿入</summary>
+                <div class="file-menu-list">
+                  <button type="button" data-question-insert="__SELTYPE__">SELTYPE</button>
+                  <button type="button" data-question-insert="__SELPROMPT__">SELPROMPT</button>
+                </div>
+              </details>
+              <div class="question-text-help">
+                  <button id="convertQuestionButton" type="button" class="ghost" aria-describedby="convertQuestionHelp">変換</button>
                   <div id="convertQuestionHelp" class="question-text-tooltip" role="tooltip">
                     <p>文字列形式の {@a@} などはXML生成・プレビュー時に自動変換されます。このボタンは現在の問題文を明示的にCAS式へ書き換え、形式もCAS式に切り替えます。</p>
                     <p>例：値は {@a@} → sconcat("値は ", stack_disp(a, "i"))</p>
                     <p>文章・HTML・LaTeX・__SELPROMPT__・__SELTYPE__を保ちます。すでに数式環境の中にある埋め込みには、数式環境を重ねません。CASTextのブロック構文は対象外です。</p>
                   </div>
                 </div>
-              </div>
+              <div id="questionTypeControls"></div>
             </div>
             <div id="questionTextFields"></div>
           </section>

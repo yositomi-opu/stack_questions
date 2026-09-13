@@ -254,7 +254,7 @@ function bindEvents() {
   Object.entries(el.questionModes).forEach(([lang, node]) => {
     node.addEventListener("change", () => {
       state.questionTypes[lang] = node.value;
-      node.closest(".question-language-field")?.classList.toggle("cas", node.value === "cas");
+      el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", node.value === "cas");
       markTranslationsStale("問題文の入力形式が変更されました");
       updateOutput();
     });
@@ -729,7 +729,7 @@ function convertQuestionToCas() {
     el.questions[lang].value = converted;
     state.questionTypes[lang] = "cas";
     el.questionModes[lang].value = "cas";
-    el.questionModes[lang].closest(".question-language-field")?.classList.add("cas");
+    el.questions[lang].closest(".question-language-field")?.classList.add("cas");
     markTranslationsStale("問題文の入力形式が変更されました");
     updateOutput();
     setStatus("問題文をCAS式に変換しました");
@@ -760,16 +760,19 @@ function buildLanguageInputs() {
     const fieldLabel = document.createElement("label");
     fieldLabel.htmlFor = `question${upperFirst(lang)}`;
     fieldLabel.textContent = lang;
-    const heading = document.createElement("div");
-    heading.className = "typed-field-heading";
+
     const mode = valueTypeSelect("text");
     mode.id = `questionType${upperFirst(lang)}`;
     const textarea = document.createElement("textarea");
     textarea.id = `question${upperFirst(lang)}`;
     textarea.rows = 4;
     if (DEFAULT_QUESTION_TEXTS[lang]) textarea.value = DEFAULT_QUESTION_TEXTS[lang];
-    heading.append(fieldLabel, mode);
-    field.append(heading, textarea);
+    fieldLabel.dataset.questionControlLang = lang;
+    mode.dataset.questionControlLang = lang;
+    fieldLabel.hidden = mode.hidden = lang !== INITIAL_LOCALE;
+    document.querySelector("#questionLanguageLabels").append(fieldLabel);
+    document.querySelector("#questionTypeControls").append(mode);
+    field.append(textarea);
     fields.append(field);
   });
 }
@@ -861,6 +864,9 @@ function ensureOneLanguage(changed) {
 }
 
 function updateQuestionLanguageVisibility() {
+  document.querySelectorAll("[data-question-control-lang]").forEach(control => {
+    control.hidden = control.dataset.questionControlLang !== baseLang();
+  });
   document.querySelectorAll(".question-language-field").forEach((field) => {
     field.hidden = field.dataset.lang !== baseLang();
   });
@@ -1087,8 +1093,8 @@ function fixedChoicesTextarea(group) {
   editor.classList.toggle("cas", mode.value !== "text");
   const controls = document.createElement("div");
   controls.className = "choice-type-controls";
-  controls.append(badge, mode);
-  editor.append(independent, controls, textarea);
+  controls.append(independent, badge, mode);
+  editor.append(controls, textarea);
   return editor;
 }
 
@@ -1195,7 +1201,10 @@ function fixedFeedbackTextarea(group) {
     markTranslationsStale("フィードバックの言語依存設定が変更されました");
     updateOutput();
   }, "feedback");
-  editor.append(independent, mode, textarea);
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  controls.append(independent, mode);
+  editor.append(controls, textarea);
   return editor;
 }
 
@@ -1296,20 +1305,20 @@ function typedTextareaInput(row, index, field) {
     updateOutput();
   });
   editor.classList.toggle("cas", mode.value !== "text");
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
   if (field === "choice") {
     const groupRows = state.rows.filter((candidate) =>
       String(candidate.pattern || "").trim() === String(row.pattern || "").trim()
       && normalizeTruth(candidate.truth) === normalizeTruth(row.truth)
     );
-    editor.append(languageIndependentToggle(groupRows, () => {
+    controls.append(languageIndependentToggle(groupRows, () => {
       copyLanguageIndependentChoices(groupRows);
       markTranslationsStale("選択肢の言語依存設定が変更されました");
       renderRows();
       updateOutput();
     }));
   }
-  const controls = document.createElement("div");
-  controls.className = "choice-type-controls";
   controls.append(badge, mode);
   editor.append(controls, textarea);
   return editor;
@@ -1355,14 +1364,17 @@ function feedbackTextarea(row, index) {
   editor.classList.toggle("cas", mode.value === "cas");
   const patternToggle = feedbackModeToggle(row, index);
   if (patternToggle) editor.append(patternToggle);
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
   if (index === firstIndex) {
-    editor.append(languageIndependentToggle(groupRows, () => {
+    controls.append(languageIndependentToggle(groupRows, () => {
       copyLanguageIndependentFeedback(groupRows);
       markTranslationsStale("フィードバックの言語依存設定が変更されました");
       updateOutput();
     }, "feedback"));
   }
-  editor.append(mode, textarea);
+  controls.append(mode);
+  editor.append(controls, textarea);
   return editor;
 }
 
@@ -2367,7 +2379,7 @@ function applyAppStateSnapshot(snapshot) {
     el.questions[lang].value = String(question.value || "");
     state.questionTypes[lang] = normalizeValueType(question.type);
     el.questionModes[lang].value = state.questionTypes[lang];
-    el.questionModes[lang].closest(".question-language-field")?.classList.toggle("cas", state.questionTypes[lang] === "cas");
+    el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", state.questionTypes[lang] === "cas");
   });
   state.questionLanguageIndependent = Boolean(snapshot.questionLanguageIndependent);
   state.rows = structuredClone(snapshot.rows);
@@ -2997,7 +3009,7 @@ function resetCsvImportState() {
     el.questions[lang].value = "";
     state.questionTypes[lang] = "text";
     el.questionModes[lang].value = "text";
-    el.questionModes[lang].closest(".question-language-field")?.classList.remove("cas");
+    el.questions[lang].closest(".question-language-field")?.classList.remove("cas");
     el.languageChecks[lang].checked = false;
   });
   state.questionLanguageIndependent = false;
@@ -3181,7 +3193,7 @@ function applyImportedQuestionTexts(qtexts, warnings) {
     el.questions[lang].value = item.value;
     state.questionTypes[lang] = item.type === "cas" ? "cas" : "text";
     el.questionModes[lang].value = state.questionTypes[lang];
-    el.questionModes[lang].closest(".question-language-field")?.classList.toggle("cas", item.type === "cas");
+    el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", item.type === "cas");
     el.languageChecks[lang].checked = true;
   });
 }
@@ -3269,7 +3281,7 @@ function applyLegacyRecords(records) {
       el.questions[lang].value = qtexts[lang].value;
       state.questionTypes[lang] = qtexts[lang].type;
       el.questionModes[lang].value = qtexts[lang].type;
-      el.questionModes[lang].closest(".question-language-field")?.classList.toggle("cas", qtexts[lang].type === "cas");
+      el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", qtexts[lang].type === "cas");
       el.languageChecks[lang].checked = true;
     }
   });

@@ -771,7 +771,7 @@ def start_services(config: dict[str, Any]) -> None:
     require_docker_daemon(auto_start=True)
     print_step("STACK APIを起動")
     run(
-        compose_command(config, "up", "-d"),
+        compose_command(config, "up", "-d", "--pull", "missing"),
         env=compose_environment(config),
     )
     wait_for_stack_api(config)
@@ -812,8 +812,8 @@ def setup(config: dict[str, Any]) -> None:
     require_basic_dependencies()
     require_docker_daemon(offer_group_fix=True, auto_start=True)
     compose_prefix()
-    print_step("公式STACK APIイメージを取得")
-    run(compose_command(config, "pull"), env=compose_environment(config))
+    print_step("未取得のSTACK API・Maximaイメージのみ取得（取得済みは再利用）")
+    run(compose_command(config, "pull", "--policy", "missing"), env=compose_environment(config))
     stop_web(config)
     start_services(config)
     check_maxima_evaluation()

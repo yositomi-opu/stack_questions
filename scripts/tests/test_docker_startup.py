@@ -1,4 +1,5 @@
 import importlib.util
+from contextlib import ExitStack
 from pathlib import Path
 import subprocess
 import unittest
@@ -14,6 +15,25 @@ def result(code=0):
 
 
 class DockerStartupTests(unittest.TestCase):
+    def test_setup_and_start_reuse_cached_images(self):
+        config = {"locale": "ja", "locale_mode": "auto", "host": "127.0.0.1",
+                  "web_port": 4173, "include_base_url": "https://example.org/",
+                  "stack_api_url": "http://127.0.0.1:3080"}
+        with ExitStack() as mocks:
+            for name in ["repair_permissions", "require_basic_dependencies", "require_docker_daemon",
+                         "compose_prefix", "stop_web", "start_web", "wait_for_stack_api",
+                         "check_maxima_evaluation"]:
+                mocks.enter_context(patch.object(manager, name))
+            mocks.enter_context(patch.object(manager, "dependency_diagnostics", return_value=[]))
+            mocks.enter_context(patch.object(manager, "compose_environment", return_value={}))
+            mocks.enter_context(patch.object(manager, "compose_command", side_effect=lambda config, *args: ["compose", *args]))
+            run = mocks.enter_context(patch.object(manager, "run"))
+            manager.setup(config)
+            self.assertEqual([call.args[0] for call in run.call_args_list], [
+                ["compose", "pull", "--policy", "missing"],
+                ["compose", "up", "-d", "--pull", "missing"],
+            ])
+
     def test_running_docker_is_not_launched_again(self):
         with patch.object(manager, "docker_daemon_probe", return_value=result()), patch.object(manager, "start_macos_docker_desktop") as launch:
             manager.require_docker_daemon(auto_start=True)
