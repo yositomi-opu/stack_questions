@@ -910,7 +910,8 @@ function renderRows() {
       cell(truthSelect(row, index)),
       cell(typedTextareaInput(row, index, "choice")),
       cell(feedbackTextarea(row, index)),
-      cell(removeButton(index))
+      normalizeTruth(row.truth) === "C" && patternRowsFor(row).find(r => normalizeTruth(r.truth) === "C") === row
+        ? cell(removeButton(index)) : document.createElement("td")
     );
     el.rowsBody.append(tr);
   });
@@ -923,8 +924,8 @@ function pairedPatternEditor(row, index) {
   if (patternRowsFor(row)[0] === row) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "ghost";
-    button.textContent = "正↔不";
+    button.className = "ghost pair-swap-button";
+    button.textContent = "正不\n入替";
     button.title = "正解と不正解を入れかえます";
     button.setAttribute("aria-label", "正解と不正解を入れかえます");
     button.addEventListener("click", () => swapPairedOptions(row.pattern));
@@ -1124,7 +1125,7 @@ function languageIndependentToggle(rows, onChange, field = "choice") {
     rows.forEach((row) => { row[property] = input.checked; });
     onChange?.(input.checked);
   });
-  label.append(input, document.createTextNode("言語に依存しない"));
+  label.append(input, document.createTextNode("言語非依存"));
   return label;
 }
 
@@ -1377,9 +1378,8 @@ function feedbackTextarea(row, index) {
   });
   editor.classList.toggle("cas", mode.value === "cas");
   const patternToggle = feedbackModeToggle(row, index);
-  if (patternToggle) editor.append(patternToggle);
   const controls = document.createElement("div");
-  controls.className = "choice-type-controls";
+  controls.className = "choice-type-controls feedback-controls";
   if (index === firstIndex) {
     controls.append(languageIndependentToggle(groupRows, () => {
       copyLanguageIndependentFeedback(groupRows);
@@ -1387,6 +1387,7 @@ function feedbackTextarea(row, index) {
       updateOutput();
     }, "feedback"));
   }
+  if (patternToggle) controls.append(patternToggle);
   controls.append(mode);
   editor.append(controls, textarea);
   return editor;
@@ -1561,7 +1562,12 @@ function removeButton(index) {
   button.textContent = "×";
   button.title = "削除";
   button.addEventListener("click", () => {
-    state.rows.splice(index, 1);
+    if (el.requirePairs.checked) {
+      const group = patternRowsFor(state.rows[index]);
+      state.rows = state.rows.filter(row => !group.includes(row));
+    } else {
+      state.rows.splice(index, 1);
+    }
     markCasEvaluationStale();
     markTranslationsStale("選択肢行が削除されました");
     renderRows();

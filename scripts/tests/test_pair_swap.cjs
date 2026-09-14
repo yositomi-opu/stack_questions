@@ -63,3 +63,14 @@ assert.ok(!el.casDiagnosticSummary.textContent.includes('__MCQ_EVAL_'));
 assert.ok(!el.casDiagnosticSummary.textContent.includes('aa1$'));
 assert.ok(el.casDiagnostics.textContent.includes('__MCQ_EVAL_'));
 console.log('Syntax hints and cleaned log checks passed');
+
+// Paired deletion removes the whole pattern; independent deletion keeps other rows.
+context.document={createElement(){return {addEventListener(type,fn){this[type]=fn;}};}};
+vm.runInContext('function markCasEvaluationStale(){} function markTranslationsStale(){}',context);
+state.rows=structuredClone(original);el.requirePairs.checked=true;
+context.removeButton(0).click();
+assert.deepEqual(state.rows.map(r=>r.pattern),['02','02']);
+state.rows=structuredClone(original);el.requirePairs.checked=false;
+context.removeButton(0).click();assert.equal(state.rows.length,4);
+assert.equal(state.rows[0].truth,'W');
+console.log('Passed: whole-pattern deletion in paired mode, single-row deletion otherwise.');

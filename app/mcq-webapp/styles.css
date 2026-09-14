@@ -1279,3 +1279,9 @@ td:nth-child(5) {
 .app-title-row .castext-template-toggle { margin: 0; font-size: 13px; white-space: nowrap; }
 
 .include-settings-heading .include-filename { width: 200px; min-width: 100px; max-width: 100%; padding: 6px 8px; }
+
+.pair-swap-button { white-space: pre-line; line-height: 1.15; padding: 4px 7px; font-size: 12px; }
+.feedback-controls { justify-content: flex-start; }
+.feedback-controls .language-independent-toggle { margin-right: 0; }
+.feedback-controls .feedback-mode-toggle { margin: 0; font-size: 11px; gap: 3px; flex-shrink: 0; }
+.feedback-controls .value-type-select { margin-left: auto; }
