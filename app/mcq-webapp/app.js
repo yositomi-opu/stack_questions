@@ -40,6 +40,7 @@ const el = {
   modeRb: document.querySelector("#modeRb"),
   modeCb: document.querySelector("#modeCb"),
   noCorrectOption: document.querySelector("#noCorrectOption"),
+  radioMultiplePrompt: document.querySelector("#radioMultiplePrompt"),
   noIdeaOption: document.querySelector("#noIdeaOption"),
   scoringMethodField: document.querySelector("#scoringMethodField"),
   castextTemplate: document.querySelector("#castextTemplate"),
@@ -169,7 +170,7 @@ function bindEvents() {
   });
   document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
-  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.castextTemplate].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
+  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.castextTemplate, el.radioMultiplePrompt].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
   el.modeCb.addEventListener("change", () => setMode("cb"));
@@ -674,6 +675,7 @@ function checkResponse(response) {
 
 function setMode(mode, update = true) {
   state.mode = mode;
+  if (el.radioMultiplePrompt) el.radioMultiplePrompt.disabled = mode === "cb";
   el.modeRb.checked = mode === "rb";
   el.modeCb.checked = mode === "cb";
   if (el.scoringMethodField) el.scoringMethodField.hidden = mode !== "cb";
@@ -1620,7 +1622,7 @@ function generateXml() {
     .replace(/\{@__mcq_noidea_checked@\}/g, "{@%__mcq_noidea_checked@}")
     .replace(/(?:\[\[lang code=['"][^'"]+['"]\]\]\[\[\/lang\]\])+/g, languageBlocks())
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
-    .replace(/%__mcq_rb_cb:"(?:rb|cb)";/, `%__mcq_rb_cb:"${state.mode}";`)
+    .replace(/%__mcq_rb_cb\s*:\s*"(?:rb2?|cb)"\s*;/, `%__mcq_rb_cb:"${state.mode === "cb" ? "cb" : el.radioMultiplePrompt?.checked ? "rb2" : "rb"}";`)
     .replace(/%__mcq_max_cp:\d+;/, `%__mcq_max_cp:${Math.max(5, maxCorrect)};`)
     .replace(/%__mcq_max_wp:\d+;/, `%__mcq_max_wp:${Math.max(9, maxWrong)};`)
     .replace(
@@ -1745,6 +1747,7 @@ function appStateSnapshot() {
     settings: {
       noCorrectOption: Boolean(el.noCorrectOption?.checked),
       noIdeaOption: Boolean(el.noIdeaOption?.checked),
+      radioMultiplePrompt: Boolean(el.radioMultiplePrompt?.checked),
       castextTemplate: Boolean(el.castextTemplate?.checked),
       scoringMethod: el.scoringMethod?.value || "1",
       numOptions: el.numOptions.value,
@@ -2413,6 +2416,7 @@ function applyAppStateSnapshot(snapshot) {
   state.qvars = [el.qvars.value];
   if (el.noCorrectOption) el.noCorrectOption.checked = Boolean(snapshot.settings?.noCorrectOption);
   if (el.noIdeaOption) el.noIdeaOption.checked = Boolean(snapshot.settings?.noIdeaOption);
+  if (el.radioMultiplePrompt) el.radioMultiplePrompt.checked = Boolean(snapshot.settings?.radioMultiplePrompt);
   if (el.castextTemplate) el.castextTemplate.checked = Boolean(snapshot.settings?.castextTemplate);
   if (el.scoringMethod) el.scoringMethod.value = String(snapshot.settings?.scoringMethod || "1");
   el.numOptions.value = String(snapshot.settings?.numOptions || 2);
@@ -2519,6 +2523,7 @@ function importLegacyQuestionVariables(variables, documentNode, filename, xmlVar
   el.parameters.value = preamble.parameters;
   const flags = stripMaximaComments(xmlVariables).match(/%_MCQ_FLAGS\s*:\s*\[\s*(?:true|false)\s*,\s*(?:true|false)\s*,\s*(true|false)\s*,\s*(true|false)/);
   const settingsSource = stripMaximaComments(xmlVariables);
+  if (el.radioMultiplePrompt) el.radioMultiplePrompt.checked = /%__mcq_rb_cb\s*:\s*"rb2"/.test(settingsSource);
   const literal = (name) => [...settingsSource.matchAll(new RegExp(name + "\\s*:\\s*(true|false|[1-4])\\s*[;$]", "g"))].at(-1)?.[1];
   if (el.noCorrectOption) el.noCorrectOption.checked = (literal("%__mcq_nocorrectopt") || flags?.[2]) === "true";
   if (el.noIdeaOption) el.noIdeaOption.checked = (literal("%__mcq_noidea") || flags?.[1]) === "true";
@@ -3053,6 +3058,7 @@ function resetCsvImportState() {
   el.requirePairs.checked = false;
   if (el.noCorrectOption) el.noCorrectOption.checked = false;
   if (el.noIdeaOption) el.noIdeaOption.checked = false;
+  if (el.radioMultiplePrompt) el.radioMultiplePrompt.checked = false;
   if (el.castextTemplate) el.castextTemplate.checked = false;
   if (el.scoringMethod) el.scoringMethod.value = "1";
   el.parameters.value = "";
@@ -3349,6 +3355,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "radio_multiple_prompt" && el.radioMultiplePrompt) el.radioMultiplePrompt.checked = parseBoolean(value);
   if (key === "include_filename") state.includeFilename = normalizeIncludeFilename(value);
   if (key === "nocorrectopt") el.noCorrectOption.checked = parseBoolean(value);
   if (key === "castext_template" && el.castextTemplate) el.castextTemplate.checked = parseBoolean(value);
@@ -3388,6 +3395,7 @@ function downloadSampleCsv() {
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
@@ -3444,6 +3452,7 @@ function currentCsvRecords(title) {
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],

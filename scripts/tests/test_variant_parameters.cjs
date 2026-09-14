@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(root,'app/mcq-webapp/app.js'),'utf8');
 const functions = [...source.matchAll(/^function \w+\([^]*?^}/gm)].map(m=>m[0]).join('\n');
 const langs = ['en','ja','fr','it','de','pt','zh','ko','ru','sv','es'];
 const field = (value='')=>({value,checked:false,hidden:false,closest:()=>({classList:{toggle(){},remove(){}}})});
-const el = Object.fromEntries(['castextTemplate','noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
+const el = Object.fromEntries(['radioMultiplePrompt','castextTemplate','noCorrectOption','noIdeaOption','scoringMethod','stackApiUrl','parameters','qvars','questionId','baseLanguage','modeRb','modeCb','numOptions','numCorrect','randomCorrect','correctCounts','requirePairs','feedbackByTruth','saveVariablesSeparately','downloadIncludeButton','includeBaseUrl','correctCountsRow'].map(k=>[k,field()]));
 el.baseLanguage.value='ja';
 el.includeBaseUrl.value='https://example.org/';
 el.questions=Object.fromEntries(langs.map(l=>[l,field()]));
@@ -324,3 +324,32 @@ assert.equal(state.includeSource.url,'https://example.org/005/renamed.txt');
 assert.equal(state.includeSource.path,'005/renamed.txt');
 context.resetCsvImportState();assert.equal(state.includeFilename,'');assert.equal(el.includeFilename.value,'');
 console.log('Passed: default/manual include names, rb/cb suffixes, metadata/CSV, URL consistency, reset.');
+
+// rb2 is an instruction variant, not a different input type or random outcome.
+context.applyRecords(context.parseDelimited(fs.readFileSync(path.join(root,'app/mcq-webapp/sample.csv'),'utf8'),','));
+for (const cas of [false,true]) {
+ el.castextTemplate.checked=cas;
+ el.radioMultiplePrompt.checked=true;
+ context.setMode('rb');
+ for (const count of ['1','2']) {
+  el.randomCorrect.checked=true;el.correctCounts.value=count;
+  // Use the sample's complete C/W pair and sufficient evaluated capacity.
+  evaluateLists();
+  assert.match(context.generateXml(),/%__mcq_rb_cb:"rb2";/);
+ }
+ el.correctCounts.value='1, 2';evaluateLists();
+ const saved=context.appStateSnapshot();
+ el.radioMultiplePrompt.checked=false;context.applyAppStateSnapshot(saved);
+ assert.equal(el.radioMultiplePrompt.checked,true);
+ const records=context.currentCsvRecords('rb2');
+ el.radioMultiplePrompt.checked=false;context.applyRecords(records);
+ assert.equal(el.radioMultiplePrompt.checked,true);
+ context.setMode('cb');assert.equal(el.radioMultiplePrompt.disabled,true);
+ evaluateLists();assert.match(context.generateXml(),/%__mcq_rb_cb:"cb";/);
+ context.setMode('rb');assert.equal(el.radioMultiplePrompt.disabled,false);
+ assert.equal(el.radioMultiplePrompt.checked,true);
+ el.radioMultiplePrompt.checked=false;evaluateLists();
+ assert.match(context.generateXml(),/%__mcq_rb_cb:"rb";/);
+}
+context.resetCsvImportState();assert.equal(el.radioMultiplePrompt.checked,false);
+console.log('Passed: rb/rb2/cb generation independent of drawn count, settings round trips and reset.');

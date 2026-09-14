@@ -1285,3 +1285,6 @@ td:nth-child(5) {
 .feedback-controls .language-independent-toggle { margin-right: 0; }
 .feedback-controls .feedback-mode-toggle { margin: 0; font-size: 11px; gap: 3px; flex-shrink: 0; }
 .feedback-controls .value-type-select { margin-left: auto; }
+
+.special-options-checks { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; flex: 0 1 auto; }
+.special-options-settings { flex-direction: column; align-items: flex-start; }

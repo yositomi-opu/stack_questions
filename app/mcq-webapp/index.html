@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260914-compact1">
+    <link rel="stylesheet" href="./styles.css?v=20260915-rb2">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260914-compact1"></script>
-    <script defer src="./app.js?v=20260914-compact1"></script>
+    <script defer src="./i18n.js?v=20260915-rb2"></script>
+    <script defer src="./app.js?v=20260915-rb2"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -160,9 +160,10 @@
               </div>
               </fieldset>
               <div class="special-options-settings">
+                <label class="check-row" for="radioMultiplePrompt"><input id="radioMultiplePrompt" type="checkbox"><span>「正解が2つ以上の場合も1つ選べばよい」を使用</span></label>
                 <div class="special-options-checks">
-              <label class="check-row" for="noCorrectOption"><input id="noCorrectOption" type="checkbox"><span>「選択肢に正解はない」オプションを使用する</span></label>
-              <label class="check-row" for="noIdeaOption"><input id="noIdeaOption" type="checkbox"><span>「わからない」オプションを使用する</span></label>
+              <label class="check-row" for="noCorrectOption"><input id="noCorrectOption" type="checkbox"><span>「選択肢に正解はない」を含める</span></label>
+              <label class="check-row" for="noIdeaOption"><input id="noIdeaOption" type="checkbox"><span>「わからない」を選択肢に含める</span></label>
                 </div>
               </div>
               <div class="number-grid">
