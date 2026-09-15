@@ -66,8 +66,8 @@ if %__mcq_nocorrectopt and %__mcq_nocorrecttrue then %__mcq_num_copts:0;
 %__mcq_cw_delimiter:%__mcq_max_opts*(%__mcq_max_patterns+1);
 %__mcq_CLlen:map(length, %__mcq_CLbase);
 %__mcq_WLlen:map(length, %__mcq_WLbase);
-%__mcq_nC:%__mcq_min_max(%__mcq_num_copts, length(flatten(%__mcq_CLbase)));
-%__mcq_nW:%__mcq_min_max(%__mcq_num_wopts, length(flatten(%__mcq_WLbase)));
+%__mcq_nC:%__mcq_min_max(%__mcq_num_copts, apply("+", map(length, %__mcq_CLbase)));
+%__mcq_nW:%__mcq_min_max(%__mcq_num_wopts, apply("+", map(length, %__mcq_WLbase)));
 
 
 

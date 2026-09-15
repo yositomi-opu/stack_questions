@@ -2222,8 +2222,11 @@ function maximaAssoc(entries, type) {
 }
 
 function maximaChoiceList(items) {
-  const rendered = `[${items.map(maximaTypedValue).join(", ")}]`;
-  return items.some((item) => item.listExpression) ? `flatten(${rendered})` : rendered;
+  if (!items.some(item => item.listExpression)) return `[${items.map(maximaTypedValue).join(", ")}]`;
+  // Join only the option-list layer. CASText objects (and list-valued choices)
+  // must remain single labels, not be recursively flattened into their contents.
+  const lists = items.map(item => item.listExpression ? maximaTypedValue(item) : `[${maximaTypedValue(item)}]`);
+  return lists.length === 1 ? lists[0] : `append(${lists.join(", ")})`;
 }
 
 function maximaAssociation(entries) {

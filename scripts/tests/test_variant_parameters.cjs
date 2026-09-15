@@ -427,3 +427,11 @@ console.log('Passed: CASText selection enables templates, retains input, and not
 state.qvars=['a:1;\n/* EOF */','/* only a comment */','b:2 /* trailing comment */','s:"semi;/* literal */"; /* end */'];
 assert.deepEqual(Array.from(context.normalizedQvars()),['a:1;\n/* EOF */','/* only a comment */','b:2 /* trailing comment */;','s:"semi;/* literal */"; /* end */']);
 console.log('Passed: trailing comments do not cause empty Maxima statements.');
+// List sources expand once; scalar list values and CASText labels stay atomic.
+const listSource=value=>({value,type:'cas',listExpression:true});
+const scalar=value=>({value,type:'cas'});
+assert.equal(context.maximaChoiceList([listSource('ListAL1')]),'ListAL1');
+assert.equal(context.maximaChoiceList([listSource('L1'),scalar('castext("label")'),listSource('L2'),scalar('[1,2]')]),'append(L1, [castext("label")], L2, [[1,2]])');
+assert.equal(context.maximaChoiceList([scalar('[1,2]'),scalar('castext("label")')]),'[[1,2], castext("label")]');
+assert.equal(context.maximaChoiceList([]),'[]');
+console.log('Passed: shallow option-list concatenation preserves CASText and list-valued labels.');

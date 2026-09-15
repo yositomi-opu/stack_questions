@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- CASText選択肢に%root等が表示される原因は、アプリのmaximaChoiceListがCASリスト式をflattenで再帰展開していたこと。単一リストは直接使用、混在／複数リストは単体要素を[]で包んでappendする方式へ修正。通常／CAS両postの候補数もflatten後の長さから各パターンのlength合計へ変更し、makeで両.macを再生成。該当001.GaussElimRowReducedCheck-B-3x4rk2-rb.xmlの4つのflattenも直接代入に修正。README・キャッシュ更新。
+- 検証: variant_parametersに単一リスト／複数リスト・単体CASText・リスト値の混在／空リストの回帰追加し成功。casttext_migration・test_mcq_pre_castext.py（4件）成功。ローカルSTACK APIで修正XMLの7選択肢がp,qの組として生成され%rootなし、正解1点・誤答0点と対応FB、errors/fverrors空を確認。検証はAPI応答まででブラウザMathJax未確認。関連修正をcommit/pushする依頼あり。
+
 - 001.GaussElimRowReducedCheck-B-3x4rk2-rb.xmlのAPI HTTP500を調査。include展開後450行目のEOFコメント末尾に単独セミコロンがあり、normalizedQvarsが末尾コメントの前の終端記号を見落として追加していた。コメント除去後のコード末尾で判定するよう修正し、該当XMLの余分なセミコロンも削除。末尾コメント／コメントのみ／文字列内コメント記号／未終端コードの回帰テスト追加、variant_parameters成功。修正XMLをローカルSTACK APIへ送りHTTP200・本文生成を確認。問題文の `%_nc` が `{@%_nc@}` でなく `{%_nc}` になっている別の記述不備もあり、利用者が75e93f7で直接修正・push済み。app.jsキャッシュ更新。commit/push未実施。
 
 - 多言語設定見出しを「多言語設定 ? 展開」に整理し、小さい展開ボタンを移動。?に対象（問題文、言語非依存でない選択肢／FB）と依頼／JSON反映手順を日英で追加。旧「XMLに展開する言語を選択」を削除し、言語ボタン列の先頭へ「展開言語」・ALLを配置。ALLは全11言語を選択して設定保存・表示更新・翻訳再生成必要状態へ更新し、基本言語のロックを保持。問題変数上にdetailsと同色の罫線を追加。VMでALLの選択／保存／更新、HTMLボタン一意性、JS構文・diff検査成功。実ブラウザの配置は未確認。commit/push未実施。

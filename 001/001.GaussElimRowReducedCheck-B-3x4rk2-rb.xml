@@ -156,7 +156,7 @@ ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
 
 /* Fixed true/false patterns (pair requirement disabled). */
 
-%__CoptL1:flatten([ListAL1]);
+%__CoptL1:ListAL1;
 %__Cmsg1L:[["en", castext("Correct. You seem to understand the properties of reduced row echelon matrices.")],
  ["ja", castext("正解です. 被約階段行列(行簡約行列)の性質を理解しているようです.")],
  ["fr", castext("Correct. Vous semblez comprendre les propriétés des matrices sous forme échelonnée réduite.")],
@@ -169,7 +169,7 @@ ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
  ["sv", castext("Rätt. Du verkar förstå egenskaperna hos matriser på reducerad trappstegsform.")],
  ["es", castext("Correcto. Parece que comprendes las propiedades de las matrices en forma escalonada reducida por filas.")]];
 
-%__WoptL1:flatten([ListBL1]);
+%__WoptL1:ListBL1;
 %__Wmsg1L:[["en", castext("One of the values is correct, but the other appears to be incorrect.")],
  ["ja", castext("一方の値は正しいのですが, もう一方が違うようです.")],
  ["fr", castext("L'une des valeurs est correcte, mais l'autre semble incorrecte.")],
@@ -182,7 +182,7 @@ ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
  ["sv", castext("Det ena värdet är korrekt, men det andra verkar vara felaktigt.")],
  ["es", castext("Uno de los valores es correcto, pero el otro parece ser incorrecto.")]];
 
-%__WoptL2:flatten([ListBL2]);
+%__WoptL2:ListBL2;
 %__Wmsg2L:[["en", castext("One of the values is correct, but the other appears to be incorrect.")],
  ["ja", castext("一方の値は正しいのですが, もう一方が違うようです.")],
  ["fr", castext("L'une des valeurs est correcte, mais l'autre semble incorrecte.")],
@@ -195,7 +195,7 @@ ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
  ["sv", castext("Det ena värdet är korrekt, men det andra verkar vara felaktigt.")],
  ["es", castext("Uno de los valores es correcto, pero el otro parece ser incorrecto.")]];
 
-%__WoptL3:flatten([ListBL3]);
+%__WoptL3:ListBL3;
 %__Wmsg3L:[["en", castext("Both values appear to be incorrect.")],
  ["ja", castext("どちらの値も違うようです.")],
  ["fr", castext("Les deux valeurs semblent incorrectes.")],
