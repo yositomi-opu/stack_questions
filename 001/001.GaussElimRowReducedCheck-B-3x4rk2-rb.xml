@@ -140,19 +140,19 @@ ListBL3:endcons(%_mkop(pp+2, qq-rand([1, 2])), ListBL3);
 /* MCQ_WEBAPP_SLOT:Wmsg3 */
 
 
-/********** EOF **********/;
+/********** EOF **********/
 
-%__mcq_qtextL:[["en", castext("Applying elementary row operations to the {@%_nr@}\\times{%_nc} matrix \\(A=\\) {@matAp@} yields {@matFq@}. Select the correct pair of values for \\(p, q\\).")],
- ["ja", castext("{@%_nr@}\\times{%_nc} 行列\\(A=\\) {@matAp@} を行に関して基本変形すると, {@matFq@} になる. このとき, \\(p, q\\)の値の組として正しいものを選べ．")],
- ["fr", castext("L'application d'opérations élémentaires sur les lignes de la matrice {@%_nr@}\\times{%_nc} \\(A=\\) {@matAp@} donne {@matFq@}. Sélectionnez le couple correct de valeurs de \\(p, q\\).")],
- ["it", castext("Applicando operazioni elementari sulle righe alla matrice {@%_nr@}\\times{%_nc} \\(A=\\) {@matAp@}, si ottiene {@matFq@}. Seleziona la coppia corretta di valori di \\(p, q\\).")],
- ["de", castext("Durch elementare Zeilenumformungen wird die {@%_nr@}\\times{%_nc}-Matrix \\(A=\\) {@matAp@} in {@matFq@} überführt. Wählen Sie das richtige Wertepaar für \\(p, q\\) aus.")],
- ["pt", castext("Aplicando operações elementares sobre as linhas à matriz {@%_nr@}\\times{%_nc} \\(A=\\) {@matAp@}, obtém-se {@matFq@}. Selecione o par correto de valores de \\(p, q\\).")],
- ["zh", castext("对{@%_nr@}\\times{%_nc}矩阵\\(A=\\) {@matAp@}进行初等行变换后，得到{@matFq@}。请选择\\(p, q\\)的正确取值组合。")],
- ["ko", castext("{@%_nr@}\\times{%_nc} 행렬 \\(A=\\) {@matAp@}에 기본 행 연산을 적용하면 {@matFq@}가 된다. 이때 \\(p, q\\)의 값으로 올바른 순서쌍을 고르시오.")],
- ["ru", castext("После элементарных преобразований строк матрица размера {@%_nr@}\\times{%_nc} \\(A=\\) {@matAp@} принимает вид {@matFq@}. Выберите правильную пару значений \\(p, q\\).")],
- ["sv", castext("När elementära radoperationer utförs på {@%_nr@}\\times{%_nc}-matrisen \\(A=\\) {@matAp@}, erhålls {@matFq@}. Välj det korrekta värdeparet för \\(p, q\\).")],
- ["es", castext("Al aplicar operaciones elementales por filas a la matriz {@%_nr@}\\times{%_nc} \\(A=\\) {@matAp@}, se obtiene {@matFq@}. Selecciona el par correcto de valores de \\(p, q\\).")]];
+%__mcq_qtextL:[["en", castext("Applying elementary row operations to the {@%_nr@}\\times{@%_nc@} matrix \\(A=\\) {@matAp@} yields {@matFq@}. Select the correct pair of values for \\(p, q\\).")],
+ ["ja", castext("{@%_nr@}\\times{@%_nc@} 行列\\(A=\\) {@matAp@} を行に関して基本変形すると, {@matFq@} になる. このとき, \\(p, q\\)の値の組として正しいものを選べ．")],
+ ["fr", castext("L'application d'opérations élémentaires sur les lignes de la matrice {@%_nr@}\\times{@%_nc@} \\(A=\\) {@matAp@} donne {@matFq@}. Sélectionnez le couple correct de valeurs de \\(p, q\\).")],
+ ["it", castext("Applicando operazioni elementari sulle righe alla matrice {@%_nr@}\\times{@%_nc@} \\(A=\\) {@matAp@}, si ottiene {@matFq@}. Seleziona la coppia corretta di valori di \\(p, q\\).")],
+ ["de", castext("Durch elementare Zeilenumformungen wird die {@%_nr@}\\times{@%_nc@}-Matrix \\(A=\\) {@matAp@} in {@matFq@} überführt. Wählen Sie das richtige Wertepaar für \\(p, q\\) aus.")],
+ ["pt", castext("Aplicando operações elementares sobre as linhas à matriz {@%_nr@}\\times{@%_nc@} \\(A=\\) {@matAp@}, obtém-se {@matFq@}. Selecione o par correto de valores de \\(p, q\\).")],
+ ["zh", castext("对{@%_nr@}\\times{@%_nc@}矩阵\\(A=\\) {@matAp@}进行初等行变换后，得到{@matFq@}。请选择\\(p, q\\)的正确取值组合。")],
+ ["ko", castext("{@%_nr@}\\times{@%_nc@} 행렬 \\(A=\\) {@matAp@}에 기본 행 연산을 적용하면 {@matFq@}가 된다. 이때 \\(p, q\\)의 값으로 올바른 순서쌍을 고르시오.")],
+ ["ru", castext("После элементарных преобразований строк матрица размера {@%_nr@}\\times{@%_nc@} \\(A=\\) {@matAp@} принимает вид {@matFq@}. Выберите правильную пару значений \\(p, q\\).")],
+ ["sv", castext("När elementära radoperationer utförs på {@%_nr@}\\times{@%_nc@}-matrisen \\(A=\\) {@matAp@}, erhålls {@matFq@}. Välj det korrekta värdeparet för \\(p, q\\).")],
+ ["es", castext("Al aplicar operaciones elementales por filas a la matriz {@%_nr@}\\times{@%_nc@} \\(A=\\) {@matAp@}, se obtiene {@matFq@}. Selecciona el par correcto de valores de \\(p, q\\).")]];
 
 /* Fixed true/false patterns (pair requirement disabled). */
 
