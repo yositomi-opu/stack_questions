@@ -12,7 +12,6 @@
     "includeファイル名": "Include filename",
     "ファイル名.txt": "filename.txt",
     "「正解が2つ以上の場合も1つ選べばよい」を使用": "Explain that one correct choice is enough, even if several are correct",
-    "（試験運用）": "(Experimental)",
     "選択肢データについて": "About option data",
     "「castext 版を使用する」ときは、STACKの問題文と同じ書式で入力してください。{@a@} やブロック構文が使えます。外側の引用符やcastext()は不要です。従来のCAS式は埋め込み形式へ移行します。以下の文字列・CAS式の説明は通常版用です。": "With CASText enabled, use STACK question text syntax, including {@a@} and blocks. Do not add outer quotes or castext(). Legacy CAS expressions are migrated to embedded expressions. The following text/CAS instructions apply to the standard version.",
     "CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式のsconcatやtex2などはできる範囲で変換し、独自の式はそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。": "For CASText feedback, enter text, {@a@}, or blocks without an outer castext() call. Legacy sconcat and tex2 feedback expressions are converted where possible; custom expressions remain unchanged. Option text, CAS expressions, and CAS list expressions remain supported.",
