@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 115488  -->
+  <question type="stack">
+    <name>
+      <text>001.GaussElimCoeffMat-B-rb</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[[[lang code="en"]][[/lang]][[lang code="ja"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="it"]][[/lang]][[lang code="de"]][[/lang]][[lang code="pt"]][[/lang]][[lang code="zh"]][[/lang]][[lang code="ko"]][[/lang]][[lang code="ru"]][[/lang]][[lang code="sv"]][[/lang]][[lang code="es"]][[/lang]]{@%__mcq_langcode@}
+<p>{@qtext@}</p>
+<p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026010500</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
+stack_include("https://yositomi-opu.github.io/stack_questions/ky_linear_algebra.mac");
+/* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
+%__mcq_rb_cb:"rb";
+/*************** some usual fuctions I use. Feel free to customize here **********************/
+powerdisp:true;
+%_rp(L):=random_permutation(L);
+stack_include("https://yositomi-opu.github.io/stack_questions/tex_library.mac");
+/*********************************** Flags ***********************************/
+/* NOTE: opts=options, copts=correct options, wopts=wrong(incorrect) options */
+
+/* Flags : modification not required if not necessary. See mcq_template_pre_cas.txt for details */
+/* [use feedback?, use subscore?, use noidea opt, use nocorrect opt, is nocorrect opt true?, use qtext_auto?] */
+
+%_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true];
+
+/* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
+/*       and adjust the following constants. */
+%__mcq_max_cp:5;
+%__mcq_max_wp:9;
+
+/********************************* DO NOT EDIT HERE **************************************/
+stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre_cas.mac");
+/*****************************************************************************************/
+/* MCQ_WEBAPP_DATA_BASE64:eyJ2ZXJzaW9uIjoxLCJxdWVzdGlvbklkIjoiR2F1c3NFbGltQ29lZmZNYXQtQiIsIm1vZGUiOiJyYiIsImJhc2VMYW5ndWFnZSI6ImphIiwiYWN0aXZlTGFuZ3VhZ2VzIjpbImVuIiwiamEiLCJmciIsIml0IiwiZGUiLCJwdCIsInpoIiwia28iLCJydSIsInN2IiwiZXMiXSwicXVlc3Rpb25MYW5ndWFnZUluZGVwZW5kZW50IjpmYWxzZSwicXVlc3Rpb25zIjp7ImVuIjp7InZhbHVlIjoiVGhlIHN5c3RlbSBvZiBsaW5lYXIgZXF1YXRpb25zIGluIHRoZSB2YXJpYWJsZXMge0B4TFNAfSBpczxicj57QFF1ZXN0aW9uRXFAfTxicj5TZWxlY3QgaXRzIDxiPmF1Z21lbnRlZDwvYj4gY29lZmZpY2llbnQgbWF0cml4LiIsInR5cGUiOiJjYXN0ZXh0In0sImphIjp7InZhbHVlIjoi5aSJ5pWwe0B4TFNAfeOBq+mWouOBmeOCi+mAo+erizHmrKHmlrnnqIvlvI/jga7mlrnnqIvlvI/jgYw8YnI+e0BRdWVzdGlvbkVxQH08YnI+44Gn44GC44KL44Go44GE44GGLiA8Yj7mi6HlpKc8L2I+5L+C5pWw6KGM5YiX44KS6YG444G5LiIsInR5cGUiOiJjYXN0ZXh0In0sImZyIjp7InZhbHVlIjoiTGUgc3lzdMOobWUgZCfDqXF1YXRpb25zIGxpbsOpYWlyZXMgZW4gbGVzIHZhcmlhYmxlcyB7QHhMU0B9IGVzdDxicj57QFF1ZXN0aW9uRXFAfTxicj5Tw6lsZWN0aW9ubmV6IHNhIG1hdHJpY2UgZGVzIGNvZWZmaWNpZW50cyA8Yj5hdWdtZW50w6llPC9iPi4iLCJ0eXBlIjoiY2FzdGV4dCJ9LCJpdCI6eyJ2YWx1ZSI6IklsIHNpc3RlbWEgZGkgZXF1YXppb25pIGxpbmVhcmkgbmVsbGUgdmFyaWFiaWxpIHtAeExTQH0gw6g8YnI+e0BRdWVzdGlvbkVxQH08YnI+U2VsZXppb25hIGxhIHN1YSBtYXRyaWNlIGRlaSBjb2VmZmljaWVudGkgPGI+YXVtZW50YXRhPC9iPi4iLCJ0eXBlIjoiY2FzdGV4dCJ9LCJkZSI6eyJ2YWx1ZSI6IkRhcyBsaW5lYXJlIEdsZWljaHVuZ3NzeXN0ZW0gaW4gZGVuIFZhcmlhYmxlbiB7QHhMU0B9IGxhdXRldDxicj57QFF1ZXN0aW9uRXFAfTxicj5Xw6RobGVuIFNpZSBkaWUgPGI+ZXJ3ZWl0ZXJ0ZTwvYj4gS29lZmZpemllbnRlbm1hdHJpeCBhdXMuIiwidHlwZSI6ImNhc3RleHQifSwicHQiOnsidmFsdWUiOiJPIHNpc3RlbWEgZGUgZXF1YcOnw7VlcyBsaW5lYXJlcyBuYXMgdmFyacOhdmVpcyB7QHhMU0B9IMOpPGJyPntAUXVlc3Rpb25FcUB9PGJyPlNlbGVjaW9uZSBhIHN1YSBtYXRyaXogZG9zIGNvZWZpY2llbnRlcyA8Yj5hdW1lbnRhZGE8L2I+LiIsInR5cGUiOiJjYXN0ZXh0In0sInpoIjp7InZhbHVlIjoi5YWz5LqO5Y+Y6YePe0B4TFNAfeeahOe6v+aAp+aWueeoi+e7hOS4ujxicj57QFF1ZXN0aW9uRXFAfTxicj7or7fpgInmi6nlhbY8Yj7lop7lub88L2I+57O75pWw55+p6Zi144CCIiwidHlwZSI6ImNhc3RleHQifSwia28iOnsidmFsdWUiOiLrs4DsiJgge0B4TFNAfeyXkCDqtIDtlZwg7Jew66a97J287LCo67Cp7KCV7Iud7J20PGJyPntAUXVlc3Rpb25FcUB9PGJyPuydvCDrlYwsIOq3uCA8Yj7ssqjqsIA8L2I+6rOE7IiY7ZaJ66Cs7J2EIOqzoOultOyLnOyYpC4iLCJ0eXBlIjoiY2FzdGV4dCJ9LCJydSI6eyJ2YWx1ZSI6ItCh0LjRgdGC0LXQvNCwINC70LjQvdC10LnQvdGL0YUg0YPRgNCw0LLQvdC10L3QuNC5INC+0YLQvdC+0YHQuNGC0LXQu9GM0L3QviDQv9C10YDQtdC80LXQvdC90YvRhSB7QHhMU0B9INC40LzQtdC10YIg0LLQuNC0PGJyPntAUXVlc3Rpb25FcUB9PGJyPtCS0YvQsdC10YDQuNGC0LUg0LXRkSA8Yj7RgNCw0YHRiNC40YDQtdC90L3Rg9GOPC9iPiDQvNCw0YLRgNC40YbRgyDQutC+0Y3RhNGE0LjRhtC40LXQvdGC0L7Qsi4iLCJ0eXBlIjoiY2FzdGV4dCJ9LCJzdiI6eyJ2YWx1ZSI6IkRldCBsaW5qw6RyYSBla3ZhdGlvbnNzeXN0ZW1ldCBpIHZhcmlhYmxlcm5hIHtAeExTQH0gw6RyPGJyPntAUXVlc3Rpb25FcUB9PGJyPlbDpGxqIGRlc3MgPGI+dXTDtmthZGU8L2I+IGtvZWZmaWNpZW50bWF0cmlzLiIsInR5cGUiOiJjYXN0ZXh0In0sImVzIjp7InZhbHVlIjoiRWwgc2lzdGVtYSBkZSBlY3VhY2lvbmVzIGxpbmVhbGVzIGVuIGxhcyB2YXJpYWJsZXMge0B4TFNAfSBlczxicj57QFF1ZXN0aW9uRXFAfTxicj5TZWxlY2Npb25hIHN1IG1hdHJpeiBkZSBjb2VmaWNpZW50ZXMgPGI+YW1wbGlhZGE8L2I+LiIsInR5cGUiOiJjYXN0ZXh0In19LCJyb3dzIjpbeyJwYXR0ZXJuIjoiMDEiLCJ0cnV0aCI6IkMiLCJjaG9pY2VfZW4iOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfZW4iOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2VuIjp0cnVlLCJjaG9pY2VfbGFuZ3VhZ2VfaW5kZXBlbmRlbnQiOnRydWUsImNob2ljZV9mciI6Ikxpc3RBTDEiLCJjaG9pY2VfdHlwZV9mciI6ImNhcyIsImNob2ljZV9saXN0X2V4cHJfZnIiOnRydWUsImNob2ljZV9kZSI6Ikxpc3RBTDEiLCJjaG9pY2VfdHlwZV9kZSI6ImNhcyIsImNob2ljZV9saXN0X2V4cHJfZGUiOnRydWUsImNob2ljZV9pdCI6Ikxpc3RBTDEiLCJjaG9pY2VfdHlwZV9pdCI6ImNhcyIsImNob2ljZV9saXN0X2V4cHJfaXQiOnRydWUsImNob2ljZV9qYSI6Ikxpc3RBTDEiLCJjaG9pY2VfdHlwZV9qYSI6ImNhcyIsImNob2ljZV9saXN0X2V4cHJfamEiOnRydWUsImZlZWRiYWNrX2VuIjoiQ29ycmVjdC4gWW91IHNlZW0gdG8gdW5kZXJzdGFuZCBhdWdtZW50ZWQgY29lZmZpY2llbnQgbWF0cmljZXMuIiwiZmVlZGJhY2tfdHlwZV9lbiI6InRleHQiLCJmZWVkYmFja19mciI6IkNvcnJlY3QuIFZvdXMgc2VtYmxleiBhdm9pciBjb21wcmlzIGNlIHF1J2VzdCB1bmUgbWF0cmljZSBkZXMgY29lZmZpY2llbnRzIGF1Z21lbnTDqWUuIiwiZmVlZGJhY2tfdHlwZV9mciI6InRleHQiLCJmZWVkYmFja19kZSI6IlJpY2h0aWcuIFNpZSBzY2hlaW5lbiBlcndlaXRlcnRlIEtvZWZmaXppZW50ZW5tYXRyaXplbiB2ZXJzdGFuZGVuIHp1IGhhYmVuLiIsImZlZWRiYWNrX3R5cGVfZGUiOiJ0ZXh0IiwiZmVlZGJhY2tfaXQiOiJDb3JyZXR0by4gU2VtYnJhIGNoZSB0dSBhYmJpYSBjb21wcmVzbyBpbCBjb25jZXR0byBkaSBtYXRyaWNlIGRlaSBjb2VmZmljaWVudGkgYXVtZW50YXRhLiIsImZlZWRiYWNrX3R5cGVfaXQiOiJ0ZXh0IiwiZmVlZGJhY2tfamEiOiLmraPop6PjgafjgZkuIOaLoeWkp+S/guaVsOihjOWIl+OBq+OBpOOBhOOBpueQhuino+OBl+OBpuOBhOOCi+OCiOOBhuOBp+OBmS4iLCJmZWVkYmFja190eXBlX2phIjoidGV4dCIsImZlZWRiYWNrX2J5X3RydXRoIjp0cnVlLCJjaG9pY2VfcHQiOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfcHQiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3B0Ijp0cnVlLCJjaG9pY2VfemgiOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfemgiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3poIjp0cnVlLCJjaG9pY2Vfa28iOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfa28iOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2tvIjp0cnVlLCJjaG9pY2VfcnUiOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfcnUiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3J1Ijp0cnVlLCJjaG9pY2Vfc3YiOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfc3YiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3N2Ijp0cnVlLCJjaG9pY2VfZXMiOiJMaXN0QUwxIiwiY2hvaWNlX3R5cGVfZXMiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2VzIjp0cnVlLCJmZWVkYmFja19wdCI6IkNvcnJldG8uIFBhcmVjZSBxdWUgY29tcHJlZW5kZSBvIGNvbmNlaXRvIGRlIG1hdHJpeiBkb3MgY29lZmljaWVudGVzIGF1bWVudGFkYS4iLCJmZWVkYmFja190eXBlX3B0IjoidGV4dCIsImZlZWRiYWNrX3poIjoi5Zue562U5q2j56Gu44CC55yL5p2l5L2g5bey57uP55CG6Kej5LqG5aKe5bm/57O75pWw55+p6Zi144CCIiwiZmVlZGJhY2tfdHlwZV96aCI6InRleHQiLCJmZWVkYmFja19rbyI6IuygleuLteyeheuLiOuLpC4g7LKo6rCA6rOE7IiY7ZaJ66Cs7J2EIOyemCDsnbTtlbTtlZjqs6Ag7J6I64qUIOqygyDqsJnsirXri4jri6QuIiwiZmVlZGJhY2tfdHlwZV9rbyI6InRleHQiLCJmZWVkYmFja19ydSI6ItCS0LXRgNC90L4uINCf0L4t0LLQuNC00LjQvNC+0LzRgywg0LLRiyDQv9C+0L3QuNC80LDQtdGC0LUsINGH0YLQviDRgtCw0LrQvtC1INGA0LDRgdGI0LjRgNC10L3QvdCw0Y8g0LzQsNGC0YDQuNGG0LAg0LrQvtGN0YTRhNC40YbQuNC10L3RgtC+0LIuIiwiZmVlZGJhY2tfdHlwZV9ydSI6InRleHQiLCJmZWVkYmFja19zdiI6IlLDpHR0LiBEdSB2ZXJrYXIgZsO2cnN0w6UgYmVncmVwcGV0IHV0w7ZrYWQga29lZmZpY2llbnRtYXRyaXMuIiwiZmVlZGJhY2tfdHlwZV9zdiI6InRleHQiLCJmZWVkYmFja19lcyI6IkNvcnJlY3RvLiBQYXJlY2UgcXVlIGNvbXByZW5kZXMgZWwgY29uY2VwdG8gZGUgbWF0cml6IGRlIGNvZWZpY2llbnRlcyBhbXBsaWFkYS4iLCJmZWVkYmFja190eXBlX2VzIjoidGV4dCJ9LHsicGF0dGVybiI6IjAxIiwidHJ1dGgiOiJXIiwiY2hvaWNlX2VuIjoiTGlzdEJMMSIsImNob2ljZV90eXBlX2VuIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9lbiI6dHJ1ZSwiY2hvaWNlX2xhbmd1YWdlX2luZGVwZW5kZW50Ijp0cnVlLCJjaG9pY2VfZnIiOiJMaXN0QkwxIiwiY2hvaWNlX3R5cGVfZnIiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2ZyIjp0cnVlLCJjaG9pY2VfZGUiOiJMaXN0QkwxIiwiY2hvaWNlX3R5cGVfZGUiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2RlIjp0cnVlLCJjaG9pY2VfaXQiOiJMaXN0QkwxIiwiY2hvaWNlX3R5cGVfaXQiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2l0Ijp0cnVlLCJjaG9pY2VfamEiOiJMaXN0QkwxIiwiY2hvaWNlX3R5cGVfamEiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2phIjp0cnVlLCJmZWVkYmFja19lbiI6IlRoZSBvcmRlciBvZiB0aGUgdmFyaWFibGVzIGlzIGltcG9ydGFudC4gTW9yZW92ZXIsIGJ5IGRlZmluaXRpb24sIGEgbWF0cml4IG9idGFpbmVkIGJ5IGludGVyY2hhbmdpbmcgcm93cyBpcyBhIGRpZmZlcmVudCBtYXRyaXguICIsImZlZWRiYWNrX3R5cGVfZW4iOiJ0ZXh0IiwiZmVlZGJhY2tfZnIiOiJMJ29yZHJlIGRlcyB2YXJpYWJsZXMgZXN0IGltcG9ydGFudC4gRGUgcGx1cywgcGFyIGTDqWZpbml0aW9uLCB1bmUgbWF0cmljZSBvYnRlbnVlIGVuIHBlcm11dGFudCBkZXMgbGlnbmVzIGVzdCB1bmUgbWF0cmljZSBkaWZmw6lyZW50ZS4gIiwiZmVlZGJhY2tfdHlwZV9mciI6InRleHQiLCJmZWVkYmFja19kZSI6IkRpZSBSZWloZW5mb2xnZSBkZXIgVmFyaWFibGVuIGlzdCB3aWNodGlnLiBBdcOfZXJkZW0gaXN0IGVpbmUgZHVyY2ggVmVydGF1c2NoZW4gdm9uIFplaWxlbiBlbnRzdGFuZGVuZSBNYXRyaXggZGVmaW5pdGlvbnNnZW3DpMOfIGVpbmUgYW5kZXJlIE1hdHJpeC4gIiwiZmVlZGJhY2tfdHlwZV9kZSI6InRleHQiLCJmZWVkYmFja19pdCI6Ikwnb3JkaW5lIGRlbGxlIHZhcmlhYmlsaSDDqCBpbXBvcnRhbnRlLiBJbm9sdHJlLCBwZXIgZGVmaW5pemlvbmUsIHVuYSBtYXRyaWNlIG90dGVudXRhIHNjYW1iaWFuZG8gbGUgcmlnaGUgw6ggdW5hIG1hdHJpY2UgZGl2ZXJzYS4gIiwiZmVlZGJhY2tfdHlwZV9pdCI6InRleHQiLCJmZWVkYmFja19qYSI6IuWkieaVsOOBrumghuW6j+OBr+mHjeimgeOBp+OBmeOBlywg44G+44GfLCDlrprnvqnjgajjgZfjgabjga8sIOihjOOBruWFpeOCjOOBi+OBiOOBn+OCguOBruOBr+mBleOBhuOCguOBruOBp+OBmS4gIiwiZmVlZGJhY2tfdHlwZV9qYSI6InRleHQiLCJmZWVkYmFja19ieV90cnV0aCI6dHJ1ZSwiY2hvaWNlX3B0IjoiTGlzdEJMMSIsImNob2ljZV90eXBlX3B0IjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9wdCI6dHJ1ZSwiY2hvaWNlX3poIjoiTGlzdEJMMSIsImNob2ljZV90eXBlX3poIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl96aCI6dHJ1ZSwiY2hvaWNlX2tvIjoiTGlzdEJMMSIsImNob2ljZV90eXBlX2tvIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9rbyI6dHJ1ZSwiY2hvaWNlX3J1IjoiTGlzdEJMMSIsImNob2ljZV90eXBlX3J1IjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9ydSI6dHJ1ZSwiY2hvaWNlX3N2IjoiTGlzdEJMMSIsImNob2ljZV90eXBlX3N2IjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9zdiI6dHJ1ZSwiY2hvaWNlX2VzIjoiTGlzdEJMMSIsImNob2ljZV90eXBlX2VzIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9lcyI6dHJ1ZSwiZmVlZGJhY2tfcHQiOiJBIG9yZGVtIGRhcyB2YXJpw6F2ZWlzIMOpIGltcG9ydGFudGUuIEFsw6ltIGRpc3NvLCBwb3IgZGVmaW5pw6fDo28sIHVtYSBtYXRyaXogb2J0aWRhIHBlbGEgdHJvY2EgZGUgbGluaGFzIMOpIHVtYSBtYXRyaXogZGlmZXJlbnRlLiAiLCJmZWVkYmFja190eXBlX3B0IjoidGV4dCIsImZlZWRiYWNrX3poIjoi5Y+Y6YeP55qE6aG65bqP5b6I6YeN6KaB44CC5q2k5aSW77yM5qC55o2u5a6a5LmJ77yM5Lqk5o2i6KGM5ZCO5b6X5Yiw55qE55+p6Zi15piv5Y+m5LiA5Liq55+p6Zi144CCICIsImZlZWRiYWNrX3R5cGVfemgiOiJ0ZXh0IiwiZmVlZGJhY2tfa28iOiLrs4DsiJjsnZgg7Iic7ISc64qUIOykkeyalO2VqeuLiOuLpC4g65iQ7ZWcIOygleydmOyDgSDtlonsnYQg7ISc66GcIOuwlOq+uOyWtCDslrvsnYAg7ZaJ66Cs7J2AIOuLpOuluCDtlonroKzsnoXri4jri6QuICIsImZlZWRiYWNrX3R5cGVfa28iOiJ0ZXh0IiwiZmVlZGJhY2tfcnUiOiLQn9C+0YDRj9C00L7QuiDQv9C10YDQtdC80LXQvdC90YvRhSDQstCw0LbQtdC9LiDQmtGA0L7QvNC1INGC0L7Qs9C+LCDQv9C+INC+0L/RgNC10LTQtdC70LXQvdC40Y4g0LzQsNGC0YDQuNGG0LAsINC/0L7Qu9GD0YfQtdC90L3QsNGPINC/0LXRgNC10YHRgtCw0L3QvtCy0LrQvtC5INGB0YLRgNC+0LosINGP0LLQu9GP0LXRgtGB0Y8g0LTRgNGD0LPQvtC5INC80LDRgtGA0LjRhtC10LkuICIsImZlZWRiYWNrX3R5cGVfcnUiOiJ0ZXh0IiwiZmVlZGJhY2tfc3YiOiJWYXJpYWJsZXJuYXMgb3JkbmluZyDDpHIgdmlrdGlnLiBEZXNzdXRvbSDDpHIgZW4gbWF0cmlzIHNvbSBlcmjDpWxscyBnZW5vbSBhdHQgYnl0YSBwbGF0cyBww6UgcmFkZXIgZGVmaW5pdGlvbnNtw6Rzc2lndCBlbiBhbm5hbiBtYXRyaXMuICIsImZlZWRiYWNrX3R5cGVfc3YiOiJ0ZXh0IiwiZmVlZGJhY2tfZXMiOiJFbCBvcmRlbiBkZSBsYXMgdmFyaWFibGVzIGVzIGltcG9ydGFudGUuIEFkZW3DoXMsIHBvciBkZWZpbmljacOzbiwgdW5hIG1hdHJpeiBvYnRlbmlkYSBpbnRlcmNhbWJpYW5kbyBmaWxhcyBlcyB1bmEgbWF0cml6IGRpZmVyZW50ZS4gIiwiZmVlZGJhY2tfdHlwZV9lcyI6InRleHQifSx7InBhdHRlcm4iOiIwMiIsInRydXRoIjoiVyIsImNob2ljZV9lbiI6Ikxpc3RCTDIiLCJjaG9pY2VfdHlwZV9lbiI6ImNhcyIsImNob2ljZV9saXN0X2V4cHJfZW4iOnRydWUsImNob2ljZV9sYW5ndWFnZV9pbmRlcGVuZGVudCI6dHJ1ZSwiY2hvaWNlX2ZyIjoiTGlzdEJMMiIsImNob2ljZV90eXBlX2ZyIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9mciI6dHJ1ZSwiY2hvaWNlX2RlIjoiTGlzdEJMMiIsImNob2ljZV90eXBlX2RlIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9kZSI6dHJ1ZSwiY2hvaWNlX2l0IjoiTGlzdEJMMiIsImNob2ljZV90eXBlX2l0IjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9pdCI6dHJ1ZSwiY2hvaWNlX2phIjoiTGlzdEJMMiIsImNob2ljZV90eXBlX2phIjoiY2FzIiwiY2hvaWNlX2xpc3RfZXhwcl9qYSI6dHJ1ZSwiZmVlZGJhY2tfZW4iOiJZb3UgZG8gbm90IHNlZW0gdG8gZGlzdGluZ3Vpc2ggYmV0d2VlbiBhIGNvZWZmaWNpZW50IG1hdHJpeCBhbmQgYW4gYXVnbWVudGVkIGNvZWZmaWNpZW50IG1hdHJpeC4iLCJmZWVkYmFja190eXBlX2VuIjoidGV4dCIsImZlZWRiYWNrX2ZyIjoiVm91cyBuZSBzZW1ibGV6IHBhcyBmYWlyZSBsYSBkaXN0aW5jdGlvbiBlbnRyZSB1bmUgbWF0cmljZSBkZXMgY29lZmZpY2llbnRzIGV0IHVuZSBtYXRyaWNlIGRlcyBjb2VmZmljaWVudHMgYXVnbWVudMOpZS4iLCJmZWVkYmFja190eXBlX2ZyIjoidGV4dCIsImZlZWRiYWNrX2RlIjoiU2llIHNjaGVpbmVuIG5pY2h0IHp3aXNjaGVuIGVpbmVyIEtvZWZmaXppZW50ZW5tYXRyaXggdW5kIGVpbmVyIGVyd2VpdGVydGVuIEtvZWZmaXppZW50ZW5tYXRyaXggenUgdW50ZXJzY2hlaWRlbi4iLCJmZWVkYmFja190eXBlX2RlIjoidGV4dCIsImZlZWRiYWNrX2l0IjoiU2VtYnJhIGNoZSB0dSBub24gZGlzdGluZ3VhIHRyYSB1bmEgbWF0cmljZSBkZWkgY29lZmZpY2llbnRpIGUgdW5hIG1hdHJpY2UgZGVpIGNvZWZmaWNpZW50aSBhdW1lbnRhdGEuIiwiZmVlZGJhY2tfdHlwZV9pdCI6InRleHQiLCJmZWVkYmFja19qYSI6IuS/guaVsOihjOWIl+OBqOaLoeWkp+S/guaVsOihjOWIl+OBruWMuuWIpeOBjOOBp+OBjeOBpuOBhOOBquOBhOOCiOOBhuOBp+OBmS4iLCJmZWVkYmFja190eXBlX2phIjoidGV4dCIsImZlZWRiYWNrX2J5X3RydXRoIjp0cnVlLCJjaG9pY2VfcHQiOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfcHQiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3B0Ijp0cnVlLCJjaG9pY2VfemgiOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfemgiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3poIjp0cnVlLCJjaG9pY2Vfa28iOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfa28iOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2tvIjp0cnVlLCJjaG9pY2VfcnUiOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfcnUiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3J1Ijp0cnVlLCJjaG9pY2Vfc3YiOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfc3YiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX3N2Ijp0cnVlLCJjaG9pY2VfZXMiOiJMaXN0QkwyIiwiY2hvaWNlX3R5cGVfZXMiOiJjYXMiLCJjaG9pY2VfbGlzdF9leHByX2VzIjp0cnVlLCJmZWVkYmFja19wdCI6IlBhcmVjZSBxdWUgbsOjbyBkaXN0aW5ndWUgZW50cmUgdW1hIG1hdHJpeiBkb3MgY29lZmljaWVudGVzIGUgdW1hIG1hdHJpeiBkb3MgY29lZmljaWVudGVzIGF1bWVudGFkYS4iLCJmZWVkYmFja190eXBlX3B0IjoidGV4dCIsImZlZWRiYWNrX3poIjoi55yL5p2l5L2g6L+Y5LiN6IO95Yy65YiG57O75pWw55+p6Zi15ZKM5aKe5bm/57O75pWw55+p6Zi144CCIiwiZmVlZGJhY2tfdHlwZV96aCI6InRleHQiLCJmZWVkYmFja19rbyI6IuqzhOyImO2WieugrOqzvCDssqjqsIDqs4TsiJjtlonroKzsnYQg6rWs67OE7ZWY7KeAIOuqu+2VmOqzoCDsnojripQg6rKDIOqwmeyKteuLiOuLpC4iLCJmZWVkYmFja190eXBlX2tvIjoidGV4dCIsImZlZWRiYWNrX3J1Ijoi0J/Qvi3QstC40LTQuNC80L7QvNGDLCDQstGLINC90LUg0YDQsNC30LvQuNGH0LDQtdGC0LUg0LzQsNGC0YDQuNGG0YMg0LrQvtGN0YTRhNC40YbQuNC10L3RgtC+0LIg0Lgg0YDQsNGB0YjQuNGA0LXQvdC90YPRjiDQvNCw0YLRgNC40YbRgyDQutC+0Y3RhNGE0LjRhtC40LXQvdGC0L7Qsi4iLCJmZWVkYmFja190eXBlX3J1IjoidGV4dCIsImZlZWRiYWNrX3N2IjoiRHUgdmVya2FyIGludGUgc2tpbGphIG1lbGxhbiBlbiBrb2VmZmljaWVudG1hdHJpcyBvY2ggZW4gdXTDtmthZCBrb2VmZmljaWVudG1hdHJpcy4iLCJmZWVkYmFja190eXBlX3N2IjoidGV4dCIsImZlZWRiYWNrX2VzIjoiUGFyZWNlIHF1ZSBubyBkaXN0aW5ndWVzIGVudHJlIHVuYSBtYXRyaXogZGUgY29lZmljaWVudGVzIHkgdW5hIG1hdHJpeiBkZSBjb2VmaWNpZW50ZXMgYW1wbGlhZGEuIiwiZmVlZGJhY2tfdHlwZV9lcyI6InRleHQifV0sInF2YXJzIjoiLyoqKioqKioqKioqKioqKioqIEdhdXNzRWxpbUNvZWZmTWF0LUEgKHJiKSAqKioqKioqKioqKioqKioqKiovXG4vKiAwMDEuTUNCIGluY2x1ZGUgZmlsZVx0XHQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICovXG4vKiBPYmplY3RpdmU6IFRvIGxlYXJuL2NoZWNrIGNvZWZmaWNpZW50IG1hdHJpeCBvZiBsaW4gZXFzICAgKi9cbi8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqL1xuLyogYzpbMV0sIHc6WzQsIDRdOyAqL1xuaWYgbm90IG51bWJlcnAoJV9NQ1FfTlVNX09QVFMpIHRoZW4gJV9NQ1FfTlVNX09QVFM6NjtcbiVfTUNRX05VTV9DT1BUUzoxO1xuLyoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqL1xuJV9ycChMKTo9cmFuZG9tX3Blcm11dGF0aW9uKEwpO1xudGV4MihzKTo9c2NvbmNhdChcIlxcXFwoXCIsIHRleDEocyksIFwiXFxcXClcIik7XG5hTDptYWtlX3JhbmRvbV9kaXN0cmlidXRpb25fcG0oW1sxLCA0XSwgWzIsIDNdLCBbMywgMl0sIFs0LCAxXSwgWzUsIDFdXSk7XG4lX21rbWF0KHIsIGMpOj1nZW5tYXRyaXgobGFtYmRhKFtpLCBqXSwgcmFuZChhTCkpLCByLCBjKTtcbiVfbm1rX2FsbDolX3JwKGxpc3RpZnkoY2FydGVzaWFuX3Byb2R1Y3QoezEsIDIsIDMsIDQsIDV9LCB7MSwgMiwgMywgNCwgNX0pKSk7XG5ubUw6WzEsIDIsIDMsIDQsIDVdO1xuXG5ydzpyYW5kKFszLCA0XSk7XG5jbDpyYW5kKFszLCA0XSk7LyogbWF4IDYsIG1pbiAzICovXG5cbiVfbWtFcShBLCBiLCB4TCk6PWJsb2NrKFtzOlwiXFxcXChcXFxcbGVmdFxcXFx7XFxcXGJlZ2lue2FycmF5fXtjY2N9XCIsIGssIHZ4XSwgdng6dHJhbnNwb3NlKG1hdHJpeCh4TCkpLFxuICBmb3IgazoxIHRocnUgbGVuZ3RoKEEpIGRvIChcbiAgICBzOnNjb25jYXQocywgZGlzcGxheV9wb2x5bm9taWFsX3Zhcmxpc3RfdGV4MSgobWF0QS52eClbaywgMV0sIHhMKSwgXCImPSZcIiwgdGV4MShiW2ssIDFdKSksXG4gICAgaWYgazxsZW5ndGgoQSkgdGhlbiBzOnNjb25jYXQocywgXCJcXFxcXFxcXFwiKSksXG4gIHM6c2NvbmNhdChzLCBcIlxcXFxlbmR7YXJyYXl9XFxcXHJpZ2h0LlxcXFwpXCIpLCByZXR1cm4ocykpO1xuXG5hTDolX3JwKGFwcGVuZChtYWtlbGlzdChrLCBrLCAtOSwgOSksIG1ha2VsaXN0KDAsIDIpKSk7XG56TDphcHBlbmQoWzBdLCAlX3JwKGFwcGVuZChtYWtlbGlzdCgwLCBjbC0yKSwgWzFdKSkpO1xucG1vZChhLCBuKTo9aWYgbW9kKGEsIG4pPTAgdGhlbiBuIGVsc2UgbW9kKGEsIG4pO1xuJV96aTpyYW5kKHJ3KSsxO1xubWF0QTpnZW5tYXRyaXgobGFtYmRhKFtpLCBqXSwgaWYgaT0lX3ppIHRoZW4gekxbal0gZWxzZSBhTFtwbW9kKGNsKihpLTEpK2osIGxlbmd0aChhTCkpXSksIHJ3LCBjbCk7XG54eXo6JV9ycChbdSwgdiwgdywgeCwgeSwgel0pO1xuXG54TDpyYW5kKFttYWtlbGlzdCh4W2tdLCBrLCAxLCBjbCksIG1ha2VsaXN0KHh5eltrXSwgaywgMSwgY2wpXSk7XG54TFM6dGV4MihzZXF1ZW5jZWlmeSh4TCkpO1xudkI6Z2VubWF0cml4KGxhbWJkYShbaSwgal0sIHJhbmQoWy0zLCAtMiwgLTEsIDEsIDIsIDNdKSksIHJ3LCAxKTtcblxuUXVlc3Rpb25FcTolX21rRXEobWF0QSwgdkIsIHhMKTtcbm1hdEFiOmFkZGNvbChtYXRBLCB2Qik7XG5MaXN0QUwxOlttYXRBYl07XG5cbmNsTDolX3JwKG1ha2VsaXN0KGssIGssIGNsKSk7XG5tYXRBMTptYXRBLmtpaG9uUihjbCwgY2xMWzFdLCBjbExbMl0pO1xubWF0QTI6bWF0QS5raWhvblIoY2wsIGNsTFsxXSwgY2xMWzNdKTtcbm1hdEEzOm1hdEEua2lob25SKGNsLCBjbExbMl0sIGNsTFszXSk7XG5cbnJ3TDolX3JwKG1ha2VsaXN0KGssIGssIHJ3KSk7XG5tYXRBNDpraWhvblIocncsIHJ3TFsxXSwgcndMWzJdKS5tYXRBYjtcbm1hdEE1OmtpaG9uUihydywgcndMWzFdLCByd0xbM10pLm1hdEFiO1xubWF0QTY6a2lob25SKHJ3LCByd0xbMl0sIHJ3TFszXSkubWF0QWI7XG5cblxuTGlzdEJMMTpbXTtcbkxpc3RCTDE6Y29ucyhhZGRjb2wobWF0QTEsIHZCKSwgTGlzdEJMMSk7XG5MaXN0QkwxOmNvbnMoYWRkY29sKHJhbmQoW21hdEEyLCBtYXRBM10pLCB2QiksIExpc3RCTDEpO1xuTGlzdEJMMTpjb25zKHJhbmQoW21hdEE0LCBtYXRBNV0pLCBMaXN0QkwxKTtcbkxpc3RCTDE6Y29ucyhtYXRBNiwgTGlzdEJMMSk7XG5cbkxpc3RCTDI6W21hdEEsIG1hdEExLCBtYXRBMiwgbWF0QTNdO1xuXG4vKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKiBRdWVzdGlvbiB0ZXh0ICoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKiovXG4vKiAlX19tY3FfcXRleHRMIDogcXVlc3Rpb24gdGV4dCBsYW5ndWFnZSBsaXN0ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICovXG4vKiBOT1RFOiBJbiB0aGUgcXVlc3Rpb24gdGV4dCwgc3RyaW5nIFwiX19TRUxUWVBFX19cIiBpcyByZXBsYWNlZCBhdXRvbWF0aWNhbGx5LiAgICAgICAgICAgKi9cbi8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKi9cbi8qIGlmIG5vdCBkZXBlbmQgb24gbG9jYWxlLCBkZWZpbmUgJyVfX21jcV9xdGV4dCcobWF5IGluY2x1ZGUgX19TRUxUWVBFX18pIG9yICdxdGV4dCcgZGlyZWN0bHkgKi9cbi8qIE1DUV9XRUJBUFBfU0xPVDpxdGV4dCAqL1xuXG5cbi8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKiBMaXN0IG9mIHBhdHRlcm5zL2ZlZWRiYWNrcyAqKioqKioqKioqKioqKioqKioqKioqKioqKioqKi9cbi8qICBUaGlzIHRlbXBsYXRlIGFzc3VtZXMgdGhlIGxpc3RzICVfX0NvcHQ/TCwgJV9fV29wdD9MIGRvZXMgbm90IGRlcGVuZCBvbiB0aGUgbG9jYWxlLiAgKi9cbi8qICBJZiBpdCBkZXBlbmRzIG9uIHRoZSBsb2NhbGUsIHBsZWFzZSBzZXQgdXAgdGhlIGxpc3QgdXNpbmcgJV9TVEFDS19MQU5HLiAgICAgICAgICAgICAgKi9cbi8qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKi9cbi8qIENvcnJlY3QgcGF0dGVybiAxICovXG4vKiBNQ1FfV0VCQVBQX1NMT1Q6Q29wdDEgKi9cbi8qIE1DUV9XRUJBUFBfU0xPVDpDbXNnMSAqL1xuXG4vKiBXcm9uZyBhbnN3ZXIgcGF0dGVybiAxICovXG4vKiBNQ1FfV0VCQVBQX1NMT1Q6V29wdDEgKi9cbi8qIE1DUV9XRUJBUFBfU0xPVDpXbXNnMSAqL1xuXG4vKiBXcm9uZyBhbnN3ZXIgcGF0dGVybiAxICovXG4vKiBNQ1FfV0VCQVBQX1NMT1Q6V29wdDIgKi9cbi8qIE1DUV9XRUJBUFBfU0xPVDpXbXNnMiAqL1xuXG5cbi8qKioqKioqKioqIEVPRiAqKioqKioqKioqL1xuIiwicGFyYW1ldGVycyI6Ii8qKioqKiBTZWUgdGhlIFNhbXBsZS50eHQgZmlsZSBiZWxvdyBmb3IgaG93IHRvIGRlc2NyaWJlIHF1ZXN0aW9uIHZhcmlhYmxlcyBoZXJlICoqKioqKioqKi9cbi8qIGNbMV0sIHdbNCwgNF0gKi8iLCJzZXR0aW5ncyI6eyJub0NvcnJlY3RPcHRpb24iOmZhbHNlLCJub0lkZWFPcHRpb24iOmZhbHNlLCJyYWRpb011bHRpcGxlUHJvbXB0IjpmYWxzZSwiY2FzdGV4dFRlbXBsYXRlIjp0cnVlLCJzY29yaW5nTWV0aG9kIjoiMSIsIm51bU9wdGlvbnMiOiI3IiwibnVtQ29ycmVjdCI6IjEiLCJyYW5kb21Db3JyZWN0IjpmYWxzZSwiY29ycmVjdENvdW50cyI6IjEsIDIiLCJyZXF1aXJlUGFpcnMiOmZhbHNlLCJmZWVkYmFja0J5VHJ1dGgiOmZhbHNlLCJmZWVkYmFja01vZGUiOiJ0cnVlIn0sImxlZ2FjeVF1ZXN0aW9uSW5wdXRzIjp7ImVuIjp7Im9yaWdpbmFsIjoic2NvbmNhdChcIlRoZSBzeXN0ZW0gb2YgbGluZWFyIGVxdWF0aW9ucyB3aXRoIHZhcmlhYmxlcyBcIiwgeExTLCBcIiBpcyBnaXZlbiBieTxicj5cIiwgUXVlc3Rpb25FcSwgXCI8YnI+LiBDaG9vc2UgdGhlIDxiPmF1Z21lbnRlZDwvYj4gbWF0cml4LlwiKSIsImNvbnZlcnRlZCI6IlRoZSBzeXN0ZW0gb2YgbGluZWFyIGVxdWF0aW9ucyB3aXRoIHZhcmlhYmxlcyB7QHNzdWJzdCglX19TRUxQUk9NUFQsIFwiX19TRUxQUk9NUFRfX1wiLCBzc3Vic3QoJV9fU0VMVFlQRSwgXCJfX1NFTFRZUEVfX1wiLCBzY29uY2F0KHhMUykpKUB9IGlzIGdpdmVuIGJ5PGJyPntAc3N1YnN0KCVfX1NFTFBST01QVCwgXCJfX1NFTFBST01QVF9fXCIsIHNzdWJzdCglX19TRUxUWVBFLCBcIl9fU0VMVFlQRV9fXCIsIHNjb25jYXQoUXVlc3Rpb25FcSkpKUB9PGJyPi4gQ2hvb3NlIHRoZSA8Yj5hdWdtZW50ZWQ8L2I+IG1hdHJpeC4ifSwiZnIiOnsib3JpZ2luYWwiOiJzY29uY2F0KFwiTGUgc3lzdMOobWUgZOKAmcOpcXVhdGlvbnMgbGluw6lhaXJlcyDDoCB2YXJpYWJsZXMgXCIsIHhMUywgXCIgZXN0IGRvbm7DqSBwYXI8YnI+XCIsIFF1ZXN0aW9uRXEsIFwiPGJyPi4gQ2hvaXNpc3NleiBsYSBtYXRyaWNlIDxiPmF1Z21lbnTDqWU8L2I+LlwiKSIsImNvbnZlcnRlZCI6IkxlIHN5c3TDqG1lIGTigJnDqXF1YXRpb25zIGxpbsOpYWlyZXMgw6AgdmFyaWFibGVzIHtAc3N1YnN0KCVfX1NFTFBST01QVCwgXCJfX1NFTFBST01QVF9fXCIsIHNzdWJzdCglX19TRUxUWVBFLCBcIl9fU0VMVFlQRV9fXCIsIHNjb25jYXQoeExTKSkpQH0gZXN0IGRvbm7DqSBwYXI8YnI+e0Bzc3Vic3QoJV9fU0VMUFJPTVBULCBcIl9fU0VMUFJPTVBUX19cIiwgc3N1YnN0KCVfX1NFTFRZUEUsIFwiX19TRUxUWVBFX19cIiwgc2NvbmNhdChRdWVzdGlvbkVxKSkpQH08YnI+LiBDaG9pc2lzc2V6IGxhIG1hdHJpY2UgPGI+YXVnbWVudMOpZTwvYj4uIn0sIml0Ijp7Im9yaWdpbmFsIjoic2NvbmNhdChcIklsIHNpc3RlbWEgZGkgZXF1YXppb25pIGxpbmVhcmkgbmVsbGUgdmFyaWFiaWxpIFwiLCB4TFMsIFwiIMOoIGRhdG8gZGE8YnI+XCIsIFF1ZXN0aW9uRXEsIFwiPGJyPi4gU2NlZ2xpIGxhIG1hdHJpY2UgPGI+YXVtZW50YXRhPC9iPi5cIikiLCJjb252ZXJ0ZWQiOiJJbCBzaXN0ZW1hIGRpIGVxdWF6aW9uaSBsaW5lYXJpIG5lbGxlIHZhcmlhYmlsaSB7QHNzdWJzdCglX19TRUxQUk9NUFQsIFwiX19TRUxQUk9NUFRfX1wiLCBzc3Vic3QoJV9fU0VMVFlQRSwgXCJfX1NFTFRZUEVfX1wiLCBzY29uY2F0KHhMUykpKUB9IMOoIGRhdG8gZGE8YnI+e0Bzc3Vic3QoJV9fU0VMUFJPTVBULCBcIl9fU0VMUFJPTVBUX19cIiwgc3N1YnN0KCVfX1NFTFRZUEUsIFwiX19TRUxUWVBFX19cIiwgc2NvbmNhdChRdWVzdGlvbkVxKSkpQH08YnI+LiBTY2VnbGkgbGEgbWF0cmljZSA8Yj5hdW1lbnRhdGE8L2I+LiJ9LCJkZSI6eyJvcmlnaW5hbCI6InNjb25jYXQoXCJEYXMgbGluZWFyZSBHbGVpY2h1bmdzc3lzdGVtIG1pdCBkZW4gVmFyaWFibGVuIFwiLCB4TFMsIFwiIGlzdCBkdXJjaDxicj5cIiwgUXVlc3Rpb25FcSwgXCI8YnI+IGdlZ2ViZW4uIFfDpGhsZW4gU2llIGRpZSA8Yj5lcndlaXRlcnRlPC9iPiBLb2VmZml6aWVudGVubWF0cml4LlwiKSIsImNvbnZlcnRlZCI6IkRhcyBsaW5lYXJlIEdsZWljaHVuZ3NzeXN0ZW0gbWl0IGRlbiBWYXJpYWJsZW4ge0Bzc3Vic3QoJV9fU0VMUFJPTVBULCBcIl9fU0VMUFJPTVBUX19cIiwgc3N1YnN0KCVfX1NFTFRZUEUsIFwiX19TRUxUWVBFX19cIiwgc2NvbmNhdCh4TFMpKSlAfSBpc3QgZHVyY2g8YnI+e0Bzc3Vic3QoJV9fU0VMUFJPTVBULCBcIl9fU0VMUFJPTVBUX19cIiwgc3N1YnN0KCVfX1NFTFRZUEUsIFwiX19TRUxUWVBFX19cIiwgc2NvbmNhdChRdWVzdGlvbkVxKSkpQH08YnI+IGdlZ2ViZW4uIFfDpGhsZW4gU2llIGRpZSA8Yj5lcndlaXRlcnRlPC9iPiBLb2VmZml6aWVudGVubWF0cml4LiJ9fSwiaW5jbHVkZUZpbGVuYW1lIjoiR2F1c3NFbGltQ29lZmZNYXQtQS50eHQiLCJpbmNsdWRlU291cmNlIjp7InVybCI6Imh0dHBzOi8veW9zaXRvbWktb3B1LmdpdGh1Yi5pby9zdGFja19xdWVzdGlvbnMvMDAxL0dhdXNzRWxpbUNvZWZmTWF0LUEudHh0IiwicGF0aCI6IjAwMS9HYXVzc0VsaW1Db2VmZk1hdC1BLnR4dCIsImZpbGVuYW1lIjoiR2F1c3NFbGltQ29lZmZNYXQtQS50eHQiLCJnZW5lcmF0ZWQiOmZhbHNlLCJhdXRvVXJsIjpmYWxzZX19 */
+
+/******************************** MAIN QUESTION VARIABLES ********************************/
+
+
+%_MCQ_NUM_OPTS:7;
+%_MCQ_NUM_COPTS:1;
+%__mcq_nocorrectopt:false;
+%__mcq_noidea:false;
+%__mcq_scmethod:1;
+/***** See the Sample.txt file below for how to describe question variables here *********/
+/* c[1], w[4, 4] */
+stack_include("https://yositomi-opu.github.io/stack_questions/001/GaussElimCoeffMat-A.txt");
+
+/***************************** END OF MAIN QUESTION VARIABLES ****************************/
+
+/*********************************** DO NOT EDIT HERE ************************************/
+/*************** patterns is automatically generate by the post template *****************/
+stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_cas.mac");
+/*****************************************************************************************/
+
+%__mcq_langcode:castext("[[lang code=\"en\"]][[/lang]][[lang code=\"ja\"]][[/lang]][[lang code=\"fr\"]][[/lang]][[lang code=\"it\"]][[/lang]][[lang code=\"de\"]][[/lang]][[lang code=\"pt\"]][[/lang]][[lang code=\"zh\"]][[/lang]][[lang code=\"ko\"]][[/lang]][[lang code=\"ru\"]][[/lang]][[lang code=\"sv\"]][[/lang]][[lang code=\"es\"]][[/lang]]");
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="html">
+      <text>001.GaussElimCoeffMat-B-rb</text>
+    </questionnote>
+    <questiondescription format="html">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span>
+<span lang="ja" class="multilang">よくできました。正解です！</span>
+<span lang="en" class="multilang">Well done! Spot on!</span>
+<span lang="es" class="multilang">¡Muy bien! ¡Respuesta correcta!</span>
+<span lang="fr" class="multilang">Bravo ! Bonne réponse !</span>
+<span lang="it" class="multilang">Ben fatto! Risposta corretta!</span>
+<span lang="de" class="multilang">Gut gemacht! Richtig!</span>
+<span lang="pt" class="multilang">Muito bem! Resposta correta!</span>
+<span lang="zh" class="multilang">做得很好！回答正确！</span>
+<span lang="ko" class="multilang">잘했습니다! 정답입니다!</span>
+<span lang="ru" class="multilang">Отлично! Верно!</span>
+<span lang="sv" class="multilang">Bra gjort! Rätt svar!</span>]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
+<span lang="ja" class="multilang">部分的に正解です。</span>
+<span lang="en" class="multilang">Partially correct!</span>
+<span lang="es" class="multilang">Parcialmente correcto.</span>
+<span lang="fr" class="multilang">Partiellement correct.</span>
+<span lang="it" class="multilang">Parzialmente corretto.</span>
+<span lang="de" class="multilang">Teilweise richtig.</span>
+<span lang="pt" class="multilang">Parcialmente correto.</span>
+<span lang="zh" class="multilang">部分正确。</span>
+<span lang="ko" class="multilang">부분적으로 맞았습니다.</span>
+<span lang="ru" class="multilang">Частично верно.</span>
+<span lang="sv" class="multilang">Delvis rätt.</span>]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
+<span lang="ja" class="multilang">間違いです。</span>
+<span lang="en" class="multilang">Incorrect!</span>
+<span lang="es" class="multilang">Respuesta incorrecta.</span>
+<span lang="fr" class="multilang">Incorrect.</span>
+<span lang="it" class="multilang">Errato.</span>
+<span lang="de" class="multilang">Falsch.</span>
+<span lang="pt" class="multilang">Incorreto.</span>
+<span lang="zh" class="multilang">回答错误。</span>
+<span lang="ko" class="multilang">오답입니다.</span>
+<span lang="ru" class="multilang">Неверно.</span>
+<span lang="sv" class="multilang">Felaktigt.</span>]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>radio</type>
+      <tans>ta1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar_cas.mac");
+]]></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description>NOIDEA-option-detection</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgNOID</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[{@%__mcq_langcode@}
+<p>{@%__mcq_noidea_checked@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
+        <description>Score and all messages are given here</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>chk1</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>2</truenextnode>
+        <trueanswernote>prt1-2-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
+{@%__mcq_langcode@}
+<p>{@msg@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>sc</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>2</falsenextnode>
+        <falseanswernote>prt1-2-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[<!-- general error / 一般の誤り -->
+{@%__mcq_langcode@}
+<p>{@msg@}. </p>
+<p>Score: {@sc@}</p>]]></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>10</name>
+        <description>Wrong(Incorrect) Pattern 4</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[4]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>11</truenextnode>
+        <trueanswernote>prt1-11-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>11</falsenextnode>
+        <falseanswernote>prt1-11-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>11</name>
+        <description>Wrong(Incorrect) Pattern 5</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>12</truenextnode>
+        <trueanswernote>prt1-12-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>12</falsenextnode>
+        <falseanswernote>prt1-12-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>12</name>
+        <description>Wrong(Incorrect) Pattern 6</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[6]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>13</truenextnode>
+        <trueanswernote>prt1-13-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>13</falsenextnode>
+        <falseanswernote>prt1-13-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>13</name>
+        <description>Wrong(Incorrect) Pattern 7</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[7]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>14</truenextnode>
+        <trueanswernote>prt1-14-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>14</falsenextnode>
+        <falseanswernote>prt1-14-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>14</name>
+        <description>Wrong(Incorrect) Pattern 8</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[8]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>15</truenextnode>
+        <trueanswernote>prt1-15-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>15</falsenextnode>
+        <falseanswernote>prt1-15-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>15</name>
+        <description>Wrong(Incorrect) Pattern 9</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[9]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-16-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-16-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>2</name>
+        <description>Correct Pattern 1</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>3</truenextnode>
+        <trueanswernote>prt1-3-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>3</falsenextnode>
+        <falseanswernote>prt1-3-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>3</name>
+        <description>Correct Pattern 2</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>4</truenextnode>
+        <trueanswernote>prt1-4-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>4</falsenextnode>
+        <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>4</name>
+        <description>Correct Pattern 3</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>5</truenextnode>
+        <trueanswernote>prt1-5-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>5</falsenextnode>
+        <falseanswernote>prt1-5-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>5</name>
+        <description>Correct Patern 4</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[4]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>6</truenextnode>
+        <trueanswernote>prt1-6-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>6</falsenextnode>
+        <falseanswernote>prt1-6-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>6</name>
+        <description>Correct Pattern 5</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>7</truenextnode>
+        <trueanswernote>prt1-7-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>7</falsenextnode>
+        <falseanswernote>prt1-7-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>7</name>
+        <description>Wrong(Incorrect) Pattern 1</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>8</truenextnode>
+        <trueanswernote>prt1-8-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>8</falsenextnode>
+        <falseanswernote>prt1-8-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>8</name>
+        <description>Wrong(Incorrect) Pattern 2</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>9</truenextnode>
+        <trueanswernote>prt1-9-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>9</falsenextnode>
+        <falseanswernote>prt1-9-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>9</name>
+        <description>Wrong(Incorrect) Pattern 3</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>10</truenextnode>
+        <trueanswernote>prt1-10-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>10</falsenextnode>
+        <falseanswernote>prt1-10-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+    </prt>
+  </question>
+
+</quiz>
