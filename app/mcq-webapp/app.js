@@ -249,6 +249,7 @@ function bindEvents() {
       updateOutput();
     });
   });
+  document.querySelector("#selectAllLanguagesButton").addEventListener("click", selectAllLanguages);
   el.baseLanguage.addEventListener("change", changeBaseLanguage);
   el.prepareTranslationButton.addEventListener("click", prepareTranslationRequest);
   el.copyTranslationButton.addEventListener("click", copyTranslationRequest);
@@ -837,6 +838,14 @@ function saveLanguageSettings() {
 
 function baseLang() {
   return el.baseLanguage.value || INITIAL_LOCALE;
+}
+
+function selectAllLanguages() {
+  LANGS.forEach(lang => { el.languageChecks[lang].checked = true; });
+  saveLanguageSettings();
+  updateQuestionLanguageVisibility();
+  markTranslationsStale("展開先言語が変更されました");
+  updateOutput();
 }
 
 function changeBaseLanguage() {

@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260915-rb2">
+    <link rel="stylesheet" href="./styles.css?v=20260915-languageheading1">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260915-manualcasttext2"></script>
-    <script defer src="./app.js?v=20260915-manualcasttext2"></script>
+    <script defer src="./i18n.js?v=20260915-languageheading1"></script>
+    <script defer src="./app.js?v=20260915-languageheading1"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -68,15 +68,26 @@
         <aside class="panel settings-panel">
           <section class="language-settings" aria-labelledby="languageHeading">
             <div class="language-settings-heading">
-              <h2 id="languageHeading">多言語設定</h2>
+              <div class="row-actions language-heading-actions">
+                <h2 id="languageHeading">多言語設定</h2>
+                <div class="question-text-help">
+                  <button type="button" class="question-text-help-button" aria-label="多言語設定について" aria-describedby="languageHelp">?</button>
+                  <div id="languageHelp" class="question-text-tooltip" role="tooltip">
+                    <p>問題文と、「言語非依存」にチェックが入っていない選択肢・フィードバックを、選択した言語へ多言語展開します。</p>
+                    <p>「展開」で翻訳依頼を作成します。ChatGPTへ渡し、返された翻訳JSONを「翻訳結果を確認・修正」に貼り付けて反映してください。</p>
+                  </div>
+                </div>
+                <button id="prepareTranslationButton" type="button" class="primary" title="多言語展開">展開</button>
+              </div>
               <div class="base-language-row">
                 <label for="baseLanguage">基本言語</label>
                 <select id="baseLanguage"></select>
               </div>
             </div>
-            <p class="language-help">XMLに展開する言語を選択</p>
-            <div id="languageChoices" class="language-choices"></div>
-            <button id="prepareTranslationButton" type="button" class="primary translation-button">多言語展開</button>
+            <div id="languageChoices" class="language-choices">
+              <span class="language-choices-label">展開言語</span>
+              <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択">ALL</button>
+            </div>
             <details id="translationPanel" class="translation-panel">
               <summary>翻訳結果を確認・修正</summary>
               <p class="translation-guide">生成された依頼をChatGPTへ貼り付け、返されたJSONでこの欄を置き換えてから「結果を反映」を押してください。</p>

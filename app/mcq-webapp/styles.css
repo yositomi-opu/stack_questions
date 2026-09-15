@@ -1288,3 +1288,11 @@ td:nth-child(5) {
 
 .special-options-checks { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; flex: 0 1 auto; }
 .special-options-settings { flex-direction: column; align-items: flex-start; }
+
+.language-heading-actions { gap: 6px; }
+.language-heading-actions #prepareTranslationButton { width: auto; min-height: 32px; padding: 5px 9px; font-size: 12px; white-space: nowrap; }
+.language-heading-actions .question-text-tooltip { left: 0; right: auto; }
+.language-choices { align-items: center; }
+.language-choices-label { font-size: 12px; white-space: nowrap; }
+#selectAllLanguagesButton { min-height: 30px; padding: 4px 7px; font-size: 12px; }
+.qvars-field { border-top: 1px solid var(--line); padding-top: 12px; }
