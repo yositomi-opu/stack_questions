@@ -10,13 +10,19 @@
 
 
 
+
 if (not %__mcq_min_max=min) and (not %__mcq_min_max=max) then %__mcq_min_max:min;
 [%__mcq_fbp, %__mcq_subsc, %__mcq_noidea, %__mcq_nocorrectopt, %__mcq_nocorrecttrue, %__mcq_qtext_auto]:%_MCQ_FLAGS;
+
+
 %__mcq_scmethod:1;
+
+
+if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
+
 
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
-if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 
 
 %__mcq_lang_list:["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"];
@@ -53,8 +59,11 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_WLbase:[];
 %__mcq_CmsgL:[];
 %__mcq_WmsgL:[];
+
+
 %__mcq_addCopt(s, m):=block([], if listp(s) then (%__mcq_CLbase:append(%__mcq_CLbase, [random_permutation(s)]), %__mcq_CmsgL:append(%__mcq_CmsgL, [m])));
 %__mcq_addWopt(s, m):=block([], if listp(s) then (%__mcq_WLbase:append(%__mcq_WLbase, [random_permutation(s)]), %__mcq_WmsgL:append(%__mcq_WmsgL, [m])));
+
 %__mcq_noidea_checkedL:[
  ["en", castext("\"I don't know yet\" was selected/checked. The score is 0.")], ["es", castext("Se ha seleccionado «Todavía no lo sé». La puntuación es 0.")],
  ["ja", castext("「まだわからない」が選択/チェックされました. 得点は0です.")],
@@ -68,3 +77,32 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
  ["sv", castext("Alternativet ”Jag vet inte ännu” valdes/markerades. Poängen är 0.")]
 ];
 %__mcq_noidea_checked:%__mcq_lang(%__mcq_noidea_checkedL, %_STACK_LANG);
+
+
+
+
+
+%__mcq_SELL:[["en", "Choose"], ["es", "Elige"], ["fr", "Choisissez"], ["de", "Wählen Sie"], ["it", "Scegli"], ["ja", "選べ"], ["pt", "Escolha"], ["zh", "选择"], ["ko", "선택하시오"], ["ru", "Выберите"], ["sv", "Välj"]];
+%__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
+%__mcq_SELALLL:[["en", "Choose all"], ["es", "Elige todas"], ["fr", "Choisissez toutes les"], ["de", "Wählen Sie alle"], ["it", "Scegli tutte le"], ["ja", "すべて選べ"], ["pt", "Escolha todas as"], ["zh", "选择所有"], ["ko", "모두 선택하시오"], ["ru", "Выберите все"], ["sv", "Välj alla"]];
+%__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
+%__mcq_SELONEANYL:[
+ ["en", "Choose one of the"], ["es", "Elige una de las"], ["fr", "Choisissez une des"], ["de", "Wählen Sie eine der"], ["it", "Scegli una delle"], ["ja", "1つ選べ（正解が複数あっても1つでよい）"], ["pt", "Escolha uma das"], ["zh", "选择其中一个"], ["ko", "그중 하나를 선택하시오"], ["ru", "Выберите один из"], ["sv", "Välj ett av"]];
+%__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
+
+
+%__mcq_SELPROMPT_ONE_L:[
+ ["en", "Select the correct answer."], ["es", "Selecciona la respuesta correcta."], ["fr", "Sélectionnez la bonne réponse."], ["de", "Wählen Sie die richtige Antwort aus."], ["it", "Seleziona la risposta corretta."], ["ja", "正しいものを選べ。"], ["pt", "Selecione a resposta correta."], ["zh", "请选择一个正确答案。"], ["ko", "정답 하나를 선택하시오."], ["ru", "Выберите правильный ответ."], ["sv", "Välj rätt svar."]];
+%__mcq_SELPROMPT_ALL_L:[
+ ["en", "Select all correct answers."], ["es", "Selecciona todas las respuestas correctas."], ["fr", "Sélectionnez toutes les bonnes réponses."], ["de", "Wählen Sie alle richtigen Antworten aus."], ["it", "Seleziona tutte le risposte corrette."], ["ja", "正しいものをすべて選べ。"], ["pt", "Selecione todas as respostas corretas."], ["zh", "请选择所有正确答案。"], ["ko", "정답을 모두 선택하시오."], ["ru", "Выберите все правильные ответы."], ["sv", "Välj alla rätta svar."]];
+%__mcq_SELPROMPT_ANY_L:[
+ ["en", "Select one correct answer, even if more than one is correct."], ["es", "Selecciona una respuesta correcta, aunque haya más de una."], ["fr", "Sélectionnez une bonne réponse, même s’il y en a plusieurs."], ["de", "Wählen Sie eine richtige Antwort aus, auch wenn es mehrere gibt."], ["it", "Seleziona una risposta corretta, anche se ce n’è più di una."], ["ja", "正しいものを1つ選べ（複数ある場合も1つでよい）。"], ["pt", "Selecione uma resposta correta, mesmo que haja mais de uma."], ["zh", "请选择一个正确答案，即使正确答案不止一个。"], ["ko", "정답이 여러 개여도 하나만 선택하시오."], ["ru", "Выберите один правильный ответ, даже если их несколько."], ["sv", "Välj ett rätt svar, även om det finns flera."]];
+
+
+if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL
+  else if %__mcq_rb_cb="rb2" then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG)
+  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG)
+  else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
+%__SELTYPE:%__mcq_seltype;
+%__SELPROMPT:%__mcq_selprompt;

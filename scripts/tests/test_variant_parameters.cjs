@@ -353,3 +353,34 @@ for (const cas of [false,true]) {
 }
 context.resetCsvImportState();assert.equal(el.radioMultiplePrompt.checked,false);
 console.log('Passed: rb/rb2/cb generation independent of drawn count, settings round trips and reset.');
+
+// CASText migration preserves literal strings, legacy CAS expressions, and saved state.
+context.applyRecords(context.parseDelimited(fs.readFileSync(path.join(root,'app/mcq-webapp/sample.csv'),'utf8'),','));
+for(const lang of langs) {
+ el.questionModes[lang].options=[{textContent:'文字列'}, {textContent:'CAS式'}];
+ el.questions[lang].closest=()=>({classList:{add(){},remove(){},toggle(){}}});
+}
+const legacy='sconcat("行列 ", stack_disp(m,"i"), " __SELTYPE__")';
+el.questions.ja.value=legacy;state.questionTypes.ja='cas';el.castextTemplate.checked=true;
+context.syncCastextQuestionInputs();
+const migrated=el.questions.ja.value;
+assert.equal(migrated,'行列 {@m@} __SELTYPE__');
+assert.equal(state.questionTypes.ja,'text');assert.equal(el.questionModes.ja.disabled,true);
+context.syncCastextQuestionInputs();assert.equal(el.questions.ja.value,migrated,'migration is idempotent');
+assert.equal(context.replaceCasttextPrompts(migrated),'行列 {@m@} {@%__SELTYPE@}');
+assert.equal(context.replaceCasttextPrompts('{@f("__SELTYPE__")@}'),'{@f("__SELTYPE__")@}');
+assert.equal(context.replaceCasttextPrompts('文 __SELTYPE__ {@a@} __SELPROMPT__'),'文 {@%__SELTYPE@} {@a@} {@%__SELPROMPT@}');
+assert.equal(context.casttextLiteral('a\n"b"'), 'castext("a\n\\"b\\"")');
+assert.match(context.langAssocFromFields(),/castext\(/);
+const castSnapshot=context.appStateSnapshot();state.legacyQuestionInputs={};context.applyAppStateSnapshot(castSnapshot);
+assert.equal(state.legacyQuestionInputs.ja.original,legacy);
+const castRecords=context.currentCsvRecords('cast');context.applyRecords(castRecords);
+assert.equal(state.legacyQuestionInputs.ja.original,legacy);
+el.castextTemplate.checked=false;context.syncCastextQuestionInputs();
+assert.equal(el.questions.ja.value,legacy);assert.equal(state.questionTypes.ja,'cas');
+assert.equal(el.questionModes.ja.disabled,false);
+assert.equal(context.feedbackOutputValue({value:'Test {@a@}',type:'text'}).type,'text');
+el.castextTemplate.checked=true;
+assert.equal(context.feedbackOutputValue({value:'Test {@a@}',type:'text'}).value,'castext("Test {@a@}")');
+assert.equal(context.feedbackOutputValue({value:'stack_disp(a)',type:'cas'}).value,'stack_disp(a)');
+console.log('Passed: CASText migration, escaping, prompt tokens, feedback wrapping, save/load and reversal.');

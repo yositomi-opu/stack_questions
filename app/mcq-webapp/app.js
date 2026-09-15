@@ -30,6 +30,7 @@ const state = {
   questionLanguageIndependent: false,
   includeSource: null,
   includeFilename: "",
+  legacyQuestionInputs: {},
   casEvaluation: { status: "idle", stale: false, variables: [], expressions: {} },
 };
 
@@ -170,7 +171,8 @@ function bindEvents() {
   });
   document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
-  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.castextTemplate, el.radioMultiplePrompt].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
+  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.radioMultiplePrompt].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
+  el.castextTemplate.addEventListener("change", () => { updateOutput(); renderRows(); });
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
   el.modeRb.addEventListener("change", () => setMode("rb"));
   el.modeCb.addEventListener("change", () => setMode("cb"));
@@ -655,10 +657,10 @@ function clamp(value, min, max) {
 async function loadTemplates() {
   try {
     const [rb, cb, rbCas, cbCas] = await Promise.all([
-      fetch("./templates/001.MCQ-rb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ-cb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-rb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-cb.xml?v=20260914-es1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-rb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-cb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-rb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-cb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
     ]);
     state.templates = { rb, cb, rbCas, cbCas };
     setStatus("テンプレート読込完了");
@@ -1189,12 +1191,18 @@ function setFixedGroupChoices(group, values) {
   markTranslationsStale("基本言語の選択肢が変更されました");
 }
 
+function feedbackValueTypeSelect(value) {
+  const mode = valueTypeSelect(value);
+  if (el.castextTemplate?.checked) mode.options[0].textContent = "CASText";
+  return mode;
+}
+
 function fixedFeedbackTextarea(group) {
   const feedbackKey = `feedback_${baseLang()}`;
   const typeKey = `feedback_type_${baseLang()}`;
   const editor = document.createElement("div");
   editor.className = "typed-editor";
-  const mode = valueTypeSelect(group.rows.find((row) => row[typeKey])?.[typeKey] || "text");
+  const mode = feedbackValueTypeSelect(group.rows.find((row) => row[typeKey])?.[typeKey] || "text");
   const textarea = document.createElement("textarea");
   textarea.rows = 3;
   textarea.value = group.rows.find((row) => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
@@ -1368,7 +1376,7 @@ function feedbackTextarea(row, index) {
     updateOutput();
   });
   const sourceWithType = groupRows.find((candidate) => candidate[typeKey]);
-  const mode = valueTypeSelect(sourceWithType?.[typeKey] || "text");
+  const mode = feedbackValueTypeSelect(sourceWithType?.[typeKey] || "text");
   mode.dataset.feedbackGroup = key;
   mode.disabled = textarea.disabled;
   mode.addEventListener("change", () => {
@@ -1579,6 +1587,7 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  syncCastextQuestionInputs();
   syncIncludeFilename();
   if (!state.rows.length) {
     el.xmlOutput.value = "";
@@ -1619,6 +1628,9 @@ function generateXml() {
     ? patternCount - minSelectedCorrect
     : patterns.filter((pattern) => pattern.W.length).length;
   return template
+    // STACK discovers available languages in top-level question CASText.
+    // Keep these invisible declarations as well as the reusable langcode variable.
+    .replace(/(<questiontext[^>]*>\s*<text><!\[CDATA\[)/, (start) => el.castextTemplate?.checked ? start + languageBlocks() : start)
     .replace(/\{@__mcq_noidea_checked@\}/g, "{@%__mcq_noidea_checked@}")
     .replace(/(?:\[\[lang code=['"][^'"]+['"]\]\]\[\[\/lang\]\])+/g, languageBlocks())
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
@@ -1633,6 +1645,8 @@ function generateXml() {
       /\n\s*(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/)/,
       `\n${metadataComment}\n\n$1`
     )
+    .replace(/(\]\]><\/text>\s*<\/questionvariables>)/, (end) => el.castextTemplate?.checked
+      ? `\n%__mcq_langcode:${casttextLiteral(languageBlocks())};\n${end}` : end)
     .replace(/<questionnote format="html">\s*<text>[\s\S]*?<\/text>\s*<\/questionnote>/, `<questionnote format="html">\n      <text>${escapeXml(id)}</text>\n    </questionnote>`);
 }
 
@@ -1758,6 +1772,7 @@ function appStateSnapshot() {
       feedbackByTruth: el.feedbackByTruth.checked,
       feedbackMode: feedbackModeConfigValue(),
     },
+    legacyQuestionInputs: state.legacyQuestionInputs || {},
     includeFilename: state.includeFilename || "",
     includeSource: state.includeSource ? {
       url: state.includeSource.url,
@@ -1907,10 +1922,10 @@ function fixedFeedbackAssoc(rows) {
     activeLangs().map((lang) => {
       const sourceLang = independent ? baseLang() : lang;
       const exact = rows.find((row) => String(row[`feedback_${sourceLang}`] || "").trim());
-      return [lang, {
+      return [lang, feedbackOutputValue({
         value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
         type: exact?.[`feedback_type_${sourceLang}`] || "text",
-      }];
+      })];
     }),
     "string"
   );
@@ -1988,10 +2003,10 @@ function localizedFeedbackTyped(pattern, lang, truth = null) {
   const rows = truth ? pattern[truth] : [...pattern.C, ...pattern.W];
   const sourceLang = rows.some((row) => row.feedback_language_independent) ? baseLang() : lang;
   const exact = rows.find((row) => String(row[`feedback_${sourceLang}`] || "").trim());
-  return {
+  return feedbackOutputValue({
     value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
     type: exact?.[`feedback_type_${sourceLang}`] || "text",
-  };
+  });
 }
 
 function groupPatterns() {
@@ -2006,12 +2021,155 @@ function groupPatterns() {
   return [...groups.values()].sort((a, b) => Number(a.id) - Number(b.id) || a.id.localeCompare(b.id));
 }
 
+// CASText must be compiled from a literal, preserving newlines for block syntax.
+function casttextLiteral(text) {
+  return `castext("${String(text).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}")`;
+}
+
+// Split only structural commas: quoted strings and nested expressions stay intact.
+function casttextExpressionParts(source) {
+  const masked = maskMaximaCommentsAndStrings(source);
+  const stack = [], parts = [];
+  let start = 0;
+  for (let i = 0; i < masked.length; i++) {
+    const ch = masked[i];
+    if ("([{".includes(ch)) stack.push(ch);
+    else if (")]}".includes(ch)) {
+      if (stack.pop() !== { ")": "(", "]": "[", "}": "{" }[ch]) throw new Error("Unbalanced expression");
+    } else if (ch === "," && !stack.length) { parts.push(source.slice(start, i).trim()); start = i + 1; }
+  }
+  if (stack.length) throw new Error("Unbalanced expression");
+  parts.push(source.slice(start).trim());
+  return parts;
+}
+
+function casttextSourceString(source) {
+  // Maxima escapes the following character; this is not JSON's \n decoder.
+  if (!/^"(?:[^"\\]|\\[\s\S])*"$/.test(source)) return null;
+  return source.slice(1, -1).replace(/\\([\s\S])/g, "$1");
+}
+
+// Local overrides must match the conventional wrapper before removing it.
+function casttextKnownWrapper(name) {
+  if (!["tex2", "tex2L"].includes(name)) return true;
+  const source = typeof el === "undefined" ? "" : el.qvars?.value || "";
+  const definitions = splitMaximaStatements(stripMaximaComments(source)).filter(line => new RegExp(`^\\s*${name}\\s*\\(`).test(line) && line.includes(":="));
+  return definitions.every(line => {
+    const match = line.match(/^\s*\w+\s*\(\s*(\w+)\s*\)\s*:=([\s\S]*?)[;$]?\s*$/);
+    if (!match) return false;
+    const [, arg, body] = match;
+    const compact = value => value.replace(/\s/g, "");
+    const expected = name === "tex2"
+      ? `sconcat("\\\\(",tex1(${arg}),"\\\\)")`
+      : `block([s:"\\\\(",k],for k:1 thru length(${arg}) do s:sconcat(s,if stringp(${arg}[k]) then ${arg}[k] else tex1(${arg}[k])," "),s:sconcat(s,"\\\\)"),return(s))`;
+    return compact(body) === compact(expected);
+  });
+}
+
+function legacyQuestionCasttext(expression) {
+  const code = String(expression).trim().replace(/[;$]\s*$/, "");
+  if (!code) return "";
+  const embed = value => `{@ssubst(%__SELPROMPT, "__SELPROMPT__", ssubst(%__SELTYPE, "__SELTYPE__", sconcat(${value})))@}`;
+  let result = "";
+  const inMath = () => {
+    const delimiters = result.match(/\\[()[\]]/g) || [];
+    return ["\\(", "\\["].includes(delimiters.at(-1));
+  };
+  const append = (value, depth = 0) => {
+    if (depth > 100) throw new Error("Expression nesting limit");
+    const literal = casttextSourceString(value);
+    if (literal !== null) { result += literal; return; }
+    if (["__SELTYPE__", "__SELPROMPT__"].includes(value)) { result += value; return; }
+    const call = value.match(/^(sconcat|tex2|tex1|tex2L|stack_disp)\s*\(([\s\S]*)\)$/);
+    if (call && casttextKnownWrapper(call[1])) {
+      const args = casttextExpressionParts(call[2]);
+      if (call[1] === "sconcat") { args.filter(Boolean).forEach(arg => append(arg, depth + 1)); return; }
+      if (call[1] === "tex2" && args.length === 1 || call[1] === "tex1" && args.length === 1 && inMath()
+          || call[1] === "stack_disp" && args.length === 2 && ["i", ""].includes(casttextSourceString(args[1])) && (casttextSourceString(args[1]) === "i" || inMath())) {
+        result += `{@${args[0]}@}`; return;
+      }
+      if (call[1] === "tex2L" && args.length === 1 && args[0].startsWith("[") && args[0].endsWith("]")) {
+        const items = casttextExpressionParts(args[0].slice(1, -1));
+        result += "\\(";
+        result += items.filter(Boolean).map(item => casttextSourceString(item) ?? `{@${item}@}`).join(" ");
+        result += "\\)"; return;
+      }
+    }
+    // Preserve sconcat's string coercion, custom rendering and prompt replacement
+    // for just this part, rather than retaining the whole question expression.
+    result += embed(value);
+  };
+  try { append(code); return result; }
+  catch { return embed(code); }
+}
+
+function replaceCasttextPrompts(source) {
+  let result = "", start = 0;
+  const replace = text => text.replace(/__SELPROMPT__/g, "{@%__SELPROMPT@}").replace(/__SELTYPE__/g, "{@%__SELTYPE@}");
+  while (start < source.length) {
+    const open = source.indexOf("{@", start);
+    if (open < 0) return result + replace(source.slice(start));
+    result += replace(source.slice(start, open));
+    const end = maskMaximaCommentsAndStrings(source.slice(open + 2)).indexOf("@}");
+    if (end < 0) throw new Error("{@ と @} の対応を確認してください");
+    const next = open + 2 + end + 2;
+    result += source.slice(open, next);
+    start = next;
+  }
+  return result;
+}
+
+function syncCastextQuestionInputs() {
+  state.legacyQuestionInputs ||= {};
+  const enabled = Boolean(el.castextTemplate?.checked);
+  LANGS.forEach(lang => {
+    const saved = state.legacyQuestionInputs[lang];
+    if (enabled && saved && el.questions[lang].value === saved.converted) {
+      saved.converted = legacyQuestionCasttext(saved.original);
+      el.questions[lang].value = saved.converted;
+    }
+    if (!enabled && saved && el.questions[lang].value === saved.converted) {
+      el.questions[lang].value = saved.original;
+      state.questionTypes[lang] = "cas";
+      el.questionModes[lang].value = "cas";
+      el.questions[lang].closest(".question-language-field")?.classList.add("cas");
+      delete state.legacyQuestionInputs[lang];
+    }
+    if (enabled && state.questionTypes[lang] === "cas") {
+      const original = el.questions[lang].value;
+      el.questions[lang].value = legacyQuestionCasttext(original);
+      state.legacyQuestionInputs[lang] = { original, converted: el.questions[lang].value };
+      state.questionTypes[lang] = "text";
+      el.questionModes[lang].value = "text";
+      el.questions[lang].closest(".question-language-field")?.classList.remove("cas");
+    }
+    const options = el.questionModes[lang]?.options;
+    if (options) {
+      options[0].textContent = enabled ? "CASText" : uiText("文字列");
+      options[1].disabled = enabled;
+      options[1].hidden = enabled;
+      el.questionModes[lang].disabled = enabled;
+    }
+  });
+  const convert = document.querySelector?.("#convertQuestionButton");
+  if (convert) convert.disabled = enabled;
+}
+
+function feedbackOutputValue(item) {
+  return el.castextTemplate?.checked && item.type !== "cas"
+    ? { value: casttextLiteral(item.value), type: "cas" } : item;
+}
+
 function langAssocFromFields() {
   return maximaAssoc(
     activeLangs().map((lang) => {
       const source = state.questionLanguageIndependent ? baseLang() : lang;
       const value = el.questions[source].value.trim();
       const type = state.questionTypes[source] || "text";
+      if (el.castextTemplate?.checked) {
+        const text = type === "cas" ? legacyQuestionCasttext(value) : value;
+        return [lang, { value: casttextLiteral(replaceCasttextPrompts(text)), type: "cas" }];
+      }
       // Compile only for output; retain the original editable text and metadata.
       if (type === "text" && (value.includes("{@") || value.includes("@}"))) {
         return [lang, { value: questionTextToCas(value), type: "cas" }];
@@ -2380,6 +2538,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     importLegacyQuestionVariables(includeSource?.content || variables, documentNode, filename, variables);
     if (el.castextTemplate) el.castextTemplate.checked = /mcq_template_pre_cas\.(?:mac|txt)/.test(variables);
     state.includeSource = includeSource;
+    state.legacyQuestionInputs = {};
     state.includeFilename = includeSource?.filename || basenameFromPath(includeSource?.path) || "";
     syncIncludeControls();
   }
@@ -2432,6 +2591,7 @@ function applyAppStateSnapshot(snapshot) {
   });
   if (el.requirePairs.checked) synchronizeSharedFeedback();
   state.translationsStale = false;
+  state.legacyQuestionInputs = snapshot.legacyQuestionInputs || {};
   state.includeFilename = String(snapshot.includeFilename || (snapshot.includeSource?.autoUrl ? "" : snapshot.includeSource?.filename) || "");
   state.includeSource = snapshot.includeSource ? {
     url: String(snapshot.includeSource.url || ""),
@@ -3043,6 +3203,7 @@ function clearAllEntries() {
 }
 
 function resetCsvImportState() {
+  state.legacyQuestionInputs = {};
   state.includeFilename = "";
   resetDerivedResults();
   state.rows = [];
@@ -3355,6 +3516,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "legacy_question_inputs") state.legacyQuestionInputs = value ? JSON.parse(value) : {};
   if (key === "radio_multiple_prompt" && el.radioMultiplePrompt) el.radioMultiplePrompt.checked = parseBoolean(value);
   if (key === "include_filename") state.includeFilename = normalizeIncludeFilename(value);
   if (key === "nocorrectopt") el.noCorrectOption.checked = parseBoolean(value);
@@ -3395,6 +3557,7 @@ function downloadSampleCsv() {
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "legacy_question_inputs", JSON.stringify(state.legacyQuestionInputs || {})],
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
@@ -3452,6 +3615,7 @@ function currentCsvRecords(title) {
     ["config", "random_correct", el.randomCorrect.checked ? "true" : "false"],
     ["config", "correct_counts", el.correctCounts.value],
     ["config", "nocorrectopt", el.noCorrectOption?.checked ? "true" : "false"],
+    ["config", "legacy_question_inputs", JSON.stringify(state.legacyQuestionInputs || {})],
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],

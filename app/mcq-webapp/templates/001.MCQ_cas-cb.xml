@@ -6,7 +6,7 @@
       <text>000.MCQ-cb-2026-04-12</text>
     </name>
     <questiontext format="moodle_auto_format">
-      <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+      <text><![CDATA[{@%__mcq_langcode@}
 <p>{@qtext@}</p>
 <p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
     </questiontext>
@@ -48,9 +48,18 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre_c
 
 /******************************** MAIN QUESTION VARIABLES ********************************/
 
+/**************** insert the following code before define %__mcq_qtextL ******************
+if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL
+  else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG)
+  else if %__mcq_num_copts>1 then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG)
+  else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
+%__SELTYPE:%__mcq_seltype;
+%__SELPROMPT:%__mcq_selprompt;
+ *****************************************************************************************/
+
 /***** See the Sample.txt file below for how to describe question variables here *********/
 stack_include("https://yositomi-opu.github.io/stack_questions/001/Sample.txt");
-
 /***************************** END OF MAIN QUESTION VARIABLES ****************************/
 
 /*********************************** DO NOT EDIT HERE ************************************/
@@ -63,7 +72,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       <text>[[feedback:prt1]]</text>
     </specificfeedback>
     <questionnote format="html">
-      <text>{@matA@}, {@matF@}, {@map(first,ta1)@}:{@ta1@}</text>
+      <text>{@map(first,ta1)@}:{@ta1@}</text>
     </questionnote>
     <questiondescription format="html">
       <text></text>
@@ -164,8 +173,8 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <truenextnode>-1</truenextnode>
         <trueanswernote>prt1-1-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
-<p>{@__mcq_noidea_checked@}</p>]]></text>
+          <text><![CDATA[{@%__mcq_langcode@}
+<p>{@%__mcq_noidea_checked@}</p>]]></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
@@ -191,7 +200,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <trueanswernote>prt1-2-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
-[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+{@%__mcq_langcode@}
 <p>{@msg@}</p>]]></text>
         </truefeedback>
         <falsescoremode>=</falsescoremode>
@@ -201,7 +210,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <falseanswernote>prt1-2-F</falseanswernote>
         <falsefeedback format="html">
           <text><![CDATA[<!-- general error / 一般の誤り -->
-[[lang code='ja']][[/lang]][[lang code='en']][[/lang]][[lang code='fr']][[/lang]][[lang code='de']][[/lang]]
+{@%__mcq_langcode@}
 <p>{@msg@}. </p>
 <p>Score: {@sc@}</p>]]></text>
         </falsefeedback>

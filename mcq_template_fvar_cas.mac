@@ -11,10 +11,10 @@ flgWL:makelist(member(k, ans1WL), k, 1, max(%__mcq_max_wp, length(%__mcq_WLbase)
 flgWnc:member(%__mcq_nocorrect_id, ans1WL);
 flgC0:member(0, ans1CL);
 flgNOID:member(%__mcq_noidea_flag, ans1WL);
-msg:"";
+msg:castext("");
 
-for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:sconcat(msg, %__mcq_CmsgL[k], "<br>");
-for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:sconcat(msg, %__mcq_WmsgL[k], "<br>");
+for k:1 thru length(%__mcq_CLbase) do if flgCL[k] then msg:castext_concat(castext_concat(msg, %__mcq_CmsgL[k]), castext("<br>"));
+for k:1 thru length(%__mcq_WLbase) do if flgWL[k] then msg:castext_concat(castext_concat(msg, %__mcq_WmsgL[k]), castext("<br>"));
 msgC0L:[
  ["en", castext("There is no correct option among the choices. If you have not selected any other option, your answer is correct.")], ["es", castext("Ninguna de las opciones es correcta. La respuesta es correcta si no has seleccionado ninguna otra opción.")],
  ["ja", castext("選択肢に正解はありません. 他を選択していなければ正解です.")],
@@ -41,8 +41,8 @@ msgWncL:[
  ["sv", castext("Det finns ett korrekt svarsalternativ!")]
 ];
 msgWnc:%__mcq_lang(msgWncL, %_STACK_LANG);
-if flgC0 then msg:castext_concat(msg, msgC0, "<br>");
-if flgWnc then msg:castext_concat(msg, msgWnc, "<br>");
+if flgC0 then msg:castext_concat(castext_concat(msg, msgC0), castext("<br>"));
+if flgWnc then msg:castext_concat(castext_concat(msg, msgWnc), castext("<br>"));
 cN:%__mcq_num_copts;
 wN:%__mcq_num_wopts;
 sc:if flgNOID then 0
@@ -59,4 +59,4 @@ if (not %__mcq_nocorrecttrue) and flgWnc then sc:0;
 
 
 if %__mcq_nocorrecttrue and %__mcq_nocorrectopt and apply("or", flgWL) then sc:0;
-if not %__mcq_fbp then msg:"";
+if not %__mcq_fbp then msg:castext("");

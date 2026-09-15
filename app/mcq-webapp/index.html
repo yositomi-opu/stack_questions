@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260915-rb2">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260915-rb2"></script>
-    <script defer src="./app.js?v=20260915-rb2"></script>
+    <script defer src="./i18n.js?v=20260915-casfix1"></script>
+    <script defer src="./app.js?v=20260915-casmigrate2"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -19,7 +19,7 @@
           <p class="eyebrow">STACK / MCQ</p>
           <div class="app-title-row">
             <h1>XML Generator</h1>
-            <label class="check-row castext-template-toggle"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span><span>（現在、実装されていません）</span></label>
+            <label class="check-row castext-template-toggle"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span><span>（試験運用）</span></label>
           </div>
         </div>
         <div class="actions">
@@ -221,6 +221,7 @@
               <div class="question-text-help question-overview-help">
                 <button type="button" class="question-text-help-button" aria-label="問題文の入力について" aria-describedby="questionTextHelp">?</button>
                 <div id="questionTextHelp" class="question-text-tooltip" role="tooltip">
+                    <p>「castext 版を使用する」ときは、STACKの問題文と同じ書式で入力してください。{@a@} やブロック構文が使えます。外側の引用符やcastext()は不要です。従来のCAS式は埋め込み形式へ移行します。以下の文字列・CAS式の説明は通常版用です。</p>
                     <p>文字列形式では、STACKの問題文書式のうち、文章と {@a@} などの式の埋め込みが使えます。HTML・LaTeXも文章に含められます。条件分岐・繰り返しなどのブロック構文は使えません。</p>
                     <p>CAS式形式では、問題文を表す文字列を返す式だけを入力してください。qtext: sconcat(...); のような代入文ではなく、右辺の sconcat(...) だけを書きます。</p>
                     <p>例：sconcat("値は ", stack_disp(a, "i"))</p>
@@ -256,7 +257,10 @@
           </section>
           <div class="section-divider"></div>
           <div class="panel-heading">
-            <h2>選択肢データ</h2>
+            <div class="row-actions"><h2>選択肢データ</h2><div class="question-text-help">
+              <button type="button" class="question-text-help-button" aria-label="選択肢データについて" aria-describedby="choiceDataHelp">?</button>
+              <div id="choiceDataHelp" class="question-text-tooltip" role="tooltip"><p>CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式を選んだ場合は式をそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。</p></div>
+            </div></div>
             <div class="row-actions">
               <button id="swapAllPairsButton" type="button" class="ghost" title="全パターンの正解と不正解を入れかえます" aria-label="全パターンの正解と不正解を入れかえます">全体正不入替</button>
               <button id="addRowButton" type="button" class="ghost">行追加</button>

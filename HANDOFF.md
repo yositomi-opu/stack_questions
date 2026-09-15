@@ -13,6 +13,19 @@
 
 ## 直近の変更と決定事項
 
+- CASTextへの一方向変換を実装。外側／入れ子sconcatを分解し、文字列のMaximaエスケープを1段解除、標準tex2・数式内tex1・stack_disp・直接リストtex2Lを文章と埋め込みへ変換。未知の式や動的リストは部分ごとのsconcat文字列化＋選択指示置換を保持。ローカルtex2/tex2Lが標準定義と異なるときは取り除かない（外部include内の再定義は判定対象外）。元式をCSV/XMLに保持し、未編集の旧互換移行も新形式へ更新。一般的な逆変換は実装しない。README・検討メモ更新、app.jsキャッシュ識別子更新。
+- 検証: test_casttext_migration.cjs新設（提示例・入れ子・数式内外・動的リスト・独自処理・区切り・エスケープ・標準／独自ローカル定義）、test_variant_parameters.cjs、test_question_text_conversion.cjs、test_pair_swap.cjs、JS構文・git diff --check成功。実装関数が生成した提示例のCASTextをローカルSTACK APIへ送信し本文と負の分数行列の出力を確認。ブラウザ操作・全問題実行は未確認。今回commit/pushは未実施。
+
+- 従来のsconcat/tex2/tex2L問題文を読みやすいCASTextへ変換する規則を調査し、`app/mcq-webapp/CASTEXT_CONVERSION.md` に対象・例外・実装順序案を記録。Git管理対象001/*.txtは60件、既存パーサーで59件279言語分を抽出（SetContainIncludeBはコメント構造により除外）。利用者例の変換候補をローカルSTACK APIで旧式と比較し、数式内の行列埋め込み、負の分数の括弧解消、直接CASTextとの出力一致、LaTeX行列改行の保持を確認。全問題・ブラウザ描画は未検証。この調査ではアプリコードの変更なし、読みやすくする変換は未実装。前回の互換移行等の未コミット変更と利用者の変更を保持。
+
+- 従来版→CASText切替を実装。問題文文字列をcastextリテラル化し、__SELTYPE__/__SELPROMPT__は埋め込み外だけを対応変数へ置換。旧CAS式はssubstで指示を置換する埋め込みへ包み、計算内容を保持してCASText入力に移行。未編集でオフに戻す場合は元式復元（XMLメタデータ／CSV legacy_question_inputsも保持）。CASText中は問題文の型をCASTextへ固定・変換ボタン無効、FBはCASText／CASを維持。選択肢データの?説明と日英ヘルプ追加。「未実装」注記を「試験運用」へ更新。
+- 利用者が編集したCAS pre/postのrb2・qtext定義等を保持し.mac再生成、CAS XMLのルート／アプリコピーを同期しnoidea変数の%不足を修正。%__mcq_langcodeをquestionvariables末尾に生成。変数内のlangブロックだけではAPIが言語を認識せず英語へフォールバックしたため、問題文先頭にも選択言語の空langブロックを生成する。
+- 実API採点でcastext_concatの3引数呼出がエラーになることを確認し、fvar_casの4箇所を2引数呼出の入れ子へ修正。通常テンプレート本体は今回変更なし。
+- 検証: アプリ関数をVMで使い、従来の文字列／sconcat+stack_dispによる負の分数行列をCASText版へ切替、実STACK APIで両者の本文と指示が表示されることを確認。rb2・Checkbox・ptの描画、Radio正解1点／誤答0点とFB、Checkbox正解1点、ja/ptのわからない0点とFBを確認（全採点のerrors/fverrors空）。公開include取得は未検証で、ローカルincludeを展開したプレビュー用XMLを使用。実ブラウザ操作は未検証。
+- 回帰: test_variant_parameters.cjs（移行・エスケープ・埋め込み内の置換抑制・保存復元・FB生成追加）、test_question_text_conversion.cjs、test_pair_swap.cjs、test_mcq_pre_castext.py（4件）、JS構文・git diff --check成功。CAS関連に含まれる利用者の先行変更も引き継いだ状態で、commit時はこれらを含める。無関係の001問題ファイルは除外。
+
+- 従来形式からCASText切替の互換性を検証し不具合を確認。アプリのCSV読込／XML生成関数をテスト用VMで実行し、文字列問題文とsconcat＋stack_disp問題文、stack_dispの行列選択肢で通常/CASの4件を実STACK APIへ送信。通常版は正常、CAS版はqtext未定義の変数名を表示。作業中のpost_cas.txtのqtext代入が.mac未反映のため。さらにCAS用.txtを一時的にインライン化した2件では本文と行列は表示されるが__SELTYPE__が残る。langAssocFromFieldsにCASText切替分岐がなく、チェックはテンプレート選択のみ。自動移行は未実装。実ブラウザ操作・採点は未検証。今回アプリ／テンプレート本体は変更せず、作業中のファイルを保持。
+
 - 選択肢設定の行順を、上段「正解が2つ以上の場合も1つ選べばよい」、下段「選択肢に正解はない」／「わからない」の横並びへ変更。HTML順序とgit diff --checkを確認。
 
 - 特殊選択肢を「選択肢に正解はない」を含める／「わからない」を選択肢に含めるへ短縮し横並び。「正解が2つ以上の場合も1つ選べばよい」を使用チェックを追加（日英）。入力形式はrb/cbのまま、XMLの%__mcq_rb_cbはRadio＋オンでrb2、それ以外rb/cb。Checkbox時は無効化しRadioへ戻したときに設定復元。CSV config,radio_multiple_promptとXMLメタデータで保持、旧XMLのrb2も読込、クリアでオフ。
