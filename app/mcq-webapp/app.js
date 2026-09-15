@@ -2247,7 +2247,10 @@ function normalizedQvars() {
   return state.qvars
     .map((expression) => String(expression).trim())
     .filter(Boolean)
-    .map((expression) => /[;$]\s*$/.test(expression) ? expression : `${expression};`);
+    .map((expression) => {
+      const code = stripMaximaComments(expression).trim();
+      return !code || /[;$]\s*$/.test(code) ? expression : `${expression};`;
+    });
 }
 
 function validateTranslationCoverage() {

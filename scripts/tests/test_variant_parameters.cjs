@@ -424,3 +424,6 @@ assert.equal(migrationNotice,'');
 el.castextTemplate.checked=false;context.changeQuestionValueType('ja','text');
 assert.equal(el.castextTemplate.checked,false);
 console.log('Passed: CASText selection enables templates, retains input, and notifies only on activation.');
+state.qvars=['a:1;\n/* EOF */','/* only a comment */','b:2 /* trailing comment */','s:"semi;/* literal */"; /* end */'];
+assert.deepEqual(Array.from(context.normalizedQvars()),['a:1;\n/* EOF */','/* only a comment */','b:2 /* trailing comment */;','s:"semi;/* literal */"; /* end */']);
+console.log('Passed: trailing comments do not cause empty Maxima statements.');
