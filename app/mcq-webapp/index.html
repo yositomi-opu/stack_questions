@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260915-rb2">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260915-casfix1"></script>
-    <script defer src="./app.js?v=20260915-casmigrate2"></script>
+    <script defer src="./i18n.js?v=20260915-manualcasttext2"></script>
+    <script defer src="./app.js?v=20260915-manualcasttext2"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -19,7 +19,7 @@
           <p class="eyebrow">STACK / MCQ</p>
           <div class="app-title-row">
             <h1>XML Generator</h1>
-            <label class="check-row castext-template-toggle"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span><span>（試験運用）</span></label>
+            <label class="check-row castext-template-toggle" title="問題文と数式（CAS式）を含むフィードバックは、できるだけ自動で変換されますが、できるだけ自分でCASTextに変更してから、このチェックを入れてください。問題文の種別にCASTextを選んで入力した内容は、そのまま使用します。独自のCAS式は自動変換されない場合があります。"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span><span>（試験運用）</span></label>
           </div>
         </div>
         <div class="actions">
@@ -259,7 +259,7 @@
           <div class="panel-heading">
             <div class="row-actions"><h2>選択肢データ</h2><div class="question-text-help">
               <button type="button" class="question-text-help-button" aria-label="選択肢データについて" aria-describedby="choiceDataHelp">?</button>
-              <div id="choiceDataHelp" class="question-text-tooltip" role="tooltip"><p>CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式を選んだ場合は式をそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。</p></div>
+              <div id="choiceDataHelp" class="question-text-tooltip" role="tooltip"><p>CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式のsconcatやtex2などはできる範囲で変換し、独自の式はそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。</p></div>
             </div></div>
             <div class="row-actions">
               <button id="swapAllPairsButton" type="button" class="ghost" title="全パターンの正解と不正解を入れかえます" aria-label="全パターンの正解と不正解を入れかえます">全体正不入替</button>

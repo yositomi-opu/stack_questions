@@ -13,6 +13,11 @@
 
 ## 直近の変更と決定事項
 
+- 問題文の種別をCASTextへ手動変更すると、CASTextテンプレートチェックを自動でオンにし、フィードバックの確認／必要に応じた変換を促す日英通知を表示。test_variant_parameters.cjsで自動オン・入力維持・通知の一回性を検証し成功、JS構文・差分検査成功。実ブラウザ操作は未確認。フィードバックの型表示も再描画。手動入力は保持し、CSV／XMLの設定保存は従来どおり。チェックを明示的に外した場合の出力ガードは維持。README・キャッシュ識別子更新。
+
+- CASTextチェックに日英の移行ヘルプを追加。通常版の問題文種別に独立したcastextを追加し、手動入力を切替時に再変換しない。CSV qtextLのcastext型・XML再編集メタデータで保持。チェック前は編集／CSV保存用とし、XML生成・プレビューはCASTextチェックが必要な旨を案内。型の手動変更で旧自動変換の復元情報を解除。既知のCASフィードバック（sconcat/tex2等）は出力時にCASText化し、独自CAS式は保持。日英ヘルプ・README・キャッシュ識別子更新。
+- 検証: test_variant_parameters.cjsに手動CASTextのCSV／メタデータ往復・オン／オフ不変・通常版出力ガード・既知／未知FB変換を追加し成功。test_casttext_migration.cjsも成功。ブラウザ操作は未確認。commit/push未実施。
+
 - CASTextへの一方向変換を実装。外側／入れ子sconcatを分解し、文字列のMaximaエスケープを1段解除、標準tex2・数式内tex1・stack_disp・直接リストtex2Lを文章と埋め込みへ変換。未知の式や動的リストは部分ごとのsconcat文字列化＋選択指示置換を保持。ローカルtex2/tex2Lが標準定義と異なるときは取り除かない（外部include内の再定義は判定対象外）。元式をCSV/XMLに保持し、未編集の旧互換移行も新形式へ更新。一般的な逆変換は実装しない。README・検討メモ更新、app.jsキャッシュ識別子更新。
 - 検証: test_casttext_migration.cjs新設（提示例・入れ子・数式内外・動的リスト・独自処理・区切り・エスケープ・標準／独自ローカル定義）、test_variant_parameters.cjs、test_question_text_conversion.cjs、test_pair_swap.cjs、JS構文・git diff --check成功。実装関数が生成した提示例のCASTextをローカルSTACK APIへ送信し本文と負の分数行列の出力を確認。ブラウザ操作・全問題実行は未確認。今回commit/pushは未実施。
 

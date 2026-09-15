@@ -4,6 +4,9 @@
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
     "（現在、実装されていません）": "(Not currently implemented)",
+    "問題文と数式（CAS式）を含むフィードバックは、できるだけ自動で変換されますが、できるだけ自分でCASTextに変更してから、このチェックを入れてください。問題文の種別にCASTextを選んで入力した内容は、そのまま使用します。独自のCAS式は自動変換されない場合があります。": "Question text and feedback containing CAS expressions are converted automatically where possible. Prefer editing them into CASText yourself before enabling this option. Question text marked CASText is used unchanged. Custom CAS expressions may remain unconverted.",
+    "CASTextの問題文を使用するには「castext 版を使用する」をオンにしてください。編集内容はCSVに保存できます。": "Enable Use CASText templates to generate questions with CASText. You can save your edits to CSV.",
+    "CASText版を有効にしました。フィードバックも確認し、必要に応じてCASText形式に変換してください。": "CASText templates enabled. Please review the feedback and convert it to CASText where necessary.",
     "castext 版を使用する": "Use CASText templates",
     "「問題変数を別ファイルに保存する」をオンにすると保存できます": "Enable Save question variables in a separate file to save the include file",
     "includeファイル名": "Include filename",
@@ -12,7 +15,7 @@
     "（試験運用）": "(Experimental)",
     "選択肢データについて": "About option data",
     "「castext 版を使用する」ときは、STACKの問題文と同じ書式で入力してください。{@a@} やブロック構文が使えます。外側の引用符やcastext()は不要です。従来のCAS式は埋め込み形式へ移行します。以下の文字列・CAS式の説明は通常版用です。": "With CASText enabled, use STACK question text syntax, including {@a@} and blocks. Do not add outer quotes or castext(). Legacy CAS expressions are migrated to embedded expressions. The following text/CAS instructions apply to the standard version.",
-    "CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式を選んだ場合は式をそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。": "For CASText feedback, enter text, {@a@}, or blocks without an outer castext() call. CAS expressions are used as entered. Option text, CAS expressions, and CAS list expressions remain supported.",
+    "CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式のsconcatやtex2などはできる範囲で変換し、独自の式はそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。": "For CASText feedback, enter text, {@a@}, or blocks without an outer castext() call. Legacy sconcat and tex2 feedback expressions are converted where possible; custom expressions remain unchanged. Option text, CAS expressions, and CAS list expressions remain supported.",
     "全入力クリア": "Clear all entries",
     "クリア": "Clear",
     "読込": "Load",

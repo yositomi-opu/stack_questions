@@ -263,12 +263,7 @@ function bindEvents() {
     });
   });
   Object.entries(el.questionModes).forEach(([lang, node]) => {
-    node.addEventListener("change", () => {
-      state.questionTypes[lang] = node.value;
-      el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", node.value === "cas");
-      markTranslationsStale("問題文の入力形式が変更されました");
-      updateOutput();
-    });
+    node.addEventListener("change", () => changeQuestionValueType(lang, node.value));
   });
   el.parameters.addEventListener("input", () => {
     markCasEvaluationStale();
@@ -776,6 +771,10 @@ function buildLanguageInputs() {
     fieldLabel.textContent = lang;
 
     const mode = valueTypeSelect("text");
+    const casttextOption = document.createElement("option");
+    casttextOption.value = "castext";
+    casttextOption.textContent = "CASText";
+    mode.append(casttextOption);
     mode.id = `questionType${upperFirst(lang)}`;
     const textarea = document.createElement("textarea");
     textarea.id = `question${upperFirst(lang)}`;
@@ -2148,16 +2147,38 @@ function syncCastextQuestionInputs() {
       options[0].textContent = enabled ? "CASText" : uiText("文字列");
       options[1].disabled = enabled;
       options[1].hidden = enabled;
+      options[0].hidden = enabled && state.questionTypes[lang] === "castext";
+      if (options[2]) options[2].hidden = enabled && state.questionTypes[lang] !== "castext";
       el.questionModes[lang].disabled = enabled;
     }
   });
   const convert = document.querySelector?.("#convertQuestionButton");
-  if (convert) convert.disabled = enabled;
+  if (convert) convert.disabled = enabled || state.questionTypes[baseLang()] === "castext";
+}
+
+function changeQuestionValueType(lang, type) {
+  state.questionTypes[lang] = type;
+  delete state.legacyQuestionInputs?.[lang];
+  el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", type === "cas");
+  const enableCasttext = type === "castext" && !el.castextTemplate.checked;
+  if (enableCasttext) el.castextTemplate.checked = true;
+  markTranslationsStale("問題文の入力形式が変更されました");
+  updateOutput();
+  if (enableCasttext) {
+    renderRows();
+    window.mcqNotice?.(uiText("CASText版を有効にしました。フィードバックも確認し、必要に応じてCASText形式に変換してください。"));
+  }
 }
 
 function feedbackOutputValue(item) {
-  return el.castextTemplate?.checked && item.type !== "cas"
-    ? { value: casttextLiteral(item.value), type: "cas" } : item;
+  if (!el.castextTemplate?.checked) return item;
+  if (item.type !== "cas") return { value: casttextLiteral(item.value), type: "cas" };
+  // Convert known legacy text builders; arbitrary CAS and existing castext()
+  // remain expressions so that CASText objects are not coerced into strings.
+  if (/^\s*(sconcat|tex2|tex2L|tex1|stack_disp)\s*\(/.test(item.value)) {
+    return { value: casttextLiteral(replaceCasttextPrompts(legacyQuestionCasttext(item.value))), type: "cas" };
+  }
+  return item;
 }
 
 function langAssocFromFields() {
@@ -2170,6 +2191,7 @@ function langAssocFromFields() {
         const text = type === "cas" ? legacyQuestionCasttext(value) : value;
         return [lang, { value: casttextLiteral(replaceCasttextPrompts(text)), type: "cas" }];
       }
+      if (type === "castext") throw new Error(uiText("CASTextの問題文を使用するには「castext 版を使用する」をオンにしてください。編集内容はCSVに保存できます。"));
       // Compile only for output; retain the original editable text and metadata.
       if (type === "text" && (value.includes("{@") || value.includes("@}"))) {
         return [lang, { value: questionTextToCas(value), type: "cas" }];
@@ -2564,7 +2586,7 @@ function applyAppStateSnapshot(snapshot) {
     el.languageChecks[lang].checked = (snapshot.activeLanguages || []).includes(lang) || lang === el.baseLanguage.value;
     const question = snapshot.questions?.[lang] || {};
     el.questions[lang].value = String(question.value || "");
-    state.questionTypes[lang] = normalizeValueType(question.type);
+    state.questionTypes[lang] = question.type === "castext" ? "castext" : normalizeValueType(question.type);
     el.questionModes[lang].value = state.questionTypes[lang];
     el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", state.questionTypes[lang] === "cas");
   });
@@ -3260,7 +3282,7 @@ function applyCsvV2Records(records) {
     const feedbackMatch = kind.match(/^feedback(\d+)([cw])?$/i);
 
     if (kind === "qtextl") {
-      assertCsvType(kind, type, ["string", "cas"], recordIndex + 1);
+      assertCsvType(kind, type, ["string", "cas", "castext"], recordIndex + 1);
       const key = language.independent ? "n/a" : language.lang;
       warnDuplicate(seen, `qtextL:${key}`, warnings, recordIndex + 1);
       qtexts.set(key, { type, value, independent: language.independent });
@@ -3411,7 +3433,7 @@ function applyImportedQuestionTexts(qtexts, warnings) {
   const entries = independent ? [[baseLang(), independent]] : [...qtexts.entries()];
   entries.forEach(([lang, item]) => {
     el.questions[lang].value = item.value;
-    state.questionTypes[lang] = item.type === "cas" ? "cas" : "text";
+    state.questionTypes[lang] = ["cas", "castext"].includes(item.type) ? item.type : "text";
     el.questionModes[lang].value = state.questionTypes[lang];
     el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", item.type === "cas");
     el.languageChecks[lang].checked = true;
@@ -3697,6 +3719,7 @@ function currentCsvRecords(title) {
 
 function csvValueType(type, listExpression = false) {
   if (listExpression) return "cas_list";
+  if (type === "castext") return "castext";
   return type === "cas" ? "cas" : "string";
 }
 
