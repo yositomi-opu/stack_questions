@@ -57,3 +57,29 @@ assert.equal(state.questionTypes.pt,'text','legacy text JSON must remain support
 state.questionLanguageIndependent=true;
 assert.equal(context.translationPayload().question_text,null);
 console.log('Passed: pt CAS translation payload, non-destructive preparation, text/CAS/list types, independent expressions, legacy text JSON.');
+const response={schema:'stack-mcq-translations-v1',translations:{pt:{question_text:String.raw`\({@%_nr@}\times{@%_nc@}\)`,rows:[{id:'0',choice:null,feedback:'castext("Correto.")'}]}}};
+const json=JSON.stringify(response,null,2);
+for(const wrapped of [json,'```\n'+json+'\n```','```json\n'+json+'\n```','以下が翻訳です。\n```json\n'+json+'\n```\n以上です。']) {
+ assert.equal(JSON.stringify(context.parseTranslationResponse(wrapped)),JSON.stringify(response));
+}
+context.prepareTranslationRequest();
+const request=el.translationJson.value;
+assert.throws(()=>context.parseTranslationResponse(request),/翻訳依頼文が残っています/);
+assert.equal(JSON.stringify(context.parseTranslationResponse(request+'\n```json\n'+json+'\n```')),JSON.stringify(response));
+assert.throws(()=>context.parseTranslationResponse(json+'\n'+json),/複数/);
+assert.throws(()=>context.parseTranslationResponse(json.slice(0,-3)),/有効なJSON/);
+assert.throws(()=>context.parseTranslationResponse('{"translations":{"pt":{"question_text":"castext("bad")"}}}'),/有効なJSON/);
+const prior=el.questions.pt.value;
+el.translationJson.value=request;context.applyTranslationResult();assert.equal(el.questions.pt.value,prior);assert.equal(context.status.kind,'error');
+if(process.env.MCQ_TRANSLATION_RESPONSE) {
+ const pasted=fs.readFileSync(process.env.MCQ_TRANSLATION_RESPONSE,'utf8');
+ const decoded=context.parseTranslationResponse(pasted);
+ assert.equal(Object.keys(decoded.translations).length,10);
+ assert.ok(decoded.translations.pt.question_text.includes(String.raw`\times`));
+ el.translationJson.value=pasted;context.applyTranslationResult();
+ assert.notEqual(context.status.kind,'error',context.status.message);
+ assert.equal(el.questions.pt.value,decoded.translations.pt.question_text);
+ assert.equal(state.rows[0].feedback_pt,decoded.translations.pt.rows[0].feedback);
+ console.log('Passed: supplied ten-language response parses and its supported languages apply unchanged.');
+}
+console.log('Passed: JSON/fences/prose/request+response extraction, request-only guidance, malformed/ambiguous rejection, lossless strings.');

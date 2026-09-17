@@ -2350,12 +2350,43 @@ async function copyTranslationRequest() {
   }
 }
 
+function parseTranslationResponse(input) {
+  const text = String(input).trim().replace(/^\uFEFF/, "");
+  const candidates = [];
+  let depth = 0, start = -1, quoted = false, escaped = false;
+  // Extract complete JSON objects without modifying any string contents.
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (!depth) {
+      if (ch === "{") { start = i; depth = 1; quoted = false; escaped = false; }
+      continue;
+    }
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') quoted = false;
+      continue;
+    }
+    if (ch === '"') quoted = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}" && --depth === 0) {
+      try {
+        const value = JSON.parse(text.slice(start, i + 1));
+        if (value && typeof value === "object" && value.translations && typeof value.translations === "object" && !Array.isArray(value.translations)) candidates.push(value);
+      } catch { /* Reject malformed JSON; never guess quotes or backslashes. */ }
+    }
+  }
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1) throw new Error(uiText("翻訳JSONが複数あります。適用する回答を1つだけ貼り付けてください。"));
+  if (text.startsWith(uiText("次のSTACK MCQ教材を target_languages に翻訳してください。")) && !/"translations"\s*:/.test(text)) {
+    throw new Error(uiText("翻訳依頼文が残っています。この欄をChatGPTから返された翻訳JSONに置き換えてから「結果を反映」を押してください。"));
+  }
+  throw new Error(uiText("translationsを含む有効なJSONが見つかりません。回答を末尾までコピーしてください。引用符やバックスラッシュの不備は、ChatGPTに有効なJSONとして出し直すよう依頼してください。"));
+}
+
 function applyTranslationResult() {
   try {
-    const raw = el.translationJson.value.trim()
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/, "");
-    const result = JSON.parse(raw);
+    const result = parseTranslationResponse(el.translationJson.value);
     if (!result.translations || typeof result.translations !== "object") {
       throw new Error("translations が見つかりません");
     }
