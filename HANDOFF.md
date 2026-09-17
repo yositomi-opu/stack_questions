@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-15
+更新日: 2026-09-17
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,11 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- メタデータ付きXMLでも選択肢／FBを実際の定義から復元。固定スロット番号保持、CASText／リスト値の内部構造保持、ランダムパターンのリスト参照復元。定義はCASリスト式へ集約される場合あり。生成マーカーがあるXMLの問題変数本体と取得済みincludeもファイルを優先。パラメータ等の画面設定はメタデータを保持。メタデータ付きでもinclude取得を行う。CSV／XML／見本の読込完了後に自動評価、キャンセル時は評価しない。variant_parameters（直編集の選択肢・FB・ランダムパターン追加）、casttext_migration、test_import_evaluation.cjs成功。ブラウザ操作未確認。commit/push未実施。
+
+- メタデータ付きXML読込時に、実際の%__mcq_qtextLとメタデータから再生成した問題文を照合。差分のある言語はXMLを優先し、静的castextリテラルを1段デコードしてcastext型で復元。旧CAS式復旧情報を解除し、不一致反映を日英通知。設定はメタデータから保持。外部include内容が取得済みなら同様に照合。未取得の外部定義は対象外。選択肢／FB／パラメータ差分照合は未対応とREADMEに明記。
+- 検証: 該当RowReducedCheck XMLに古い{%_nc}メタデータを設定して、本文の{@%_nc@}優先・設定保持・二重読込不変・再保存データ保持をvariant_parametersで確認。他の既存回帰も成功。ブラウザ操作は未確認。commit/push未実施。
 
 - CASText選択肢に%root等が表示される原因は、アプリのmaximaChoiceListがCASリスト式をflattenで再帰展開していたこと。単一リストは直接使用、混在／複数リストは単体要素を[]で包んでappendする方式へ修正。通常／CAS両postの候補数もflatten後の長さから各パターンのlength合計へ変更し、makeで両.macを再生成。該当001.GaussElimRowReducedCheck-B-3x4rk2-rb.xmlの4つのflattenも直接代入に修正。README・キャッシュ更新。
 - 検証: variant_parametersに単一リスト／複数リスト・単体CASText・リスト値の混在／空リストの回帰追加し成功。casttext_migration・test_mcq_pre_castext.py（4件）成功。ローカルSTACK APIで修正XMLの7選択肢がp,qの組として生成され%rootなし、正解1点・誤答0点と対応FB、errors/fverrors空を確認。検証はAPI応答まででブラウザMathJax未確認。関連修正をcommit/pushする依頼あり。

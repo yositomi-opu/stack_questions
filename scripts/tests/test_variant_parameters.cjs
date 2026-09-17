@@ -14,7 +14,7 @@ el.questions=Object.fromEntries(langs.map(l=>[l,field()]));
 el.questionModes=Object.fromEntries(langs.map(l=>[l,field()]));
 el.languageChecks=Object.fromEntries(langs.map(l=>[l,field()]));
 const state={mode:'cb',rows:[],qvars:[],questionTypes:{},templates:{cb:fs.readFileSync(path.join(root,'app/mcq-webapp/templates/001.MCQ-cb.xml'),'utf8')},casEvaluation:{stale:false,expressions:{}}};
-const context=vm.createContext({el,state,TextEncoder,TextDecoder,URL,structuredClone,btoa:s=>Buffer.from(s,'binary').toString('base64'),atob:s=>Buffer.from(s,'base64').toString('binary')});
+const context=vm.createContext({el,state,window:{},TextEncoder,TextDecoder,URL,structuredClone,btoa:s=>Buffer.from(s,'binary').toString('base64'),atob:s=>Buffer.from(s,'base64').toString('binary')});
 vm.runInContext(`const LANGS=${JSON.stringify(langs)}; const INITIAL_LOCALE='ja';
 const DEFAULT_INCLUDE_BASE_URL='https://example.org/'; const uiText=s=>s;
 ${functions}
@@ -435,3 +435,30 @@ assert.equal(context.maximaChoiceList([listSource('L1'),scalar('castext("label")
 assert.equal(context.maximaChoiceList([scalar('[1,2]'),scalar('castext("label")')]),'[[1,2], castext("label")]');
 assert.equal(context.maximaChoiceList([]),'[]');
 console.log('Passed: shallow option-list concatenation preserves CASText and list-valued labels.');
+setImmediate(() => {
+  const xml=fs.readFileSync(path.join(root,'001/001.GaussElimRowReducedCheck-B-3x4rk2-rb.xml'),'utf8');
+  const variables=xml.match(/<questionvariables>\s*<text><!\[CDATA\[([^]*?)\]\]><\/text>/)[1];
+  const snapshot=context.decodeAppMetadata(variables.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)[1]);
+  // Deliberately stale metadata, independent of future fixture repairs.
+  for(const question of Object.values(snapshot.questions)) question.value=question.value.replace('{@%_nc@}','{%_nc}');
+  context.applyAppStateSnapshot(snapshot);
+  const originalParams=el.parameters.value;
+  assert.equal(context.reconcileXmlQuestionTexts(variables),true);
+  assert.ok(el.questions.ja.value.includes('{@%_nc@}'));
+  assert.equal(state.questionTypes.ja,'castext');
+  assert.equal(state.legacyQuestionInputs.ja,undefined);
+  assert.equal(el.parameters.value,originalParams);
+  assert.equal(context.reconcileXmlQuestionTexts(variables),false,'second reconciliation must preserve editor state');
+  const editedChoices=variables.replace('%__CoptL1:ListAL1;', '%__CoptL1:[castext("Edited {@p@}")];').replace('正解です. 被約階段行列(行簡約行列)の性質を理解しているようです.', 'Changed feedback');
+  context.reconcileXmlChoices(editedChoices);
+  assert.ok(state.rows.some(row=>row.choice_ja.includes('Edited {@p@}')));
+  assert.ok(state.rows.some(row=>row.feedback_ja?.includes('Changed feedback')));
+  assert.ok(state.rows.every(row=>row.choice_list_expr_ja));
+  const saved=context.appStateSnapshot();context.applyAppStateSnapshot(saved);
+  assert.ok(el.questions.ja.value.includes('{@%_nc@}'));
+  assert.equal(context.reconcileXmlQuestionTexts('stack_include("external.txt");'),false);
+  context.reconcileXmlChoices('%__CoptL1:if true then [L1,L2][%__mcq_pattern_order[1]] else false;\n%__Cmsg1L:[["ja",["C1","C2"]][%__mcq_pattern_order[1]]];\n%__WoptL1:if true then [W1,W2][%__mcq_pattern_order[2]] else false;');
+  assert.equal(state.rows.filter(row=>row.truth==='C').length,2);
+  assert.equal(el.requirePairs.checked,true);
+  console.log('Passed: direct XML text edits override stale metadata without losing parameters, remain stable, and survive saving.');
+});

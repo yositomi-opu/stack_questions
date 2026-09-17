@@ -13,6 +13,8 @@
     "展開言語": "Languages",
     "全言語を選択": "Select all languages",
     "展開": "Translate",
+    "問題文・選択肢・フィードバックをXML本文から読み込みました。": "Question text, choices, and feedback have been loaded from the XML definitions.",
+    "XML本文の問題文を解析できません。メタデータとの差分を確認してください。": "Cannot parse the XML question text. Check its differences from the editing metadata.",
     "castext 版を使用する": "Use CASText templates",
     "「問題変数を別ファイルに保存する」をオンにすると保存できます": "Enable Save question variables in a separate file to save the include file",
     "includeファイル名": "Include filename",

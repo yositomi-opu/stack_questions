@@ -2437,6 +2437,7 @@ async function readSelectedFile(event) {
     } else {
       setStatus(`${file.name} を読み込みました`);
     }
+    await evaluateCasLocally();
   } catch (error) {
     setStatus(error.message, true);
   } finally {
@@ -2454,9 +2455,7 @@ async function readSelectedXml(event) {
     const summary = importXmlText(xmlText, file.name, includeSource);
     const includeNote = includeSource ? `／include: ${includeSource.path}` : "";
     setStatus(`${file.name} を読み込みました（基本言語: ${summary.baseLanguage}／言語: ${summary.languages.join(", ")}／パターン: ${summary.patterns}${includeNote}）`);
-    if (includeSource && (problemVariableNames().length || casChoiceExpressions().length)) {
-      await evaluateCasLocally();
-    }
+    await evaluateCasLocally();
   } catch (error) {
     setStatus(`XMLを読み込めません: ${error.message}`, true);
   } finally {
@@ -2465,7 +2464,6 @@ async function readSelectedXml(event) {
 }
 
 async function resolveMainInclude(xmlText) {
-  if (/MCQ_WEBAPP_DATA_BASE64:/.test(xmlText)) return null;
   const documentNode = new DOMParser().parseFromString(xmlText, "application/xml");
   const variables = documentNode.querySelector("questionvariables > text")?.textContent || "";
   const main = extractMainVariableSection(variables);
@@ -2563,14 +2561,97 @@ function basenameFromPath(value) {
   return String(value || "").split(/[\\/]/).filter(Boolean).pop() || "";
 }
 
+// Keep editor-only settings, but never let stale metadata overwrite edited qtextL.
+function reconcileXmlQuestionTexts(variables) {
+  const assignment = splitMaximaStatements(stripMaximaComments(variables))
+    .map(parseMaximaAssignment).filter(item => item?.name === "%__mcq_qtextL").at(-1);
+  if (!assignment) return false; // The definition may live in an external include.
+  if (/^\[\s*\]$/.test(assignment.expression)) return false;
+  const actual = extractLanguageAssociation(assignment.expression);
+  if (!actual) throw new Error(uiText("XML本文の問題文を解析できません。メタデータとの差分を確認してください。"));
+  const expected = extractLanguageAssociation(langAssocFromFields());
+  let changed = false;
+  for (const [lang, node] of actual) {
+    if (node.kind === expected?.get(lang)?.kind && node.value === expected.get(lang).value) continue;
+    let value = node.value, type = node.kind === "string" ? "text" : "cas";
+    const call = type === "cas" && value.match(/^castext\s*\(([\s\S]*)\)$/);
+    if (call) {
+      const literal = casttextSourceString(call[1].trim());
+      if (literal !== null) { value = literal; type = "castext"; }
+    }
+    el.questions[lang].value = value;
+    state.questionTypes[lang] = type;
+    el.questionModes[lang].value = type;
+    el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", type === "cas");
+    el.languageChecks[lang].checked = true;
+    delete state.legacyQuestionInputs?.[lang];
+    changed = true;
+  }
+  if (changed) state.questionLanguageIndependent = false;
+  return changed;
+}
+
+function reconcileXmlChoices(variables) {
+  const statements = splitMaximaStatements(stripMaximaComments(extractMainVariableSection(variables)));
+  const assignments = [...new Map(statements.map(parseMaximaAssignment).filter(Boolean).map(item => [item.name, item])).values()];
+  const optionPattern = /^%__[CW]optL?\d+L?$/;
+  if (!assignments.some(item => optionPattern.test(item.name))) return false;
+  const rows = [];
+  const languages = [...LANGS];
+  for (const truth of ["C", "W"]) {
+    const options = managedAssignments(assignments, new RegExp(`^%__${truth}optL?(\\d+)L?$`), languages);
+    const messages = managedAssignments(assignments, new RegExp(`^%__${truth}msg(\\d+)L?$`), languages);
+    const data = optionPatternData(options, baseLang());
+    if (data.paired) {
+      for (let index = 0; index < data.patterns.length; index++) appendImportedRows(rows, String(index + 1).padStart(2, "0"), truth, index, data, messages, languages);
+    } else {
+      for (const option of options) {
+        const single = optionPatternData([option], baseLang());
+        appendImportedRows(rows, String(option.slot).padStart(2, "0"), truth, 0, single, messages.filter(item => item.slot === option.slot), languages);
+      }
+    }
+  }
+  if (!rows.length) throw new Error("XMLの選択肢を復元できません");
+  // Reconstructed XML definitions are authoritative. Keep CASText feedback as
+  // a CAS expression; do not stringify the object or flatten option contents.
+  const before = JSON.stringify(state.rows);
+  state.rows = rows;
+  assignFeedbackModesFromValues(rows);
+  el.requirePairs.checked = assignments.some(item => optionPattern.test(item.name) && item.expression.includes("%__mcq_pattern_order"));
+  el.feedbackByTruth.checked = el.requirePairs.checked && rows.every(row => row.feedback_by_truth);
+  return before !== JSON.stringify(rows);
+}
+
 function importXmlText(xmlText, filename = "", includeSource = null) {
   const documentNode = new DOMParser().parseFromString(xmlText, "application/xml");
   if (documentNode.querySelector("parsererror")) throw new Error("XMLの構文が不正です");
   const variables = documentNode.querySelector("questionvariables > text")?.textContent || "";
   if (!variables.trim()) throw new Error("questionvariables が見つかりません");
   const metadata = variables.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)?.[1];
+  let questionTextUpdated = false;
   if (metadata) {
     applyAppStateSnapshot(decodeAppMetadata(metadata));
+    const authoritativeVariables = includeSource?.content ? includeSource.content + "\n" + extractMainVariableSection(variables) : variables;
+    questionTextUpdated = reconcileXmlQuestionTexts(authoritativeVariables);
+    questionTextUpdated = reconcileXmlChoices(authoritativeVariables) || questionTextUpdated;
+    if (!includeSource) {
+      const main = extractMainVariableSection(variables);
+      const generated = main.match(/\/\*+\s*Generated by mcq-webapp\s*\*+\//);
+      if (generated) {
+        const body = main.slice(generated.index + generated[0].length);
+        const boundary = findManagedAssignmentRanges(body)[0];
+        if (boundary) {
+          el.qvars.value = body.slice(0, boundary.start).trim();
+          state.qvars = [el.qvars.value];
+        }
+      }
+    }
+    if (includeSource) {
+      state.includeSource = { ...state.includeSource, ...includeSource };
+      el.qvars.value = createIncludeEditSkeleton(includeSource.content);
+      state.qvars = [el.qvars.value];
+      syncIncludeControls();
+    }
   } else {
     importLegacyQuestionVariables(includeSource?.content || variables, documentNode, filename, variables);
     if (el.castextTemplate) el.castextTemplate.checked = /mcq_template_pre_cas\.(?:mac|txt)/.test(variables);
@@ -2585,6 +2666,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
   updateQuestionLanguageVisibility();
   updateBaseLanguageUi();
   updateOutput();
+  if (questionTextUpdated) window.mcqNotice?.(uiText("問題文・選択肢・フィードバックをXML本文から読み込みました。"));
   return {
     baseLanguage: baseLang(),
     languages: activeLangs(),
@@ -2983,7 +3065,7 @@ function managedAssignments(assignments, pattern, fallbackLangs = []) {
     if (!assoc) {
       const isOption = /^%__[CW]optL?\d+L?$/.test(item.name);
       const listStart = item.expression.indexOf("[");
-      if (!isOption && listStart >= 0) {
+      if ((!isOption || item.expression.includes("%__mcq_pattern_order")) && listStart >= 0) {
         try {
           const shared = parseMaximaValue(item.expression, listStart).node;
           assoc = new Map(fallbackLangs.map((lang) => [lang, shared]));
@@ -3097,7 +3179,7 @@ function optionPatternData(assignments, base) {
   // Only the legacy randomized exporter uses a list of patterns. A directly
   // assigned list (including a list of lists) is one candidate-list expression.
   const nestedPatterns = assignments[0].expression.includes("%__mcq_pattern_order")
-    && firstValue?.kind === "list" && firstValue.items.every((item) => item.kind === "list");
+    && firstValue?.kind === "list";
   if (nestedPatterns) {
     return { paired: true, patterns: firstValue.items, languages: assignments[0].assoc, listExpressions: firstValue.items.map(() => true), languageIndependent: firstValue.items.map(() => assignments[0].languageIndependent) };
   }
