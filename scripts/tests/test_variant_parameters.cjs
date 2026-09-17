@@ -15,7 +15,7 @@ el.questionModes=Object.fromEntries(langs.map(l=>[l,field()]));
 el.languageChecks=Object.fromEntries(langs.map(l=>[l,field()]));
 const state={mode:'cb',rows:[],qvars:[],questionTypes:{},templates:{cb:fs.readFileSync(path.join(root,'app/mcq-webapp/templates/001.MCQ-cb.xml'),'utf8')},casEvaluation:{stale:false,expressions:{}}};
 const context=vm.createContext({el,state,window:{},TextEncoder,TextDecoder,URL,structuredClone,btoa:s=>Buffer.from(s,'binary').toString('base64'),atob:s=>Buffer.from(s,'base64').toString('binary')});
-vm.runInContext(`const LANGS=${JSON.stringify(langs)}; const INITIAL_LOCALE='ja';
+vm.runInContext(`const LANGS=${JSON.stringify(langs)}; const INITIAL_LOCALE='ja'; const SERVER_CONFIG={includeBaseUrl:'https://example.org/'};
 const DEFAULT_INCLUDE_BASE_URL='https://example.org/'; const uiText=s=>s;
 ${functions}
 function updateOutput(){} function updateQuestionLanguageVisibility(){} function updateBaseLanguageUi(){}
@@ -306,12 +306,13 @@ for (const title of ['Example','Example-rb','Example-cb']) {
  el.questionId.value=title;context.syncIncludeFilename();
  assert.equal(el.includeFilename.value,'Example.txt');
 }
+el.includeBaseUrl.value='https://example.org/';
 state.includeFilename=context.normalizeIncludeFilename('shared');
 state.includeSource={generated:true,autoUrl:true};el.questionId.value='Other-rb';
 context.refreshGeneratedIncludeSource();
 assert.equal(state.includeSource.filename,'shared.txt');
-assert.equal(state.includeSource.path,'001/shared.txt');
-assert.match(state.includeSource.url,/\/001\/shared.txt$/);
+assert.equal(state.includeSource.path,'shared.txt');
+assert.equal(state.includeSource.url,'https://example.org/shared.txt');
 const nameSnapshot=context.appStateSnapshot();
 state.includeFilename='';context.applyAppStateSnapshot(nameSnapshot);
 assert.equal(state.includeFilename,'shared.txt');
@@ -462,3 +463,12 @@ setImmediate(() => {
   assert.equal(el.requirePairs.checked,true);
   console.log('Passed: direct XML text edits override stale metadata without losing parameters, remain stable, and survive saving.');
 });
+
+el.includeBaseUrl.value='https://example.org/';
+assert.equal(context.publicIncludeUrl('long name.txt'),'https://example.org/long%20name.txt');
+el.includeBaseUrl.value='https://example.org/custom/';
+assert.equal(context.publicIncludeUrl('question.txt'),'https://example.org/custom/question.txt');
+assert.equal(context.rewriteTemplateIncludeUrls('stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre.mac");'),'stack_include("https://example.org/mcq_template_pre.mac");');
+state.includeSource={url:'https://other.example/004/test.txt'};context.restoreIncludeDirectory();
+assert.equal(el.includeBaseUrl.value,'https://other.example/004/');
+console.log('Passed: exact include directories, URL encoding, independent template URLs and imported directory restoration.');

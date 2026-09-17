@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260915-languageheading1">
+    <link rel="stylesheet" href="./styles.css?v=20260917-includedirectory1">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260917-translationjson1"></script>
-    <script defer src="./app.js?v=20260917-translationjson1"></script>
+    <script defer src="./i18n.js?v=20260917-includedirectory1"></script>
+    <script defer src="./app.js?v=20260917-includedirectory1"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -133,16 +133,20 @@
                 <button type="button" class="question-text-help-button" aria-label="別ファイル保存について" aria-describedby="includeSaveHelp">?</button>
                 <div id="includeSaveHelp" class="question-text-tooltip" role="tooltip">
                   <p>オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、パラメータだけを変えた問題を作るときに便利です。</p>
-                  <p>Moodle/STACKから取得できるURLを指定します。include URLベースには公開先の基準URLを入力してください。</p>
-                  <p>XMLとincludeファイルは別々に保存します。「include保存」で取得したファイルを、XMLのstack_includeに記載されたURLで取得できる場所へ配置してください。保存操作だけでは公開先へアップロードされません。</p>
+                  <p>Moodle/STACKから取得できるURLを指定します。URLベースにはファイルを公開するディレクトリのURLを、末尾の / まで入力してください。ファイル名だけを連結し、001/などは自動で追加しません。</p>
+                  <p>XMLとincludeファイルは別々に保存します。「保存」で取得したincludeファイルを、XMLのstack_includeに記載されたURLで取得できる場所へ配置してください。保存操作だけでは公開先へアップロードされません。</p>
                 </div>
               </div>
-              <button id="downloadIncludeButton" type="button" class="ghost" disabled title="「問題変数を別ファイルに保存する」をオンにすると保存できます">include保存</button>
-              <input id="includeFilename" class="include-filename" type="text" aria-label="includeファイル名" placeholder="ファイル名.txt" spellcheck="false">
+            </div>
+            <div class="include-filename-row">
+              <label for="includeFilename">ファイル名：</label>
+              <input id="includeFilename" class="include-filename" type="text" placeholder="ファイル名.txt" spellcheck="false">
+              <button id="downloadIncludeButton" type="button" class="ghost" disabled title="「問題変数を別ファイルに保存する」をオンにすると保存できます">保存</button>
             </div>
             <div class="field-row include-base-field">
-              <label for="includeBaseUrl">include URLベース</label>
-              <input id="includeBaseUrl" type="url" placeholder="https://username.github.io/repository/" spellcheck="false">
+              <label for="includeBaseUrl">URLベース</label>
+              <input id="includeBaseUrl" type="url" placeholder="https://username.github.io/repository/001/" spellcheck="false">
+              <span id="includeUrlFilename" class="include-url-filename"></span>
             </div>
           </section>
         </aside>

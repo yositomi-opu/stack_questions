@@ -1296,3 +1296,11 @@ td:nth-child(5) {
 .language-choices-label { font-size: 12px; white-space: nowrap; }
 #selectAllLanguagesButton { min-height: 30px; padding: 4px 7px; font-size: 12px; }
 .qvars-field { border-top: 1px solid var(--line); padding-top: 12px; }
+
+.include-filename-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.include-filename-row label, .include-base-field label { margin: 0; white-space: nowrap; font-size: 12px; }
+.include-filename-row .include-filename { flex: 1 1 0; width: 0; min-width: 0; padding: 6px 8px; }
+.include-filename-row button { flex: 0 0 auto; }
+.include-base-field { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.include-base-field input { flex: 1 1 0; width: 0; min-width: 0; }
+.include-url-filename { color: var(--muted); font-size: 12px; max-width: 40%; overflow-wrap: anywhere; }

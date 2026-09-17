@@ -8,7 +8,7 @@ const DEFAULT_QUESTION_TEXTS = {
   en: "__SELTYPE__ correct statements about stars, planets, and satellites.",
 };
 const STACK_API_URL_STORAGE_KEY = "mcq-webapp.stack-api-url";
-const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-base-url";
+const INCLUDE_BASE_URL_STORAGE_KEY = "mcq-webapp.include-directory-url";
 const DEFAULT_INCLUDE_BASE_URL = "https://yositomi-opu.github.io/stack_questions/";
 const WEBAPP_BASE_URL = new URL("./", window.location.href);
 const webappUrl = (path) => new URL(String(path).replace(/^\/+/, ""), WEBAPP_BASE_URL).toString();
@@ -76,6 +76,7 @@ const el = {
   casVariablesBody: document.querySelector("#casVariablesBody"),
   stackApiUrl: document.querySelector("#stackApiUrl"),
   includeBaseUrl: document.querySelector("#includeBaseUrl"),
+  includeUrlFilename: document.querySelector("#includeUrlFilename"),
   checkStackApiButton: document.querySelector("#checkStackApiButton"),
   testStackQuestionButton: document.querySelector("#testStackQuestionButton"),
   stackApiStatus: document.querySelector("#stackApiStatus"),
@@ -130,12 +131,12 @@ async function init() {
     || "http://127.0.0.1:3080";
   try {
     el.includeBaseUrl.value = normalizedIncludeBaseUrl(
-      SERVER_CONFIG.includeBaseUrl
-        || localStorage.getItem(INCLUDE_BASE_URL_STORAGE_KEY)
-        || DEFAULT_INCLUDE_BASE_URL
+      localStorage.getItem(INCLUDE_BASE_URL_STORAGE_KEY)
+        || new URL("001/", normalizedIncludeBaseUrl(SERVER_CONFIG.includeBaseUrl
+          || localStorage.getItem("mcq-webapp.include-base-url") || DEFAULT_INCLUDE_BASE_URL)).href
     );
   } catch (_error) {
-    el.includeBaseUrl.value = DEFAULT_INCLUDE_BASE_URL;
+    el.includeBaseUrl.value = new URL("001/", DEFAULT_INCLUDE_BASE_URL).href;
     localStorage.removeItem(INCLUDE_BASE_URL_STORAGE_KEY);
   }
   populateBaseLanguage();
@@ -206,6 +207,7 @@ function bindEvents() {
     localStorage.setItem(STACK_API_URL_STORAGE_KEY, el.stackApiUrl.value.trim());
   });
   el.includeBaseUrl.addEventListener("input", () => {
+    if (state.includeSource) state.includeSource.autoUrl = true;
     localStorage.setItem(INCLUDE_BASE_URL_STORAGE_KEY, el.includeBaseUrl.value.trim());
     updateOutput();
   });
@@ -2510,7 +2512,7 @@ async function resolveMainInclude(xmlText) {
     try {
       const response = await fetch(candidate);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return { url: path ? publicIncludeUrl(path) : url, path: path || url, filename: basenameFromPath(path || url), content: await response.text() };
+      return { url, path: path || url, filename: basenameFromPath(path || url), content: await response.text() };
     } catch (error) {
       lastError = error.message;
     }
@@ -2526,9 +2528,9 @@ function includePathFromUrl(url) {
     // An invalid field is reported when generating XML; legacy URLs can still be imported.
   }
   const prefixes = [
-    configuredPrefix,
     "https://stack.mathedu.jp/sc/",
     "https://yositomi-opu.github.io/stack_questions/",
+    configuredPrefix,
   ].filter(Boolean);
   const prefix = prefixes.find((candidate) => url.startsWith(candidate));
   if (!prefix) return "";
@@ -2543,7 +2545,7 @@ function publicIncludeUrl(path) {
 }
 
 function rewriteTemplateIncludeUrls(template) {
-  const baseUrl = normalizedIncludeBaseUrl(el.includeBaseUrl.value);
+  const baseUrl = normalizedIncludeBaseUrl(SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL);
   return [
     "https://yositomi-opu.github.io/stack_questions/",
     "https://stack.mathedu.jp/sc/",
@@ -2555,21 +2557,21 @@ function rewriteTemplateIncludeUrls(template) {
 
 function normalizedIncludeBaseUrl(value) {
   const candidate = String(value || "").trim();
-  if (!candidate) throw new Error("include URLベースを入力してください");
+  if (!candidate) throw new Error("URLベースを入力してください");
   if (/["\r\n]/.test(candidate)) {
-    throw new Error("include URLベースに引用符や改行は使用できません");
+    throw new Error("URLベースに引用符や改行は使用できません");
   }
   let parsed;
   try {
     parsed = new URL(candidate);
   } catch (_error) {
-    throw new Error("include URLベースはhttp://またはhttps://で始まるURLを指定してください");
+    throw new Error("URLベースはhttp://またはhttps://で始まるURLを指定してください");
   }
   if (!["http:", "https:"].includes(parsed.protocol) || !parsed.host) {
-    throw new Error("include URLベースはhttp://またはhttps://で始まるURLを指定してください");
+    throw new Error("URLベースはhttp://またはhttps://で始まるURLを指定してください");
   }
   if (parsed.username || parsed.password || parsed.search || parsed.hash) {
-    throw new Error("include URLベースに認証情報、クエリ、フラグメントは指定できません");
+    throw new Error("URLベースに認証情報、クエリ、フラグメントは指定できません");
   }
   parsed.pathname = `${parsed.pathname.replace(/\/+$/, "")}/`;
   return parsed.toString();
@@ -2581,7 +2583,7 @@ function changeIncludeBaseUrl() {
     el.includeBaseUrl.value = normalized;
     localStorage.setItem(INCLUDE_BASE_URL_STORAGE_KEY, normalized);
     updateOutput();
-    setStatus(`include URLベースを ${normalized} に設定しました`);
+    setStatus(`URLベースを ${normalized} に設定しました`);
   } catch (error) {
     setStatus(error.message, true);
     el.includeBaseUrl.focus();
@@ -2681,6 +2683,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
       state.includeSource = { ...state.includeSource, ...includeSource };
       el.qvars.value = createIncludeEditSkeleton(includeSource.content);
       state.qvars = [el.qvars.value];
+      restoreIncludeDirectory();
       syncIncludeControls();
     }
   } else {
@@ -2689,6 +2692,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     state.includeSource = includeSource;
     state.legacyQuestionInputs = {};
     state.includeFilename = includeSource?.filename || basenameFromPath(includeSource?.path) || "";
+    restoreIncludeDirectory();
     syncIncludeControls();
   }
   resetDerivedResults();
@@ -2750,6 +2754,7 @@ function applyAppStateSnapshot(snapshot) {
     generated: Boolean(snapshot.includeSource.generated),
     autoUrl: Boolean(snapshot.includeSource.autoUrl),
   } : null;
+  restoreIncludeDirectory();
   syncIncludeControls();
 }
 
@@ -2767,7 +2772,7 @@ function changeIncludeMode() {
     return;
   }
   const filename = selectedIncludeFilename();
-  const path = `001/${filename}`;
+  const path = filename;
   let defaultUrl;
   try {
     defaultUrl = publicIncludeUrl(path);
@@ -2787,6 +2792,12 @@ function changeIncludeMode() {
   syncIncludeControls();
   updateOutput();
   setStatus(`問題変数を ${filename} として保存する設定にしました`);
+}
+
+function restoreIncludeDirectory() {
+  if (!state.includeSource?.url) return;
+  try { el.includeBaseUrl.value = new URL("./", state.includeSource.url).href; }
+  catch { /* URL validation reports malformed imported addresses later. */ }
 }
 
 function syncIncludeControls() {
@@ -2809,14 +2820,21 @@ function selectedIncludeFilename() {
 
 function syncIncludeFilename() {
   if (el.includeFilename) el.includeFilename.value = selectedIncludeFilename();
+  const preview = el.includeUrlFilename;
+  if (preview) {
+    const filename = selectedIncludeFilename();
+    preview.textContent = filename ? encodeURIComponent(filename) : "";
+    try { preview.title = filename ? publicIncludeUrl(filename) : ""; }
+    catch { preview.title = ""; }
+  }
 }
 
 function refreshGeneratedIncludeSource() {
   if (!state.includeSource) return;
   const filename = selectedIncludeFilename();
   if (!filename) return;
-  if (state.includeSource.generated && state.includeSource.autoUrl) {
-    const path = `001/${filename}`;
+  if (state.includeSource.autoUrl) {
+    const path = filename;
     state.includeSource.url = publicIncludeUrl(path);
     state.includeSource.path = path;
   } else if (filename !== state.includeSource.filename) {
