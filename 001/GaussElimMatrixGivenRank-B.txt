@@ -85,12 +85,12 @@ if %_rk=3 then (ListAL1:matA3L, ListBL1:append(matA0L, matA1L, matA2L));
 /* NOTE: In the question text, string "__SELTYPE__" is replaced automatically.           */
 /*****************************************************************************************/
 /* if not depend on locale, define '%__mcq_qtext'(may include __SELTYPE__) or 'qtext' directly */
-%__mcq_qtextL:[["en", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")],
+%__mcq_qtextL:[["en", sconcat("Among the following matrices, find those whose rank is ", tex2(%_rk), ". __SELTYPE__")],
  ["ja", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")],
- ["fr", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")],
- ["it", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")],
- ["de", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")],
- ["pt", sconcat("次の行列のうち, rank(階数)が", tex2(%_rk), "である行列を __SELTYPE__")]];
+ ["fr", sconcat("Parmi les matrices suivantes, trouvez celles dont le rang est ", tex2(%_rk), ". __SELTYPE__")],
+ ["it", sconcat("Tra le seguenti matrici, individua quelle il cui rango è ", tex2(%_rk), ". __SELTYPE__")],
+ ["de", sconcat("Bestimme unter den folgenden Matrizen diejenigen mit dem Rang ", tex2(%_rk), ". __SELTYPE__")],
+ ["pt", sconcat("Entre as matrizes seguintes, identifique aquelas cujo posto é ", tex2(%_rk), ". __SELTYPE__")]];
  
 
 /******************************** List of patterns/feedbacks *****************************/
@@ -104,7 +104,7 @@ if %_rk=3 then (ListAL1:matA3L, ListBL1:append(matA0L, matA1L, matA2L));
  ["fr", "Correct. Assurez-vous de bien comprendre le concept de rang."],
  ["it", "Corretto. Assicurati di comprendere bene il concetto di rango."],
  ["de", "Richtig. Stelle sicher, dass du eine klare Vorstellung vom Begriff des Rangs hast."],
- ["pt", "Correto. Certifique-se de compreender bem o conceito de posto."]];
+ ["pt", "Correto. Certifique-se de que compreende bem o conceito de posto."]];
 
 /* Wrong answer pattern 1 */
 %__WoptL1:flatten([ListBL1]);
@@ -113,7 +113,7 @@ if %_rk=3 then (ListAL1:matA3L, ListBL1:append(matA0L, matA1L, matA2L));
  ["fr", "Vous avez sélectionné une matrice dont le rang est différent du rang indiqué. Dans chaque cas, quelques opérations élémentaires sur les lignes suffisent pour le déterminer. Revoyez également attentivement la définition d'une matrice échelonnée."],
  ["it", "Hai selezionato una matrice il cui rango è diverso da quello specificato. In ogni caso, bastano poche operazioni elementari sulle righe per determinarlo. Controlla bene anche la definizione di matrice a scala."],
  ["de", "Du hast eine Matrix ausgewählt, deren Rang nicht dem angegebenen Rang entspricht. In jedem Fall reichen wenige elementare Zeilenumformungen aus, um dies festzustellen. Überprüfe auch noch einmal sorgfältig die Definition einer Zeilenstufenmatrix."],
- ["pt", "Você selecionou uma matriz cujo posto é diferente do posto especificado. Em cada caso, bastam algumas operações elementares sobre as linhas para determiná-lo. Revise também com atenção a definição de matriz escalonada."]];
+ ["pt", "Selecionou uma matriz cujo posto é diferente do posto indicado. Em cada caso, bastam algumas operações elementares sobre as linhas para o determinar. Reveja também atentamente a definição de matriz escalonada."]];
 
 
 /********** EOF **********/
