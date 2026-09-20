@@ -13,6 +13,13 @@
 
 ## 直近の変更と決定事項
 
+- テンプレートを上限の編集元に統一。MCQ_TEMPLATE_LIMITS_BEGIN/ENDコメントを追加し、アプリの一対／固定パターン番号・追加・検証・メタデータ復元を選択版cbテンプレートのmax_cp/max_wpから取得。XML生成時の5/9への上書き撤去。CASTextは15/15、通常版はルート通常テンプレートの既存上限。server.pyは4つの/templates/URLをルートXMLからno-storeで直接配信。setup/start/restartはsync_mcq_templates.pyでPRT添字と上限・rb/cb一致を検査し静的コピー同期。
+- 一対生成を共通の言語別C/WsourceL・feedbackL各1定義へ整理。全登録パターンをMaximaでrandom_permutationし、正解数だけ先頭、残り表示数だけ続きから文脈を割当。利用者が「各パターンから1候補ずつ」を明示確認。nC/nWと同数の候補リストをpostへ渡すため既存postの割当処理で各文脈1候補になる。表示数はパターン数以下。0／全正解を含め全スロットに条件付き代入、未使用はfalse。既存変数名Cmsg1等を維持。不要になった旧繰返し生成・容量に基づくスロット数探索を撤去。固定モードは既存の候補リスト直接引渡しを維持。
+- MCQ_CHOICES_BEGIN/ENDを一対生成範囲として、コンパクト一覧から既存読込形式への一時展開を実装。新旧XML、メタデータなし、include編集／保存を維持。新15パターンの編集形式復元を検証。文字列のCASText化はCASText版、通常版は互換動作を維持。
+- 利用者が先行編集したmcq_flags(.txt/.mac)、通常／CAS post(.txt/.mac)を保持して確認。通常postのみ不足していたWmsg10〜15の言語選択を補いmakeで.mac再生成。Moodle書出しでCAS XMLの標準FBがspan.multilangに戻っていたため、合意済みcommonstringへ再統一。XML改行をLFに正規化。mcq_readme.txtとバックアップは利用者の未追跡作業ファイルとして未変更。
+- 検証: test_editor_metadata.cjs（動的上限12/15、15文脈30行、本文1回、旧新／メタデータ無／include往復、0全正解）、test_variant_parameters.cjs、test_choice_capacity.cjs、test_legacy_xml_import.cjs（180代入）、test_import_evaluation.cjs、test_translation_cas.cjs、test_casttext_migration.cjs成功。PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p 'test_*.py'で29件成功（ルートXML配信・setup同期追加）。全pre/post/fvar/flagsの.txt→.mac一致、JS構文、git diff --check成功。
+- 実STACK API: 15文脈の新XMLから5選択肢／正解2でseed1・2とも文脈重複なし。正解回答score1、対応するCフィードバック、errors/fverrors空。正解数0／5もHTTP200、5文脈各1候補で指定正解数。seed2の初回は検証XMLのdeployedseedを1のままにしていたためAPI500、preview_definition(...,2)で正しく作り直して成功。新commonstringへの再統一は構文・単体確認まで。実ブラウザ操作／実Docker再起動は未実施。今回commit/push未実施。
+
 - XML読込で一対モードでもC行全部→W行全部の順になる不具合を再現・修正。メタデータによる元パターン番号の復元後、一対モードのみパターン番号／C→W順に整列。新JSON・旧Base64の明示requirePairs設定は式からの推測で上書きせず、設定がない場合だけ推測。固定モードの分離表示は維持。app.jsのキャッシュ識別子更新。
 - 検証: node scripts/tests/test_editor_metadata.cjsに通常／CASText、rb/cbの隣接ペア、旧Base64、固定モード維持、明示設定優先の回帰検証を追加し成功。test_variant_parameters.cjs、test_import_evaluation.cjs、node --check app/mcq-webapp/app.js、git diff --check成功。実ブラウザ操作と利用者の実XMLは未確認。今回commit/push未実施。
 

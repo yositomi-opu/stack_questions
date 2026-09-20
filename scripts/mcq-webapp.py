@@ -767,6 +767,7 @@ def check_maxima_evaluation() -> None:
 
 
 def start_services(config: dict[str, Any]) -> None:
+    run([sys.executable, str(REPO_ROOT / "scripts" / "sync_mcq_templates.py")])
     require_basic_dependencies()
     require_docker_daemon(auto_start=True)
     print_step("STACK APIを起動")

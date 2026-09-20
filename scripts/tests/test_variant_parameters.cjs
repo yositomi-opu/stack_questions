@@ -254,7 +254,7 @@ context.updateCasEvaluationBadge(lengthBadge);
 assert.equal(lengthBadge.textContent,'length:13');
 state.casEvaluation=priorEvaluation;
 state.rows=[{pattern:'06',truth:'C'}];
-assert.throws(()=>context.generateVariableBlock(),/正解1〜5/);
+assert.throws(()=>context.generateVariableBlock(),/テンプレートの上限/);
 console.log('Passed: pattern dropdown limits, free number reuse, invalid export rejection, compact list length.');
 
 // Template selection survives metadata and CSV round trips; reset returns to legacy.

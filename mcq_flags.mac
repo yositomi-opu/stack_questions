@@ -19,8 +19,8 @@ texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q
 %_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
 
 
-%__mcq_max_cp:5;
-%__mcq_max_wp:9;
+%__mcq_max_cp:15;
+%__mcq_max_wp:15;
 
 
 l

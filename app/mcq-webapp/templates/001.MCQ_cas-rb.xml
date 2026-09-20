@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 115488  -->
+<!-- question: 129649  -->
   <question type="stack">
     <name>
-      <text>000.MCQ-rb-2026-04-12</text>
+      <text>001.MCQ_cas-rb-2026-09-20</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[{@%__mcq_langcode@}
@@ -18,13 +18,13 @@
     <hidden>0</hidden>
     <idnumber></idnumber>
     <stackversion>
-      <text>2026010500</text>
+      <text>2026062900</text>
     </stackversion>
     <questionvariables>
       <text><![CDATA[/************** You can find latest version in github/yositomi-opu/stack_question ***********/
 stack_include("https://yositomi-opu.github.io/stack_questions/ky_linear_algebra.mac");
 /* The difference of -cb and -rb is only type of ans1(checkbox or radio button) and this setting */
-%__mcq_rb_cb:"rb2";
+%__mcq_rb_cb:"rb";
 /*************** some usual fuctions I use. Feel free to customize here **********************/
 powerdisp:true;
 %_rp(L):=random_permutation(L);
@@ -39,8 +39,10 @@ stack_include("https://yositomi-opu.github.io/stack_questions/tex_library.mac");
 
 /* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
 /*       and adjust the following constants. */
-%__mcq_max_cp:5;
-%__mcq_max_wp:9;
+/* MCQ_TEMPLATE_LIMITS_BEGIN: editor pattern capacities */
+%__mcq_max_cp:15;
+%__mcq_max_wp:15;
+/* MCQ_TEMPLATE_LIMITS_END */
 
 /********************************* DO NOT EDIT HERE **************************************/
 stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre_cas.mac");
@@ -50,9 +52,9 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre_c
 
 /**************** insert the following code before define %__mcq_qtextL ******************
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL
-  else if %__mcq_rb_cb="rb2" then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
+  else if %__mcq_num_copts>1 then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
 if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG)
-  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG)
+  else if %__mcq_num_copts>1 then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG)
   else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
 %__SELTYPE:%__mcq_seltype;
 %__SELPROMPT:%__mcq_selprompt;
@@ -65,8 +67,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/001/Sample.txt");
 /*********************************** DO NOT EDIT HERE ************************************/
 /*************** patterns is automatically generate by the post template *****************/
 stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_cas.mac");
-/*****************************************************************************************/
-]]></text>
+/*****************************************************************************************/]]></text>
     </questionvariables>
     <specificfeedback format="html">
       <text>[[feedback:prt1]]</text>
@@ -123,8 +124,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       <autosimplify>1</autosimplify>
       <feedbackstyle>1</feedbackstyle>
       <feedbackvariables>
-        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar_cas.mac");
-]]></text>
+        <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_fvar_cas.mac");]]></text>
       </feedbackvariables>
       <node>
         <name>0</name>
@@ -184,12 +184,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>10</name>
-        <description>Wrong(Incorrect) Pattern 4</description>
+        <description>Correct Pattern 9</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[4]</sans>
+        <sans>flgCL[9]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -209,12 +209,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>11</name>
-        <description>Wrong(Incorrect) Pattern 5</description>
+        <description>Correct Pattern 10</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[5]</sans>
+        <sans>flgCL[10]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -234,12 +234,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>12</name>
-        <description>Wrong(Incorrect) Pattern 6</description>
+        <description>Correct Pattern 11</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[6]</sans>
+        <sans>flgCL[11]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -259,12 +259,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>13</name>
-        <description>Wrong(Incorrect) Pattern 7</description>
+        <description>Correct Pattern 12</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[7]</sans>
+        <sans>flgCL[12]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -284,12 +284,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>14</name>
-        <description>Wrong(Incorrect) Pattern 8</description>
+        <description>Correct Pattern 13</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[8]</sans>
+        <sans>flgCL[13]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -309,16 +309,16 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>15</name>
-        <description>Wrong(Incorrect) Pattern 9</description>
+        <description>Correct Pattern 14</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[9]</sans>
+        <sans>flgCL[14]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
         <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
-        <truenextnode>-1</truenextnode>
+        <truenextnode>16</truenextnode>
         <trueanswernote>prt1-16-T</trueanswernote>
         <truefeedback format="html">
           <text></text>
@@ -326,8 +326,108 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>
         <falsepenalty></falsepenalty>
-        <falsenextnode>-1</falsenextnode>
+        <falsenextnode>16</falsenextnode>
         <falseanswernote>prt1-16-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>16</name>
+        <description>Correct Pattern 15</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgCL[15]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>17</truenextnode>
+        <trueanswernote>prt1-17-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>17</falsenextnode>
+        <falseanswernote>prt1-17-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>17</name>
+        <description>Wrong(Incorrect) Pattern 1</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[1]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>18</truenextnode>
+        <trueanswernote>prt1-18-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>18</falsenextnode>
+        <falseanswernote>prt1-18-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>18</name>
+        <description>Wrong(Incorrect) Pattern 2</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[2]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>19</truenextnode>
+        <trueanswernote>prt1-19-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>19</falsenextnode>
+        <falseanswernote>prt1-19-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>19</name>
+        <description>Wrong(Incorrect) Pattern 3</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[3]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>20</truenextnode>
+        <trueanswernote>prt1-20-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>20</falsenextnode>
+        <falseanswernote>prt1-20-F</falseanswernote>
         <falsefeedback format="html">
           <text></text>
         </falsefeedback>
@@ -358,6 +458,256 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         </falsefeedback>
       </node>
       <node>
+        <name>20</name>
+        <description>Wrong(Incorrect) Pattern 4</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[4]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>21</truenextnode>
+        <trueanswernote>prt1-21-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>21</falsenextnode>
+        <falseanswernote>prt1-21-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>21</name>
+        <description>Wrong(Incorrect) Pattern 5</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[5]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>22</truenextnode>
+        <trueanswernote>prt1-22-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>22</falsenextnode>
+        <falseanswernote>prt1-22-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>22</name>
+        <description>Wrong(Incorrect) Pattern 6</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[6]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>23</truenextnode>
+        <trueanswernote>prt1-23-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>23</falsenextnode>
+        <falseanswernote>prt1-23-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>23</name>
+        <description>Wrong(Incorrect) Pattern 7</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[7]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>24</truenextnode>
+        <trueanswernote>prt1-24-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>24</falsenextnode>
+        <falseanswernote>prt1-24-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>24</name>
+        <description>Wrong(Incorrect) Pattern 8</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[8]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>1</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>25</truenextnode>
+        <trueanswernote>prt1-25-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>25</falsenextnode>
+        <falseanswernote>prt1-25-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>25</name>
+        <description>Wrong(Incorrect) Pattern 9</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[9]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>26</truenextnode>
+        <trueanswernote>prt1-26-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>26</falsenextnode>
+        <falseanswernote>prt1-26-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>26</name>
+        <description>Wrong(Incorrect) Pattern 10</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[10]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>27</truenextnode>
+        <trueanswernote>prt1-27-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>27</falsenextnode>
+        <falseanswernote>prt1-27-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>27</name>
+        <description>Wrong(Incorrect) Pattern 11</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[11]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>28</truenextnode>
+        <trueanswernote>prt1-28-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>28</falsenextnode>
+        <falseanswernote>prt1-28-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>28</name>
+        <description>Wrong(Incorrect) Pattern 12</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[12]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>29</truenextnode>
+        <trueanswernote>prt1-29-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>29</falsenextnode>
+        <falseanswernote>prt1-29-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>29</name>
+        <description>Wrong(Incorrect) Pattern 13</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[13]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>30</truenextnode>
+        <trueanswernote>prt1-30-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>30</falsenextnode>
+        <falseanswernote>prt1-30-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
         <name>3</name>
         <description>Correct Pattern 2</description>
         <answertest>AlgEquiv</answertest>
@@ -378,6 +728,56 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <falsepenalty></falsepenalty>
         <falsenextnode>4</falsenextnode>
         <falseanswernote>prt1-4-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>30</name>
+        <description>Wrong(Incorrect) Pattern 14</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[14]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>31</truenextnode>
+        <trueanswernote>prt1-31-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>31</falsenextnode>
+        <falseanswernote>prt1-31-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>31</name>
+        <description>Wrong(Incorrect) Pattern 15</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>flgWL[15]</sans>
+        <tans>true</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-32-T</trueanswernote>
+        <truefeedback format="html">
+          <text></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-32-F</falseanswernote>
         <falsefeedback format="html">
           <text></text>
         </falsefeedback>
@@ -459,12 +859,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>7</name>
-        <description>Wrong(Incorrect) Pattern 1</description>
+        <description>Correct Pattern 6</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[1]</sans>
+        <sans>flgCL[6]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -484,12 +884,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>8</name>
-        <description>Wrong(Incorrect) Pattern 2</description>
+        <description>Correct Pattern 7</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[2]</sans>
+        <sans>flgCL[7]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>
@@ -509,12 +909,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
       </node>
       <node>
         <name>9</name>
-        <description>Wrong(Incorrect) Pattern 3</description>
+        <description>Correct Pattern 8</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL[3]</sans>
+        <sans>flgCL[8]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
-        <quiet>1</quiet>
+        <quiet>0</quiet>
         <truescoremode>+</truescoremode>
         <truescore>0</truescore>
         <truepenalty></truepenalty>

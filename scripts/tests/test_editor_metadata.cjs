@@ -114,3 +114,35 @@ const legacy='/* MCQ_WEBAPP_DATA_BASE64:' +context.encodeAppMetadata()+' */';
 assert.equal(context.readEditorMetadata(legacy).rows.length,state.rows.length);
 assert.throws(()=>context.readEditorMetadata('/* MCQ_WEBAPP_EDITOR_V1 {broken} */'));
 console.log('Passed: readable hints, legacy metadata, rb/cb regular/CASText CSV-XML-CSV, direct edits and safe comment escaping.');
+
+// Template-derived limits and compact paired sources up to the active capacity.
+context.applyRecords(records);
+for (const mode of ['rb','cb']) state.templates[mode+'Cas']=fs.readFileSync(path.join(root,`001.MCQ_cas-${mode}.xml`),'utf8');
+assert.equal(context.patternLimit('C'),15);
+assert.equal(context.patternLimit('W'),15);
+state.templates.cbCas=state.templates.cbCas.replace('%__mcq_max_cp:15;','%__mcq_max_cp:12;');
+assert.equal(context.patternLimit(),12,'limits must follow template changes');
+state.templates.cbCas=fs.readFileSync(path.join(root,'001.MCQ_cas-cb.xml'),'utf8');
+state.rows=[];
+for(let i=1;i<=15;i++) for(const truth of ['C','W'])state.rows.push({pattern:String(i).padStart(2,'0'),truth,choice_ja:`[castext("${truth}${i}a"),castext("${truth}${i}b")]`,choice_type_ja:'cas',choice_list_expr_ja:true,feedback_ja:`${truth} feedback ${i}`,feedback_type_ja:'text',feedback_by_truth:true});
+el.numOptions.value='15';el.numCorrect.value='7';state.mode='cb';
+const compact=context.generateXml();
+assert.equal((compact.match(/castext\("C15a"\)/g)||[]).length,1,'candidate definitions must not repeat per output slot');
+assert.ok(compact.includes('%__CoptL15:if 15<=%__mcq_num_cpatterns'));
+assert.ok(compact.includes('%__WoptL15:if 15<=%__mcq_num_wpatterns'));
+context.importXmlText(compact);
+assert.equal(state.rows.length,30);
+assert.equal(state.rows[28].pattern,'15');
+assert.ok(state.rows[28].choice_ja.includes('C15a'));
+for(const n of ['0','15']) { el.numCorrect.value=n;assert.ok(context.generateXml().includes('%__CoptL1:if 1<=')); }
+el.numOptions.value='16';assert.throws(()=>context.generateXml(),/パターン数以下/);
+el.numOptions.value='5';el.numCorrect.value='2';
+if(process.env.MCQ_COMPACT_FIXTURE)fs.writeFileSync(process.env.MCQ_COMPACT_FIXTURE,context.generateXml());
+console.log('Passed: template-derived limits, 15-context compact import/export, single source definitions and zero/all-correct guards.');
+
+const plainCompact=compact.replace(/\/\* MCQ_WEBAPP_EDITOR_V1[^]*?\*\//,'');
+context.importXmlText(plainCompact,'compact.xml');
+assert.equal(state.rows.length,30);
+assert.ok(!el.qvars.value.includes('%__mcq_CsourceL'));
+assert.equal(el.requirePairs.checked,true);
+console.log('Passed: compact XML without editor metadata restores all source patterns.');

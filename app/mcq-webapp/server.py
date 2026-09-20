@@ -989,6 +989,19 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        if parsed.path in {f"/templates/001.MCQ{variant}-{mode}.xml" for variant in ("", "_cas") for mode in ("rb", "cb")}:
+            target = REPO_ROOT / Path(parsed.path).name
+            if not target.is_file():
+                self.send_error(HTTPStatus.NOT_FOUND)
+                return
+            body = target.read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/xml; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if parsed.path == "/config.js":
             body = (
                 "window.MCQ_WEBAPP_CONFIG = "

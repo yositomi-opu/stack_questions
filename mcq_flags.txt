@@ -19,8 +19,8 @@ texP2(a,u,v):=sconcat("\\(", tex1(a), "+p", tex1(u), "+q", tex1(v), "\\quad (p,q
 %_MCQ_FLAGS:[true, true, false, false, rand([true, false]), true]; 
 /* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
 /*       and adjust the following constants. */
-%__mcq_max_cp:5;
-%__mcq_max_wp:9;
+%__mcq_max_cp:15;
+%__mcq_max_wp:15;
 /*****************************************************************************************/
 /**** You can make database using the area below until END of MAIN QUESTION VARIABLES ****/
 /******************************** MAIN QUESTION VARIABLES ********************************/l

@@ -39,8 +39,10 @@ stack_include("https://yositomi-opu.github.io/stack_questions/tex_library.mac");
 
 /* NOTE: If the number of correct/incorrect answer patterns exceeds 5/9, increase the number of PRT nodes */
 /*       and adjust the following constants. */
+/* MCQ_TEMPLATE_LIMITS_BEGIN: editor pattern capacities */
 %__mcq_max_cp:5;
 %__mcq_max_wp:9;
+/* MCQ_TEMPLATE_LIMITS_END */
 
 /********************************* DO NOT EDIT HERE **************************************/
 stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_pre.mac");

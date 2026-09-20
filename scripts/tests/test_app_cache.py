@@ -1,3 +1,4 @@
+import io
 import importlib.util
 from pathlib import Path
 import unittest
@@ -27,3 +28,18 @@ class AppCacheTests(unittest.TestCase):
         with patch.object(server.SimpleHTTPRequestHandler, 'end_headers'):
             handler.end_headers()
         handler.send_header.assert_not_called()
+
+
+    def test_templates_use_root_source_without_cache(self):
+        for variant in ('', '_cas'):
+            for mode in ('rb', 'cb'):
+                name = f'001.MCQ{variant}-{mode}.xml'
+                handler = server.McqRequestHandler.__new__(server.McqRequestHandler)
+                handler.path = f'/templates/{name}?v=test'
+                handler.send_response = Mock()
+                handler.send_header = Mock()
+                handler.end_headers = Mock()
+                handler.wfile = io.BytesIO()
+                handler.do_GET()
+                self.assertEqual(handler.wfile.getvalue(), (server.REPO_ROOT / name).read_bytes())
+                handler.send_header.assert_any_call('Cache-Control', 'no-store')

@@ -652,15 +652,28 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function templatePatternLimits() {
+  const key = el.castextTemplate?.checked ? "cbCas" : "cb";
+  const source = state.templates?.[key] || state.templates?.[el.castextTemplate?.checked ? "rbCas" : "rb"] || "";
+  const value = name => Number(source.match(new RegExp("%__mcq_max_" + name + "\\s*:\\s*(\\d+)\\s*;"))?.[1] || 0);
+  return { C: value("cp"), W: value("wp") };
+}
+
+function patternLimit(truth = null) {
+  const limits = templatePatternLimits();
+  return !truth || el.requirePairs.checked ? Math.min(limits.C, limits.W) : limits[truth];
+}
+
 async function loadTemplates() {
   try {
     const [rb, cb, rbCas, cbCas] = await Promise.all([
-      fetch("./templates/001.MCQ-rb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ-cb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-rb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-cb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-rb.xml?v=20260920-template-source1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-cb.xml?v=20260920-template-source1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-rb.xml?v=20260920-template-source1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-cb.xml?v=20260920-template-source1").then(checkResponse).then((r) => r.text()),
     ]);
     state.templates = { rb, cb, rbCas, cbCas };
+    renderRows();
     setStatus("テンプレート読込完了");
   } catch (error) {
     setStatus("アプリ内のXMLテンプレートを読み込めませんでした。ページを再読み込みしてください。", true);
@@ -934,7 +947,7 @@ function renderRows() {
 function pairedPatternEditor(row, index) {
   const editor = document.createElement("div");
   editor.className = "typed-editor";
-  editor.append(patternNumberSelect(patternRowsFor(row), 5));
+  editor.append(patternNumberSelect(patternRowsFor(row), patternLimit()));
   if (patternRowsFor(row)[0] === row) {
     const button = document.createElement("button");
     button.type = "button";
@@ -983,6 +996,7 @@ function swapPairedOptions(pattern = null) {
 }
 
 function updateOptionLimit() {
+  if (el.requirePairs.checked) { el.numOptions.max = String(Math.max(1, groupPatterns().length)); return; }
   const lang = baseLang();
   const pendingList = state.rows.some((row, index) => {
     if (!String(row[`choice_${lang}`] || "").trim()
@@ -1080,7 +1094,7 @@ function patternNumberSelect(rows, maximum) {
 }
 
 function fixedPatternInput(group) {
-  return patternNumberSelect(group.rows, group.truth === "C" ? 5 : 9);
+  return patternNumberSelect(group.rows, patternLimit(group.truth));
 }
 
 function fixedChoicesTextarea(group) {
@@ -1626,17 +1640,6 @@ function generateXml() {
   const variableBlock = state.includeSource
     ? [...parameterPreamble(), `stack_include("${state.includeSource.url}");`].join("\n")
     : generatedVariables;
-  const patterns = groupPatterns();
-  const patternCount = patterns.length;
-  const counts = correctCountChoices(positiveInt(el.numOptions.value, "選択肢数"));
-  const maxSelectedCorrect = Math.max(...counts);
-  const minSelectedCorrect = Math.min(...counts);
-  const maxCorrect = el.requirePairs.checked
-    ? maxSelectedCorrect
-    : patterns.filter((pattern) => pattern.C.length).length;
-  const maxWrong = el.requirePairs.checked
-    ? patternCount - minSelectedCorrect
-    : patterns.filter((pattern) => pattern.W.length).length;
   return template
     // STACK discovers available languages in top-level question CASText.
     // Keep these invisible declarations as well as the reusable langcode variable.
@@ -1645,8 +1648,6 @@ function generateXml() {
     .replace(/(?:\[\[lang code=['"][^'"]+['"]\]\]\[\[\/lang\]\])+/g, languageBlocks())
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
     .replace(/%__mcq_rb_cb\s*:\s*"(?:rb2?|cb)"\s*;/, `%__mcq_rb_cb:"${state.mode === "cb" ? "cb" : el.radioMultiplePrompt?.checked ? "rb2" : "rb"}";`)
-    .replace(/%__mcq_max_cp:\d+;/, `%__mcq_max_cp:${Math.max(5, maxCorrect)};`)
-    .replace(/%__mcq_max_wp:\d+;/, `%__mcq_max_wp:${Math.max(9, maxWrong)};`)
     .replace(
       /(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/\s*)[\s\S]*?(\s*\/\*+\s*END OF MAIN QUESTION VARIABLES\s*\*+\/)/,
       `$1\n${variableBlock}\n$2`
@@ -1674,8 +1675,8 @@ function previewQuestionSnapshot() {
 }
 
 function generateVariableBlock(includePreamble = true) {
-  if (state.rows.some(row => !Number.isInteger(Number(row.pattern)) || Number(row.pattern) < 1 || Number(row.pattern) > (normalizeTruth(row.truth) === "C" ? 5 : 9))) {
-    throw new Error("パターン番号は正解1〜5・不正解1〜9で指定してください");
+  if (state.rows.some(row => !Number.isInteger(Number(row.pattern)) || Number(row.pattern) < 1 || Number(row.pattern) > patternLimit(normalizeTruth(row.truth)))) {
+    throw new Error(uiText("パターン番号がテンプレートの上限を超えています。"));
   }
   validateTranslationCoverage();
   const numOptions = positiveInt(el.numOptions.value, "選択肢数");
@@ -1894,7 +1895,7 @@ function restoreEditorFormats(metadata, variables = "") {
   }
   for (const row of state.rows) {
     const hint = metadata.options[`option${Number(row.pattern)}${row.truth}`]?.[0];
-    if (/^0?[1-9]$/.test(String(hint?.pattern || ""))) row.pattern = String(hint.pattern).padStart(2, "0");
+    if (/^\d+$/.test(String(hint?.pattern || "")) && Number(hint.pattern) >= 1 && Number(hint.pattern) <= patternLimit(row.truth)) row.pattern = String(hint.pattern).padStart(2, "0");
   }
   const qdefinition = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(item => item?.name === "%__mcq_qtextL").at(-1);
   const qvalues = qdefinition && extractLanguageAssociation(qdefinition.expression);
@@ -1933,80 +1934,55 @@ function decodeAppMetadata(value) {
 }
 
 function generatePairedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
-  patterns.forEach((pattern) => {
-    if (!pattern.C.length || !pattern.W.length) {
-      throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
-    }
+  if (numOptions > patterns.length) throw new Error(uiText("一対モードの選択肢数はパターン数以下にしてください。"));
+  patterns.forEach(pattern => {
+    if (!pattern.C.length || !pattern.W.length) throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
+    if (!patternChoiceCapacity(pattern, "C") || !patternChoiceCapacity(pattern, "W")) throw new Error(uiText("各パターンの正解・不正解に少なくとも1候補が必要です。"));
   });
-
-  const plans = counts.map((correctChoices) => {
-    const wrongChoices = numOptions - correctChoices;
-    const plan = pairedPatternSlotPlan(patterns, correctChoices, wrongChoices);
-    if (!plan) {
-      throw new Error(
-        `正解${correctChoices}個・誤答${wrongChoices}個を、評価済みの候補数と重複しないパターンから生成できません`
-      );
+  const lines = [...baseVariableLines(numOptions, counts, includePreamble), "/* MCQ_CHOICES_BEGIN */"];
+  lines.push(`%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`);
+  lines.push("%__po:%__mcq_pattern_order;", "%__mcq_num_cpatterns:%_MCQ_NUM_COPTS;", "%__mcq_num_wpatterns:%_MCQ_NUM_OPTS-%_MCQ_NUM_COPTS;");
+  for (const truth of ["C", "W"]) {
+    const source = maximaAssociation(activeLangs().map(lang => {
+      const values = patterns.map(pattern => maximaChoiceList(pattern[truth].map(row => localizedTyped(row, "choice", row.choice_language_independent ? baseLang() : lang)).filter(item => item.value)));
+      return `["${lang}", [${values.join(", ")}]]`;
+    }));
+    const messages = maximaAssociation(activeLangs().map(lang => {
+      const values = patterns.map(pattern => maximaTypedValue(localizedFeedbackTyped(pattern, lang, patternFeedbackSeparate(pattern.id) ? truth : null)));
+      return `["${lang}", [${values.join(", ")}]]`;
+    }));
+    const count = `%__mcq_num_${truth.toLowerCase()}patterns`;
+    const position = truth === "C" ? "k" : "k+%__mcq_num_cpatterns";
+    lines.push(`%__mcq_${truth}sourceL:${source};`, `%__mcq_${truth}feedbackL:${messages};`);
+    lines.push(`%__mcq_${truth}source:%__mcq_lang(%__mcq_${truth}sourceL, %_STACK_LANG);`, `%__mcq_${truth}feedback:%__mcq_lang(%__mcq_${truth}feedbackL, %_STACK_LANG);`);
+    lines.push(`%__mcq_${truth}patterns:makelist(%__mcq_${truth}source[%__po[${position}]], k, 1, ${count});`, `%__mcq_${truth}messages:makelist(%__mcq_${truth}feedback[%__po[${position}]], k, 1, ${count});`);
+    for (let slot = 1; slot <= templatePatternLimits()[truth]; slot++) {
+      lines.push(`%__${truth}optL${slot}:if ${slot}<=${count} then %__mcq_${truth}patterns[${slot}] else false;`);
+      lines.push(`%__${truth}msg${slot}:if ${slot}<=${count} then %__mcq_${truth}messages[${slot}] else false;`);
     }
-    return { correctChoices, ...plan };
-  });
-  const maxCorrectSlots = Math.max(...plans.map((plan) => plan.correctSlots));
-  const maxWrongSlots = Math.max(...plans.map((plan) => plan.wrongSlots));
-
-  const lines = [
-    ...baseVariableLines(numOptions, counts, includePreamble),
-    `/* Randomly assign distinct patterns; each pattern may supply multiple options. */`,
-    `%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`,
-    `%__mcq_num_cpatterns:${slotPlanExpression(plans, "correctSlots")};`,
-    `%__mcq_num_wpatterns:${slotPlanExpression(plans, "wrongSlots")};`,
-    "",
-  ];
-
-  for (let index = 0; index < maxCorrectSlots; index += 1) {
-    appendRandomPattern(
-      lines, "C", index + 1, String(index + 1), patterns,
-      `${index + 1} <= %__mcq_num_cpatterns`
-    );
   }
-  for (let index = 0; index < maxWrongSlots; index += 1) {
-    appendRandomPattern(
-      lines, "W", index + 1, `%__mcq_num_cpatterns + ${index + 1}`, patterns,
-      `${index + 1} <= %__mcq_num_wpatterns`
-    );
-  }
-  lines.push("/**************** End of generated variables ****************/");
+  lines.push("/* MCQ_CHOICES_END */", "/**************** End of generated variables ****************/");
   return lines.join("\n");
 }
 
-function pairedPatternSlotPlan(patterns, correctChoices, wrongChoices) {
-  const patternCount = patterns.length;
-  const correctCapacities = patterns.map((pattern) => patternChoiceCapacity(pattern, "C")).sort((a, b) => a - b);
-  const wrongCapacities = patterns.map((pattern) => patternChoiceCapacity(pattern, "W")).sort((a, b) => a - b);
-  const candidates = [];
-  for (let correctSlots = correctChoices ? 1 : 0; correctSlots <= patternCount; correctSlots += 1) {
-    if (!correctChoices && correctSlots > 0) break;
-    for (let wrongSlots = wrongChoices ? 1 : 0; wrongSlots <= patternCount - correctSlots; wrongSlots += 1) {
-      if (!wrongChoices && wrongSlots > 0) break;
-      const correctCapacity = correctCapacities.slice(0, correctSlots).reduce((sum, value) => sum + value, 0);
-      const wrongCapacity = wrongCapacities.slice(0, wrongSlots).reduce((sum, value) => sum + value, 0);
-      if (correctCapacity >= correctChoices && wrongCapacity >= wrongChoices) {
-        candidates.push({ correctSlots, wrongSlots });
-      }
+// Adapt compact source tables to the legacy importer without evaluating Maxima.
+// The source text is used only for reading; saved XML retains the compact form.
+function expandCompactChoices(variables) {
+  const assignments = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(Boolean);
+  const sources = new Map(assignments.map(item => [item.name, item.expression]));
+  if (!sources.has("%__mcq_CsourceL") || !sources.has("%__mcq_WsourceL")) return variables;
+  const lines = [];
+  for (const truth of ["C", "W"]) {
+    for (const [kind, name] of [["optL1L", "sourceL"], ["msg1L", "feedbackL"]]) {
+      const assoc = extractLanguageAssociation(sources.get(`%__mcq_${truth}${name}`) || "");
+      if (!assoc) throw new Error(uiText("選択肢の多言語連想配列を解析できません"));
+      lines.push(`%__${truth}${kind}:` + maximaAssociation([...assoc].map(([lang, node]) => `["${lang}", ${node.value}[%__mcq_pattern_order[1]]]`)) + ";");
     }
   }
-  candidates.sort((a, b) =>
-    (a.correctSlots + a.wrongSlots) - (b.correctSlots + b.wrongSlots)
-    || Math.abs(a.correctSlots - correctChoices) - Math.abs(b.correctSlots - correctChoices)
-  );
-  return candidates[0] || null;
+  return variables.replace(/\/\* MCQ_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_CHOICES_END \*\//, lines.join("\n"));
 }
 
-function slotPlanExpression(plans, key) {
-  if (plans.every((plan) => plan[key] === plans[0][key])) return String(plans[0][key]);
-  return plans.slice(0, -1).reduceRight(
-    (otherwise, plan) => `if %_MCQ_NUM_COPTS=${plan.correctChoices} then ${plan[key]} else ${otherwise}`,
-    String(plans.at(-1)[key])
-  );
-}
+
 
 function generateFixedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
   const correct = patterns.filter((pattern) => pattern.C.length);
@@ -2066,50 +2042,9 @@ function fixedFeedbackAssoc(rows) {
   );
 }
 
-function appendRandomPattern(lines, truth, slot, orderPosition, patterns, condition) {
-  const independent = patterns.every((pattern) =>
-    pattern[truth].length > 0 && pattern[truth].every((row) => row.choice_language_independent)
-  );
-  const optName = truth === "C" ? `%__CoptL${slot}${independent ? "" : "L"}` : `%__WoptL${slot}${independent ? "" : "L"}`;
-  const msgName = truth === "C" ? `%__Cmsg${slot}L` : `%__Wmsg${slot}L`;
-  const optionValue = independent
-    ? randomizedIndependentChoices(patterns, truth, orderPosition)
-    : randomizedLangAssoc(patterns, truth, orderPosition);
-  lines.push(`${optName}:if ${condition} then ${optionValue} else false;`);
-  lines.push(`${msgName}:if ${condition} then ${randomizedFeedbackAssoc(patterns, truth, orderPosition)} else false;`);
-  lines.push("");
-}
 
-function randomizedIndependentChoices(patterns, truth, orderPosition) {
-  const values = patterns.map((pattern) => independentChoicesValue(pattern[truth]));
-  return `[${values.join(", ")}][%__mcq_pattern_order[${orderPosition}]]`;
-}
 
-function randomizedLangAssoc(patterns, truth, orderPosition) {
-  const entries = availableLangs(patterns.flatMap((pattern) => pattern[truth]));
-  return maximaAssociation(entries.map((lang) => {
-    const choicesByPattern = patterns.map((pattern) => {
-      const sourceItems = pattern[truth].map((row) => localizedTyped(row, "choice", lang)).filter((item) => item.value);
-      return maximaChoiceList(sourceItems);
-    });
-    return `["${lang}", [${choicesByPattern.join(", ")}][%__mcq_pattern_order[${orderPosition}]]]`;
-  }));
-}
 
-function randomizedFeedbackAssoc(patterns, truth, orderPosition) {
-  const allRows = patterns.flatMap((pattern) => patternFeedbackSeparate(pattern.id)
-    ? pattern[truth]
-    : [...pattern.C, ...pattern.W]);
-  const entries = availableLangs(allRows);
-  return maximaAssociation(entries.map((lang) => {
-    const values = patterns.map((pattern) => maximaTypedValue(localizedFeedbackTyped(
-      pattern,
-      lang,
-      patternFeedbackSeparate(pattern.id) ? truth : null
-    )));
-    return `["${lang}", [${values.join(", ")}][%__mcq_pattern_order[${orderPosition}]]]`;
-  }));
-}
 
 function availableLangs(rows) {
   return activeLangs().filter((lang) => rows.some((row) => localized(row, "choice", lang)));
@@ -2751,7 +2686,7 @@ function reconcileXmlQuestionTexts(variables) {
 }
 
 function reconcileXmlChoices(variables, requirePairs = null) {
-  const statements = splitMaximaStatements(stripMaximaComments(extractMainVariableSection(variables)));
+  const statements = splitMaximaStatements(stripMaximaComments(expandCompactChoices(extractMainVariableSection(variables))));
   const assignments = [...new Map(statements.map(parseMaximaAssignment).filter(Boolean).map(item => [item.name, item])).values()];
   const optionPattern = /^%__[CW]optL?\d+L?$/;
   if (!assignments.some(item => optionPattern.test(item.name))) return false;
@@ -2994,7 +2929,7 @@ function importLegacyQuestionVariables(variables, documentNode, filename, xmlVar
   if (el.scoringMethod) el.scoringMethod.value = literal("%__mcq_scmethod") || "1";
   el.parameters.value = el.parameters.value.replace(/%__mcq_(?:nocorrectopt|noidea|scmethod)\s*:\s*(?:true|false|[1-4])\s*[;$]/g, "").replace(/%__mcq_nocorrecttrue:is\(%_MCQ_NUM_COPTS=0\);/g, "").trim();
   const main = extractMainVariableSection(variables);
-  const uncommented = stripMaximaComments(main);
+  const uncommented = stripMaximaComments(expandCompactChoices(main));
   const statements = splitMaximaStatements(uncommented);
   const assignments = statements.map(parseMaximaAssignment).filter(Boolean);
   const qtextAssignment = assignments.find((item) => item.name === "%__mcq_qtextL");
@@ -3052,6 +2987,11 @@ function importLegacyQuestionVariables(variables, documentNode, filename, xmlVar
       return true;
     });
     el.qvars.value = qvarStatements.map((item) => item.trim()).filter(Boolean).join("\n");
+  }
+  if (/MCQ_CHOICES_BEGIN/.test(main) && variables === xmlVariables) {
+    const body = main.split(/\/\*+\s*Generated by mcq-webapp\s*\*+\//)[1] || "";
+    const boundary = findManagedAssignmentRanges(body)[0];
+    if (boundary) el.qvars.value = body.slice(0, boundary.start).trim();
   }
   state.qvars = [el.qvars.value];
 
@@ -3163,6 +3103,7 @@ function managedCanonicalName(name) {
 }
 
 function createIncludeEditSkeleton(source) {
+  source = source.replace(/\/\* MCQ_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_CHOICES_END \*\//, "/* MCQ_WEBAPP_SLOT:choices */");
   let output = source;
   const ranges = findManagedAssignmentRanges(source);
   ranges.sort((a, b) => b.start - a.start).forEach((range) => {
@@ -4083,10 +4024,12 @@ async function copyCasDebugCode() {
 function generateIncludeFileContent() {
   if (state.includeSource?.generated) return `${generateVariableBlock(false).trim()}\n`;
   const generated = generateVariableBlock(false);
-  const generatedAssignments = splitMaximaStatements(stripMaximaComments(generated))
+  const choiceBlock = generated.match(/\/\* MCQ_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_CHOICES_END \*\//)?.[0];
+  const generatedAssignments = splitMaximaStatements(stripMaximaComments(choiceBlock ? generated.replace(choiceBlock, "") : generated))
     .map(parseMaximaAssignment)
     .filter(Boolean);
   const managed = new Map();
+  if (choiceBlock) managed.set("choices", choiceBlock);
   generatedAssignments.forEach((assignment) => {
     const canonical = managedCanonicalName(assignment.name);
     if (canonical) managed.set(canonical, assignment.raw.trim());
@@ -4184,12 +4127,12 @@ function upperFirst(value) {
 }
 
 function nextPattern(truth = null) {
-  const maximum = truth === "W" ? 9 : 5;
+  const maximum = patternLimit(truth);
   const used = new Set(state.rows.filter(row => !truth || normalizeTruth(row.truth) === truth).map(row => Number(row.pattern)));
   for (let n = 1; n <= maximum; n++) {
     if (!used.has(n)) return String(n).padStart(2, "0");
   }
-  setStatus("パターン番号の上限です（正解1〜5・不正解1〜9）", true);
+  setStatus(uiText("パターン番号がテンプレートの上限を超えています。"), true);
   return null;
 }
 

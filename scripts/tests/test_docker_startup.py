@@ -31,6 +31,7 @@ class DockerStartupTests(unittest.TestCase):
             manager.setup(config)
             self.assertEqual([call.args[0] for call in run.call_args_list], [
                 ["compose", "pull", "--policy", "missing"],
+                [manager.sys.executable, str(manager.REPO_ROOT / "scripts" / "sync_mcq_templates.py")],
                 ["compose", "up", "-d", "--pull", "missing"],
             ])
 
