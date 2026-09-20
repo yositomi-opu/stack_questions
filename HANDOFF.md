@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- XMLの新規保存を可読JSONコメントMCQ_WEBAPP_EDITOR_V1へ変更。問題文／選択肢／FB／問題変数の本文は重複保存せず、型・言語非依存・個別FB・パターン対応・設定を保持。旧Base64読込は継続。コメント内のスラッシュと > をJSON UnicodeエスケープしMaximaコメント／CDATA終端を保護。本文から再構築後、静的な単一候補と整合する型だけ復元し、複雑な式や複数編集行の連結はリスト式のまま通知。パラメータなどの設定は従来どおりメタデータ優先。旧自動変換前の本文バックアップは新XMLへ重複保存しない（CSVでは従来どおり）。
+- CASText版の文字列選択肢をcastextリテラルで出力するよう統一。CSVは元の文章／型を保持し、新XML往復でも安全に復元可能。日英ヘルプ・README・キャッシュ更新。
+- 検証: node scripts/tests/test_editor_metadata.cjs（通常／CASText、rb/cb、型と本文のCSV→XML→CSV、直編集優先、旧形式、コメント境界、非連続パターン、言語非依存、外部include、多言語）、test_variant_parameters.cjs、test_casttext_migration.cjs、test_import_evaluation.cjs、test_translation_cas.cjsが成功。node --check app/mcq-webapp/app.js とi18n.js、git diff --check成功。ローカルSTACK API /renderで新コメントを含むXMLのHTTP200と選択肢生成を確認。ランダム抽出用候補を同じ検証用CASTextへ揃えた追加リクエストで {@aa@}→3 の展開を確認。APIの採点・実ブラウザ操作は今回未確認。利用者依頼によりcommit/push予定、送信状態はgit履歴で確認。
+
 - 通常／CASText版のrb/cb計4テンプレートとアプリ内コピーのprtcorrect・prtpartiallycorrect・prtincorrectをSTACK標準のsymbolic/default commonstringへ変更。言語パックで記号と文言を取得し、Moodle multilangフィルタへの依存を除去。公式Authoring/Feedback文書に従った対応。アプリのテンプレート／JSキャッシュ識別子とREADME更新。
 - 検証: 8 XMLのElementTree解析、変更範囲が3フィードバック欄のみであること、4組のコピー一致をPythonで確認。node --check app/mcq-webapp/app.js、node scripts/tests/test_variant_parameters.cjs、PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（4件）、git diff --check成功。実STACK API採点／ブラウザでの各言語表示は未確認。GitHubへの反映依頼あり、送信結果はgit履歴で確認。
 

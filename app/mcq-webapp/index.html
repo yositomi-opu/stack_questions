@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260917-includedirectory1">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260917-includedirectory1"></script>
-    <script defer src="./app.js?v=20260920-commonstring1"></script>
+    <script defer src="./i18n.js?v=20260920-editor1"></script>
+    <script defer src="./app.js?v=20260920-editor1"></script>
     <script defer src="./file-ui.js?v=20260913-files1"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -274,7 +274,7 @@
           <div class="panel-heading">
             <div class="row-actions"><h2>選択肢データ</h2><div class="question-text-help">
               <button type="button" class="question-text-help-button" aria-label="選択肢データについて" aria-describedby="choiceDataHelp">?</button>
-              <div id="choiceDataHelp" class="question-text-tooltip" role="tooltip"><p>CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式のsconcatやtex2などはできる範囲で変換し、独自の式はそのまま使用します。選択肢の文字列・CAS式・CASリスト式は従来どおり使えます。</p></div>
+              <div id="choiceDataHelp" class="question-text-tooltip" role="tooltip"><p>CASText版のフィードバックでは、CASTextに文章や{@a@}、ブロック構文を入力できます。外側のcastext()は不要です。CAS式のsconcatやtex2などはできる範囲で変換し、独自の式はそのまま使用します。CASText版では、選択肢の「文字列」もCASTextとして処理します。文章や{@a@}を入力し、外側のcastext()は付けません。「CAS式」は1選択肢、「CASリスト式」は複数候補を返す式です。</p></div>
             </div></div>
             <div class="row-actions">
               <button id="swapAllPairsButton" type="button" class="ghost" title="全パターンの正解と不正解を入れかえます" aria-label="全パターンの正解と不正解を入れかえます">全体正不入替</button>

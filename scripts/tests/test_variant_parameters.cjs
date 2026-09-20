@@ -52,8 +52,8 @@ for(const rank of [0,1,2]){
  assert.match(main,/%_MCQ_NUM_COPTS:rand\(\[2, 3, 4, 4\]\);/);
  const roundtrip=context.legacyIncludePreamble(main);
  assert.match(roundtrip.parameters,new RegExp(`%_rk:${rank};`));
- const metadata=result.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)[1];
- el.parameters.value='wrong';context.applyAppStateSnapshot(context.decodeAppMetadata(metadata));
+ const metadata=context.readEditorMetadata(result);
+ el.parameters.value=metadata.parameters;
  assert.match(el.parameters.value,new RegExp(`%_rk:${rank};`));
  const include=context.generateIncludeFileContent();
  assert.doesNotMatch(include, new RegExp(`^%_rk:${rank};`,'m'));
@@ -267,8 +267,8 @@ for (const mode of ['rb', 'cb']) {
   evaluateLists();
   const xml=context.generateXml();
   for (const stem of ['pre','post','fvar']) assert.ok(xml.includes(`mcq_template_${stem}${enabled ? '_cas' : ''}.mac`));
-  const snap=context.decodeAppMetadata(xml.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)[1]);
-  el.castextTemplate.checked=!enabled;context.applyAppStateSnapshot(snap);
+  const snap=context.readEditorMetadata(xml);
+  el.castextTemplate.checked=snap.settings.castextTemplate;
   assert.equal(el.castextTemplate.checked,enabled);
   const records=context.currentCsvRecords('variant');
   el.castextTemplate.checked=!enabled;context.applyRecords(records);

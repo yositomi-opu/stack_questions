@@ -1622,7 +1622,7 @@ function generateXml() {
   refreshGeneratedIncludeSource();
   const id = xmlFileStem(baseTitle(el.questionId.value));
   const generatedVariables = generateVariableBlock();
-  const metadataComment = `/* MCQ_WEBAPP_DATA_BASE64:${encodeAppMetadata()} */`;
+  const metadataComment = editorMetadataComment();
   const variableBlock = state.includeSource
     ? [...parameterPreamble(), `stack_include("${state.includeSource.url}");`].join("\n")
     : generatedVariables;
@@ -1792,6 +1792,131 @@ function appStateSnapshot() {
       autoUrl: Boolean(state.includeSource.autoUrl),
     } : null,
   };
+}
+
+// Only editing hints belong here. Executable text is read from the XML/include.
+function editorMetadataComment() {
+  const snapshot = appStateSnapshot();
+  const patterns = groupPatterns();
+  const options = {};
+  for (const truth of ["C", "W"]) {
+    const groups = el.requirePairs.checked ? patterns : patterns.filter(pattern => pattern[truth].length);
+    groups.forEach((pattern, index) => {
+      options[`option${index + 1}${truth}`] = pattern[truth].map(row => ({
+        pattern: row.pattern,
+        choice_language_independent: Boolean(row.choice_language_independent),
+        feedback_language_independent: Boolean(row.feedback_language_independent),
+        feedback_by_truth: Boolean(row.feedback_by_truth),
+        languages: Object.fromEntries(activeLangs().map(lang => [lang, {
+          input_type: csvValueType(row[`choice_type_${lang}`], row[`choice_list_expr_${lang}`]),
+          feedback_type: csvValueType(row[`feedback_type_${lang}`]),
+        }])),
+      }));
+    });
+  }
+  delete snapshot.rows;
+  delete snapshot.qvars;
+  delete snapshot.legacyQuestionInputs;
+  snapshot.questions = Object.fromEntries(activeLangs().map(lang => [lang, { type: state.questionTypes[lang] || "text" }]));
+  const data = { schema: "mcq-webapp-editor-v1", ...snapshot, options };
+  // Prevent Maxima nested comments and XML CDATA terminators inside JSON strings.
+  const json = JSON.stringify(data, null, 2).replace(/\//g, "\\u002f").replace(/>/g, "\\u003e");
+  return `/* MCQ_WEBAPP_EDITOR_V1\n${json}\n*/`;
+}
+
+function readEditorMetadata(variables) {
+  const readable = variables.match(/\/\*\s*MCQ_WEBAPP_EDITOR_V1\s+([\s\S]*?)\*\//);
+  if (readable) {
+    const data = JSON.parse(readable[1]);
+    if (data.schema !== "mcq-webapp-editor-v1" || data.version !== 1 || !data.options || typeof data.options !== "object") {
+      throw new Error("Invalid MCQ_WEBAPP_EDITOR_V1 metadata");
+    }
+    return { ...data, rows: [], qvars: "", legacyQuestionInputs: {} };
+  }
+  const legacy = variables.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)?.[1];
+  return legacy ? decodeAppMetadata(legacy) : null;
+}
+
+function restoreEditorLiteral(value) {
+  const literal = casttextSourceString(String(value).trim());
+  if (literal !== null) return literal;
+  const call = String(value).trim().match(/^castext\s*\(([\s\S]*)\)$/);
+  return call ? casttextSourceString(call[1].trim()) : null;
+}
+
+function restoreEditorFormats(metadata, variables = "") {
+  let fallback = false;
+  for (const row of state.rows) {
+    const hints = metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    // A single CSV source can be restored without guessing how a concatenation
+    // was divided between several editor rows. Keep complex sources intact.
+    if (!Array.isArray(hints) || hints.length !== 1) { fallback = true; continue; }
+    const hint = hints[0];
+    for (const lang of activeLangs()) {
+      const types = hint.languages?.[lang];
+      if (!types) continue;
+      const value = row[`choice_${lang}`];
+      if (!value) continue;
+      if (types.input_type !== "cas_list") {
+        const parsed = parseMaximaValue(value, 0);
+        const list = parsed?.node;
+        if (list?.kind === "list" && parsed.index === value.length && list.items.length === 1) {
+          const item = list.items[0];
+          const text = item.kind === "string" ? item.value : restoreEditorLiteral(item.value);
+          if (types.input_type === "string" && text !== null) {
+            row[`choice_${lang}`] = text;
+            row[`choice_type_${lang}`] = "text";
+            row[`choice_list_expr_${lang}`] = false;
+          } else if (types.input_type === "cas") {
+            row[`choice_${lang}`] = item.kind === "string" ? maximaString(item.value) : item.value;
+            row[`choice_type_${lang}`] = "cas";
+            row[`choice_list_expr_${lang}`] = false;
+          } else { fallback = true; }
+        } else { fallback = true; }
+      }
+      if (types.feedback_type === "string" && row[`feedback_type_${lang}`] === "cas") {
+        const text = restoreEditorLiteral(row[`feedback_${lang}`]);
+        if (text !== null) {
+          row[`feedback_${lang}`] = text;
+          row[`feedback_type_${lang}`] = "text";
+        } else { fallback = true; }
+      }
+    }
+    for (const field of ["choice", "feedback"]) {
+      const values = activeLangs().map(lang => row[`${field}_${lang}`]).filter(value => value);
+      row[`${field}_language_independent`] = Boolean(hint[`${field}_language_independent`]) && new Set(values).size <= 1;
+    }
+  }
+  // Keep explicit separate feedback, even when both messages happen to match.
+  for (const row of state.rows) {
+    const hint = metadata.options[`option${Number(row.pattern)}${row.truth}`]?.[0];
+    if (hint?.feedback_by_truth) row.feedback_by_truth = true;
+  }
+  for (const row of state.rows) {
+    const hint = metadata.options[`option${Number(row.pattern)}${row.truth}`]?.[0];
+    if (/^0?[1-9]$/.test(String(hint?.pattern || ""))) row.pattern = String(hint.pattern).padStart(2, "0");
+  }
+  const qdefinition = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(item => item?.name === "%__mcq_qtextL").at(-1);
+  const qvalues = qdefinition && extractLanguageAssociation(qdefinition.expression);
+  for (const lang of activeLangs()) {
+    const hint = metadata.questions?.[lang]?.type;
+    if (hint === "cas" && qvalues?.get(lang)?.kind === "raw") {
+      el.questions[lang].value = qvalues.get(lang).value;
+      state.questionTypes[lang] = "cas";
+      el.questionModes[lang].value = "cas";
+    }
+    if ((hint === "text" || hint === "castext") && state.questionTypes[lang] === "castext") {
+      el.questions[lang].value = el.questions[lang].value.replace(/\{@%__SELPROMPT@\}/g, "__SELPROMPT__").replace(/\{@%__SELTYPE@\}/g, "__SELTYPE__");
+      state.questionTypes[lang] = hint;
+      el.questionModes[lang].value = hint;
+    }
+    if (hint && hint !== state.questionTypes[lang]) fallback = true;
+  }
+  if (metadata.questionLanguageIndependent) {
+    state.questionLanguageIndependent = new Set(activeLangs().map(lang => el.questions[lang].value)).size <= 1;
+  }
+  el.feedbackByTruth.checked = el.requirePairs.checked && state.rows.every(row => row.feedback_by_truth);
+  return fallback;
 }
 
 function encodeAppMetadata() {
@@ -2224,6 +2349,7 @@ function maximaAssoc(entries, type) {
 }
 
 function maximaChoiceList(items) {
+  if (el.castextTemplate?.checked) items = items.map(item => item.type === "cas" ? item : { ...item, value: casttextLiteral(item.value), type: "cas" });
   if (!items.some(item => item.listExpression)) return `[${items.map(maximaTypedValue).join(", ")}]`;
   // Join only the option-list layer. CASText objects (and list-valued choices)
   // must remain single labels, not be recursively flattened into their contents.
@@ -2660,13 +2786,15 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
   if (documentNode.querySelector("parsererror")) throw new Error("XMLの構文が不正です");
   const variables = documentNode.querySelector("questionvariables > text")?.textContent || "";
   if (!variables.trim()) throw new Error("questionvariables が見つかりません");
-  const metadata = variables.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)?.[1];
+  const metadata = readEditorMetadata(variables);
+  let formatFallback = false;
   let questionTextUpdated = false;
   if (metadata) {
-    applyAppStateSnapshot(decodeAppMetadata(metadata));
+    applyAppStateSnapshot(metadata);
     const authoritativeVariables = includeSource?.content ? includeSource.content + "\n" + extractMainVariableSection(variables) : variables;
     questionTextUpdated = reconcileXmlQuestionTexts(authoritativeVariables);
     questionTextUpdated = reconcileXmlChoices(authoritativeVariables) || questionTextUpdated;
+    if (metadata.schema === "mcq-webapp-editor-v1") formatFallback = restoreEditorFormats(metadata, authoritativeVariables);
     if (!includeSource) {
       const main = extractMainVariableSection(variables);
       const generated = main.match(/\/\*+\s*Generated by mcq-webapp\s*\*+\//);
@@ -2701,7 +2829,8 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
   updateQuestionLanguageVisibility();
   updateBaseLanguageUi();
   updateOutput();
-  if (questionTextUpdated) window.mcqNotice?.(uiText("問題文・選択肢・フィードバックをXML本文から読み込みました。"));
+  if (formatFallback) window.mcqNotice?.(uiText("XML本文と編集形式が一致しない項目は、式を保持して読み込みました。"));
+  else if (questionTextUpdated) window.mcqNotice?.(uiText("問題文・選択肢・フィードバックをXML本文から読み込みました。"));
   return {
     baseLanguage: baseLang(),
     languages: activeLangs(),
