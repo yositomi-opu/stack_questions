@@ -1657,8 +1657,7 @@ function generateXml() {
       `\n${metadataComment}\n\n$1`
     )
     .replace(/(\]\]><\/text>\s*<\/questionvariables>)/, (end) => el.castextTemplate?.checked
-      ? `\n%__mcq_langcode:${casttextLiteral(languageBlocks())};\n${end}` : end)
-    .replace(/<questionnote format="html">\s*<text>[\s\S]*?<\/text>\s*<\/questionnote>/, `<questionnote format="html">\n      <text>${escapeXml(id)}</text>\n    </questionnote>`);
+      ? `\n%__mcq_langcode:${casttextLiteral(languageBlocks())};\n${end}` : end);
 }
 
 // Preview takes a separate snapshot; saved XML and shared include files are unchanged.

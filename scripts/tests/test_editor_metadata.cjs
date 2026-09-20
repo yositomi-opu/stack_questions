@@ -46,6 +46,9 @@ for(const mode of ['cb','rb']) for(const cas of [false,true]) {
  context.applyRecords(records);state.mode=mode;el.castextTemplate.checked=cas;
  const before=context.currentCsvRecords('metadata-test');
  const xml=context.generateXml();
+ const templateNote=state.templates[mode+(cas?'Cas':'')].match(/<questionnote\b[^]*?<\/questionnote>/)[0];
+ assert.equal(xml.match(/<questionnote\b[^]*?<\/questionnote>/)[0],templateNote,'questionnote must remain the template CASText');
+ assert.equal(context.previewQuestionSnapshot().questionDefinition.match(/<questionnote\b[^]*?<\/questionnote>/)[0],templateNote,'preview must preserve questionnote');
  if(mode==='cb' && cas && process.env.MCQ_EDITOR_FIXTURE) fs.writeFileSync(process.env.MCQ_EDITOR_FIXTURE,xml);
  assert.ok(xml.includes('MCQ_WEBAPP_EDITOR_V1'));
  assert.ok(!xml.includes('MCQ_WEBAPP_DATA_BASE64'));
