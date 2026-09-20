@@ -2750,7 +2750,7 @@ function reconcileXmlQuestionTexts(variables) {
   return changed;
 }
 
-function reconcileXmlChoices(variables) {
+function reconcileXmlChoices(variables, requirePairs = null) {
   const statements = splitMaximaStatements(stripMaximaComments(extractMainVariableSection(variables)));
   const assignments = [...new Map(statements.map(parseMaximaAssignment).filter(Boolean).map(item => [item.name, item])).values()];
   const optionPattern = /^%__[CW]optL?\d+L?$/;
@@ -2776,7 +2776,8 @@ function reconcileXmlChoices(variables) {
   const before = JSON.stringify(state.rows);
   state.rows = rows;
   assignFeedbackModesFromValues(rows);
-  el.requirePairs.checked = assignments.some(item => optionPattern.test(item.name) && item.expression.includes("%__mcq_pattern_order"));
+  el.requirePairs.checked = typeof requirePairs === "boolean" ? requirePairs
+    : assignments.some(item => optionPattern.test(item.name) && item.expression.includes("%__mcq_pattern_order"));
   el.feedbackByTruth.checked = el.requirePairs.checked && rows.every(row => row.feedback_by_truth);
   return before !== JSON.stringify(rows);
 }
@@ -2793,7 +2794,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     applyAppStateSnapshot(metadata);
     const authoritativeVariables = includeSource?.content ? includeSource.content + "\n" + extractMainVariableSection(variables) : variables;
     questionTextUpdated = reconcileXmlQuestionTexts(authoritativeVariables);
-    questionTextUpdated = reconcileXmlChoices(authoritativeVariables) || questionTextUpdated;
+    questionTextUpdated = reconcileXmlChoices(authoritativeVariables, metadata.settings?.requirePairs) || questionTextUpdated;
     if (metadata.schema === "mcq-webapp-editor-v1") formatFallback = restoreEditorFormats(metadata, authoritativeVariables);
     if (!includeSource) {
       const main = extractMainVariableSection(variables);
@@ -2822,6 +2823,12 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     state.includeFilename = includeSource?.filename || basenameFromPath(includeSource?.path) || "";
     restoreIncludeDirectory();
     syncIncludeControls();
+  }
+  // XML declarations are grouped by truth, but the paired editor needs each
+  // pattern's C/W rows together. Sort only after restoring original pattern IDs.
+  if (el.requirePairs.checked) {
+    state.rows.sort((a, b) => Number(a.pattern) - Number(b.pattern)
+      || (normalizeTruth(a.truth) === "C" ? 0 : 1) - (normalizeTruth(b.truth) === "C" ? 0 : 1));
   }
   resetDerivedResults();
   renderRows();

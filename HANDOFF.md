@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- XML読込で一対モードでもC行全部→W行全部の順になる不具合を再現・修正。メタデータによる元パターン番号の復元後、一対モードのみパターン番号／C→W順に整列。新JSON・旧Base64の明示requirePairs設定は式からの推測で上書きせず、設定がない場合だけ推測。固定モードの分離表示は維持。app.jsのキャッシュ識別子更新。
+- 検証: node scripts/tests/test_editor_metadata.cjsに通常／CASText、rb/cbの隣接ペア、旧Base64、固定モード維持、明示設定優先の回帰検証を追加し成功。test_variant_parameters.cjs、test_import_evaluation.cjs、node --check app/mcq-webapp/app.js、git diff --check成功。実ブラウザ操作と利用者の実XMLは未確認。今回commit/push未実施。
+
 - XMLの新規保存を可読JSONコメントMCQ_WEBAPP_EDITOR_V1へ変更。問題文／選択肢／FB／問題変数の本文は重複保存せず、型・言語非依存・個別FB・パターン対応・設定を保持。旧Base64読込は継続。コメント内のスラッシュと > をJSON UnicodeエスケープしMaximaコメント／CDATA終端を保護。本文から再構築後、静的な単一候補と整合する型だけ復元し、複雑な式や複数編集行の連結はリスト式のまま通知。パラメータなどの設定は従来どおりメタデータ優先。旧自動変換前の本文バックアップは新XMLへ重複保存しない（CSVでは従来どおり）。
 - CASText版の文字列選択肢をcastextリテラルで出力するよう統一。CSVは元の文章／型を保持し、新XML往復でも安全に復元可能。日英ヘルプ・README・キャッシュ更新。
 - 検証: node scripts/tests/test_editor_metadata.cjs（通常／CASText、rb/cb、型と本文のCSV→XML→CSV、直編集優先、旧形式、コメント境界、非連続パターン、言語非依存、外部include、多言語）、test_variant_parameters.cjs、test_casttext_migration.cjs、test_import_evaluation.cjs、test_translation_cas.cjsが成功。node --check app/mcq-webapp/app.js とi18n.js、git diff --check成功。ローカルSTACK API /renderで新コメントを含むXMLのHTTP200と選択肢生成を確認。ランダム抽出用候補を同じ検証用CASTextへ揃えた追加リクエストで {@aa@}→3 の展開を確認。APIの採点・実ブラウザ操作は今回未確認。利用者依頼によりcommit/push予定、送信状態はgit履歴で確認。

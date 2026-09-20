@@ -53,6 +53,8 @@ for(const mode of ['cb','rb']) for(const cas of [false,true]) {
  assert.equal(meta.options.option1C[0].languages.ja.input_type,'string');
  assert.ok(!JSON.stringify(meta).includes('文章'));
  context.importXmlText(xml);
+ assert.equal(el.requirePairs.checked,true);
+ assert.deepEqual(Array.from(state.rows,r=>`${r.pattern}${r.truth}`),['01C','01W','02C','02W'],'paired XML must restore adjacent C/W rows');
  const after=context.currentCsvRecords('metadata-test');
  for(const rec of before.filter(r=>/^(option|feedback|qtextL|qvar)/.test(r[0]))) {
    const actual=after.find(r=>r[0]===rec[0] && r[2]===rec[2]);
@@ -71,6 +73,7 @@ context.applyRecords(records);
 el.requirePairs.checked=false;
 state.rows.forEach(r=>{r.pattern=r.pattern==='01'?'03':'05';r.choice_language_independent=true;r.feedback_language_independent=true;});
 const fixed=context.generateXml();context.importXmlText(fixed);
+assert.equal(el.requirePairs.checked,false);
 assert.deepEqual([...new Set(state.rows.map(r=>r.pattern))],['03','05']);
 assert.ok(state.rows.every(r=>r.choice_language_independent && r.feedback_language_independent));
 // Independent source file remains authoritative while XML stores only hints.
@@ -98,7 +101,16 @@ assert.equal(comment.match(/\/\*/g).length,1);
 assert.equal(comment.match(/\*\//g).length,1);
 assert.ok(!comment.includes(']]>'));
 assert.equal(context.readEditorMetadata(comment).questionId,el.questionId.value);
-const legacy='/* MCQ_WEBAPP_DATA_BASE64:'+context.encodeAppMetadata()+' */';
+// Legacy Base64 snapshots must also render adjacent pairs on full XML import.
+context.applyRecords(records);
+const legacyXml=context.generateXml().replace(/\/\* MCQ_WEBAPP_EDITOR_V1[^]*?\*\//,'/* MCQ_WEBAPP_DATA_BASE64:'+context.encodeAppMetadata()+' */');
+context.importXmlText(legacyXml);
+assert.equal(el.requirePairs.checked,true);
+assert.deepEqual(Array.from(state.rows,r=>`${r.pattern}${r.truth}`),['01C','01W','02C','02W']);
+// Explicit editor settings override heuristic inference from expression syntax.
+context.reconcileXmlChoices('%__CoptL1:[castext("C")]; %__WoptL1:[castext("W")];',true);
+assert.equal(el.requirePairs.checked,true);
+const legacy='/* MCQ_WEBAPP_DATA_BASE64:' +context.encodeAppMetadata()+' */';
 assert.equal(context.readEditorMetadata(legacy).rows.length,state.rows.length);
 assert.throws(()=>context.readEditorMetadata('/* MCQ_WEBAPP_EDITOR_V1 {broken} */'));
 console.log('Passed: readable hints, legacy metadata, rb/cb regular/CASText CSV-XML-CSV, direct edits and safe comment escaping.');
