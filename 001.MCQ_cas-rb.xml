@@ -792,7 +792,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <name>31</name>
         <description>Wrong(Incorrect) Pattern 15</description>
         <answertest>AlgEquiv</answertest>
-        <sans>flgWL1[15]</sans>
+        <sans>flgWL[15]</sans>
         <tans>true</tans>
         <testoptions></testoptions>
         <quiet>0</quiet>
