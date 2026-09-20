@@ -233,19 +233,20 @@ assert.equal(context.cleanParameterStatements('%_rk:2;\n;\n/* keep */;'),'%_rk:2
 assert.equal(context.cleanParameterStatements('s:";";'),'s:";";');
 console.log('Passed: empty/comment-only parameters, stray terminators, literals, and necessary terminators.');
 
-state.rows=Array.from({length:5},(_,i)=>({pattern:String(i+1).padStart(2,'0'),truth:'C'}));
+const patternLimits=context.templatePatternLimits();
+state.rows=Array.from({length:patternLimits.C},(_,i)=>({pattern:String(i+1).padStart(2,'0'),truth:'C'}));
 assert.equal(context.nextPattern('C'),null);
 assert.equal(context.nextPattern('W'),'01');
 state.rows.splice(1,1);
 assert.equal(context.nextPattern('C'),'02');
-state.rows=Array.from({length:9},(_,i)=>({pattern:String(i+1).padStart(2,'0'),truth:'W'}));
+state.rows=Array.from({length:patternLimits.W},(_,i)=>({pattern:String(i+1).padStart(2,'0'),truth:'W'}));
 assert.equal(context.nextPattern('W'),null);
 context.document.createElement=()=>({children:[],dataset:{},classList:{add(){}},append(...items){this.children.push(...items);},setAttribute(){},addEventListener(){}});
 const correctMenu=context.fixedPatternInput({truth:'C',pattern:'03',rows:[{pattern:'03'}]});
-assert.equal(correctMenu.children.length,5);
+assert.equal(correctMenu.children.length,patternLimits.C);
 assert.equal(correctMenu.value,'03');
 assert.equal(correctMenu.children[0].textContent,'1');
-assert.equal(context.fixedPatternInput({truth:'W',rows:[{pattern:'09'}]}).children.length,9);
+assert.equal(context.fixedPatternInput({truth:'W',rows:[{pattern:'09'}]}).children.length,patternLimits.W);
 const priorEvaluation=state.casEvaluation;
 const lengthBadge=context.document.createElement();
 lengthBadge.dataset.evalIds='a';
@@ -253,7 +254,7 @@ state.casEvaluation={status:'ready',stale:false,expressions:{a:{ok:true,type:'li
 context.updateCasEvaluationBadge(lengthBadge);
 assert.equal(lengthBadge.textContent,'length:13');
 state.casEvaluation=priorEvaluation;
-state.rows=[{pattern:'06',truth:'C'}];
+state.rows=[{pattern:String(patternLimits.C+1),truth:'C'}];
 assert.throws(()=>context.generateVariableBlock(),/テンプレートの上限/);
 console.log('Passed: pattern dropdown limits, free number reuse, invalid export rejection, compact list length.');
 

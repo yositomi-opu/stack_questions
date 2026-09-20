@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- 通常版001.MCQ-rb/cb.xmlのPRTパターン判定ノード2以降をCASText版と同じC15＋W15に拡張（特殊処理2を含め32ノード）。利用者が先にステージしたmax_cp/wp=15を維持。通常版のノード0/1の言語ブロック・文字列msg表示・mcq_template_fvar.mac参照は保持し、noidea表示の変数名だけ欠落していた%を補正。ルート→アプリ静的コピーをsync_mcq_templates.pyで同期。現在は両版とも上限15/15、README更新。
+- 検証: node scripts/tests/test_variant_parameters.cjs（上限テストもテンプレート値から取得）、test_editor_metadata.cjs成功。PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.pyで5件成功（通常/CASノード2以降の全フィールド一致、32ノード、遷移先、通常版依存維持を追加）。git diff --check成功。実STACK API採点・ブラウザ操作は今回未実施。commit/push未実施。
+
 - generateXmlがquestionnoteをタイトル由来のidへ上書きしていた処理を削除。使用テンプレートの問題記録を保存・プレビューともそのまま保持。READMEに既存XMLの再保存で現テンプレートの問題記録へ戻せる旨を追記、app.jsキャッシュ更新。test_editor_metadata.cjsで通常／CASText×rb/cbの生成とプレビューのquestionnote完全一致を追加し成功。node --check app/mcq-webapp/app.js、git diff --check成功。実STACK APIでの問題記録の評価は今回未確認。commit/push未実施。
 
 - テンプレートを上限の編集元に統一。MCQ_TEMPLATE_LIMITS_BEGIN/ENDコメントを追加し、アプリの一対／固定パターン番号・追加・検証・メタデータ復元を選択版cbテンプレートのmax_cp/max_wpから取得。XML生成時の5/9への上書き撤去。CASTextは15/15、通常版はルート通常テンプレートの既存上限。server.pyは4つの/templates/URLをルートXMLからno-storeで直接配信。setup/start/restartはsync_mcq_templates.pyでPRT添字と上限・rb/cb一致を検査し静的コピー同期。

@@ -46,3 +46,22 @@ class McqPreCastextTests(unittest.TestCase):
             for stem in ['pre', 'post', 'fvar']:
                 self.assertIn(f'mcq_template_{stem}_cas.mac', source)
                 self.assertNotIn(f'mcq_template_{stem}.mac', source)
+
+    def test_standard_and_cas_pattern_nodes_match(self):
+        import xml.etree.ElementTree as ET
+        for mode in ['rb', 'cb']:
+            standard = ET.parse(ROOT / f'001.MCQ-{mode}.xml').find('question')
+            cas = ET.parse(ROOT / f'001.MCQ_cas-{mode}.xml').find('question')
+            nodes = {node.findtext('name'): node for node in standard.findall('prt/node')}
+            self.assertEqual(len(nodes), 32)
+            for node in cas.findall('prt/node'):
+                name = node.findtext('name')
+                if int(name) >= 2:
+                    fields = lambda item: [(el.tag, (el.text or '').strip()) for el in item.iter()]
+                    self.assertEqual(fields(nodes[name]), fields(node))
+            for node in nodes.values():
+                for branch in ['truenextnode', 'falsenextnode']:
+                    self.assertIn(node.findtext(branch), set(nodes) | {'-1'})
+            self.assertIn('mcq_template_fvar.mac', standard.findtext('prt/feedbackvariables/text'))
+            self.assertNotIn('%__mcq_langcode', ''.join(standard.find('prt').itertext()))
+            self.assertIn('{@%__mcq_noidea_checked@}', standard.findtext('prt/node/truefeedback/text'))
