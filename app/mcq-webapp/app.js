@@ -655,10 +655,10 @@ function clamp(value, min, max) {
 async function loadTemplates() {
   try {
     const [rb, cb, rbCas, cbCas] = await Promise.all([
-      fetch("./templates/001.MCQ-rb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ-cb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-rb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
-      fetch("./templates/001.MCQ_cas-cb.xml?v=20260915-casfix1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-rb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ-cb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-rb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
+      fetch("./templates/001.MCQ_cas-cb.xml?v=20260920-commonstring1").then(checkResponse).then((r) => r.text()),
     ]);
     state.templates = { rb, cb, rbCas, cbCas };
     setStatus("テンプレート読込完了");

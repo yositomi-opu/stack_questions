@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-17
+更新日: 2026-09-20
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,9 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 通常／CASText版のrb/cb計4テンプレートとアプリ内コピーのprtcorrect・prtpartiallycorrect・prtincorrectをSTACK標準のsymbolic/default commonstringへ変更。言語パックで記号と文言を取得し、Moodle multilangフィルタへの依存を除去。公式Authoring/Feedback文書に従った対応。アプリのテンプレート／JSキャッシュ識別子とREADME更新。
+- 検証: 8 XMLのElementTree解析、変更範囲が3フィードバック欄のみであること、4組のコピー一致をPythonで確認。node --check app/mcq-webapp/app.js、node scripts/tests/test_variant_parameters.cjs、PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（4件）、git diff --check成功。実STACK API採点／ブラウザでの各言語表示は未確認。GitHubへの反映依頼あり、送信結果はgit履歴で確認。
 
 - includeの画面URLベースをファイルの公開ディレクトリそのものへ変更。001/の強制追加を撤去し、初期値／旧設定移行時に001/を含める。新localStorageキーで新旧を区別。共通ライブラリのURL書換えはサーバー設定の基準URLを使用し、画面ディレクトリと分離。読込済みincludeからディレクトリ復元、既知リポジトリURLのパス解決優先順位を調整。ファイル名ラベル＋伸縮入力＋保存、横並びURLベース入力＋灰色ファイル名表示（titleは完全URL）へ変更。日英ヘルプとREADME更新。variant_parametersで任意ディレクトリ・エンコード・共通テンプレート分離・読込復元と既存回帰成功。実ブラウザ配置未確認。commit/push未実施。
 
