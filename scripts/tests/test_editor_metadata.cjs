@@ -196,7 +196,8 @@ for (const paired of [false, true]) {
  assert.equal(target.feedback_en,'English {@aa@}');assert.equal(target.feedback_type_en,'text');
  assert.equal(dynamic.feedback_ja,'castext(message)');assert.equal(dynamic.feedback_type_ja,'cas');
  assert.equal(plain.feedback_ja,'castext("literal example")');
- assert.equal(expression.feedback_type_ja,'cas');
+ assert.equal(expression.feedback_type_ja,'text');
+ assert.ok(expression.feedback_ja.startsWith('message{@'));
  state.rows.splice(-3);
  const csv=context.currentCsvRecords('feedback-test');
  assert.equal(csv.find(r=>r[0]==='feedback1W' && r[2]==='ja')[1],'string');
@@ -210,3 +211,48 @@ const classic={feedback_ja:'castext("keep")',feedback_type_ja:'cas'};
 context.normalizeFeedbackCasttext([classic]);
 assert.equal(classic.feedback_type_ja,'cas');
 console.log('Passed: static feedback CASText normalization, all languages, paired/fixed CSV/XML persistence and dynamic CAS preservation.');
+
+// Editor types differ from the legacy serialized list marker for opaque lists.
+context.applyRecords(records);
+el.qvars.value='optionsL:["a","b"]; ListAL1:optionsL; cycleA:cycleB; cycleB:cycleA;';
+const choices=[
+ {choice_ja:'castext("説明{@aa@}")',choice_type_ja:'cas'},
+ {choice_ja:'sconcat("値",tex2(aa))',choice_type_ja:'cas'},
+ {choice_ja:'["説明{@aa@}", matrix([1,2]),castext("B")]',choice_type_ja:'cas'},
+ {choice_ja:'optionsL',choice_type_ja:'cas'},
+ {choice_ja:'ListAL1',choice_type_ja:'cas'},
+ {choice_ja:'makelist(sconcat("値",tex2(k)),k,1,3)',choice_type_ja:'cas'},
+ {choice_ja:'externalL',choice_type_ja:'cas',choice_list_expr_ja:true},
+ {choice_ja:'aa+bb',choice_type_ja:'cas'},
+];
+context.normalizeChoiceCasttext(choices);
+assert.equal(choices[0].choice_ja,'説明{@aa@}');assert.equal(choices[0].choice_type_ja,'text');
+assert.equal(choices[1].choice_ja,'値{@aa@}');
+assert.equal(choices[2].choice_ja,'["説明{@aa@}", "{@matrix([1,2])@}", "B"]');
+assert.equal(context.choiceValueType(choices[2]),'cas_list');
+for(const row of choices.slice(3,7)) {
+ assert.equal(context.choiceValueType(row),'cas');assert.equal(row.choice_list_expr_ja,true);
+}
+assert.equal(choices[5].choice_ja,'makelist(sconcat("値",tex2(k)),k,1,3)');
+assert.equal(choices[7].choice_ja,'aa+bb');assert.ok(!choices[7].choice_list_expr_ja);
+assert.equal(context.knownChoiceList('cycleA'),false);
+const once=JSON.stringify(choices);context.normalizeChoiceCasttext(choices);
+assert.equal(JSON.stringify(choices),once,'normalization must be idempotent');
+assert.equal(context.maximaChoiceList([context.localizedTyped(choices[2],'choice','ja')]),
+ '[castext("説明{@aa@}"), castext("{@matrix([1,2])@}"), castext("B")]');
+assert.equal(context.maximaChoiceList([context.localizedTyped(choices[3],'choice','ja')]),'optionsL','a list variable must not be wrapped in another list');
+for (const row of choices.slice(2,7)) {
+ context.applyRecords(records);
+ el.qvars.value='optionsL:["a","b"]; ListAL1:optionsL;';state.qvars=[el.qvars.value];
+ Object.assign(state.rows[0],row);
+ const xml=context.generateXml();context.importXmlText(xml);context.normalizeChoiceCasttext();
+ assert.equal(state.rows[0].choice_ja,row.choice_ja);
+ assert.equal(context.choiceValueType(state.rows[0]),context.choiceValueType(row));
+ const csv=context.currentCsvRecords('types');context.applyRecords(csv);context.normalizeChoiceCasttext();
+ assert.equal(state.rows[0].choice_ja,row.choice_ja);
+ assert.equal(context.choiceValueType(state.rows[0]),context.choiceValueType(row));
+}
+console.log('Passed: scalar/list CASText editing, mixed elements, opaque list variables/builders, aliases/cycles, idempotence and CSV/XML round trips.');
+
+assert.equal(context.convertConstantChoiceBuilder('makelist(sconcat("A", "B"), k, 1, 3)'), 'makelist(castext("AB"), k, 1, 3)');
+assert.equal(context.convertConstantChoiceBuilder('makelist(sconcat("A", tex2(k)), k, 1, 3)'), 'makelist(sconcat("A", tex2(k)), k, 1, 3)');

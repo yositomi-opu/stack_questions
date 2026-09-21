@@ -808,14 +808,14 @@ function buildLanguageInputs() {
 
 function choiceValueType(row, lang = baseLang()) {
   if (!row || (row[`choice_type_${lang}`] || "text") !== "cas") return "text";
-  return row[`choice_list_expr_${lang}`] ? "cas_list" : "cas";
+  return row[`choice_list_expr_${lang}`] && (!el.castextTemplate.checked || literalChoiceElements(row[`choice_${lang}`]) !== null) ? "cas_list" : "cas";
 }
 
 function valueTypeSelect(value = "text", allowList = false) {
   const select = document.createElement("select");
   select.className = "value-type-select";
   select.innerHTML = '<option value="text">文字列</option><option value="cas">CAS式</option>'
-    + (allowList ? '<option value="cas_list">CASリスト式</option>' : "");
+    + (allowList ? '<option value="cas_list">リスト</option>' : "");
   select.value = allowList && value === "cas_list" ? "cas_list" : (value === "cas" ? "cas" : "text");
   return select;
 }
@@ -914,6 +914,7 @@ function updateQuestionLanguageVisibility() {
 }
 
 function renderRows() {
+  normalizeChoiceCasttext();
   normalizeFeedbackCasttext();
   updateBaseLanguageUi();
   updateOptionLimit();
@@ -1001,7 +1002,7 @@ function updateOptionLimit() {
   const lang = baseLang();
   const pendingList = state.rows.some((row, index) => {
     if (!String(row[`choice_${lang}`] || "").trim()
-      || choiceValueType(row, lang) !== "cas_list") return false;
+      || !row[`choice_list_expr_${lang}`]) return false;
     const result = state.casEvaluation.expressions[choiceEvaluationId(index, lang)];
     return state.casEvaluation.stale || !result?.ok || result.type !== "list";
   });
@@ -1133,7 +1134,9 @@ function changeRowValueType(rows, field, lang, type) {
   converted.forEach(([row, value]) => { row[`${field}_${lang}`] = value; });
   rows.forEach(row => {
     row[`${field}_type_${lang}`] = type === "text" ? "text" : "cas";
-    if (field === "choice") row[`choice_list_expr_${lang}`] = type === "cas_list";
+    if (field === "choice") row[`choice_list_expr_${lang}`] = type === "cas_list"
+      || (type === "cas" && el.castextTemplate.checked && (knownChoiceList(row[`choice_${lang}`])
+        || (row[`choice_list_expr_${lang}`] && literalChoiceElements(row[`choice_${lang}`]) === null)));
   });
   if (converted.length && !el.castextTemplate.checked) {
     el.castextTemplate.checked = true;
@@ -1259,14 +1262,95 @@ function setFixedGroupChoices(group, values) {
   markTranslationsStale("基本言語の選択肢が変更されました");
 }
 
+// Literal candidate lists have an editable text form. Opaque list expressions
+// retain their source and internal list marker, independently of the UI label.
+function literalChoiceElements(expression) {
+  const code = String(expression || "").trim().replace(/[;$]\s*$/, "");
+  if (!code.startsWith("[") || !code.endsWith("]")) return null;
+  try {
+    const items = casttextExpressionParts(code.slice(1, -1));
+    return items.length === 1 && !items[0] ? [] : items;
+  } catch { return null; }
+}
+
+function knownChoiceList(expression, seen = new Set()) {
+  const code = String(expression || "").trim().replace(/[;$]\s*$/, "");
+  if (literalChoiceElements(code) !== null || /^makelist\s*\(/.test(code)) return true;
+  if (!/^[%A-Za-z_][%A-Za-z0-9_]*$/.test(code) || seen.has(code)) return false;
+  seen.add(code);
+  const definition = splitMaximaStatements(stripMaximaComments(el.qvars.value || ""))
+    .map(parseMaximaAssignment).filter(item => item?.name === code).at(-1);
+  return definition ? knownChoiceList(definition.expression, seen) : false;
+}
+
+// Only constant builder bodies are rewritten: moving loop variables into
+// CASText compilation can change their evaluation scope.
+function constantChoiceText(expression) {
+  const text = casttextSourceString(expression.trim());
+  if (text !== null) return text;
+  const call = expression.match(/^sconcat\s*\(([\s\S]*)\)$/);
+  if (!call) return null;
+  try {
+    const values = casttextExpressionParts(call[1]).map(constantChoiceText);
+    return values.every(value => value !== null) ? values.join("") : null;
+  } catch { return null; }
+}
+
+function convertConstantChoiceBuilder(expression) {
+  const call = String(expression).trim().match(/^makelist\s*\(([\s\S]*)\)[;$]?$/);
+  if (!call) return expression;
+  try {
+    const args = casttextExpressionParts(call[1]);
+    if (args.length < 2) return expression;
+    const text = constantChoiceText(args[0]);
+    if (text === null) return expression;
+    return `makelist(${casttextLiteral(text)}, ${args.slice(1).join(", ")})`;
+  } catch { return expression; }
+}
+
+function normalizeChoiceCasttext(rows = state.rows) {
+  if (!el.castextTemplate.checked) return;
+  for (const row of rows) for (const lang of LANGS) {
+    if (row[`choice_type_${lang}`] !== "cas") continue;
+    const value = row[`choice_${lang}`] || "";
+    const items = literalChoiceElements(value);
+    if (items !== null) {
+      // An arbitrary mathematical element becomes a single CASText insertion.
+      // Dynamic castext calls cannot be unwrapped, so retain the complete list.
+      const texts = items.map(item => casExpressionToEditorText(item)
+        ?? (/^castext\s*\(/.test(item) ? null : `{@${item}@}`));
+      if (texts.every(text => text !== null)) row[`choice_${lang}`] = `[${texts.map(maximaString).join(", ")}]`;
+      row[`choice_list_expr_${lang}`] = true;
+      continue;
+    }
+    const text = casExpressionToEditorText(value);
+    if (text !== null && value.trim()) {
+      row[`choice_${lang}`] = text;
+      row[`choice_type_${lang}`] = "text";
+      row[`choice_list_expr_${lang}`] = false;
+    } else if (knownChoiceList(value)) {
+      row[`choice_${lang}`] = convertConstantChoiceBuilder(value);
+      row[`choice_list_expr_${lang}`] = true;
+    }
+  }
+}
+
+function compileLiteralChoiceList(expression) {
+  const items = literalChoiceElements(expression);
+  if (items === null || !items.some(item => casttextSourceString(item) !== null)) return expression;
+  return `[${items.map(item => {
+    const text = casttextSourceString(item);
+    return text === null ? item : casttextLiteral(text);
+  }).join(", ")}]`;
+}
+
 // Static CASText feedback is edited as its source text; dynamic CAS stays CAS.
 function normalizeFeedbackCasttext(rows = state.rows) {
   if (!el.castextTemplate.checked) return;
   for (const row of rows) for (const lang of LANGS) {
     if (row[`feedback_type_${lang}`] !== "cas") continue;
     const code = String(row[`feedback_${lang}`] || "").trim().replace(/[;$]\s*$/, "");
-    if (!/^castext\s*\(/.test(code)) continue;
-    const text = restoreEditorLiteral(code);
+    const text = casExpressionToEditorText(code);
     if (text === null) continue;
     row[`feedback_${lang}`] = text;
     row[`feedback_type_${lang}`] = "text";
@@ -1274,9 +1358,7 @@ function normalizeFeedbackCasttext(rows = state.rows) {
 }
 
 function feedbackValueTypeSelect(value) {
-  const mode = valueTypeSelect(value);
-  if (el.castextTemplate?.checked) mode.options[0].textContent = "CASText";
-  return mode;
+  return valueTypeSelect(value);
 }
 
 function fixedFeedbackTextarea(group) {
@@ -2358,7 +2440,10 @@ function maximaAssoc(entries, type) {
 }
 
 function maximaChoiceList(items) {
-  if (el.castextTemplate?.checked) items = items.map(item => item.type === "cas" ? item : { ...item, value: casttextLiteral(item.value), type: "cas" });
+  if (el.castextTemplate?.checked) items = items.map(item => {
+    if (item.type !== "cas") return { ...item, value: casttextLiteral(item.value), type: "cas" };
+    return item.listExpression ? { ...item, value: compileLiteralChoiceList(item.value) } : item;
+  });
   if (!items.some(item => item.listExpression)) return `[${items.map(maximaTypedValue).join(", ")}]`;
   // Join only the option-list layer. CASText objects (and list-valued choices)
   // must remain single labels, not be recursively flattened into their contents.

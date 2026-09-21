@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- CASText版の選択肢表示を文字列／CAS式／リストへ整理。静的castext・変換可能sconcat等を本文へ、直接記述リストの文字列／castextを本文、数式要素を{@式@}へ正規化。XML出力時はリスト文字列要素を個別castext化。FBも変換可能sconcatを本文へ、型の表示名を文字列へ統一。通常版の変換動作は維持。
+- リスト変数・makelistのUI表示はCAS式、内部list_exprとCSV cas_listを保持して多候補の生成・容量判定を維持。ローカルqvarsの単純リスト代入／別名参照も認識、循環参照防止。makelist本文が定数文字列のsconcatならcastext化。ループ変数依存式や参照先のqvars定義は安全を保証できないため書換えず、編集者確認とする。外部includeのみで型が不明の場合は既存リスト指定が必要。日英ヘルプ・README・キャッシュ更新。
+- 検証: node scripts/tests/test_editor_metadata.cjs（単体／混在リスト、変数／別名／循環、makelist、冪等性、CSV/XML往復追加）、test_choice_capacity.cjs、test_import_evaluation.cjs、test_legacy_xml_import.cjs、test_translation_cas.cjs、test_casttext_migration.cjs、test_variant_parameters.cjs成功。app.js／i18n.js構文、git diff --check成功。実ブラウザ／STACK API未確認。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - CASText版のフィードバック表示前に、CAS型の静的 `castext("…")` を本文＋text型へ正規化（全言語、一対／固定の両方）。動的引数や他のCAS式、既にtext型の関数名を含む文章は保持。共有FBの型選択を「最初の型付き行」から「表示本文のある行」に合わせ、空行の型による誤表示を修正。README・キャッシュ識別子更新。
 - 検証: `node scripts/tests/test_editor_metadata.cjs`（静的FBの型・本文、全言語、一対／固定、CSV/XML再保存・再読込、動的CAS保持を追加）、`node scripts/tests/test_casttext_migration.cjs`、`node scripts/tests/test_variant_parameters.cjs`、`node --check app/mcq-webapp/app.js`、`git diff --check`成功。実ブラウザ／STACK API確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 
