@@ -180,3 +180,33 @@ el.castextTemplate.checked=false;
 assert.equal(context.changeRowValueType([{choice_type_ja:'cas',choice_ja:'castext("text")'}],'choice','ja','text'),true);
 assert.equal(el.castextTemplate.checked,true);
 console.log('Passed: manual type conversion, CASText unwrapping, tex1/tex2, escapes, CSV/XML persistence and atomic safe rejection.');
+
+// Static feedback CASText uses the text editor in both paired and fixed modes.
+for (const paired of [false, true]) {
+ context.applyRecords(records);
+ el.requirePairs.checked=paired;
+ const target=state.rows.find(r=>r.pattern==='01' && r.truth==='W');
+ target.feedback_en='castext("English {@aa@}")';target.feedback_type_en='cas';
+ const dynamic={feedback_ja:'castext(message)',feedback_type_ja:'cas'};
+ const plain={feedback_ja:'castext("literal example")',feedback_type_ja:'text'};
+ const expression={feedback_ja:'sconcat("message",aa)',feedback_type_ja:'cas'};
+ state.rows.push(dynamic,plain,expression);
+ context.normalizeFeedbackCasttext();
+ assert.equal(target.feedback_ja,'不正解');assert.equal(target.feedback_type_ja,'text');
+ assert.equal(target.feedback_en,'English {@aa@}');assert.equal(target.feedback_type_en,'text');
+ assert.equal(dynamic.feedback_ja,'castext(message)');assert.equal(dynamic.feedback_type_ja,'cas');
+ assert.equal(plain.feedback_ja,'castext("literal example")');
+ assert.equal(expression.feedback_type_ja,'cas');
+ state.rows.splice(-3);
+ const csv=context.currentCsvRecords('feedback-test');
+ assert.equal(csv.find(r=>r[0]==='feedback1W' && r[2]==='ja')[1],'string');
+ const xml=context.generateXml();
+ assert.ok(xml.includes('castext("不正解")'));
+ context.importXmlText(xml);
+ assert.equal(state.rows.find(r=>r.pattern==='01' && r.truth==='W').feedback_ja,'不正解');
+}
+el.castextTemplate.checked=false;
+const classic={feedback_ja:'castext("keep")',feedback_type_ja:'cas'};
+context.normalizeFeedbackCasttext([classic]);
+assert.equal(classic.feedback_type_ja,'cas');
+console.log('Passed: static feedback CASText normalization, all languages, paired/fixed CSV/XML persistence and dynamic CAS preservation.');

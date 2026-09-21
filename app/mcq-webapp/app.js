@@ -914,6 +914,7 @@ function updateQuestionLanguageVisibility() {
 }
 
 function renderRows() {
+  normalizeFeedbackCasttext();
   updateBaseLanguageUi();
   updateOptionLimit();
   const paired = el.requirePairs.checked;
@@ -1258,6 +1259,20 @@ function setFixedGroupChoices(group, values) {
   markTranslationsStale("基本言語の選択肢が変更されました");
 }
 
+// Static CASText feedback is edited as its source text; dynamic CAS stays CAS.
+function normalizeFeedbackCasttext(rows = state.rows) {
+  if (!el.castextTemplate.checked) return;
+  for (const row of rows) for (const lang of LANGS) {
+    if (row[`feedback_type_${lang}`] !== "cas") continue;
+    const code = String(row[`feedback_${lang}`] || "").trim().replace(/[;$]\s*$/, "");
+    if (!/^castext\s*\(/.test(code)) continue;
+    const text = restoreEditorLiteral(code);
+    if (text === null) continue;
+    row[`feedback_${lang}`] = text;
+    row[`feedback_type_${lang}`] = "text";
+  }
+}
+
 function feedbackValueTypeSelect(value) {
   const mode = valueTypeSelect(value);
   if (el.castextTemplate?.checked) mode.options[0].textContent = "CASText";
@@ -1269,7 +1284,8 @@ function fixedFeedbackTextarea(group) {
   const typeKey = `feedback_type_${baseLang()}`;
   const editor = document.createElement("div");
   editor.className = "typed-editor";
-  const mode = feedbackValueTypeSelect(group.rows.find((row) => row[typeKey])?.[typeKey] || "text");
+  const sourceRow = group.rows.find(row => String(row[feedbackKey] || "").trim()) || group.rows[0];
+  const mode = feedbackValueTypeSelect(sourceRow?.[typeKey] || "text");
   const textarea = document.createElement("textarea");
   textarea.rows = 3;
   textarea.value = group.rows.find((row) => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
@@ -1282,7 +1298,7 @@ function fixedFeedbackTextarea(group) {
     updateOutput();
   });
   mode.addEventListener("change", () => {
-    if (!changeRowValueType(group.rows, "feedback", baseLang(), mode.value)) { mode.value = group.rows.find(row => row[typeKey])?.[typeKey] || "text"; return; }
+    if (!changeRowValueType(group.rows, "feedback", baseLang(), mode.value)) { mode.value = sourceRow?.[typeKey] || "text"; return; }
     textarea.value = group.rows.find(row => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
     editor.classList.toggle("cas", mode.value === "cas");
     markTranslationsStale("フィードバックの入力形式が変更されました");
@@ -1445,7 +1461,7 @@ function feedbackTextarea(row, index) {
     markTranslationsStale("基本言語のフィードバックが変更されました");
     updateOutput();
   });
-  const sourceWithType = groupRows.find((candidate) => candidate[typeKey]);
+  const sourceWithType = groupRows.find(candidate => String(candidate[feedbackKey] || "").trim()) || groupRows[0];
   const mode = feedbackValueTypeSelect(sourceWithType?.[typeKey] || "text");
   mode.dataset.feedbackGroup = key;
   mode.disabled = textarea.disabled;

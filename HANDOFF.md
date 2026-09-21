@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- CASText版のフィードバック表示前に、CAS型の静的 `castext("…")` を本文＋text型へ正規化（全言語、一対／固定の両方）。動的引数や他のCAS式、既にtext型の関数名を含む文章は保持。共有FBの型選択を「最初の型付き行」から「表示本文のある行」に合わせ、空行の型による誤表示を修正。README・キャッシュ識別子更新。
+- 検証: `node scripts/tests/test_editor_metadata.cjs`（静的FBの型・本文、全言語、一対／固定、CSV/XML再保存・再読込、動的CAS保持を追加）、`node scripts/tests/test_casttext_migration.cjs`、`node scripts/tests/test_variant_parameters.cjs`、`node --check app/mcq-webapp/app.js`、`git diff --check`成功。実ブラウザ／STACK API確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - 選択肢／FBの一対・固定UIと問題文のCAS→文字列変更に変換処理を接続。静的castextをデコード、既知sconcat/tex1/tex2等をCASText本文へ変換。CASText内の単純な{@tex1/tex2(...)@}も埋め込みへ戻すが文章中の関数名は保持。複数行は原子的に変換、CASリスト／未知の外側式・動的castextは型と本文を保持して日英通知。変換時に通常版ならCASText版を自動オン、表示を再描画。既存の自動移行はtex1の数式内限定規則を維持し、手動変換のみ数式外も対象。README・キャッシュ更新。
 - 検証: test_editor_metadata.cjsに提示例・エスケープ・tex1/tex2・選択肢／FBの変換・CSV/XML保持・失敗時の非変更・自動CASTextオン追加。保存時の既存先頭末尾空白除去は維持。test_variant_parameters.cjs、test_casttext_migration.cjs、JS構文・git diff --check確認。実ブラウザ操作／STACK API評価は今回未実施。commit/push未実施。
 
