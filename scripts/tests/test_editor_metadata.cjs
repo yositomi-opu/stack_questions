@@ -278,3 +278,27 @@ context.resetCsvImportState();assert.equal(state.xmlFilename,'');assert.equal(el
 assert.equal(context.normalizedXmlFilename('notes'),'notes.xml');
 assert.equal(context.normalizedXmlFilename('../custom.xml'),'custom.xml');
 console.log('Passed: v0.8 CASText default, legacy opt-out import, rb/rb2/cb names, manual filename CSV/XML persistence and clear.');
+
+context.applyRecords(records);
+const namedXml=context.generateXml();
+assert.ok(namedXml.includes('optC1:%__mcq_lang([["ja", castext("文章{@aa@}")]'));
+assert.ok(namedXml.includes('msgC1:%__mcq_lang([["ja", castext("正解{@aa@}")]'));
+assert.ok(namedXml.includes('%__mcq_Csource:[[optC1], optC2];'));
+assert.ok(namedXml.includes('%__mcq_Cfeedback:[msgC1, msgC2];'));
+assert.ok(!namedXml.includes('%__mcq_CsourceL:'));
+context.importXmlText(namedXml.replace('castext("正解{@aa@}")','castext("編集した説明{@aa@}")'));
+assert.equal(state.rows[0].feedback_ja,'編集した説明{@aa@}');
+// Read previous direct sourceL tables as well as the new named definitions.
+const variables=namedXml.match(/<questionvariables>\s*<text><!\[CDATA\[([^]*?)\]\]><\/text>/)[1];
+const defs=new Map(context.splitMaximaStatements(context.stripMaximaComments(variables)).map(context.parseMaximaAssignment).filter(Boolean).map(d=>[d.name,d.expression]));
+let oldBlock='/* MCQ_CHOICES_BEGIN */\n%__mcq_pattern_order:random_permutation([1,2]);\n';
+for(const truth of ['C','W'])for(const kind of ['source','feedback']) {
+ const assoc=context.namedChoiceAssociation(defs,truth,kind);
+ oldBlock+=`%__mcq_${truth}${kind}L:[${[...assoc].map(([lang,node])=>`["${lang}", ${node.value}]`).join(',')}];\n`;
+}
+oldBlock+='/* MCQ_CHOICES_END */';
+context.importXmlText(namedXml.replace(/\/\* MCQ_CHOICES_BEGIN \*\/[^]*?\/\* MCQ_CHOICES_END \*\//,oldBlock));
+assert.equal(state.rows[0].choice_ja,'文章{@aa@}');assert.equal(state.rows[0].feedback_ja,'正解{@aa@}');
+el.qvars.value='optC1:42;';
+assert.throws(()=>context.generateXml(),/重複/);
+console.log('Passed: named options/messages, direct edits, legacy sourceL import and variable collision protection.');

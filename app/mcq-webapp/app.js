@@ -1960,22 +1960,36 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
     if (!pattern.C.length || !pattern.W.length) throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
     if (!patternChoiceCapacity(pattern, "C") || !patternChoiceCapacity(pattern, "W")) throw new Error(uiText("各パターンの正解・不正解に少なくとも1候補が必要です。"));
   });
+  const generatedNames = new Set(patterns.flatMap(pattern => ["C", "W"].flatMap(truth =>
+    [`opt${truth}${Number(pattern.id)}`, `msg${truth}${Number(pattern.id)}`])));
+  const declarations = splitMaximaStatements(stripMaximaComments(`${el.qvars.value}\n${el.parameters.value}`)).map(parseMaximaAssignment).filter(Boolean);
+  if (declarations.some(item => generatedNames.has(item.name))) throw new Error(uiText("問題変数または補助パラメータに、生成するoptC・optW・msgC・msgWの変数名と重複する定義があります。名前を変更してください。"));
   const lines = [...baseVariableLines(numOptions, counts, includePreamble), "/* MCQ_CHOICES_BEGIN */"];
   lines.push(`%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`);
   lines.push("%__po:%__mcq_pattern_order;", "%__mcq_num_cpatterns:%_MCQ_NUM_COPTS;", "%__mcq_num_wpatterns:%_MCQ_NUM_OPTS-%_MCQ_NUM_COPTS;");
   for (const truth of ["C", "W"]) {
-    const source = maximaAssociation(activeLangs().map(lang => {
-      const values = patterns.map(pattern => maximaChoiceList(pattern[truth].map(row => localizedTyped(row, "choice", row.choice_language_independent ? baseLang() : lang)).filter(item => item.value)));
-      return `["${lang}", [${values.join(", ")}]]`;
-    }));
-    const messages = maximaAssociation(activeLangs().map(lang => {
-      const values = patterns.map(pattern => maximaTypedValue(localizedFeedbackTyped(pattern, lang, patternFeedbackSeparate(pattern.id) ? truth : null)));
-      return `["${lang}", [${values.join(", ")}]]`;
-    }));
+    const refs = [], messageRefs = [];
+    for (const pattern of patterns) {
+      const suffix = `${truth}${Number(pattern.id)}`;
+      const optionName = `opt${suffix}`, messageName = `msg${suffix}`;
+      const rows = pattern[truth];
+      const scalar = rows.length === 1 && activeLangs().every(lang =>
+        !localizedTyped(rows[0], "choice", rows[0].choice_language_independent ? baseLang() : lang).listExpression);
+      const options = maximaAssociation(activeLangs().map(lang => {
+        const items = rows.map(row => localizedTyped(row, "choice", row.choice_language_independent ? baseLang() : lang)).filter(item => item.value);
+        const list = maximaChoiceList(items);
+        const value = scalar ? literalChoiceElements(list)[0] || '""' : list;
+        return `["${lang}", ${value}]`;
+      }));
+      const messages = maximaAssociation(activeLangs().map(lang =>
+        `["${lang}", ${maximaTypedValue(localizedFeedbackTyped(pattern, lang, patternFeedbackSeparate(pattern.id) ? truth : null))}]`));
+      lines.push(`${optionName}:%__mcq_lang(${options}, %_STACK_LANG);`, `${messageName}:%__mcq_lang(${messages}, %_STACK_LANG);`);
+      refs.push(scalar ? `[${optionName}]` : optionName);
+      messageRefs.push(messageName);
+    }
     const count = `%__mcq_num_${truth.toLowerCase()}patterns`;
     const position = truth === "C" ? "k" : "k+%__mcq_num_cpatterns";
-    lines.push(`%__mcq_${truth}sourceL:${source};`, `%__mcq_${truth}feedbackL:${messages};`);
-    lines.push(`%__mcq_${truth}source:%__mcq_lang(%__mcq_${truth}sourceL, %_STACK_LANG);`, `%__mcq_${truth}feedback:%__mcq_lang(%__mcq_${truth}feedbackL, %_STACK_LANG);`);
+    lines.push(`%__mcq_${truth}source:[${refs.join(", ")}];`, `%__mcq_${truth}feedback:[${messageRefs.join(", ")}];`);
     lines.push(`%__mcq_${truth}patterns:makelist(%__mcq_${truth}source[%__po[${position}]], k, 1, ${count});`, `%__mcq_${truth}messages:makelist(%__mcq_${truth}feedback[%__po[${position}]], k, 1, ${count});`);
     for (let slot = 1; slot <= templatePatternLimits()[truth]; slot++) {
       lines.push(`%__${truth}optL${slot}:if ${slot}<=${count} then %__mcq_${truth}patterns[${slot}] else false;`);
@@ -1986,16 +2000,45 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
   return lines.join("\n");
 }
 
+// Resolve only generated option/message references, never evaluate Maxima or
+// substitute user variables inside an option expression.
+function namedChoiceAssociation(sources, truth, kind) {
+  const refs = literalChoiceElements(sources.get(`%__mcq_${truth}${kind}`));
+  if (!refs) return null;
+  const definitions = refs.map(ref => {
+    const wrapped = literalChoiceElements(ref);
+    const name = wrapped?.length === 1 ? wrapped[0] : ref;
+    if (!new RegExp(`^${kind === "source" ? "opt" : "msg"}${truth}\\d+$`).test(name)) return null;
+    const expression = sources.get(name) || "";
+    if (!/^%__mcq_lang\s*\(/.test(expression)) return null;
+    const assoc = extractLanguageAssociation(expression);
+    return assoc ? { assoc, wrapped: wrapped !== null } : null;
+  });
+  if (definitions.some(item => !item)) return null;
+  const languages = [...new Set(definitions.flatMap(item => [...item.assoc.keys()]))];
+  return new Map(languages.map(lang => {
+    const values = definitions.map(({assoc, wrapped}) => {
+      const node = assoc.get(lang) || assoc.get("en") || assoc.values().next().value;
+      const value = node.kind === "string" ? maximaString(node.value) : node.value;
+      return wrapped ? `[${value}]` : value;
+    });
+    return [lang, {kind: "raw", value: `[${values.join(", ")}]`}];
+  }));
+}
+
 // Adapt compact source tables to the legacy importer without evaluating Maxima.
 // The source text is used only for reading; saved XML retains the compact form.
 function expandCompactChoices(variables) {
   const assignments = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(Boolean);
   const sources = new Map(assignments.map(item => [item.name, item.expression]));
-  if (!sources.has("%__mcq_CsourceL") || !sources.has("%__mcq_WsourceL")) return variables;
+  const named = ["C", "W"].every(truth => literalChoiceElements(sources.get(`%__mcq_${truth}source`)) !== null);
+  if (!named && (!sources.has("%__mcq_CsourceL") || !sources.has("%__mcq_WsourceL"))) return variables;
   const lines = [];
   for (const truth of ["C", "W"]) {
     for (const [kind, name] of [["optL1L", "sourceL"], ["msg1L", "feedbackL"]]) {
-      const assoc = extractLanguageAssociation(sources.get(`%__mcq_${truth}${name}`) || "");
+      const assoc = named
+        ? namedChoiceAssociation(sources, truth, name === "sourceL" ? "source" : "feedback")
+        : extractLanguageAssociation(sources.get(`%__mcq_${truth}${name}`) || "");
       if (!assoc) throw new Error(uiText("選択肢の多言語連想配列を解析できません"));
       lines.push(`%__${truth}${kind}:` + maximaAssociation([...assoc].map(([lang, node]) => `["${lang}", ${node.value}[%__mcq_pattern_order[1]]]`)) + ";");
     }

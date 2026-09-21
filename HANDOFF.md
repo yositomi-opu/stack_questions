@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- 一対モードのXMLを、パターンIDごとのoptC/optW/msgC/msgW変数へ言語連想配列を定義して%__mcq_lang(...,%_STACK_LANG)で選ぶ形式へ変更。source/feedback配列には変数参照のみ、単独候補は[optC1]、候補リストはoptC2で保持。抽出・PRT引渡しロジックは維持。固定モードの生成は変更なし。問題変数／補助パラメータの同名トップレベル定義は上書きせず日英で通知。README・キャッシュ更新。
+- namedChoiceAssociationで生成参照だけを解決し、旧インポート形式へ一時展開。本文中のユーザーCAS変数は解決しない。新旧のsourceL形式、metadata有無、include、直接編集、単体／リスト、多言語の往復を維持。
+- 検証: node scripts/tests/test_editor_metadata.cjs（名前付き定義・配列参照・直編集優先・旧sourceL読込・衝突検出を追加）、test_variant_parameters.cjs、test_choice_capacity.cjs、test_import_evaluation.cjs、test_translation_cas.cjs、test_legacy_xml_import.cjs成功。JS構文／git diff --check成功。ローカルSTACK API previewで15文脈から5候補・文脈重複なし・正解2、gradeでscore1とC15/C6の対応FB・errors/fverrors空を確認。実ブラウザ編集操作は未確認。追加のローカルSTACK API previewでlistp(castext("abc"))はfalse、listp(castext("a={@2+3@}"))はtrueを確認。単独候補を明示的にリストで包み、postの言語連想配列用変数とは分ける設計を維持する。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - 問題変数textareaの手動拡大でinclude設定に重なる不具合を修正。旧左右分割用qvars-fieldのflex:4 1 0／minmax(0,1fr)が親の高さを固定していたため、flex:0 0 auto／auto行に変更。textareaの高さ100%指定も撤去。CSSキャッシュ識別子更新。
 - 実ブラウザで修正前にtextarea高さ220→401pxでも次欄の位置が変わらないことを再現。修正後は同じドラッグでinclude欄が下がり、縮小時も上に戻り重ならないことをスクリーンショットで確認。修正後のDOM座標取得はブラウザツールがタイムアウトしたため目視確認。git diff --check成功。CSSのみの修正でデータ処理の変更なし。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 

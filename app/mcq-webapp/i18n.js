@@ -8,6 +8,7 @@
     "オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、補助パラメータだけを変えた問題を作るときに便利です。": "When enabled, the XML loads question variables from a separate file with stack_include. This is useful for sharing question variables across questions with different parameters.",
     "実行順は「選択肢設定 → 補助パラメータ → 問題変数本体（stack_include）」です。選択肢数と正解数は上の選択肢設定で指定します。": "Execution order: option settings → parameters → main question variables (stack_include). Set the number of options and correct answers in the option settings above.",
     "読み込み先の共通ファイルでは、補助パラメータが未設定の場合だけ既定値を入れるようにします。ここで指定した値は各問題のXMLに保存されます。": "In the shared file, assign defaults only when a parameter is not already set. Values entered here are saved in each question's XML.",
+    "問題変数または補助パラメータに、生成するoptC・optW・msgC・msgWの変数名と重複する定義があります。名前を変更してください。": "A question variable or auxiliary parameter conflicts with a generated optC, optW, msgC, or msgW variable. Rename the conflicting variable.",
     "クリア": "Clear",
     "保存ファイル名": "Save filename",
     "XML保存ファイル名": "XML save filename",
