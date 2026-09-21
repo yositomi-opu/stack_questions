@@ -195,7 +195,7 @@ pending.then(()=>{
 const resetHtml=fs.readFileSync(path.join(root,"app/mcq-webapp/index.html"),"utf8");
 assert.doesNotMatch(resetHtml,/id="clearRowsButton"/);
 assert.doesNotMatch(source,/el\.clearRowsButton/);
-assert.match(resetHtml,/id="clearAllButton"[^>]*>全入力クリア/);
+assert.match(resetHtml,/id="clearAllButton"[^>]*>クリア/);
 
 // Reset must not generate XML midway through clearing fields.
 vm.runInContext('function updateOutput(){throw new Error("Unexpected generation during reset");}',context);

@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260917-includedirectory1">
+    <link rel="stylesheet" href="./styles.css?v=20260921-v08">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260921-choicetypes1"></script>
-    <script defer src="./app.js?v=20260921-choicetypes1"></script>
-    <script defer src="./file-ui.js?v=20260913-files1"></script>
+    <script defer src="./i18n.js?v=20260921-v08"></script>
+    <script defer src="./app.js?v=20260921-v08"></script>
+    <script defer src="./file-ui.js?v=20260921-v08"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
   <body>
@@ -19,10 +19,14 @@
           <p class="eyebrow">STACK / MCQ</p>
           <div class="app-title-row">
             <h1>XML Generator</h1>
-            <label class="check-row castext-template-toggle" title="問題文と数式（CAS式）を含むフィードバックは、できるだけ自動で変換されますが、できるだけ自分でCASTextに変更してから、このチェックを入れてください。問題文の種別にCASTextを選んで入力した内容は、そのまま使用します。独自のCAS式は自動変換されない場合があります。"><input id="castextTemplate" type="checkbox"><span>castext 版を使用する</span></label>
+            <details class="version-info"><summary>v0.8</summary><div class="version-info-body">
+              <p>バージョン0.8（開発版）</p><p>1.0を正式リリースとする予定です。</p>
+              <p><time datetime="2026-09-21T17:42:00+09:00">2026-09-21 17:42 JST</time></p>
+            </div></details>
           </div>
         </div>
         <div class="actions">
+          <button id="clearAllButton" type="button" class="ghost">クリア</button>
           <details class="file-menu"><summary>CSV</summary><div class="file-menu-list">
             <button id="sampleCsvButton" type="button">見本</button>
             <button id="dataFileButton" type="button">読込</button>
@@ -42,64 +46,17 @@
       </header>
 
       <section class="title-toolbar" aria-label="問題ファイル設定">
-        <div class="title-field">
-          <label class="sr-only" for="questionId">タイトル</label>
+        <div class="title-field"><label for="questionId">Title:</label>
           <input id="questionId" value="" placeholder="例: MCQ_sampleXYZ" spellcheck="false">
         </div>
-          <input id="dataFileInput" class="visually-hidden-file" type="file" accept=".csv,.tsv,.xlsx,.xls">
-          <input id="xmlFileInput" class="visually-hidden-file" type="file" accept=".xml,application/xml,text/xml">
-        <button id="clearAllButton" type="button" class="ghost">全入力クリア</button>
-        <details class="display-settings">
-          <summary>表示設定</summary>
-          <div class="display-settings-menu">
-            <div class="field-row">
-              <label for="settingsWidth">左欄の幅</label>
-              <input id="settingsWidth" type="range" min="300" max="2400" value="480">
-            </div>
-            <div class="field-row">
-              <label for="dataWidth">選択肢欄の幅</label>
-              <input id="dataWidth" type="range" min="420" max="900" value="620">
-            </div>
-          </div>
-        </details>
+        <div class="xml-filename-field"><label for="xmlFilename">保存ファイル名</label>
+          <input id="xmlFilename" type="text" spellcheck="false" aria-label="XML保存ファイル名">
+        </div>
+        <input id="dataFileInput" class="visually-hidden-file" type="file" accept=".csv,.tsv,.xlsx,.xls">
+        <input id="xmlFileInput" class="visually-hidden-file" type="file" accept=".xml,application/xml,text/xml">
       </section>
 
-      <section class="workspace">
-        <aside class="panel settings-panel">
-          <section class="language-settings" aria-labelledby="languageHeading">
-            <div class="language-settings-heading">
-              <div class="row-actions language-heading-actions">
-                <h2 id="languageHeading">多言語設定</h2>
-                <div class="question-text-help">
-                  <button type="button" class="question-text-help-button" aria-label="多言語設定について" aria-describedby="languageHelp">?</button>
-                  <div id="languageHelp" class="question-text-tooltip" role="tooltip">
-                    <p>問題文と、「言語非依存」にチェックが入っていない選択肢・フィードバックを、選択した言語へ多言語展開します。</p>
-                    <p>「展開」で翻訳依頼を作成します。ChatGPTへ渡し、返された翻訳JSONを「翻訳結果を確認・修正」に貼り付けて反映してください。</p>
-                  </div>
-                </div>
-                <button id="prepareTranslationButton" type="button" class="primary" title="多言語展開">展開</button>
-              </div>
-              <div class="base-language-row">
-                <label for="baseLanguage">基本言語</label>
-                <select id="baseLanguage"></select>
-              </div>
-            </div>
-            <div id="languageChoices" class="language-choices">
-              <span class="language-choices-label">展開言語</span>
-              <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択">ALL</button>
-            </div>
-            <details id="translationPanel" class="translation-panel">
-              <summary>翻訳結果を確認・修正</summary>
-              <p class="translation-guide">生成された依頼をChatGPTへ貼り付け、返されたJSONでこの欄を置き換えてから「結果を反映」を押してください。</p>
-              <textarea id="translationJson" rows="12" spellcheck="false"></textarea>
-              <div class="row-actions translation-actions">
-                <button id="copyTranslationButton" type="button" class="ghost">依頼をコピー</button>
-                <button id="applyTranslationButton" type="button" class="primary">結果を反映</button>
-              </div>
-              <p id="translationStatus" class="translation-status" aria-live="polite"></p>
-            </details>
-          </section>
-
+      <section class="workspace panel">
           <div class="field-row qvars-field">
             <div class="panel-heading qvars-heading">
               <div class="row-actions qvars-heading-actions">
@@ -108,12 +65,13 @@
                   <button type="button" class="question-text-help-button" aria-label="問題変数について" aria-describedby="qvarsHelp">?</button>
                   <div id="qvarsHelp" class="question-text-tooltip" role="tooltip">
                     <p>乱数や行列など、問題文・選択肢・フィードバックで使う変数をMaximaの代入文で定義します。例：a:rand([1, 2, 3]);</p>
-                    <p>評価順は「選択肢設定 → パラメータ → 問題変数」です。選択肢数や採点方式は選択肢設定、問題ごとに変える値はパラメータ、共通の計算は問題変数に設定します。</p>
-                    <p>「評価」で現在の設定を使って計算し、右側の評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。</p>
+                    <p>評価順は「選択肢設定 → 補助パラメータ → 問題変数」です。選択肢数や採点方式は選択肢設定、問題ごとに変える値は補助パラメータ、共通の計算は問題変数に設定します。</p>
+                    <p>「評価」で現在の設定を使って計算し、別ウィンドウの評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。</p>
                   </div>
                 </div>
                 <div class="qvars-evaluation-action">
                   <button id="evaluateCasButton" type="button" class="primary">評価</button>
+                  <button id="evaluationResultsButton" type="button" class="ghost">評価結果</button>
                   <p id="casEvaluationStatus" class="cas-evaluation-status" aria-live="polite">未評価</p>
                 </div>
               </div>
@@ -132,7 +90,7 @@
               <div class="question-text-help">
                 <button type="button" class="question-text-help-button" aria-label="別ファイル保存について" aria-describedby="includeSaveHelp">?</button>
                 <div id="includeSaveHelp" class="question-text-tooltip" role="tooltip">
-                  <p>オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、パラメータだけを変えた問題を作るときに便利です。</p>
+                  <p>オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、補助パラメータだけを変えた問題を作るときに便利です。</p>
                   <p>Moodle/STACKから取得できるURLを指定します。URLベースにはファイルを公開するディレクトリのURLを、末尾の / まで入力してください。ファイル名だけを連結し、001/などは自動で追加しません。</p>
                   <p>XMLとincludeファイルは別々に保存します。「保存」で取得したincludeファイルを、XMLのstack_includeに記載されたURLで取得できる場所へ配置してください。保存操作だけでは公開先へアップロードされません。</p>
                 </div>
@@ -149,11 +107,7 @@
               <span id="includeUrlFilename" class="include-url-filename"></span>
             </div>
           </section>
-        </aside>
-
-        <div id="settingsResizeHandle" class="settings-resize-handle" role="separator" aria-orientation="vertical" aria-label="左欄の幅を変更" title="左右にドラッグして左欄の幅を変更"></div>
-
-        <section class="panel data-panel">
+          <div class="section-divider"></div>
           <section class="choice-settings" aria-labelledby="choiceSettingsHeading">
             <h2 id="choiceSettingsHeading">選択肢設定</h2>
             <div class="choice-settings-grid">
@@ -216,14 +170,14 @@
           <div class="section-divider"></div>
           <section class="parameters-section" aria-labelledby="parametersHeading">
             <div class="question-text-heading">
-              <h2 id="parametersHeading"><label for="parameters">パラメータ</label></h2>
+              <h2 id="parametersHeading"><label for="parameters">補助パラメータ</label></h2>
               <div class="question-text-help">
-                <button type="button" class="question-text-help-button" aria-label="パラメータの入力について" aria-describedby="parametersHelp">?</button>
+                <button type="button" class="question-text-help-button" aria-label="補助パラメータの入力について" aria-describedby="parametersHelp">?</button>
                 <div id="parametersHelp" class="question-text-tooltip" role="tooltip">
                   <p>問題ごとに変えたい値を、問題変数本体より先に設定する欄です。不要なら空欄で構いません。</p>
                   <p>stack_includeで共通の問題変数を読み込む場合に特に有効です。同じファイルを使ったまま、%_rk:2; のようにrankなどを指定して別の問題を作れます。</p>
-                  <p>実行順は「選択肢設定 → パラメータ → 問題変数本体（stack_include）」です。選択肢数と正解数は上の選択肢設定で指定します。</p>
-                  <p>読み込み先の共通ファイルでは、パラメータが未設定の場合だけ既定値を入れるようにします。ここで指定した値は各問題のXMLに保存されます。</p>
+                  <p>実行順は「選択肢設定 → 補助パラメータ → 問題変数本体（stack_include）」です。選択肢数と正解数は上の選択肢設定で指定します。</p>
+                  <p>読み込み先の共通ファイルでは、補助パラメータが未設定の場合だけ既定値を入れるようにします。ここで指定した値は各問題のXMLに保存されます。</p>
                 </div>
               </div>
             </div>
@@ -236,17 +190,15 @@
               <div class="question-text-help question-overview-help">
                 <button type="button" class="question-text-help-button" aria-label="問題文の入力について" aria-describedby="questionTextHelp">?</button>
                 <div id="questionTextHelp" class="question-text-tooltip" role="tooltip">
-                    <p>「castext 版を使用する」ときは、STACKの問題文と同じ書式で入力してください。{@a@} やブロック構文が使えます。外側の引用符やcastext()は不要です。従来のCAS式は埋め込み形式へ移行します。以下の文字列・CAS式の説明は通常版用です。</p>
-                    <p>文字列形式では、STACKの問題文書式のうち、文章と {@a@} などの式の埋め込みが使えます。HTML・LaTeXも文章に含められます。条件分岐・繰り返しなどのブロック構文は使えません。</p>
-                    <p>CAS式形式では、問題文を表す文字列を返す式だけを入力してください。qtext: sconcat(...); のような代入文ではなく、右辺の sconcat(...) だけを書きます。</p>
-                    <p>例：sconcat("値は ", stack_disp(a, "i"))</p>
+                    <p>STACKの問題文と同じCASText書式で入力してください。文章・HTML・LaTeX・{@a@}・ブロック構文が使えます。外側の引用符やcastext()は不要です。</p>
+                    <p>旧形式のsconcat・tex1・tex2などは読み込み時に可能な範囲で変換します。変換後の内容をプレビューで確認してください。</p>
 
                     <p>__SELTYPE__ は、上の選択肢設定に応じて「1つ選べ」「すべて選べ」、正解が複数あるRadio形式では「1つ選べ（正解が複数あっても1つでよい）」に置き換わります。</p>
                     <p>何を選ぶかは問題文に書きます。例：「間違っているものを __SELTYPE__。」「rankが1であるものを __SELTYPE__。」</p>
                     <p>__SELPROMPT__ は「正しいものを1つ選べ。」などの指示文全体を挿入します。「正しいものを」を前に重ねないでください。</p>
                     <p>どちらも使わず、自分で好きな指示文を書いても問題ありません。</p>
 
-                    <p>選ぶと現在の問題文のカーソル位置に挿入します。文字を選択している場合は置き換えます。CAS式では文字列の中に挿入してください。</p>
+                    <p>選ぶと現在の問題文のカーソル位置に挿入します。文字を選択している場合は置き換えます。</p>
 
                 </div>
               </div>
@@ -258,15 +210,7 @@
                   <button type="button" data-question-insert="__SELPROMPT__">SELPROMPT</button>
                 </div>
               </details>
-              <div class="question-text-help">
-                  <button id="convertQuestionButton" type="button" class="ghost" aria-describedby="convertQuestionHelp">変換</button>
-                  <div id="convertQuestionHelp" class="question-text-tooltip" role="tooltip">
-                    <p>文字列形式の {@a@} などはXML生成・プレビュー時に自動変換されます。このボタンは現在の問題文を明示的にCAS式へ書き換え、形式もCAS式に切り替えます。</p>
-                    <p>例：値は {@a@} → sconcat("値は ", stack_disp(a, "i"))</p>
-                    <p>文章・HTML・LaTeX・__SELPROMPT__・__SELTYPE__を保ちます。すでに数式環境の中にある埋め込みには、数式環境を重ねません。CASTextのブロック構文は対象外です。</p>
-                  </div>
-                </div>
-              <div id="questionTypeControls"></div>
+              <div id="questionTypeControls" hidden></div>
             </div>
             <div id="questionTextFields"></div>
           </section>
@@ -321,6 +265,45 @@
               </div>
             </section>
           </div>
+          <div class="section-divider"></div>
+          <section class="language-settings" aria-labelledby="languageHeading">
+            <div class="language-settings-heading">
+              <div class="row-actions language-heading-actions">
+                <h2 id="languageHeading">多言語対応</h2>
+                <div class="question-text-help">
+                  <button type="button" class="question-text-help-button" aria-label="多言語対応について" aria-describedby="languageHelp">?</button>
+                  <div id="languageHelp" class="question-text-tooltip" role="tooltip">
+                    <p>問題文と、「言語非依存」にチェックが入っていない選択肢・フィードバックを、選択した言語へ多言語展開します。</p>
+                    <p>「展開」で翻訳依頼を作成します。ChatGPTへ渡し、返された翻訳JSONを「翻訳結果を確認・修正」に貼り付けて反映してください。</p>
+                  </div>
+                </div>
+                <button id="prepareTranslationButton" type="button" class="primary" title="多言語展開">展開</button>
+              </div>
+              <div class="base-language-row">
+                <label for="baseLanguage">基本言語</label>
+                <select id="baseLanguage"></select>
+              </div>
+            </div>
+            <div id="languageChoices" class="language-choices">
+              <span class="language-choices-label">展開言語</span>
+              <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択">ALL</button>
+            </div>
+            <details id="translationPanel" class="translation-panel">
+              <summary>翻訳結果を確認・修正</summary>
+              <p class="translation-guide">生成された依頼をChatGPTへ貼り付け、返されたJSONでこの欄を置き換えてから「結果を反映」を押してください。</p>
+              <textarea id="translationJson" rows="12" spellcheck="false"></textarea>
+              <div class="row-actions translation-actions">
+                <button id="copyTranslationButton" type="button" class="ghost">依頼をコピー</button>
+                <button id="applyTranslationButton" type="button" class="primary">結果を反映</button>
+              </div>
+              <p id="translationStatus" class="translation-status" aria-live="polite"></p>
+            </details>
+          </section>
+
+          <p id="statusLine" class="status" aria-live="polite"></p>
+      </section>
+      <textarea id="xmlOutput" hidden aria-hidden="true"></textarea>
+      <div hidden id="evaluationResultsSource">
           <section class="cas-evaluation-panel cas-results-panel" aria-labelledby="casEvaluationHeading">
             <h2 id="casEvaluationHeading">問題変数評価結果</h2>
             <details id="casDiagnosticsPanel" hidden>
@@ -341,26 +324,7 @@
               </div>
             </details>
           </section>
-          <section class="stack-api-panel" aria-labelledby="stackApiHeading">
-            <h2 id="stackApiHeading">STACK API 動作確認</h2>
-            <p class="stack-api-help">STACK APIのベースURLを入力すると、接続確認と現在の生成XMLのテストを実行できます。</p>
-            <div class="stack-api-controls">
-              <label for="stackApiUrl">API URL</label>
-              <input id="stackApiUrl" type="url" placeholder="http://localhost:3080" spellcheck="false">
-              <button id="checkStackApiButton" type="button" class="ghost">接続確認</button>
-              <button id="testStackQuestionButton" type="button" class="primary">生成XMLをテスト</button>
-            </div>
-            <p id="stackApiStatus" class="stack-api-status" aria-live="polite">未確認</p>
-            <details id="stackApiResultPanel" class="stack-api-result-panel" hidden>
-              <summary>API応答の詳細</summary>
-              <pre id="stackApiResult"></pre>
-            </details>
-          </section>
-          <p id="statusLine" class="status" aria-live="polite"></p>
-        </section>
-
-        <textarea id="xmlOutput" hidden aria-hidden="true"></textarea>
-      </section>
+      </div>
       <dialog id="sourceDialog" class="source-dialog" aria-labelledby="sourceTitle">
         <div class="panel-heading"><h2 id="sourceTitle"></h2><div class="row-actions">
           <button id="copySourceButton" class="ghost icon-copy" type="button" aria-label="表示内容をコピー" title="表示内容をコピー"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button>

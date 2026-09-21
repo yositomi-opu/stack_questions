@@ -1304,3 +1304,43 @@ td:nth-child(5) {
 .include-base-field { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .include-base-field input { flex: 1 1 0; width: 0; min-width: 0; }
 .include-url-filename { color: var(--muted); font-size: 12px; max-width: 40%; overflow-wrap: anywhere; }
+
+/* v0.8: one continuous editor, with evaluation results in a separate window. */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+.workspace > * { min-width: 0; }
+.workspace .section-divider { margin: 0; }
+.workspace .qvars-field { border: 0; padding-top: 0; margin: 0; }
+#qvars { min-height: 180px; height: 220px; resize: vertical; }
+.workspace .table-wrap { max-height: none; }
+.title-toolbar { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+.title-field, .xml-filename-field { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.title-field label, .xml-filename-field label { white-space: nowrap; }
+.title-field input, .xml-filename-field input { flex: 1; min-width: 0; width: 100%; }
+.include-settings { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+.include-settings-heading { flex: 0 0 auto; }
+.include-filename-row { flex: 1 1 280px; margin: 0; }
+.include-base-field { flex: 1.4 1 340px; margin: 0; }
+.include-settings .check-row { white-space: nowrap; }
+.language-settings { padding-top: 0; }
+.version-info { margin: 0; padding: 0; border: 0; position: relative; font-size: 13px; color: var(--muted); }
+.version-info summary { cursor: pointer; white-space: nowrap; }
+.version-info-body { position: absolute; top: 100%; left: 0; width: 290px; z-index: 30; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 22px #0002; }
+.version-info-body p { margin: 6px 0; }
+.evaluation-window { padding: 20px; }
+.evaluation-window .cas-results-panel { margin: 0; }
+.evaluation-window .cas-variable-table-wrap { max-height: none; }
+@media (max-width: 800px) {
+  .topbar { display: flex; flex-wrap: wrap; }
+  .actions { display: flex; flex-wrap: wrap; }
+  .title-toolbar { grid-template-columns: 1fr; }
+  .include-settings-heading { flex-basis: auto; }
+  .include-filename-row { flex-basis: 280px; }
+  .include-base-field { flex-basis: 100%; }
+}

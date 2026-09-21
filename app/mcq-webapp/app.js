@@ -30,6 +30,7 @@ const state = {
   questionLanguageIndependent: false,
   includeSource: null,
   includeFilename: "",
+  xmlFilename: "",
   legacyQuestionInputs: {},
   casEvaluation: { status: "idle", stale: false, variables: [], expressions: {} },
 };
@@ -38,13 +39,15 @@ buildLanguageInputs();
 
 const el = {
   questionId: document.querySelector("#questionId"),
+  xmlFilename: document.querySelector("#xmlFilename"),
   modeRb: document.querySelector("#modeRb"),
   modeCb: document.querySelector("#modeCb"),
   noCorrectOption: document.querySelector("#noCorrectOption"),
   radioMultiplePrompt: document.querySelector("#radioMultiplePrompt"),
   noIdeaOption: document.querySelector("#noIdeaOption"),
   scoringMethodField: document.querySelector("#scoringMethodField"),
-  castextTemplate: document.querySelector("#castextTemplate"),
+  // Legacy importers may assign this setting; v0.8 always uses CASText.
+  castextTemplate: { get checked() { return true; }, set checked(_legacyValue) {} },
   scoringMethod: document.querySelector("#scoringMethod"),
   numOptions: document.querySelector("#numOptions"),
   numCorrect: document.querySelector("#numCorrect"),
@@ -54,9 +57,6 @@ const el = {
   requirePairs: document.querySelector("#requirePairs"),
   feedbackByTruth: document.querySelector("#feedbackByTruth"),
   feedbackByTruthRow: document.querySelector("#feedbackByTruthRow"),
-  settingsWidth: document.querySelector("#settingsWidth"),
-  dataWidth: document.querySelector("#dataWidth"),
-  settingsResizeHandle: document.querySelector("#settingsResizeHandle"),
   workspace: document.querySelector(".workspace"),
   dataFileButton: document.querySelector("#dataFileButton"),
   xmlFileButton: document.querySelector("#xmlFileButton"),
@@ -74,14 +74,9 @@ const el = {
   casVariablesPanel: document.querySelector("#casVariablesPanel"),
   casVariableCount: document.querySelector("#casVariableCount"),
   casVariablesBody: document.querySelector("#casVariablesBody"),
-  stackApiUrl: document.querySelector("#stackApiUrl"),
+  stackApiUrl: { value: "" },
   includeBaseUrl: document.querySelector("#includeBaseUrl"),
   includeUrlFilename: document.querySelector("#includeUrlFilename"),
-  checkStackApiButton: document.querySelector("#checkStackApiButton"),
-  testStackQuestionButton: document.querySelector("#testStackQuestionButton"),
-  stackApiStatus: document.querySelector("#stackApiStatus"),
-  stackApiResultPanel: document.querySelector("#stackApiResultPanel"),
-  stackApiResult: document.querySelector("#stackApiResult"),
   saveVariablesSeparately: document.querySelector("#saveVariablesSeparately"),
   rowsBody: document.querySelector("#rowsBody"),
   pairedEditor: document.querySelector("#pairedEditor"),
@@ -120,8 +115,6 @@ const el = {
   ),
 };
 
-let settingsWidthCustomized = false;
-
 init();
 
 async function init() {
@@ -143,7 +136,6 @@ async function init() {
   restoreLanguageSettings();
   updateQuestionLanguageVisibility();
   updateCorrectCountControls();
-  updateLayout();
   renderRows();
   renderCasVariables();
   await loadTemplates();
@@ -155,28 +147,15 @@ function updateCorrectCountControls() {
   el.numCorrect.disabled = el.randomCorrect.checked;
 }
 
-function updateLayout() {
-  const workspaceWidth = el.workspace.getBoundingClientRect().width || window.innerWidth;
-  const settingsMax = Math.max(300, Math.floor(workspaceWidth * 0.8));
-  if (!settingsWidthCustomized) el.settingsWidth.value = String(Math.max(300, Math.round((workspaceWidth - 14) * 0.4)));
-  el.settingsWidth.max = String(settingsMax);
-  if (Number(el.settingsWidth.value) > settingsMax) el.settingsWidth.value = String(settingsMax);
-  el.workspace.style.setProperty("--settings-width", `${el.settingsWidth.value}px`);
-  el.workspace.style.setProperty("--data-width", `${el.dataWidth.value}px`);
-
-}
-
 function bindEvents() {
   document.querySelectorAll("[data-question-insert]").forEach(button => {
     button.addEventListener("click", () => insertQuestionPlaceholder(button.dataset.questionInsert));
   });
-  document.querySelector("#convertQuestionButton").addEventListener("click", convertQuestionToCas);
   document.querySelector("#clearAllButton").addEventListener("click", clearAllEntries);
-  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod, el.radioMultiplePrompt].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
-  el.castextTemplate.addEventListener("change", () => { updateOutput(); renderRows(); });
+  [el.noCorrectOption, el.noIdeaOption, el.scoringMethod].forEach((node) => node.addEventListener("change", () => { markCasEvaluationStale(); updateOutput(); }));
   el.swapAllPairsButton.addEventListener("click", () => swapPairedOptions());
-  el.modeRb.addEventListener("change", () => setMode("rb"));
-  el.modeCb.addEventListener("change", () => setMode("cb"));
+  el.modeRb.addEventListener("change", () => { state.xmlFilename = ""; setMode("rb"); });
+  el.modeCb.addEventListener("change", () => { state.xmlFilename = ""; setMode("cb"); });
   el.addRowButton.addEventListener("click", () => {
     const pattern = nextPattern();
     if (!pattern) return;
@@ -201,11 +180,6 @@ function bindEvents() {
   el.downloadButton.addEventListener("click", downloadXml);
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
   el.evaluateCasButton.addEventListener("click", evaluateCasLocally);
-  el.checkStackApiButton.addEventListener("click", checkStackApiConnection);
-  el.testStackQuestionButton.addEventListener("click", testGeneratedQuestionWithStack);
-  el.stackApiUrl.addEventListener("input", () => {
-    localStorage.setItem(STACK_API_URL_STORAGE_KEY, el.stackApiUrl.value.trim());
-  });
   el.includeBaseUrl.addEventListener("input", () => {
     if (state.includeSource) state.includeSource.autoUrl = true;
     localStorage.setItem(INCLUDE_BASE_URL_STORAGE_KEY, el.includeBaseUrl.value.trim());
@@ -235,13 +209,6 @@ function bindEvents() {
     updateOutput();
   });
   el.correctCounts.addEventListener("input", updateOutput);
-  el.settingsResizeHandle.addEventListener("pointerdown", beginSettingsResize);
-  el.settingsWidth.addEventListener("input", () => {
-    settingsWidthCustomized = true;
-    updateLayout();
-  });
-  el.dataWidth.addEventListener("input", updateLayout);
-  window.addEventListener("resize", updateLayout);
   Object.values(el.languageChecks).forEach((node) => {
     node.addEventListener("change", () => {
       ensureOneLanguage(node);
@@ -256,7 +223,11 @@ function bindEvents() {
   el.prepareTranslationButton.addEventListener("click", prepareTranslationRequest);
   el.copyTranslationButton.addEventListener("click", copyTranslationRequest);
   el.applyTranslationButton.addEventListener("click", applyTranslationResult);
-  [el.questionId, el.numOptions, el.numCorrect].forEach((node) => {
+  el.questionId.addEventListener("input", () => { state.xmlFilename = ""; updateOutput(); });
+  el.radioMultiplePrompt.addEventListener("change", () => { state.xmlFilename = ""; markCasEvaluationStale(); updateOutput(); });
+  el.xmlFilename.addEventListener("input", () => { state.xmlFilename = el.xmlFilename.value; });
+  el.xmlFilename.addEventListener("change", () => { state.xmlFilename = normalizedXmlFilename(state.xmlFilename); syncXmlFilename(); });
+  [el.numOptions, el.numCorrect].forEach((node) => {
     node.addEventListener("input", updateOutput);
   });
   Object.values(el.questions).forEach((node) => {
@@ -284,16 +255,6 @@ function setCasEvaluationStatus(message, kind = "") {
   el.casEvaluationStatus.className = `cas-evaluation-status${kind ? ` ${kind}` : ""}`;
 }
 
-function setStackApiStatus(message, kind = "") {
-  el.stackApiStatus.textContent = message;
-  el.stackApiStatus.className = `stack-api-status${kind ? ` ${kind}` : ""}`;
-}
-
-function setStackApiBusy(busy) {
-  el.checkStackApiButton.disabled = busy;
-  el.testStackQuestionButton.disabled = busy;
-}
-
 async function callStackApi(path, payload) {
   const response = await fetch(webappUrl(path), {
     method: "POST",
@@ -303,66 +264,6 @@ async function callStackApi(path, payload) {
   const result = await response.json().catch(() => ({ error: "ローカルサーバーからJSON応答を取得できませんでした" }));
   if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
   return result;
-}
-
-function displayStackApiResult(result) {
-  el.stackApiResult.textContent = JSON.stringify(result, null, 2);
-  el.stackApiResultPanel.hidden = false;
-}
-
-async function checkStackApiConnection() {
-  const url = el.stackApiUrl.value.trim();
-  if (!url) {
-    setStackApiStatus("STACK APIのURLを入力してください", "error");
-    return;
-  }
-  setStackApiBusy(true);
-  setStackApiStatus("接続を確認しています…");
-  try {
-    const response = await callStackApi("/api/stack/check", { url });
-    el.stackApiUrl.value = response.url;
-    localStorage.setItem(STACK_API_URL_STORAGE_KEY, response.url);
-    setStackApiStatus(`${response.message}（${response.url}）`, "success");
-    displayStackApiResult(response.result);
-  } catch (error) {
-    setStackApiStatus(error.message, "error");
-  } finally {
-    setStackApiBusy(false);
-  }
-}
-
-async function testGeneratedQuestionWithStack() {
-  const url = el.stackApiUrl.value.trim();
-  if (!url) {
-    setStackApiStatus("STACK APIのURLを入力してください", "error");
-    return;
-  }
-  updateOutput();
-  if (!el.xmlOutput.value.trim() || el.xmlOutput.value.startsWith("<!-- XMLを生成できませんでした")) {
-    setStackApiStatus("先に問題XMLを生成できる状態にしてください", "error");
-    return;
-  }
-  setStackApiBusy(true);
-  setStackApiStatus("生成XMLをSTACK APIでテストしています…");
-  try {
-    const response = await callStackApi("/api/stack/test", {
-      url,
-      questionDefinition: el.xmlOutput.value,
-    });
-    el.stackApiUrl.value = response.url;
-    localStorage.setItem(STACK_API_URL_STORAGE_KEY, response.url);
-    const apiResult = response.result || {};
-    const messages = Array.isArray(apiResult.messages) ? apiResult.messages : [];
-    const summary = messages.length
-      ? `テスト完了（メッセージ ${messages.length}件）`
-      : "テスト完了";
-    setStackApiStatus(`${summary}（${response.url}/test）`, "success");
-    displayStackApiResult(apiResult);
-  } catch (error) {
-    setStackApiStatus(error.message, "error");
-  } finally {
-    setStackApiBusy(false);
-  }
 }
 
 function markCasEvaluationStale() {
@@ -619,33 +520,6 @@ function updateCasEvaluationBadge(badge) {
     : `length:${total}`;
   badge.title = results.map((item) => item.value || "").join("\n");
   badge.classList.add("ok");
-}
-
-function beginSettingsResize(event) {
-  if (window.matchMedia("(max-width: 780px)").matches) return;
-  event.preventDefault();
-  el.workspace.classList.add("resizing-settings");
-  el.settingsResizeHandle.setPointerCapture?.(event.pointerId);
-
-  const onPointerMove = (moveEvent) => {
-    const rect = el.workspace.getBoundingClientRect();
-    const maxWidth = Math.max(300, Math.floor(rect.width * 0.8));
-    const nextWidth = clamp(Math.round(moveEvent.clientX - rect.left), 300, maxWidth);
-    settingsWidthCustomized = true;
-    el.settingsWidth.value = String(nextWidth);
-    updateLayout();
-  };
-
-  const endResize = () => {
-    el.workspace.classList.remove("resizing-settings");
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", endResize);
-    window.removeEventListener("pointercancel", endResize);
-  };
-
-  window.addEventListener("pointermove", onPointerMove);
-  window.addEventListener("pointerup", endResize);
-  window.addEventListener("pointercancel", endResize);
 }
 
 function clamp(value, min, max) {
@@ -1757,6 +1631,7 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  syncXmlFilename();
   syncCastextQuestionInputs();
   syncIncludeFilename();
   if (!state.rows.length) {
@@ -1929,6 +1804,7 @@ function appStateSnapshot() {
       feedbackMode: feedbackModeConfigValue(),
     },
     legacyQuestionInputs: state.legacyQuestionInputs || {},
+    xmlFilename: state.xmlFilename || "",
     includeFilename: state.includeFilename || "",
     includeSource: state.includeSource ? {
       url: state.includeSource.url,
@@ -2976,6 +2852,7 @@ function applyAppStateSnapshot(snapshot) {
   if (el.requirePairs.checked) synchronizeSharedFeedback();
   state.translationsStale = false;
   state.legacyQuestionInputs = snapshot.legacyQuestionInputs || {};
+  state.xmlFilename = normalizedXmlFilename(snapshot.xmlFilename || "");
   state.includeFilename = String(snapshot.includeFilename || (snapshot.includeSource?.autoUrl ? "" : snapshot.includeSource?.filename) || "");
   state.includeSource = snapshot.includeSource ? {
     url: String(snapshot.includeSource.url || ""),
@@ -3608,6 +3485,8 @@ function clearAllEntries() {
 
 function resetCsvImportState() {
   state.legacyQuestionInputs = {};
+  state.xmlFilename = "";
+  if (el.xmlFilename) el.xmlFilename.value = "";
   state.includeFilename = "";
   resetDerivedResults();
   state.rows = [];
@@ -3920,6 +3799,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "xml_filename") state.xmlFilename = normalizedXmlFilename(value);
   if (key === "legacy_question_inputs") state.legacyQuestionInputs = value ? JSON.parse(value) : {};
   if (key === "radio_multiple_prompt" && el.radioMultiplePrompt) el.radioMultiplePrompt.checked = parseBoolean(value);
   if (key === "include_filename") state.includeFilename = normalizeIncludeFilename(value);
@@ -3965,6 +3845,7 @@ function downloadSampleCsv() {
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
+    ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
@@ -4023,6 +3904,7 @@ function currentCsvRecords(title) {
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
+    ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
     ["config", "require_pairs", el.requirePairs.checked ? "true" : "false"],
@@ -4127,7 +4009,8 @@ function downloadXml() {
   try {
     const xml = generateXml();
     el.xmlOutput.value = xml;
-    const filename = `${xmlFileStem(title)}.xml`;
+    syncXmlFilename();
+    const filename = normalizedXmlFilename(state.xmlFilename) || `${xmlFileStem(title)}.xml`;
     downloadText(filename, xml, "application/xml;charset=utf-8");
     setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
   } catch (error) {
@@ -4270,11 +4153,21 @@ function baseTitle(value) {
   return cleanId(basenameFromPath(value))
     .replace(/\.(?:xml|csv|txt)$/i, "")
     .replace(/^001\./i, "")
-    .replace(/-(?:cb|rb)$/i, "");
+    .replace(/-(?:cb|rb2?)$/i, "");
+}
+
+function normalizedXmlFilename(value) {
+  const name = basenameFromPath(String(value || "")).replace(/[\x00-\x1f<>:"|?*]/g, "_").trim();
+  return name ? name.replace(/\.xml$/i, "") + ".xml" : "";
+}
+
+function syncXmlFilename() {
+  if (!el.xmlFilename) return;
+  el.xmlFilename.value = state.xmlFilename || (baseTitle(el.questionId.value) ? `${xmlFileStem(el.questionId.value)}.xml` : "");
 }
 
 function xmlFileStem(title) {
-  return `001.${baseTitle(title)}-${state.mode}`;
+  return `001.${baseTitle(title)}-${state.mode === "cb" ? "cb" : el.radioMultiplePrompt?.checked ? "rb2" : "rb"}`;
 }
 
 function escapeXml(value) {

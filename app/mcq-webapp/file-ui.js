@@ -140,21 +140,38 @@
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') document.querySelectorAll('.file-menu').forEach(menu => { menu.open = false; });
   });
-  const widthKey = 'mcq-webapp-widths-v1';
-  try {
-    const saved = JSON.parse(localStorage.getItem(widthKey) || 'null');
-    if (saved && Number.isFinite(saved.settings) && Number.isFinite(saved.data)) {
-      el.settingsWidth.value = String(clamp(saved.settings, 300, 2400));
-      el.dataWidth.value = String(clamp(saved.data, 420, 900));
-      settingsWidthCustomized = true;
-      updateLayout();
+  let resultsWindow = null;
+  function refreshEvaluationWindow() {
+    if (!resultsWindow || resultsWindow.closed) return;
+    const doc = resultsWindow.document;
+    doc.title = uiText('問題変数評価結果');
+    doc.documentElement.lang = document.documentElement.lang;
+    const panel = doc.importNode(document.querySelector('.cas-results-panel'), true);
+    const heading = doc.createElement('div');
+    heading.className = 'panel-heading';
+    const status = doc.createElement('p');
+    status.textContent = el.casEvaluationStatus.textContent;
+    const close = doc.createElement('button');
+    close.textContent = uiText('閉じる');
+    close.addEventListener('click', () => resultsWindow.close());
+    heading.append(status, close);
+    doc.body.replaceChildren(heading, panel);
+  }
+  $('evaluationResultsButton').addEventListener('click', () => {
+    if (!resultsWindow || resultsWindow.closed) {
+      resultsWindow = window.open('', 'mcq-evaluation-results', 'popup,width=1000,height=700');
+      if (!resultsWindow) { window.mcqNotice('評価結果のウィンドウを開けませんでした。ポップアップを許可してください。', true); return; }
+      const doc = resultsWindow.document;
+      doc.title = uiText('問題変数評価結果');
+      doc.documentElement.lang = document.documentElement.lang;
+      const style = doc.createElement('link');
+      style.rel = 'stylesheet'; style.href = new URL('./styles.css?v=20260921-v08', location.href).href;
+      doc.head.replaceChildren(style);
+      doc.body.className = 'evaluation-window';
     }
-  } catch (_error) { /* Defaults remain available when storage is disabled. */ }
-  const saveWidths = () => {
-    try { localStorage.setItem(widthKey, JSON.stringify({settings:Number(el.settingsWidth.value),data:Number(el.dataWidth.value)})); }
-    catch (_error) { /* Layout remains usable without persistence. */ }
-  };
-  el.settingsWidth.addEventListener('input', saveWidths);
-  el.dataWidth.addEventListener('input', saveWidths);
-  window.addEventListener('pointerup', () => { if (settingsWidthCustomized) saveWidths(); });
+    refreshEvaluationWindow(); resultsWindow.focus();
+  });
+  new MutationObserver(refreshEvaluationWindow).observe($('evaluationResultsSource'), {subtree:true, childList:true, characterData:true, attributes:true});
+  new MutationObserver(refreshEvaluationWindow).observe(el.casEvaluationStatus, {subtree:true, childList:true, characterData:true});
+  window.addEventListener('mcq-language-change', refreshEvaluationWindow);
 })();

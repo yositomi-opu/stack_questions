@@ -256,3 +256,25 @@ console.log('Passed: scalar/list CASText editing, mixed elements, opaque list va
 
 assert.equal(context.convertConstantChoiceBuilder('makelist(sconcat("A", "B"), k, 1, 3)'), 'makelist(castext("AB"), k, 1, 3)');
 assert.equal(context.convertConstantChoiceBuilder('makelist(sconcat("A", tex2(k)), k, 1, 3)'), 'makelist(sconcat("A", tex2(k)), k, 1, 3)');
+
+// v0.8 UI policy ignores old opt-out settings while retaining legacy parsers.
+el.castextTemplate = vm.runInContext('({' + source.match(/castextTemplate: (\{ get checked\(\)[^\n]+),/)[0] + '})', context).castextTemplate;
+el.xmlFilename=field();
+context.applyRecords(records.map(r=>r[0]==='config' && r[1]==='castext_template' ? ['config','castext_template','false'] : r));
+assert.equal(el.castextTemplate.checked,true);
+context.resetCsvImportState();assert.equal(el.castextTemplate.checked,true);
+context.applyRecords(records);
+el.questionId.value='ABCxyz';state.mode='rb';el.radioMultiplePrompt.checked=false;
+context.syncXmlFilename();assert.equal(el.xmlFilename.value,'001.ABCxyz-rb.xml');
+el.radioMultiplePrompt.checked=true;context.syncXmlFilename();assert.equal(el.xmlFilename.value,'001.ABCxyz-rb2.xml');
+state.mode='cb';context.syncXmlFilename();assert.equal(el.xmlFilename.value,'001.ABCxyz-cb.xml');
+state.xmlFilename='custom.xml';context.syncXmlFilename();assert.equal(el.xmlFilename.value,'custom.xml');
+const nameCsv=context.currentCsvRecords('ABCxyz');
+context.applyRecords(nameCsv);assert.equal(state.xmlFilename,'custom.xml');
+const nameXml=context.generateXml();context.importXmlText(nameXml);assert.equal(state.xmlFilename,'custom.xml');
+assert.ok(nameXml.includes('mcq_template_pre_cas.mac'));
+assert.equal(context.baseTitle('001.ABCxyz-rb2.xml'),'ABCxyz');
+context.resetCsvImportState();assert.equal(state.xmlFilename,'');assert.equal(el.xmlFilename.value,'');
+assert.equal(context.normalizedXmlFilename('notes'),'notes.xml');
+assert.equal(context.normalizedXmlFilename('../custom.xml'),'custom.xml');
+console.log('Passed: v0.8 CASText default, legacy opt-out import, rb/rb2/cb names, manual filename CSV/XML persistence and clear.');

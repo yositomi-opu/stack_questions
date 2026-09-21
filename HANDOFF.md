@@ -13,6 +13,12 @@
 
 ## 直近の変更と決定事項
 
+- WebApp v0.8（開発版、1.0正式リリース予定）へ画面再構成。版情報に2026-09-21 17:42 JSTを表示。左右分割・幅設定／保存処理・CASText切替checkbox・API動作確認UI／フロントのcheck/test呼出しを削除。CASText設定は互換import用アクセサで常時true（旧false設定を受けても無効化しない）。旧形式パーサとサーバーAPIは維持、プレビューは継続。問題文はCASText本文に統一し旧CAS変換UIを撤去。
+- 縦順: 問題変数→include設定→選択肢設定→補助パラメータ→問題文→選択肢データ→多言語対応。include設定は広い画面1行／狭い画面で折返し。上部のCSV前に「クリア」。Title／XML保存名を約6:4配置、タイトル・形式変更で001.Title-(cb|rb|rb2).xmlへ更新、手動名はCSV xml_filename・XML編集メタデータへ保存。クリア時に削除。rb2接尾辞の読込・出力対応。
+- 評価横「評価結果」で名前付き別windowを開き、結果・ログを安全なDOM複製で表示、更新追従・再利用・閉じる・popup拒否案内あり。日本語／英語、READMEを更新。
+- 検証: node scripts/tests/{test_editor_metadata,test_results_window,test_variant_parameters,test_casttext_migration,test_choice_capacity,test_import_evaluation,test_translation_cas,test_legacy_xml_import,test_pair_swap}.cjsの9件成功。editor_metadataに常時CASText／旧false読込／rb2名／手動名CSV・XML往復／クリア追加、results_windowは生成・更新・再利用・閉じる・拒否を検証。JS構文、git diff --check成功。
+- ブラウザ実確認: 日本語／英語、1280px／760px配置（include2行）、タイトル変更とrb2／cb自動名、手動名入力、Maximaでaa:3評価成功、CASTextプレビューに2選択肢表示成功。別window操作はin-appブラウザで一覧に取得できず、結果window自体の実表示／実closeは未確認（制御は単体テスト）。既存4173サーバーを利用し再起動せず。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。利用者ファイルmcq_readme.txtは未変更。
+
 - CASText版の選択肢表示を文字列／CAS式／リストへ整理。静的castext・変換可能sconcat等を本文へ、直接記述リストの文字列／castextを本文、数式要素を{@式@}へ正規化。XML出力時はリスト文字列要素を個別castext化。FBも変換可能sconcatを本文へ、型の表示名を文字列へ統一。通常版の変換動作は維持。
 - リスト変数・makelistのUI表示はCAS式、内部list_exprとCSV cas_listを保持して多候補の生成・容量判定を維持。ローカルqvarsの単純リスト代入／別名参照も認識、循環参照防止。makelist本文が定数文字列のsconcatならcastext化。ループ変数依存式や参照先のqvars定義は安全を保証できないため書換えず、編集者確認とする。外部includeのみで型が不明の場合は既存リスト指定が必要。日英ヘルプ・README・キャッシュ更新。
 - 検証: node scripts/tests/test_editor_metadata.cjs（単体／混在リスト、変数／別名／循環、makelist、冪等性、CSV/XML往復追加）、test_choice_capacity.cjs、test_import_evaluation.cjs、test_legacy_xml_import.cjs、test_translation_cas.cjs、test_casttext_migration.cjs、test_variant_parameters.cjs成功。app.js／i18n.js構文、git diff --check成功。実ブラウザ／STACK API未確認。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
