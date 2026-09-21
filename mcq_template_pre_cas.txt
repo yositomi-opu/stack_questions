@@ -24,6 +24,48 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
 
+/* MCQ_CASTEXTP_BEGIN
+ * Conservative structural predicate for evaluated CASText values (STACK 2026062900).
+ * Strings count as CASText-compatible: their origin cannot be recovered.
+ * Recognises %root, smlt and %cs/commonstring; compiled lang/if blocks reduce
+ * to their selected contents. Unknown/extension blocks return false.
+ * This is not proof that castext() produced the value, nor an HTML validator.
+ * A manually constructed list with the same structure is indistinguishable.
+ * Examples: mcq_castextp(castext("abc")) = true;
+ *           mcq_castextp(castext("Value {@2+3@}")) = true;
+ *           mcq_castextp(["abc", "def"]) = false.
+ * Keep candidate-list wrapping explicit; do not use this to change MCQ types.
+ */
+mcq_castextp(x):=block([tag,n,k,valid:true],
+ if stringp(x) then return(true),
+ if not listp(x) then return(false),
+ n:length(x),
+ if n=0 then return(false),
+ tag:first(x),
+ if not stringp(tag) then return(false),
+ if tag="%root" then (
+   for k:2 thru n do if not mcq_castextp(x[k]) then valid:false,
+   return(valid)
+ ),
+ if tag="smlt" then (
+   if n<2 or n>3 then return(false),
+   if not stringp(x[2]) then return(false),
+   if n=3 then return(member(x[3],["0","1"])),
+   return(true)
+ ),
+ if member(tag,["%cs","commonstring"]) then (
+   if n<2 or mod(n,2)#0 then return(false),
+   if not stringp(x[2]) then return(false),
+   for k:3 step 2 thru n do (
+     if not stringp(x[k]) then valid:false,
+     if not mcq_castextp(x[k+1]) then valid:false
+   ),
+   return(valid)
+ ),
+ return(false)
+);
+/* MCQ_CASTEXTP_END */
+
 /* only castext case definitions : assumed list of languages */
 %__mcq_lang_list:["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"];
 

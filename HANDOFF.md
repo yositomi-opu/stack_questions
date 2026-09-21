@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-21
+更新日: 2026-09-22
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,9 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- `mcq_template_pre_cas.txt` に `mcq_castextp(x)` の保守的な実装例を追加し、`make mcq_template_pre_cas.mac` で生成。文字列、再帰的な%root、smlt、%cs/commonstringの構造を判定。lang/ifは評価後の内容で判定。拡張・未知ブロックはfalse。CASText由来の証明やHTML検証ではなく、同形の手作りリストと区別不能。制約・使用例をソースコメントに明記。既存の選択肢処理には接続していない。
+- 検証: 稼働中STACK 2026062900のstackstrings.mac／CASText processorと各ブロックを参照。`node scripts/tests/test_mcq_castextp.cjs request`でリクエストを作成し、ローカル `/api/stack/preview` にcurl POST、`node scripts/tests/test_mcq_castextp.cjs response <応答JSON>`で27ケース成功。文字列・埋込数式・行列入りCASText・lang/if/commonstring・空root・不正構造・通常リスト／行列／未定義変数を含む。`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py` 5件、`git diff --check`成功。生成.macと.txtのコメント除去後一致を確認。実ブラウザ操作は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 
 - 独立ページ `app/mcq-webapp/castext-viewer.html` と専用JS/CSSを追加。既存 `/api/stack/preview` とconfig.jsを利用し、MCQテンプレート不要の最小XMLで変数定義・最大30式を評価。描画・HTMLエスケープしたstring内部表現・listp/stringpを並記。内部表現にはMathJaxを適用しない。CASTextのリストは通常のSTACK埋め込み結果を表示し、要素描画は添字式で確認する仕様。
 - 日英UI、11描画言語、seed、式追加削除、見本、クリア、専用localStorage復元、90秒タイムアウト、編集時の旧結果非表示、APIエラーログを実装。結果は既存preview同様のsandbox iframeとCSP内に表示。対話型図は対象外。READMEにアクセス先・書式・制約を追記。既存MCQ編集画面・サーバー・テンプレートは変更なし。

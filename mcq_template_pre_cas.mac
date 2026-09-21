@@ -25,6 +25,37 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
 
 
+mcq_castextp(x):=block([tag,n,k,valid:true],
+ if stringp(x) then return(true),
+ if not listp(x) then return(false),
+ n:length(x),
+ if n=0 then return(false),
+ tag:first(x),
+ if not stringp(tag) then return(false),
+ if tag="%root" then (
+   for k:2 thru n do if not mcq_castextp(x[k]) then valid:false,
+   return(valid)
+ ),
+ if tag="smlt" then (
+   if n<2 or n>3 then return(false),
+   if not stringp(x[2]) then return(false),
+   if n=3 then return(member(x[3],["0","1"])),
+   return(true)
+ ),
+ if member(tag,["%cs","commonstring"]) then (
+   if n<2 or mod(n,2)#0 then return(false),
+   if not stringp(x[2]) then return(false),
+   for k:3 step 2 thru n do (
+     if not stringp(x[k]) then valid:false,
+     if not mcq_castextp(x[k+1]) then valid:false
+   ),
+   return(valid)
+ ),
+ return(false)
+);
+
+
+
 %__mcq_lang_list:["en", "ja", "fr", "it", "de", "pt", "zh", "ko", "ru", "sv", "es"];
 
 
