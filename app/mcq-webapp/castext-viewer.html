@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CASText Viewer</title>
+<link rel="stylesheet" href="./castext-viewer.css">
+<script defer src="./config.js"></script>
+<script defer src="./castext-viewer.js"></script>
+</head>
+<body><main>
+<header><h1>CASText Viewer</h1><nav><a href="./" data-ja="問題編集へ" data-en="Question editor">問題編集へ</a><select id="ui-language" aria-label="Interface language"><option value="ja">日本語</option><option value="en">English</option></select></nav></header>
+<p data-ja="変数や関数を定義し、確認する式を入力してください。STACKによる描画と内部の値を比較できます。" data-en="Define variables and functions, then enter expressions to compare STACK rendering with internal values."></p>
+<section><h2 data-ja="変数・関数定義" data-en="Variables and functions"></h2>
+<textarea id="variables" rows="7" spellcheck="false" aria-label="Variables and functions"></textarea>
+<p class="hint" data-ja='Maximaの書式で記述し、各文を ; で終えてください。castext("…") 内で数式の区切りを書くときは \\( … \\) を使います。' data-en='Use Maxima syntax and end each statement with ;. Inside castext("…"), write math delimiters as \\( … \\).'></p></section>
+<section><h2 data-ja="確認する式" data-en="Expressions"></h2><div id="expressions"></div><button id="add" data-ja="＋ 式を追加" data-en="＋ Add expression"></button></section>
+<div class="controls"><label><span data-ja="描画言語" data-en="Render language"></span> <select id="language" aria-label="Render language"></select></label><label><span data-ja="乱数の種" data-en="Seed"></span> <input id="seed" type="number" min="1" max="2147483647" value="1"></label><button id="run" class="primary" data-ja="実行" data-en="Run"></button><button id="sample" data-ja="見本" data-en="Example"></button><button id="clear" data-ja="クリア" data-en="Clear"></button></div>
+<p id="status" role="status" aria-live="polite"></p>
+<details id="error" hidden><summary data-ja="エラーログ" data-en="Error log"></summary><pre id="error-text"></pre></details>
+<section id="results" hidden><h2 data-ja="評価結果" data-en="Results"></h2><p class="hint" data-ja="CASText自体も内部ではリストになる場合があります。listpだけで選択肢リストと区別しないでください。内部表現は数式として描画せず、そのまま表示します。" data-en="CASText may itself be represented as a list. listp alone cannot distinguish it from a list of choices. Internal representations are shown without math rendering."></p><iframe id="output" sandbox="allow-same-origin" title="CASText results"></iframe></section>
+</main></body></html>

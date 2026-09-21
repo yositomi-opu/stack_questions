@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {buildDefinition}=require('../../app/mcq-webapp/castext-viewer.js');
+const xml=buildDefinition('a:3;\nct:castext("値 {@a@}");',['ct','listp(ct);','[ct, castext("abc")]','"<b>&</b>"']);
+assert.ok(xml.includes('cvprobev1:(listp(ct));'));
+assert.ok(xml.includes('&lt;b&gt;&amp;&lt;/b&gt;'));
+assert.ok(xml.includes('string(listp(cvprobev0))'));
+assert.ok(xml.includes('&amp;lt;'));
+assert.ok(!xml.includes('stack_include'));
+assert.throws(()=>buildDefinition('',[]));
+assert.throws(()=>buildDefinition('',[' ' ]));
+assert.throws(()=>buildDefinition('',['1'],'bad:name'));
+if(process.env.CASTEXT_VIEWER_REQUEST)fs.writeFileSync(process.env.CASTEXT_VIEWER_REQUEST,JSON.stringify({url:'http://127.0.0.1:3080',questionDefinition:xml,seed:1,lang:'en'}));
+console.log('Passed: independent viewer XML, expression delimiters, HTML/XML escaping, list diagnostics and validation.');

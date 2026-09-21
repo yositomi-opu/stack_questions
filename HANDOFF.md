@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- 独立ページ `app/mcq-webapp/castext-viewer.html` と専用JS/CSSを追加。既存 `/api/stack/preview` とconfig.jsを利用し、MCQテンプレート不要の最小XMLで変数定義・最大30式を評価。描画・HTMLエスケープしたstring内部表現・listp/stringpを並記。内部表現にはMathJaxを適用しない。CASTextのリストは通常のSTACK埋め込み結果を表示し、要素描画は添字式で確認する仕様。
+- 日英UI、11描画言語、seed、式追加削除、見本、クリア、専用localStorage復元、90秒タイムアウト、編集時の旧結果非表示、APIエラーログを実装。結果は既存preview同様のsandbox iframeとCSP内に表示。対話型図は対象外。READMEにアクセス先・書式・制約を追記。既存MCQ編集画面・サーバー・テンプレートは変更なし。
+- 検証: `node scripts/tests/test_castext_viewer.cjs`（独立XML・終端・エスケープ・型判定・不正入力）と `node --check app/mcq-webapp/castext-viewer.js`、`git diff --check` 成功。テストの `CASTEXT_VIEWER_REQUEST` 出力をローカル `/api/stack/preview` にcurl POSTし、CASText内部リスト、true/false、HTML文字列のrawエスケープを確認。実ブラウザで見本の数式・行列・内部表現・型判定、構文エラーログ、日英切替、入力復元、幅560pxを確認。最終版をreloadして再評価成功。言語ごとの翻訳ブロックとseed別乱数の実確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - 一対モードのXMLを、パターンIDごとのoptC/optW/msgC/msgW変数へ言語連想配列を定義して%__mcq_lang(...,%_STACK_LANG)で選ぶ形式へ変更。source/feedback配列には変数参照のみ、単独候補は[optC1]、候補リストはoptC2で保持。抽出・PRT引渡しロジックは維持。固定モードの生成は変更なし。問題変数／補助パラメータの同名トップレベル定義は上書きせず日英で通知。README・キャッシュ更新。
 - namedChoiceAssociationで生成参照だけを解決し、旧インポート形式へ一時展開。本文中のユーザーCAS変数は解決しない。新旧のsourceL形式、metadata有無、include、直接編集、単体／リスト、多言語の往復を維持。
 - 検証: node scripts/tests/test_editor_metadata.cjs（名前付き定義・配列参照・直編集優先・旧sourceL読込・衝突検出を追加）、test_variant_parameters.cjs、test_choice_capacity.cjs、test_import_evaluation.cjs、test_translation_cas.cjs、test_legacy_xml_import.cjs成功。JS構文／git diff --check成功。ローカルSTACK API previewで15文脈から5候補・文脈重複なし・正解2、gradeでscore1とC15/C6の対応FB・errors/fverrors空を確認。実ブラウザ編集操作は未確認。追加のローカルSTACK API previewでlistp(castext("abc"))はfalse、listp(castext("a={@2+3@}"))はtrueを確認。単独候補を明示的にリストで包み、postの言語連想配列用変数とは分ける設計を維持する。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
