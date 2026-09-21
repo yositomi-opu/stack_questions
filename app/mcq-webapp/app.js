@@ -1097,6 +1097,50 @@ function fixedPatternInput(group) {
   return patternNumberSelect(group.rows, patternLimit(group.truth));
 }
 
+function casExpressionToEditorText(expression) {
+  const code = String(expression).trim().replace(/[;$]\s*$/, "");
+  if (!code) return "";
+  const literal = restoreEditorLiteral(code);
+  if (literal !== null) return literal.replace(/\{@([\s\S]*?)@\}/g, (block, body) => {
+    const wrapper = body.trim().match(/^(tex1|tex2)\s*\(([\s\S]*)\)$/);
+    if (!wrapper || !casttextKnownWrapper(wrapper[1])) return block;
+    try {
+      const args = casttextExpressionParts(wrapper[2]);
+      return args.length === 1 && args[0] ? `{@${args[0]}@}` : block;
+    } catch { return block; }
+  });
+  const call = code.match(/^(sconcat|tex1|tex2|tex2L|stack_disp)\s*\(([\s\S]*)\)$/);
+  if (!call || !casttextKnownWrapper(call[1])) return null;
+  try { casttextExpressionParts(call[2]); } catch { return null; }
+  return legacyQuestionCasttext(code, true);
+}
+
+// Convert the whole group first, so a failure never leaves half-converted rows.
+function changeRowValueType(rows, field, lang, type) {
+  const converted = [];
+  for (const row of rows) {
+    let value = row[`${field}_${lang}`] || "";
+    if (type === "text" && row[`${field}_type_${lang}`] === "cas" && value.trim()) {
+      value = row[`${field}_list_expr_${lang}`] ? null : casExpressionToEditorText(value);
+      if (value === null) {
+        window.mcqNotice?.(uiText("この式は文字列へ安全に変換できません。元の式と入力形式を保持しました。"));
+        return false;
+      }
+      converted.push([row, value]);
+    }
+  }
+  converted.forEach(([row, value]) => { row[`${field}_${lang}`] = value; });
+  rows.forEach(row => {
+    row[`${field}_type_${lang}`] = type === "text" ? "text" : "cas";
+    if (field === "choice") row[`choice_list_expr_${lang}`] = type === "cas_list";
+  });
+  if (converted.length && !el.castextTemplate.checked) {
+    el.castextTemplate.checked = true;
+    window.mcqNotice?.(uiText("CASText版を有効にしました。フィードバックも確認し、必要に応じてCASText形式に変換してください。"));
+  }
+  return true;
+}
+
 function fixedChoicesTextarea(group) {
   const typeKey = `choice_type_${baseLang()}`;
   const editor = document.createElement("div");
@@ -1123,15 +1167,14 @@ function fixedChoicesTextarea(group) {
     updateOutput();
   });
   mode.addEventListener("change", () => {
-    group.rows.forEach((row) => {
-      row[typeKey] = mode.value === "text" ? "text" : "cas";
-      row[`choice_list_expr_${baseLang()}`] = mode.value === "cas_list";
-    });
+    if (!changeRowValueType(group.rows, "choice", baseLang(), mode.value)) { mode.value = choiceValueType(sourceRow, baseLang()); return; }
+    textarea.value = group.rows.map(row => row[`choice_${baseLang()}`] || "").join("\n");
     editor.classList.toggle("cas", mode.value !== "text");
     badge.hidden = mode.value === "text";
     markCasEvaluationStale();
     markTranslationsStale("選択肢の入力形式が変更されました");
     updateOutput();
+    renderRows();
   });
   editor.classList.toggle("cas", mode.value !== "text");
   const controls = document.createElement("div");
@@ -1239,10 +1282,12 @@ function fixedFeedbackTextarea(group) {
     updateOutput();
   });
   mode.addEventListener("change", () => {
-    group.rows.forEach((row) => { row[typeKey] = mode.value; });
+    if (!changeRowValueType(group.rows, "feedback", baseLang(), mode.value)) { mode.value = group.rows.find(row => row[typeKey])?.[typeKey] || "text"; return; }
+    textarea.value = group.rows.find(row => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
     editor.classList.toggle("cas", mode.value === "cas");
     markTranslationsStale("フィードバックの入力形式が変更されました");
     updateOutput();
+    renderRows();
   });
   editor.classList.toggle("cas", mode.value === "cas");
   const independent = languageIndependentToggle(group.rows, () => {
@@ -1345,13 +1390,14 @@ function typedTextareaInput(row, index, field) {
   const textarea = textareaInput(row, index, `${field}_${lang}`);
   const badge = casEvaluationBadge([choiceEvaluationId(index, lang)], mode.value !== "text");
   mode.addEventListener("change", () => {
-    state.rows[index][modeKey] = mode.value === "text" ? "text" : "cas";
-    state.rows[index][`${field}_list_expr_${lang}`] = mode.value === "cas_list";
+    if (!changeRowValueType([state.rows[index]], field, lang, mode.value)) { mode.value = choiceValueType(row, lang); return; }
+    textarea.value = state.rows[index][`${field}_${lang}`] || "";
     editor.classList.toggle("cas", mode.value !== "text");
     badge.hidden = mode.value === "text";
     markCasEvaluationStale();
     markTranslationsStale("選択肢の入力形式が変更されました");
     updateOutput();
+    renderRows();
   });
   editor.classList.toggle("cas", mode.value !== "text");
   const controls = document.createElement("div");
@@ -1404,11 +1450,13 @@ function feedbackTextarea(row, index) {
   mode.dataset.feedbackGroup = key;
   mode.disabled = textarea.disabled;
   mode.addEventListener("change", () => {
-    groupRows.forEach((candidate) => { candidate[typeKey] = mode.value; });
-    mirrorFeedbackEditors(key, undefined, mode.value);
+    if (!changeRowValueType(groupRows, "feedback", baseLang(), mode.value)) { mode.value = sourceWithType?.[typeKey] || "text"; return; }
+    textarea.value = groupRows.find(candidate => String(candidate[feedbackKey] || "").trim())?.[feedbackKey] || "";
+    mirrorFeedbackEditors(key, textarea.value, mode.value);
     editor.classList.toggle("cas", mode.value === "cas");
     markTranslationsStale("フィードバックの入力形式が変更されました");
     updateOutput();
+    renderRows();
   });
   editor.classList.toggle("cas", mode.value === "cas");
   const patternToggle = feedbackModeToggle(row, index);
@@ -2135,7 +2183,7 @@ function casttextKnownWrapper(name) {
   });
 }
 
-function legacyQuestionCasttext(expression) {
+function legacyQuestionCasttext(expression, convertBareTex1 = false) {
   const code = String(expression).trim().replace(/[;$]\s*$/, "");
   if (!code) return "";
   const embed = value => `{@ssubst(%__SELPROMPT, "__SELPROMPT__", ssubst(%__SELTYPE, "__SELTYPE__", sconcat(${value})))@}`;
@@ -2146,14 +2194,14 @@ function legacyQuestionCasttext(expression) {
   };
   const append = (value, depth = 0) => {
     if (depth > 100) throw new Error("Expression nesting limit");
-    const literal = casttextSourceString(value);
+    const literal = restoreEditorLiteral(value);
     if (literal !== null) { result += literal; return; }
     if (["__SELTYPE__", "__SELPROMPT__"].includes(value)) { result += value; return; }
     const call = value.match(/^(sconcat|tex2|tex1|tex2L|stack_disp)\s*\(([\s\S]*)\)$/);
     if (call && casttextKnownWrapper(call[1])) {
       const args = casttextExpressionParts(call[2]);
       if (call[1] === "sconcat") { args.filter(Boolean).forEach(arg => append(arg, depth + 1)); return; }
-      if (call[1] === "tex2" && args.length === 1 || call[1] === "tex1" && args.length === 1 && inMath()
+      if (call[1] === "tex2" && args.length === 1 || call[1] === "tex1" && args.length === 1 && (inMath() || convertBareTex1)
           || call[1] === "stack_disp" && args.length === 2 && ["i", ""].includes(casttextSourceString(args[1])) && (casttextSourceString(args[1]) === "i" || inMath())) {
         result += `{@${args[0]}@}`; return;
       }
@@ -2227,6 +2275,17 @@ function syncCastextQuestionInputs() {
 }
 
 function changeQuestionValueType(lang, type) {
+  if (state.questionTypes[lang] === "cas" && type !== "cas") {
+    const converted = casExpressionToEditorText(el.questions[lang].value);
+    if (converted === null) {
+      el.questionModes[lang].value = "cas";
+      window.mcqNotice?.(uiText("この式は文字列へ安全に変換できません。元の式と入力形式を保持しました。"));
+      return;
+    }
+    el.questions[lang].value = converted;
+    type = "castext";
+    el.questionModes[lang].value = type;
+  }
   state.questionTypes[lang] = type;
   delete state.legacyQuestionInputs?.[lang];
   el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", type === "cas");

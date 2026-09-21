@@ -16,6 +16,7 @@
     "パターン番号がテンプレートの上限を超えています。": "The pattern number exceeds the template capacity.",
     "一対モードの選択肢数はパターン数以下にしてください。": "In paired mode, the number of choices must not exceed the number of patterns.",
     "各パターンの正解・不正解に少なくとも1候補が必要です。": "Each pattern needs at least one correct and one incorrect candidate.",
+    "この式は文字列へ安全に変換できません。元の式と入力形式を保持しました。": "This expression cannot be safely converted to text. The original expression and input type have been kept.",
     "XML本文と編集形式が一致しない項目は、式を保持して読み込みました。": "Some editing formats did not match the XML definitions. Those expressions were preserved as written.",
     "問題文・選択肢・フィードバックをXML本文から読み込みました。": "Question text, choices, and feedback have been loaded from the XML definitions.",
     "XML本文の問題文を解析できません。メタデータとの差分を確認してください。": "Cannot parse the XML question text. Check its differences from the editing metadata.",

@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-20
+更新日: 2026-09-21
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,9 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 選択肢／FBの一対・固定UIと問題文のCAS→文字列変更に変換処理を接続。静的castextをデコード、既知sconcat/tex1/tex2等をCASText本文へ変換。CASText内の単純な{@tex1/tex2(...)@}も埋め込みへ戻すが文章中の関数名は保持。複数行は原子的に変換、CASリスト／未知の外側式・動的castextは型と本文を保持して日英通知。変換時に通常版ならCASText版を自動オン、表示を再描画。既存の自動移行はtex1の数式内限定規則を維持し、手動変換のみ数式外も対象。README・キャッシュ更新。
+- 検証: test_editor_metadata.cjsに提示例・エスケープ・tex1/tex2・選択肢／FBの変換・CSV/XML保持・失敗時の非変更・自動CASTextオン追加。保存時の既存先頭末尾空白除去は維持。test_variant_parameters.cjs、test_casttext_migration.cjs、JS構文・git diff --check確認。実ブラウザ操作／STACK API評価は今回未実施。commit/push未実施。
 
 - 通常版001.MCQ-rb/cb.xmlのPRTパターン判定ノード2以降をCASText版と同じC15＋W15に拡張（特殊処理2を含め32ノード）。利用者が先にステージしたmax_cp/wp=15を維持。通常版のノード0/1の言語ブロック・文字列msg表示・mcq_template_fvar.mac参照は保持し、noidea表示の変数名だけ欠落していた%を補正。ルート→アプリ静的コピーをsync_mcq_templates.pyで同期。現在は両版とも上限15/15、README更新。
 - 検証: node scripts/tests/test_variant_parameters.cjs（上限テストもテンプレート値から取得）、test_editor_metadata.cjs成功。PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.pyで5件成功（通常/CASノード2以降の全フィールド一致、32ノード、遷移先、通常版依存維持を追加）。git diff --check成功。実STACK API採点・ブラウザ操作は今回未実施。commit/push未実施。
