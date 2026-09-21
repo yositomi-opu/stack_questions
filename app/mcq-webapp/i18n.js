@@ -140,7 +140,7 @@
     "問題文の入力について": "About entering question text",
     "__SELTYPE__ は、上の選択肢設定に応じて「1つ選べ」「すべて選べ」、正解が複数あるRadio形式では「1つ選べ（正解が複数あっても1つでよい）」に置き換わります。": "__SELTYPE__ inserts “Choose”, “Choose all”, or “Choose one of the” according to the option settings. In Japanese, Radio questions with multiple correct options also explain that selecting one is enough.",
     "何を選ぶかは問題文に書きます。例：「間違っているものを __SELTYPE__。」「rankが1であるものを __SELTYPE__。」": "Write the selection criterion in the question text. For example: “__SELTYPE__ incorrect statements.” or “__SELTYPE__ matrices of rank 1.”",
-    "__SELPROMPT__ は「正しいものを1つ選べ。」などの指示文全体を挿入します。「正しいものを」を前に重ねないでください。": "__SELPROMPT__ inserts a complete instruction such as “Select the correct answer.” Do not repeat that instruction in the surrounding text.",
+    "__SELPROMPT__ は「正しいものを選べ」など、末尾の句読点を含まない指示文を挿入します。句読点は問題文側で付け、挿入位置は各言語の語順に合わせてください。「正しいものを」を前に重ねないでください。": "__SELPROMPT__ inserts an instruction such as “Select the correct answer” without terminal punctuation. Add punctuation in the question text and position the placeholder according to each language’s word order. Do not repeat the instruction in the surrounding text.",
     "どちらも使わず、自分で好きな指示文を書いても問題ありません。": "You can also leave out both placeholders and write your own instructions.",
     "左欄の幅を変更": "Resize left panel",
     "左右にドラッグして左欄の幅を変更": "Drag horizontally to resize the left panel",

@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- 通常版mcq_template_post.txtとCASText版mcq_template_pre_cas.txtのSELPROMPT ONE/ALL/ANY（各11言語）から末尾の句点・ピリオドのみ削除。文中カンマ・括弧・語順・SELTYPEは保持。make mcq_template_pre_cas.mac mcq_template_post.macで生成ファイルを更新。日英ヘルプ・READMEに句読点は問題文側で指定し、挿入位置は各言語の語順に合わせる旨を追記。既存問題文は一括変更していない。
+- 検証: 変更前後をPythonで比較し両版3モード×11言語の差分が末尾句読点のみ、定義外のコード不変を確認。PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（5件成功）、node --check app/mcq-webapp/i18n.js、git diff --check成功。実STACK API表示は未確認。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - WebApp v0.8（開発版、1.0正式リリース予定）へ画面再構成。版情報に2026-09-21 17:42 JSTを表示。左右分割・幅設定／保存処理・CASText切替checkbox・API動作確認UI／フロントのcheck/test呼出しを削除。CASText設定は互換import用アクセサで常時true（旧false設定を受けても無効化しない）。旧形式パーサとサーバーAPIは維持、プレビューは継続。問題文はCASText本文に統一し旧CAS変換UIを撤去。
 - 縦順: 問題変数→include設定→選択肢設定→補助パラメータ→問題文→選択肢データ→多言語対応。include設定は広い画面1行／狭い画面で折返し。上部のCSV前に「クリア」。Title／XML保存名を約6:4配置、タイトル・形式変更で001.Title-(cb|rb|rb2).xmlへ更新、手動名はCSV xml_filename・XML編集メタデータへ保存。クリア時に削除。rb2接尾辞の読込・出力対応。
 - 評価横「評価結果」で名前付き別windowを開き、結果・ログを安全なDOM複製で表示、更新追従・再利用・閉じる・popup拒否案内あり。日本語／英語、READMEを更新。
