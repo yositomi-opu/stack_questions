@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- 問題変数textareaの手動拡大でinclude設定に重なる不具合を修正。旧左右分割用qvars-fieldのflex:4 1 0／minmax(0,1fr)が親の高さを固定していたため、flex:0 0 auto／auto行に変更。textareaの高さ100%指定も撤去。CSSキャッシュ識別子更新。
+- 実ブラウザで修正前にtextarea高さ220→401pxでも次欄の位置が変わらないことを再現。修正後は同じドラッグでinclude欄が下がり、縮小時も上に戻り重ならないことをスクリーンショットで確認。修正後のDOM座標取得はブラウザツールがタイムアウトしたため目視確認。git diff --check成功。CSSのみの修正でデータ処理の変更なし。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - 通常版mcq_template_post.txtとCASText版mcq_template_pre_cas.txtのSELPROMPT ONE/ALL/ANY（各11言語）から末尾の句点・ピリオドのみ削除。文中カンマ・括弧・語順・SELTYPEは保持。make mcq_template_pre_cas.mac mcq_template_post.macで生成ファイルを更新。日英ヘルプ・READMEに句読点は問題文側で指定し、挿入位置は各言語の語順に合わせる旨を追記。既存問題文は一括変更していない。
 - 検証: 変更前後をPythonで比較し両版3モード×11言語の差分が末尾句読点のみ、定義外のコード不変を確認。PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py（5件成功）、node --check app/mcq-webapp/i18n.js、git diff --check成功。実STACK API表示は未確認。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 

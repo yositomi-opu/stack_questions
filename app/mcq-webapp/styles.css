@@ -450,9 +450,9 @@ h3 {
 }
 
 .qvars-field {
-  flex: 4 1 0;
-  min-height: 260px;
-  grid-template-rows: auto minmax(0, 1fr);
+  flex: 0 0 auto;
+  min-height: 0;
+  grid-template-rows: auto auto;
   align-content: start;
 }
 
@@ -463,7 +463,7 @@ h3 {
 }
 
 .qvars-field textarea {
-  height: 100%;
+  height: auto;
   min-height: 240px;
   resize: vertical;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
