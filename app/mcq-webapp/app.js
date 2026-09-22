@@ -4081,7 +4081,18 @@ function currentCsvRecords(title) {
       records.push([name,item.listExpression?"list":item.type==="cas"?"cas":"string",label,item.value]);
     }
   }
-  return records;
+  // Keep settings and question variables in their existing order; group editable
+  // choices and feedback by numeric pattern, preserving each item's candidate order.
+  const header = [];
+  const patterns = [];
+  for (const record of records) {
+    const match = record[0].match(/^(option|feedback)(\d+)([CW])?$/);
+    if (!match) header.push(record);
+    else patterns.push({ record, pattern: Number(match[2]),
+      order: (match[1] === "option" ? 0 : 2) + (match[3] === "W" ? 1 : 0) });
+  }
+  patterns.sort((a, b) => a.pattern - b.pattern || a.order - b.order);
+  return header.concat(patterns.map(item => item.record));
 }
 
 function csvSettingsAndFeedbackRecords(title) {

@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-22
+更新日: 2026-09-23
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,9 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- CSV保存時、設定・問題文・問題変数の後に、数値パターン順でoptionNC→optionNW→feedbackNC/feedbackNW（共通はfeedbackN）をまとめる。各項目内の候補・言語順と候補IDは保持。読込仕様・schema番号は変更しない。README・schema文書更新。アプリ表示をv0.81（開発版）に更新し、日英表記・更新日時・JSキャッシュを更新。
+- 検証: `node scripts/tests/test_csv_schema_v3.cjs`成功（1/2/10の数値順、共通／個別FB、複数候補と言語対応、qvar順序、保存→読込→保存の完全一致を追加）。`node scripts/tests/test_editor_metadata.cjs`、`node --check app/mcq-webapp/app.js`、`node --check app/mcq-webapp/i18n.js`、`git diff --check`成功。実ブラウザ確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。利用者のmcq_readme.txtは未変更。
 
 - CSVのTitle設定を正式に `config,title,...` へ変更。旧question_id/idを互換読込し、併記時は行順によらずtitle優先。保存・生成見本はtitleを使用。内部DOM/メタデータのquestionIdは互換性のため維持。XML問題名は既存の001.(Title)-(cb/rb/rb2)、保存ファイル名の初期値も従来どおり。rk2等はTitleへ手動追加し、補助パラメータから自動命名しない。schema文書・README・キャッシュ更新（READMEの保存schema2という残存記述も修正）。
 - 検証: node scripts/tests/test_csv_schema_v3.cjsにtitle/旧alias読込・title優先・保存・接頭辞/接尾辞除去・XML問題名を追加して成功。test_editor_metadata.cjs、node --check app/mcq-webapp/app.js、git diff --check成功。今回実ブラウザ確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。

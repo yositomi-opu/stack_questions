@@ -26,7 +26,7 @@
     "補助パラメータの入力について": "About auxiliary parameters",
     "多言語対応": "Multilingual support",
     "多言語対応について": "About multilingual support",
-    "バージョン0.8（開発版）": "Version 0.8 (development release)",
+    "バージョン0.81（開発版）": "Version 0.81 (development release)",
     "1.0を正式リリースとする予定です。": "Version 1.0 is planned as the first official release.",
     "評価結果のウィンドウを開けませんでした。ポップアップを許可してください。": "Could not open the results window. Please allow pop-ups.",
     "STACKの問題文と同じCASText書式で入力してください。文章・HTML・LaTeX・{@a@}・ブロック構文が使えます。外側の引用符やcastext()は不要です。": "Use STACK question CASText syntax: text, HTML, LaTeX, {@a@}, and blocks. Do not add outer quotes or castext().",

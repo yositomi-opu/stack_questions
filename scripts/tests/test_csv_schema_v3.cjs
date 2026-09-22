@@ -96,3 +96,30 @@ for(const configs of [
  [['config','id','Old'],['config','title','Chosen']]
 ]) {context.applyRecords(records.concat(configs));assert.equal(el.questionId.value,'Chosen');}
 console.log('Passed: title persistence, legacy aliases, precedence, normalized names and XML question title.');
+// Export numeric patterns together, preserving multilingual candidates and qvar order.
+for (const paired of [false, true]) {
+ const input = records.filter(r => !/^feedback/.test(r[0])).concat([
+  ['config','require_pairs',String(paired)],
+  ['config','feedback_by_truth','false'],
+  ['qvar','cas','n/a','b:a+1;'],
+  ...[10,2].flatMap(n => [
+   [`option${n}W`,'string','n/a',`wrong${n}`],
+   [`option${n}C`,'string','n/a',`correct${n}`]
+  ]),
+  ...[10,1,2].flatMap(n => paired
+   ? [[`feedback${n}`,'string','ja',`shared${n}`]]
+   : [[`feedback${n}W`,'string','ja',`wrong feedback${n}`],
+      [`feedback${n}C`,'string','ja',`correct feedback${n}`]])
+ ]);
+ context.applyRecords(input);
+ const ordered = context.currentCsvRecords('ordered');
+ const names = [...new Set(Array.from(ordered.filter(r=>/^(option|feedback)/.test(r[0])), r=>r[0]))];
+ assert.deepEqual(names,[1,2,10].flatMap(n=>[
+  `option${n}C`,`option${n}W`,...(paired?[`feedback${n}`]:[`feedback${n}C`,`feedback${n}W`])
+ ]));
+ assert.deepEqual(Array.from(ordered.filter(r=>r[0]==='qvar'),r=>r[3]),['a:3;','b:a+1;']);
+ assert.deepEqual(Array.from(ordered.filter(r=>r[0]==='option1C'),r=>r[2]),['en_01','ja_01','en_02','ja_02']);
+ context.applyRecords(ordered);
+ assert.deepEqual(JSON.parse(JSON.stringify(context.currentCsvRecords('ordered'))),JSON.parse(JSON.stringify(ordered)));
+}
+console.log('Passed: numeric pattern grouping, shared/separate feedback, candidate/language and qvar order, CSV roundtrip.');
