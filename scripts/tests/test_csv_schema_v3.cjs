@@ -82,3 +82,17 @@ context.applyRecords([['config','csv_schema','3'],['option1C','string','n/a1','A
 saved=context.currentCsvRecords('independent');assert.deepEqual(Array.from(saved.filter(r=>r[0]==='option1C'),r=>r[2]),['n/a_01','n/a_02']);
 const payload=context.translationPayload();assert.equal(payload.rows[0].id,'option1C_1');
 console.log('Passed: actual XML translation guard, paired candidate identity roundtrip, n/a suffixes and stable translation IDs.');
+// Formal title key, legacy aliases, precedence independent of config order.
+for(const key of ['title','question_id','id']) {
+ context.applyRecords(records.concat([['config',key,'001.Example-rk2-cb.xml']]));
+ assert.equal(el.questionId.value,'Example-rk2');
+ const csv=context.currentCsvRecords(el.questionId.value);
+ assert.equal(csv.find(r=>r[1]==='title')[2],'Example-rk2');
+ assert.ok(!csv.some(r=>['question_id','id'].includes(r[1])));
+ assert.ok(context.generateXml().includes('<text>001.Example-rk2-cb</text>'));
+}
+for(const configs of [
+ [['config','title','Chosen'],['config','question_id','Old']],
+ [['config','id','Old'],['config','title','Chosen']]
+]) {context.applyRecords(records.concat(configs));assert.equal(el.questionId.value,'Chosen');}
+console.log('Passed: title persistence, legacy aliases, precedence, normalized names and XML question title.');

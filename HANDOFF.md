@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- CSVのTitle設定を正式に `config,title,...` へ変更。旧question_id/idを互換読込し、併記時は行順によらずtitle優先。保存・生成見本はtitleを使用。内部DOM/メタデータのquestionIdは互換性のため維持。XML問題名は既存の001.(Title)-(cb/rb/rb2)、保存ファイル名の初期値も従来どおり。rk2等はTitleへ手動追加し、補助パラメータから自動命名しない。schema文書・README・キャッシュ更新（READMEの保存schema2という残存記述も修正）。
+- 検証: node scripts/tests/test_csv_schema_v3.cjsにtitle/旧alias読込・title優先・保存・接頭辞/接尾辞除去・XML問題名を追加して成功。test_editor_metadata.cjs、node --check app/mcq-webapp/app.js、git diff --check成功。今回実ブラウザ確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - CSV/XLSX schema 3を確定し`app/mcq-webapp/CSV_SCHEMA_V3.md`を追加。正式な候補識別子ja_01/en_01/n/a_01（最低2桁、欠番維持）、ja01/ja1等は読込正規化。重複は元の最大番号＋1へ警告付き再採番。同一候補の言語対応を行順とは別に保持。CSVは編集標準、XLSXは同一セル構成で読込、出力はCSV。旧アプリによる新schema読込は保証しない。
 - 保存schema 3、list出力／旧cas_list読込、未知schema拒否。旧casの静的CASText・文字列・変換可能sconcatをstringへ移行。新cas/listはverbatimフラグで自動変換・自動翻訳を除外。旧言語別のCAS/listは警告して言語コードと式を保持。旧listは分解せず保持する互換例外。手動CAS/list選択時は既存の異なる言語値がなければ言語非依存へ設定。CSVは未翻訳も候補番号と空欄を保持して途中保存可能、保存時に通知。XMLは翻訳不足を拒否。翻訳JSONのidをoption+候補番号へ変更し、旧行番号idも互換読込。
 - 一対／通常モードともopt1C・msg1C等の段階で言語を選び、%__CoptL1/%__Cmsg1等には選択済みの値を渡す。複数行はopt1C_1等から候補リストを構成し、単体・候補リスト・CASText内部構造を混同しない。生成変数名衝突を検出。新旧XMLの参照解決、固定モード生成範囲マーカー、複数string候補の編集ヒントと番号復元を追加。本文直編集を優先する既存方針を維持。README・日英通知・JSキャッシュ更新。

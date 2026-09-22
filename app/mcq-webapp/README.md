@@ -254,9 +254,9 @@ stack_include("https://example.org/001/GaussElimMatrixGivenRank-A.txt");
 
 ## CSV / XLSX 形式
 
-ヘッダーは付けず、`config`行は従来どおり「項目、値」の3列、データ行は「項目、型、言語、値」の4列で記述します。新規保存では`csv_schema=2`を出力しますが、従来形式のCSVも読み込めます。
+ヘッダーは付けず、`config`行は従来どおり「項目、値」の3列、データ行は「項目、型、言語、値」の4列で記述します。新規保存では`csv_schema=3`を出力しますが、従来形式のCSVも読み込めます。
 
-現在の保存形式は **schema 3** です。[CSV/XLSX仕様](CSV_SCHEMA_V3.md)を参照してください。選択肢の型は `string`・`list`・互換用の`cas`、複数string候補は `ja_01`・`en_01`・`n/a_01` 等で識別します。未翻訳でもCSVは途中保存でき、XML生成時に不足を確認します。以下は旧schema 2の読込互換仕様と記述例です。
+現在の保存形式は **schema 3** です。Titleは `config,title,MCQ_sample` で指定し、旧 `question_id`・`id` は互換読込できます。併記時は `title` が優先され、保存時も `title` に統一します。補助パラメータ由来の `rk2` 等は必要に応じてTitleへ手動で加えます。[CSV/XLSX仕様](CSV_SCHEMA_V3.md)を参照してください。選択肢の型は `string`・`list`・互換用の`cas`、複数string候補は `ja_01`・`en_01`・`n/a_01` 等で識別します。未翻訳でもCSVは途中保存でき、XML生成時に不足を確認します。以下は旧schema 2の読込互換仕様と記述例です。
 
 ```csv
 config,csv_schema,2

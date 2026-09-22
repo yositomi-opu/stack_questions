@@ -10,6 +10,12 @@ CSVを編集用の標準交換形式とし、XLSXは同じ行・列・セル値�
 
 第1列は項目、第2列は型、第3列は言語または候補識別子、第4列は値です。カンマ・改行・引用符を含むCSVセルは二重引用符で囲み、セル内部の二重引用符は二重にします。XLSXセルにはCSV用の引用符を付けません。既存のconfig・qvar・qtextL・feedbackの役割は維持します。
 
+## TitleとXML問題名
+
+画面のTitleは `config,title,GaussElimMatrixGivenRank-A-rk2` のように指定します。旧 `question_id`・`id` も互換読込しますが、保存は `title` に統一します。併記されている場合は行順によらず `title` を優先します。
+
+Titleの先頭に `001.` や末尾に `-cb`・`-rb`・`-rb2`、拡張子を書く必要はありません。旧データに含まれる場合は読込時に除去します。XMLの問題名（`name/text`）は従来どおり `001.(Title)-(cb/rb/rb2)`、保存ファイル名の初期値はその末尾に `.xml` を付けたものです。補助パラメータからの自動命名は行いません。必要なら `%_rk:2` に対応する `rk2` 等をTitleに手動で加えてください。
+
 ## 選択肢の型
 
 CSVの `option1C` とXMLの `opt1C` は同じ選択肢グループを表します。`option1W` は同じパターンの不正解グループです。
@@ -55,6 +61,7 @@ listはリストリテラル、問題変数に定義された変数、makelist�
 
 ```csv
 config,csv_schema,3
+config,title,MCQ_sample
 config,base_language,ja
 config,languages,"ja,en"
 option1C,string,ja_01,"説明{@a@}"

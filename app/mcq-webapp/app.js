@@ -3538,7 +3538,9 @@ function parseDelimited(text, delimiter) {
 }
 
 function applyRecords(records) {
-  const meaningful = records.filter((record) => record.some((value) => String(value).trim()));
+  let meaningful = records.filter((record) => record.some((value) => String(value).trim()));
+  const hasTitle = meaningful.some(record => csvRecordKind(record) === "config" && String(record[1] || "").trim().toLowerCase() === "title");
+  if (hasTitle) meaningful = meaningful.filter(record => !(csvRecordKind(record) === "config" && ["question_id", "id"].includes(String(record[1] || "").trim().toLowerCase())));
   const version = meaningful.find((record) =>
     csvRecordKind(record) === "config" && String(record[1] || "").trim().toLowerCase() === "csv_schema"
   )?.[2];
@@ -3985,7 +3987,7 @@ function applyConfig(key, value) {
     el.scoringMethod.value = value;
   }
   if (key === "parameters") el.parameters.value = cleanParameterStatements(value);
-  if (key === "question_id" || key === "id") el.questionId.value = baseTitle(value);
+  if (["title", "question_id", "id"].includes(key)) el.questionId.value = baseTitle(value);
   if (key === "mode") setMode(value.toLowerCase().startsWith("c") ? "cb" : "rb");
   if (key === "num_options") el.numOptions.value = value;
   if (key === "num_correct") el.numCorrect.value = value;
@@ -4008,7 +4010,7 @@ function applyConfig(key, value) {
 function downloadSampleCsv() {
   const records = [
     ["config", "csv_schema", "2"],
-    ["config", "question_id", "000.sample-mcq"],
+    ["config", "title", "sample-mcq"],
     ["config", "mode", state.mode],
     ["config", "num_options", "2"],
     ["config", "num_correct", "1"],
@@ -4085,7 +4087,7 @@ function currentCsvRecords(title) {
 function csvSettingsAndFeedbackRecords(title) {
   const records = [
     ["config", "csv_schema", "3"],
-    ["config", "question_id", title],
+    ["config", "title", title],
     ["config", "mode", state.mode],
     ["config", "num_options", el.numOptions.value],
     ["config", "num_correct", el.numCorrect.value],
