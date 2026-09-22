@@ -3,6 +3,15 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "候補の翻訳が不足しています": "A candidate translation is missing",
+    "未対応のCSV schemaです": "Unsupported CSV schema",
+    "不正な言語・候補識別子です": "Invalid language or candidate identifier",
+    "候補番号は正の整数にしてください": "Candidate IDs must be positive integers",
+    "旧CAS式の言語情報を保持しました。自動翻訳の対象外です": "Legacy CAS language variants were preserved and excluded from automatic translation",
+    "候補番号を自動割当しました。翻訳の対応を確認してください": "Candidate ID assigned automatically. Check translation correspondence",
+    "翻訳が不足しています。CSVは途中保存できます。次回、多言語展開を補ってください": "Translations are incomplete. CSV can be saved now; complete the translations later",
+    "選択肢の変数参照が循環しています": "Cyclic option variable references",
+    "生成する選択肢・フィードバックの変数名が問題変数と重複しています": "Generated option or feedback variable names conflict with question variables",
     "評価順は「選択肢設定 → 補助パラメータ → 問題変数」です。選択肢数や採点方式は選択肢設定、問題ごとに変える値は補助パラメータ、共通の計算は問題変数に設定します。": "Evaluation order is choice settings → parameters → question variables. Set option counts and scoring in choice settings, variant-specific values in parameters, and shared calculations in question variables.",
     "「評価」で現在の設定を使って計算し、別ウィンドウの評価結果に変数の値やリストの長さを表示します。設定を変更したら再評価してください。": "Evaluate question variables uses the current settings and shows variable values and list lengths in the results in the results window. Evaluate again after changing settings.",
     "オンにすると、XMLは問題変数の別ファイルをstack_includeで読み込みます。共通の問題変数を使い、補助パラメータだけを変えた問題を作るときに便利です。": "When enabled, the XML loads question variables from a separate file with stack_include. This is useful for sharing question variables across questions with different parameters.",

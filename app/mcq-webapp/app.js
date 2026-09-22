@@ -1007,6 +1007,12 @@ function changeRowValueType(rows, field, lang, type) {
   }
   converted.forEach(([row, value]) => { row[`${field}_${lang}`] = value; });
   rows.forEach(row => {
+    row[`${field}_verbatim`] = type !== "text";
+    if(type!=="text") {
+      const variants=activeLangs().filter(other=>other!==lang).map(other=>String(row[`${field}_${other}`]||"").trim()).filter(Boolean);
+      if(!variants.length || variants.every(value=>value===String(row[`${field}_${lang}`]||"").trim()))row[`${field}_language_independent`]=true;
+      else window.mcqNotice?.(uiText("旧CAS式の言語情報を保持しました。自動翻訳の対象外です"));
+    }
     row[`${field}_type_${lang}`] = type === "text" ? "text" : "cas";
     if (field === "choice") row[`choice_list_expr_${lang}`] = type === "cas_list"
       || (type === "cas" && el.castextTemplate.checked && (knownChoiceList(row[`choice_${lang}`])
@@ -1185,7 +1191,7 @@ function convertConstantChoiceBuilder(expression) {
 function normalizeChoiceCasttext(rows = state.rows) {
   if (!el.castextTemplate.checked) return;
   for (const row of rows) for (const lang of LANGS) {
-    if (row[`choice_type_${lang}`] !== "cas") continue;
+    if (row.choice_verbatim || row[`choice_type_${lang}`] !== "cas") continue;
     const value = row[`choice_${lang}`] || "";
     const items = literalChoiceElements(value);
     if (items !== null) {
@@ -1222,7 +1228,7 @@ function compileLiteralChoiceList(expression) {
 function normalizeFeedbackCasttext(rows = state.rows) {
   if (!el.castextTemplate.checked) return;
   for (const row of rows) for (const lang of LANGS) {
-    if (row[`feedback_type_${lang}`] !== "cas") continue;
+    if (row.feedback_verbatim || row[`feedback_type_${lang}`] !== "cas") continue;
     const code = String(row[`feedback_${lang}`] || "").trim().replace(/[;$]\s*$/, "");
     const text = casExpressionToEditorText(code);
     if (text === null) continue;
@@ -1695,6 +1701,7 @@ function previewQuestionSnapshot() {
 }
 
 function generateVariableBlock(includePreamble = true) {
+  ensureCandidateIds();
   if (state.rows.some(row => !Number.isInteger(Number(row.pattern)) || Number(row.pattern) < 1 || Number(row.pattern) > patternLimit(normalizeTruth(row.truth)))) {
     throw new Error(uiText("パターン番号がテンプレートの上限を超えています。"));
   }
@@ -1826,6 +1833,9 @@ function editorMetadataComment() {
     groups.forEach((pattern, index) => {
       options[`option${index + 1}${truth}`] = pattern[truth].map(row => ({
         pattern: row.pattern,
+        candidate_id: row.candidate_id || "",
+        choice_verbatim: Boolean(row.choice_verbatim),
+        feedback_verbatim: Boolean(row.feedback_verbatim),
         choice_language_independent: Boolean(row.choice_language_independent),
         feedback_language_independent: Boolean(row.feedback_language_independent),
         feedback_by_truth: Boolean(row.feedback_by_truth),
@@ -1867,13 +1877,28 @@ function restoreEditorLiteral(value) {
 }
 
 function restoreEditorFormats(metadata, variables = "") {
+  state.rows=state.rows.flatMap(row=>{
+    const hints=metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    if(!Array.isArray(hints)||hints.length<2)return [row];
+    const values=Object.fromEntries(activeLangs().map(lang=>[lang,literalChoiceElements(row[`choice_${lang}`])]));
+    if(!Object.values(values).every(items=>items?.length===hints.length))return [row];
+    return hints.map((hint,index)=>{
+      const copy={...row,_editorHint:hint};
+      for(const lang of activeLangs()) copy[`choice_${lang}`]=hint.languages?.[lang]?.input_type==="cas_list"?values[lang][index]:`[${values[lang][index]}]`;
+      return copy;
+    });
+  });
   let fallback = false;
   for (const row of state.rows) {
-    const hints = metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    const hints = row._editorHint ? [row._editorHint] : metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    delete row._editorHint;
     // A single CSV source can be restored without guessing how a concatenation
     // was divided between several editor rows. Keep complex sources intact.
     if (!Array.isArray(hints) || hints.length !== 1) { fallback = true; continue; }
     const hint = hints[0];
+    row.candidate_id = hint.candidate_id || "";
+    row.choice_verbatim = Boolean(hint.choice_verbatim);
+    row.feedback_verbatim = Boolean(hint.feedback_verbatim);
     for (const lang of activeLangs()) {
       const types = hint.languages?.[lang];
       if (!types) continue;
@@ -1954,6 +1979,57 @@ function decodeAppMetadata(value) {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+function appendNamedPattern(lines, pattern, truth, feedbackTruth = truth) {
+  const rows = pattern[truth], name=`opt${Number(pattern.id)}${truth}`, message=`msg${Number(pattern.id)}${truth}`;
+  const refs=[];
+  for(const [index,row] of rows.entries()) {
+    const variable=rows.length===1?name:`${name}_${row.candidate_id || index+1}`;
+    const langs=row.choice_language_independent?[baseLang()]:activeLangs();
+    const isList=langs.some(lang=>row[`choice_list_expr_${lang}`]);
+    const valueFor=lang=>{
+      const item=localizedTyped(row,"choice",lang);
+      return item.type==="cas"?maximaTypedValue(item):el.castextTemplate.checked?casttextLiteral(item.value):maximaString(item.value);
+    };
+    const value=row.choice_language_independent?valueFor(baseLang()):`%__mcq_lang(${maximaAssociation(langs.map(lang=>`["${lang}", ${valueFor(lang)}]`))}, %_STACK_LANG)`;
+    lines.push(`${variable}:${value};`);
+    refs.push(isList?variable:`[${variable}]`);
+  }
+  const scalar=rows.length===1 && !activeLangs().some(lang=>rows[0][`choice_list_expr_${lang}`]);
+  if(rows.length>1)lines.push(`${name}:${refs.every(ref=>/^\[[^\]]+\]$/.test(ref))?`[${refs.map(ref=>ref.slice(1,-1)).join(", ")}]`:`append(${refs.join(", ")})`};`);
+  const messages=maximaAssociation(activeLangs().map(lang=>`["${lang}", ${maximaTypedValue(localizedFeedbackTyped(pattern,lang,feedbackTruth))}]`));
+  lines.push(`${message}:%__mcq_lang(${messages}, %_STACK_LANG);`);
+  return {option:scalar?`[${name}]`:name,message};
+}
+
+function resolveGeneratedChoice(expression, sources, lang, seen = new Set()) {
+  const code=String(expression||"").trim();
+  if(/^(?:opt|msg)(?:[CW]\d+|\d+[CW])(?:_\d+)?$/.test(code) && sources.has(code)) {
+    if(seen.has(code))throw new Error(uiText("選択肢の変数参照が循環しています"));
+    return resolveGeneratedChoice(sources.get(code),sources,lang,new Set([...seen,code]));
+  }
+  if(/^%__mcq_lang\s*\(/.test(code)) {
+    const assoc=extractLanguageAssociation(code);
+    const node=assoc?.get(lang)||assoc?.get("en")||assoc?.values().next().value;
+    if(!node)throw new Error(uiText("選択肢の多言語連想配列を解析できません"));
+    return node.kind==="string"?maximaString(node.value):resolveGeneratedChoice(node.value,sources,lang,seen);
+  }
+  if(!/(?:opt|msg)(?:[CW]\d+|\d+[CW])(?:_\d+)?/.test(code))return code;
+  const items=literalChoiceElements(code);
+  if(items)return `[${items.map(item=>resolveGeneratedChoice(item,sources,lang,seen)).join(", ")}]`;
+  if(/^append\s*\(/.test(code)) {
+    const parts=casttextExpressionParts(code.slice(code.indexOf("(")+1,-1)).map(part=>resolveGeneratedChoice(part,sources,lang,seen));
+    const lists=parts.map(literalChoiceElements);
+    return lists.every(Boolean)?`[${lists.flat().join(", ")}]`:`append(${parts.join(", ")})`;
+  }
+  return code;
+}
+
+function generatedChoiceLanguages(sources) {
+  const langs=new Set();
+  for(const [name,value] of sources)if(/^(opt|msg)/.test(name) && /^%__mcq_lang\s*\(/.test(value))for(const lang of extractLanguageAssociation(value)?.keys()||[])langs.add(lang);
+  return langs.size?[...langs]:[baseLang()];
+}
+
 function generatePairedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
   if (numOptions > patterns.length) throw new Error(uiText("一対モードの選択肢数はパターン数以下にしてください。"));
   patterns.forEach(pattern => {
@@ -1961,7 +2037,7 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
     if (!patternChoiceCapacity(pattern, "C") || !patternChoiceCapacity(pattern, "W")) throw new Error(uiText("各パターンの正解・不正解に少なくとも1候補が必要です。"));
   });
   const generatedNames = new Set(patterns.flatMap(pattern => ["C", "W"].flatMap(truth =>
-    [`opt${truth}${Number(pattern.id)}`, `msg${truth}${Number(pattern.id)}`])));
+    [`opt${Number(pattern.id)}${truth}`, `msg${Number(pattern.id)}${truth}`, ...pattern[truth].map((row,index)=>`opt${Number(pattern.id)}${truth}_${row.candidate_id || index+1}`)])));
   const declarations = splitMaximaStatements(stripMaximaComments(`${el.qvars.value}\n${el.parameters.value}`)).map(parseMaximaAssignment).filter(Boolean);
   if (declarations.some(item => generatedNames.has(item.name))) throw new Error(uiText("問題変数または補助パラメータに、生成するoptC・optW・msgC・msgWの変数名と重複する定義があります。名前を変更してください。"));
   const lines = [...baseVariableLines(numOptions, counts, includePreamble), "/* MCQ_CHOICES_BEGIN */"];
@@ -1970,22 +2046,9 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
   for (const truth of ["C", "W"]) {
     const refs = [], messageRefs = [];
     for (const pattern of patterns) {
-      const suffix = `${truth}${Number(pattern.id)}`;
-      const optionName = `opt${suffix}`, messageName = `msg${suffix}`;
-      const rows = pattern[truth];
-      const scalar = rows.length === 1 && activeLangs().every(lang =>
-        !localizedTyped(rows[0], "choice", rows[0].choice_language_independent ? baseLang() : lang).listExpression);
-      const options = maximaAssociation(activeLangs().map(lang => {
-        const items = rows.map(row => localizedTyped(row, "choice", row.choice_language_independent ? baseLang() : lang)).filter(item => item.value);
-        const list = maximaChoiceList(items);
-        const value = scalar ? literalChoiceElements(list)[0] || '""' : list;
-        return `["${lang}", ${value}]`;
-      }));
-      const messages = maximaAssociation(activeLangs().map(lang =>
-        `["${lang}", ${maximaTypedValue(localizedFeedbackTyped(pattern, lang, patternFeedbackSeparate(pattern.id) ? truth : null))}]`));
-      lines.push(`${optionName}:%__mcq_lang(${options}, %_STACK_LANG);`, `${messageName}:%__mcq_lang(${messages}, %_STACK_LANG);`);
-      refs.push(scalar ? `[${optionName}]` : optionName);
-      messageRefs.push(messageName);
+      const generated=appendNamedPattern(lines,pattern,truth,patternFeedbackSeparate(pattern.id)?truth:null);
+      refs.push(generated.option);
+      messageRefs.push(generated.message);
     }
     const count = `%__mcq_num_${truth.toLowerCase()}patterns`;
     const position = truth === "C" ? "k" : "k+%__mcq_num_cpatterns";
@@ -2005,25 +2068,7 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
 function namedChoiceAssociation(sources, truth, kind) {
   const refs = literalChoiceElements(sources.get(`%__mcq_${truth}${kind}`));
   if (!refs) return null;
-  const definitions = refs.map(ref => {
-    const wrapped = literalChoiceElements(ref);
-    const name = wrapped?.length === 1 ? wrapped[0] : ref;
-    if (!new RegExp(`^${kind === "source" ? "opt" : "msg"}${truth}\\d+$`).test(name)) return null;
-    const expression = sources.get(name) || "";
-    if (!/^%__mcq_lang\s*\(/.test(expression)) return null;
-    const assoc = extractLanguageAssociation(expression);
-    return assoc ? { assoc, wrapped: wrapped !== null } : null;
-  });
-  if (definitions.some(item => !item)) return null;
-  const languages = [...new Set(definitions.flatMap(item => [...item.assoc.keys()]))];
-  return new Map(languages.map(lang => {
-    const values = definitions.map(({assoc, wrapped}) => {
-      const node = assoc.get(lang) || assoc.get("en") || assoc.values().next().value;
-      const value = node.kind === "string" ? maximaString(node.value) : node.value;
-      return wrapped ? `[${value}]` : value;
-    });
-    return [lang, {kind: "raw", value: `[${values.join(", ")}]`}];
-  }));
+  return new Map(generatedChoiceLanguages(sources).map(lang=>[lang,{kind:"raw",value:`[${refs.map(ref=>resolveGeneratedChoice(ref,sources,lang)).join(", ")}]`}]));
 }
 
 // Adapt compact source tables to the legacy importer without evaluating Maxima.
@@ -2031,6 +2076,14 @@ function namedChoiceAssociation(sources, truth, kind) {
 function expandCompactChoices(variables) {
   const assignments = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(Boolean);
   const sources = new Map(assignments.map(item => [item.name, item.expression]));
+  if(variables.includes("/* MCQ_FIXED_CHOICES_BEGIN */")) {
+    const lines=[];
+    for(const [name,value] of sources)if(/^%__[CW](optL|msg)\d+$/.test(name)) {
+      const assoc=maximaAssociation(generatedChoiceLanguages(sources).map(lang=>`["${lang}", ${resolveGeneratedChoice(value,sources,lang)}]`));
+      lines.push(`${name}L:${assoc};`);
+    }
+    return variables.replace(/\/\* MCQ_FIXED_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_FIXED_CHOICES_END \*\//,lines.join("\n"));
+  }
   const named = ["C", "W"].every(truth => literalChoiceElements(sources.get(`%__mcq_${truth}source`)) !== null);
   if (!named && (!sources.has("%__mcq_CsourceL") || !sources.has("%__mcq_WsourceL"))) return variables;
   const lines = [];
@@ -2061,22 +2114,19 @@ function generateFixedVariableBlock(patterns, numOptions, counts, includePreambl
   const lines = [
     ...baseVariableLines(numOptions, counts, includePreamble),
     "/* Fixed true/false patterns (pair requirement disabled). */",
+    "/* MCQ_FIXED_CHOICES_BEGIN */",
     "",
   ];
   correct.forEach((pattern, index) => appendFixedPattern(lines, "C", index + 1, pattern));
   wrong.forEach((pattern, index) => appendFixedPattern(lines, "W", index + 1, pattern));
+  lines.push("/* MCQ_FIXED_CHOICES_END */");
   lines.push("/**************** End of generated variables ****************/");
   return lines.join("\n");
 }
 
 function appendFixedPattern(lines, truth, slot, pattern) {
-  const independent = pattern[truth].length > 0 && pattern[truth].every((row) => row.choice_language_independent);
-  const optName = truth === "C" ? `%__CoptL${slot}${independent ? "" : "L"}` : `%__WoptL${slot}${independent ? "" : "L"}`;
-  const msgName = truth === "C" ? `%__Cmsg${slot}L` : `%__Wmsg${slot}L`;
-  const rows = pattern[truth];
-  lines.push(`${optName}:${independent ? independentChoicesValue(rows) : choicesLangAssoc(rows)};`);
-  lines.push(`${msgName}:${fixedFeedbackAssoc(rows)};`);
-  lines.push("");
+  const generated=appendNamedPattern(lines,pattern,truth);
+  lines.push(`%__${truth}optL${slot}:${generated.option};`, `%__${truth}msg${slot}:${generated.message};`);
 }
 
 function independentChoicesValue(rows) {
@@ -2100,6 +2150,7 @@ function fixedFeedbackAssoc(rows) {
       return [lang, feedbackOutputValue({
         value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
         type: exact?.[`feedback_type_${sourceLang}`] || "text",
+    verbatim: Boolean(exact?.feedback_verbatim),
       })];
     }),
     "string"
@@ -2123,6 +2174,7 @@ function localizedTyped(row, field, lang) {
     value: localized(row, field, lang),
     type: row[`${field}_type_${lang}`] || "text",
     listExpression: Boolean(row[`${field}_list_expr_${lang}`]),
+    verbatim: Boolean(row[`${field}_verbatim`]),
   };
 }
 
@@ -2140,6 +2192,7 @@ function localizedFeedbackTyped(pattern, lang, truth = null) {
   return feedbackOutputValue({
     value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
     type: exact?.[`feedback_type_${sourceLang}`] || "text",
+    verbatim: Boolean(exact?.feedback_verbatim),
   });
 }
 
@@ -2317,6 +2370,7 @@ function changeQuestionValueType(lang, type) {
 }
 
 function feedbackOutputValue(item) {
+  if (item.verbatim) return item;
   if (!el.castextTemplate?.checked) return item;
   if (item.type !== "cas") return { value: casttextLiteral(item.value), type: "cas" };
   // Convert known legacy text builders; arbitrary CAS and existing castext()
@@ -2361,7 +2415,7 @@ function maximaAssoc(entries, type) {
 function maximaChoiceList(items) {
   if (el.castextTemplate?.checked) items = items.map(item => {
     if (item.type !== "cas") return { ...item, value: casttextLiteral(item.value), type: "cas" };
-    return item.listExpression ? { ...item, value: compileLiteralChoiceList(item.value) } : item;
+    return item.listExpression && !item.verbatim ? { ...item, value: compileLiteralChoiceList(item.value) } : item;
   });
   if (!items.some(item => item.listExpression)) return `[${items.map(maximaTypedValue).join(", ")}]`;
   // Join only the option-list layer. CASText objects (and list-valued choices)
@@ -2398,6 +2452,11 @@ function normalizedQvars() {
 }
 
 function validateTranslationCoverage() {
+  for(const row of state.rows) {
+    if(row.choice_language_independent || !row.candidate_id)continue;
+    if(!activeLangs().some(lang=>String(row[`choice_${lang}`]||"").trim()))continue;
+    for(const lang of activeLangs())if(!String(row[`choice_${lang}`]||"").trim())throw new Error(uiText("候補の翻訳が不足しています")+`: option${Number(row.pattern)}${row.truth} / ${lang}_${String(row.candidate_id).padStart(2,"0")}`);
+  }
   const source = baseLang();
   const targets = translationTargets();
   if (!targets.length) return;
@@ -2426,6 +2485,7 @@ function translationTargets() {
 }
 
 function translationPayload() {
+  ensureCandidateIds();
   const source = baseLang();
   const questionType = state.questionTypes[source] || "text";
   return {
@@ -2436,15 +2496,16 @@ function translationPayload() {
     question_type: questionType,
     question_text: !state.questionLanguageIndependent ? el.questions[source].value : null,
     rows: state.rows.map((row, index) => ({
-      id: String(index),
+      id: `option${Number(row.pattern)}${normalizeTruth(row.truth)}_${row.candidate_id || "0"}`,
+      candidate_id: row.candidate_id || "",
       pattern: String(row.pattern || ""),
       truth: normalizeTruth(row.truth),
       choice_type: row[`choice_type_${source}`] || "text",
-      choice: !row.choice_language_independent
+      choice: !row.choice_verbatim && !row.choice_language_independent
         ? String(row[`choice_${source}`] || "")
         : null,
       feedback_type: row[`feedback_type_${source}`] || "text",
-      feedback: !feedbackLanguageIndependent(row)
+      feedback: !row.feedback_verbatim && !feedbackLanguageIndependent(row)
         ? String(row[`feedback_${source}`] || "")
         : null,
     })),
@@ -2543,14 +2604,15 @@ function applyTranslationResult() {
       }
       if (Array.isArray(translation.rows)) {
         translation.rows.forEach((translatedRow) => {
-          const index = Number.parseInt(translatedRow.id, 10);
+          const id=String(translatedRow.id);
+          const index = /^\d+$/.test(id) ? Number(id) : state.rows.findIndex(row=>`option${Number(row.pattern)}${normalizeTruth(row.truth)}_${row.candidate_id || "0"}`===id);
           if (!state.rows[index]) return;
-          if (typeof translatedRow.choice === "string") {
+          if (!state.rows[index].choice_verbatim && typeof translatedRow.choice === "string") {
             state.rows[index][`choice_${lang}`] = translatedRow.choice;
             state.rows[index][`choice_type_${lang}`] = state.rows[index][`choice_type_${baseLang()}`] || "text";
             state.rows[index][`choice_list_expr_${lang}`] = Boolean(state.rows[index][`choice_list_expr_${baseLang()}`]);
           }
-          if (typeof translatedRow.feedback === "string") {
+          if (!state.rows[index].feedback_verbatim && typeof translatedRow.feedback === "string") {
             state.rows[index][`feedback_${lang}`] = translatedRow.feedback;
             state.rows[index][`feedback_type_${lang}`] = state.rows[index][`feedback_type_${baseLang()}`] || "text";
           }
@@ -3481,9 +3543,11 @@ function applyRecords(records) {
     csvRecordKind(record) === "config" && String(record[1] || "").trim().toLowerCase() === "csv_schema"
   )?.[2];
   const hasV2Record = meaningful.some((record) => /^(?:option|feedback)\d+[cw]?$/i.test(csvRecordKind(record)));
+  const schema = String(version || "").trim();
+  if (schema && !["1", "2", "3"].includes(schema)) throw new Error(uiText("未対応のCSV schemaです") + ": " + schema);
   resetCsvImportState();
-  return String(version || "").trim() === "2" || hasV2Record
-    ? applyCsvV2Records(meaningful)
+  return ["2", "3"].includes(schema) || hasV2Record
+    ? applyCsvV2Records(meaningful, schema === "3" ? 3 : 2)
     : applyLegacyRecords(meaningful);
 }
 
@@ -3562,8 +3626,9 @@ function resetCsvImportState() {
   el.feedbackByTruth.checked = false;
 }
 
-function applyCsvV2Records(records) {
+function applyCsvV2Records(records, schema = 2) {
   const warnings = [];
+  records = prepareCandidateRecords(records, schema, warnings);
   const rows = [];
   const qvars = [];
   const qtexts = new Map();
@@ -3580,7 +3645,7 @@ function applyCsvV2Records(records) {
   records.filter((record) => csvRecordKind(record) !== "config").forEach((record, recordIndex) => {
     const kind = csvRecordKind(record);
     const type = normalizeCsvValueType(record[1]);
-    const language = csvLanguage(record[2], recordIndex + 1);
+    const language = csvLanguage(record[2], recordIndex + 1, /^option\d+[cw]$/i.test(kind));
     const value = String(record.slice(3).join(",")).trim();
     const optionMatch = kind.match(/^option(\d+)([cw])$/i);
     const feedbackMatch = kind.match(/^feedback(\d+)([cw])?$/i);
@@ -3600,10 +3665,10 @@ function applyCsvV2Records(records) {
       const pattern = normalizePatternId(optionMatch[1]);
       const truth = optionMatch[2].toUpperCase();
       const lang = language.independent ? baseLang() : language.lang;
-      warnDuplicate(seen, `${kind}:${language.independent ? "n/a" : lang}`, warnings, recordIndex + 1);
-      let row = rows.find((item) => item.pattern === pattern && item.truth === truth);
+      let row = rows.find((item) => item.pattern === pattern && item.truth === truth && (item.candidate_id || "") === language.candidate);
+
       if (!row) {
-        row = { pattern, truth, feedback_by_truth: feedbackDefault === "true" };
+        row = { pattern, truth, candidate_id: language.candidate, feedback_by_truth: feedbackDefault === "true" };
         rows.push(row);
       }
       if (row.choice_language_independent !== undefined
@@ -3611,6 +3676,7 @@ function applyCsvV2Records(records) {
         throw new Error(`行 ${recordIndex + 1}: ${kind} に n/a と言語別の指定は混在できません`);
       }
       row.choice_language_independent = language.independent;
+      row.choice_verbatim = type !== "string";
       row[`choice_${lang}`] = value;
       row[`choice_type_${lang}`] = type === "string" ? "text" : "cas";
       row[`choice_list_expr_${lang}`] = type === "cas_list";
@@ -3628,6 +3694,7 @@ function applyCsvV2Records(records) {
         throw new Error(`行 ${recordIndex + 1}: ${kind} に n/a と言語別の指定は混在できません`);
       }
       entry.independent = language.independent;
+      entry.feedback_verbatim = type === "cas";
       entry[`feedback_${lang}`] = value;
       entry[`feedback_type_${lang}`] = type === "cas" ? "cas" : "text";
       if (!language.independent) el.languageChecks[lang].checked = true;
@@ -3641,14 +3708,19 @@ function applyCsvV2Records(records) {
   applyCsvV2Feedback(rows, feedback, feedbackDefault, warnings);
   applyImportedQuestionTexts(qtexts, warnings);
   finishRecordImport(rows, qvars);
-  return { warnings, schema: 2 };
+  if(schema < 3) {
+    for(const row of state.rows)for(const lang of activeLangs())if(row[`choice_type_${lang}`]==="cas" && knownChoiceList(row[`choice_${lang}`]))row[`choice_list_expr_${lang}`]=true;
+    updateCorrectCountControls();
+  }
+  warnings.push(...csvCoverageWarnings());
+  return { warnings, schema };
 }
 
 function normalizeCsvValueType(value) {
   const type = String(value || "").trim().toLowerCase();
   if (["text", "string", "文字列"].includes(type)) return "string";
   if (["cas", "expression", "式"].includes(type)) return "cas";
-  if (["cas_list", "caslist"].includes(type)) return "cas_list";
+  if (["list", "cas_list", "caslist"].includes(type)) return "cas_list";
   return type;
 }
 
@@ -3658,11 +3730,70 @@ function assertCsvType(kind, type, allowed, line) {
   }
 }
 
-function csvLanguage(value, line) {
-  const token = String(value || "").trim().toLowerCase();
-  if (!token || token === "n/a") return { independent: true, lang: baseLang() };
-  if (!LANGS.includes(token)) throw new Error(`行 ${line}: 未対応の言語 ${value}`);
-  return { independent: false, lang: token };
+function csvLanguage(value, line, candidates = false) {
+  const token = String(value || "n/a").trim().toLowerCase() || "n/a";
+  const match = token.match(/^(n\/a|[a-z]{2})(?:_?([0-9]+))?$/);
+  if (!match || (match[1] !== "n/a" && !LANGS.includes(match[1])) || (match[2] && !candidates)) throw new Error(uiText("不正な言語・候補識別子です") + `: ${value} (${line})`);
+  const number = match[2] ? Number(match[2]) : 0;
+  if (match[2] && (!Number.isSafeInteger(number) || number < 1)) throw new Error(uiText("候補番号は正の整数にしてください"));
+  return { independent: match[1] === "n/a", lang: match[1] === "n/a" ? baseLang() : match[1], candidate: number ? String(number) : "" };
+}
+
+// Migrate only legacy CAS literals. Never execute expressions to infer contents.
+function prepareCandidateRecords(records, schema, warnings) {
+  let prepared = records.map(record => [...record]);
+  if (schema < 3) prepared = prepared.flatMap(record => {
+    if (!/^(option|feedback)\d+[cw]?$/i.test(csvRecordKind(record))) return [record];
+    const type = normalizeCsvValueType(record[1]), value = record.slice(3).join(",");
+    if (type === "cas") {
+      const text = casExpressionToEditorText(value);
+      if (text !== null) return [[record[0], "string", record[2], text]];
+    }
+    return [record];
+  });
+  const groups = new Map();
+  for (const record of prepared) {
+    const kind = csvRecordKind(record), option = /^option\d+[cw]$/i.test(kind);
+    if (!option && !/^feedback\d+[cw]?$/i.test(kind)) continue;
+    const lang = csvLanguage(record[2], 0, option), type = normalizeCsvValueType(record[1]);
+    if (type !== "string" && !lang.independent) warnings.push(uiText("旧CAS式の言語情報を保持しました。自動翻訳の対象外です") + `: ${record[0]} / ${record[2]}`);
+    if (!option) continue;
+    if (!groups.has(kind)) groups.set(kind, []);
+    groups.get(kind).push({record, lang});
+  }
+  for (const entries of groups.values()) {
+    const reserved = entries.reduce((max, item) => Math.max(max, Number(item.lang.candidate)), 0);
+    const counts = new Map();
+    for (const {lang} of entries) { const key=lang.independent?"n/a":lang.lang; counts.set(key,(counts.get(key)||0)+1); }
+    const numbered = reserved > 0 || [...counts.values()].some(n=>n>1);
+    const used = new Map(), next = new Map();
+    for (const {record,lang} of entries) {
+      const key=lang.independent?"n/a":lang.lang;
+      if(!used.has(key)) {used.set(key,new Set());next.set(key,reserved+1);}
+      let id=lang.candidate;
+      if (!id && numbered) {id=String(next.get(key));next.set(key,Number(id)+1);}
+      if (used.get(key).has(id)) { id=String(next.get(key));next.set(key,Number(id)+1); }
+      if(id!==lang.candidate) warnings.push(uiText("候補番号を自動割当しました。翻訳の対応を確認してください")+`: ${record[0]} / ${record[2]} → ${key}_${String(id).padStart(2,"0")}`);
+      used.get(key).add(id);
+      record[2]=key+(id?"_"+String(id).padStart(2,"0"):"");
+    }
+  }
+  return prepared;
+}
+
+function ensureCandidateIds() {
+  const groups=new Map();
+  for(const row of state.rows){const key=`${row.pattern}:${row.truth}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
+  for(const rows of groups.values()) {
+    if(rows.length===1 && !rows[0].candidate_id)continue;
+    let max=Math.max(0,...rows.map(row=>Number(row.candidate_id)||0)); const seen=new Set();
+    for(const row of rows){if(!row.candidate_id||seen.has(row.candidate_id))row.candidate_id=String(++max);seen.add(row.candidate_id);}
+  }
+}
+
+function csvCoverageWarnings() {
+  try { validateTranslationCoverage(); return []; }
+  catch(error) { return [uiText("翻訳が不足しています。CSVは途中保存できます。次回、多言語展開を補ってください")+": "+error.message]; }
 }
 
 function warnDuplicate(seen, key, warnings, line) {
@@ -3925,17 +4056,35 @@ function downloadCurrentCsv() {
   if (!title) return;
   try {
     const records = currentCsvRecords(title);
+    const warnings = csvCoverageWarnings();
     const filename = `${title}.csv`;
     downloadText(filename, csvText(records), "text/csv;charset=utf-8");
-    setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
+    setStatus([`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`, ...warnings].join("\n"));
   } catch (error) {
     setStatus(`CSVを保存できません: ${error.message}`, true);
   }
 }
 
 function currentCsvRecords(title) {
+  ensureCandidateIds();
+  const records = csvSettingsAndFeedbackRecords(title);
+  for (const row of state.rows) {
+    const name=`option${csvPatternToken(row.pattern)}${normalizeTruth(row.truth)}`;
+    const langs=row.choice_language_independent?["n/a"]:activeLangs();
+    for(const token of langs) {
+      const lang=token==="n/a"?baseLang():token;
+      const item=localizedTyped(row,"choice",lang);
+      const label=token+(row.candidate_id?"_"+String(row.candidate_id).padStart(2,"0"):"");
+      // Keep explicit empty candidates, including incomplete translations.
+      records.push([name,item.listExpression?"list":item.type==="cas"?"cas":"string",label,item.value]);
+    }
+  }
+  return records;
+}
+
+function csvSettingsAndFeedbackRecords(title) {
   const records = [
-    ["config", "csv_schema", "2"],
+    ["config", "csv_schema", "3"],
     ["config", "question_id", title],
     ["config", "mode", state.mode],
     ["config", "num_options", el.numOptions.value],
@@ -3967,35 +4116,6 @@ function currentCsvRecords(title) {
     .map((expression) => String(expression).trim())
     .filter(Boolean)
     .forEach((expression) => records.push(["qvar", "cas", "n/a", expression]));
-
-  const optionGroups = new Map();
-  state.rows.forEach((row) => {
-    const key = `${String(row.pattern || "").trim()}:${normalizeTruth(row.truth)}`;
-    if (!optionGroups.has(key)) optionGroups.set(key, []);
-    optionGroups.get(key).push(row);
-  });
-  optionGroups.forEach((groupRows, key) => {
-    const [pattern, truth] = key.split(":");
-    const recordName = `option${csvPatternToken(pattern)}${truth}`;
-    const independent = groupRows.every((row) => row.choice_language_independent);
-    const languages = independent ? ["n/a"] : activeLangs();
-    languages.forEach((langToken) => {
-      const lang = langToken === "n/a" ? baseLang() : langToken;
-      const items = groupRows.map((row) => {
-        const sourceLang = row.choice_language_independent ? baseLang() : lang;
-        return localizedTyped(row, "choice", sourceLang);
-      }).filter((item) => item.value);
-      if (!items.length) {
-        if (lang === baseLang()) records.push([recordName, "string", langToken, ""]);
-        return;
-      }
-      if (items.length === 1) {
-        records.push([recordName, csvValueType(items[0].type, items[0].listExpression), langToken, items[0].value]);
-      } else {
-        records.push([recordName, "cas_list", langToken, maximaChoiceList(items)]);
-      }
-    });
-  });
 
   const writtenFeedback = new Set();
   state.rows.forEach((row) => {

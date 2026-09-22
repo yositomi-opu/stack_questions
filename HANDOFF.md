@@ -13,6 +13,11 @@
 
 ## 直近の変更と決定事項
 
+- CSV/XLSX schema 3を確定し`app/mcq-webapp/CSV_SCHEMA_V3.md`を追加。正式な候補識別子ja_01/en_01/n/a_01（最低2桁、欠番維持）、ja01/ja1等は読込正規化。重複は元の最大番号＋1へ警告付き再採番。同一候補の言語対応を行順とは別に保持。CSVは編集標準、XLSXは同一セル構成で読込、出力はCSV。旧アプリによる新schema読込は保証しない。
+- 保存schema 3、list出力／旧cas_list読込、未知schema拒否。旧casの静的CASText・文字列・変換可能sconcatをstringへ移行。新cas/listはverbatimフラグで自動変換・自動翻訳を除外。旧言語別のCAS/listは警告して言語コードと式を保持。旧listは分解せず保持する互換例外。手動CAS/list選択時は既存の異なる言語値がなければ言語非依存へ設定。CSVは未翻訳も候補番号と空欄を保持して途中保存可能、保存時に通知。XMLは翻訳不足を拒否。翻訳JSONのidをoption+候補番号へ変更し、旧行番号idも互換読込。
+- 一対／通常モードともopt1C・msg1C等の段階で言語を選び、%__CoptL1/%__Cmsg1等には選択済みの値を渡す。複数行はopt1C_1等から候補リストを構成し、単体・候補リスト・CASText内部構造を混同しない。生成変数名衝突を検出。新旧XMLの参照解決、固定モード生成範囲マーカー、複数string候補の編集ヒントと番号復元を追加。本文直編集を優先する既存方針を維持。README・日英通知・JSキャッシュ更新。
+- 検証: node scripts/tests/test_csv_schema_v3.cjs（別表記、重複max+1、未翻訳CSV往復/XML拒否、通常／一対XML候補ID往復、n/a番号、旧言語CAS、verbatim、翻訳ID）成功。test_editor_metadata.cjs（新変数名等へ期待値更新）、test_variant_parameters.cjs、test_choice_capacity.cjs、test_import_evaluation.cjs、test_translation_cas.cjs、test_legacy_xml_import.cjs、test_casttext_migration.cjs、test_pair_swap.cjs成功。app.js/i18n.js構文・git diff --check成功。MCQ_SCHEMA3_REQUEST付きテスト出力をローカルSTACK API previewへPOSTし、英語の問題文Chooseと候補Correct B/Wrongを確認。ブラウザで複数行編集→CSV表示がschema3、ja_01/ja_02となることを確認。新schemaのXLSX実ファイル読込と全11言語の実表示、今回の採点は未確認。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。利用者のmcq_readme.txtは未変更。
+
 - `mcq_template_pre_cas.txt` に `mcq_castextp(x)` の保守的な実装例を追加し、`make mcq_template_pre_cas.mac` で生成。文字列、再帰的な%root、smlt、%cs/commonstringの構造を判定。lang/ifは評価後の内容で判定。拡張・未知ブロックはfalse。CASText由来の証明やHTML検証ではなく、同形の手作りリストと区別不能。制約・使用例をソースコメントに明記。既存の選択肢処理には接続していない。
 - 検証: 稼働中STACK 2026062900のstackstrings.mac／CASText processorと各ブロックを参照。`node scripts/tests/test_mcq_castextp.cjs request`でリクエストを作成し、ローカル `/api/stack/preview` にcurl POST、`node scripts/tests/test_mcq_castextp.cjs response <応答JSON>`で27ケース成功。文字列・埋込数式・行列入りCASText・lang/if/commonstring・空root・不正構造・通常リスト／行列／未定義変数を含む。`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py` 5件、`git diff --check`成功。生成.macと.txtのコメント除去後一致を確認。実ブラウザ操作は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 

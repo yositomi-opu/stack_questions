@@ -159,6 +159,7 @@ assert.equal(context.casExpressionToEditorText('castext("値{@tex2(aa)@}と{@tex
 assert.equal(context.casExpressionToEditorText('castext("tex2(aa) は関数名です")'),'tex2(aa) は関数名です');
 assert.equal(context.casExpressionToEditorText('castext(dynamic_text)'),null);
 const row=state.rows.find(r=>r.pattern==='01' && r.truth==='W');
+row.choice_type_ja='cas';
 row.choice_ja='castext (" abc def{@aaa@} xyz")';
 assert.equal(context.changeRowValueType([row],'choice','ja','text'),true);
 assert.equal(row.choice_type_ja,'text');assert.equal(row.choice_ja,' abc def{@aaa@} xyz');
@@ -281,10 +282,10 @@ console.log('Passed: v0.8 CASText default, legacy opt-out import, rb/rb2/cb name
 
 context.applyRecords(records);
 const namedXml=context.generateXml();
-assert.ok(namedXml.includes('optC1:%__mcq_lang([["ja", castext("文章{@aa@}")]'));
-assert.ok(namedXml.includes('msgC1:%__mcq_lang([["ja", castext("正解{@aa@}")]'));
-assert.ok(namedXml.includes('%__mcq_Csource:[[optC1], optC2];'));
-assert.ok(namedXml.includes('%__mcq_Cfeedback:[msgC1, msgC2];'));
+assert.ok(namedXml.includes('opt1C:%__mcq_lang([["ja", castext("文章{@aa@}")]'));
+assert.ok(namedXml.includes('msg1C:%__mcq_lang([["ja", castext("正解{@aa@}")]'));
+assert.ok(namedXml.includes('%__mcq_Csource:[[opt1C], opt2C];'));
+assert.ok(namedXml.includes('%__mcq_Cfeedback:[msg1C, msg2C];'));
 assert.ok(!namedXml.includes('%__mcq_CsourceL:'));
 context.importXmlText(namedXml.replace('castext("正解{@aa@}")','castext("編集した説明{@aa@}")'));
 assert.equal(state.rows[0].feedback_ja,'編集した説明{@aa@}');
@@ -299,6 +300,6 @@ for(const truth of ['C','W'])for(const kind of ['source','feedback']) {
 oldBlock+='/* MCQ_CHOICES_END */';
 context.importXmlText(namedXml.replace(/\/\* MCQ_CHOICES_BEGIN \*\/[^]*?\/\* MCQ_CHOICES_END \*\//,oldBlock));
 assert.equal(state.rows[0].choice_ja,'文章{@aa@}');assert.equal(state.rows[0].feedback_ja,'正解{@aa@}');
-el.qvars.value='optC1:42;';
+el.qvars.value='opt1C:42;';
 assert.throws(()=>context.generateXml(),/重複/);
 console.log('Passed: named options/messages, direct edits, legacy sourceL import and variable collision protection.');
