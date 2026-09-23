@@ -35,7 +35,7 @@ const state = {
   casEvaluation: { status: "idle", stale: false, variables: [], expressions: {} },
 };
 
-buildLanguageInputs();
+if (!window.MCQ_HEADLESS) buildLanguageInputs();
 
 const el = {
   questionId: document.querySelector("#questionId"),
@@ -116,7 +116,7 @@ const el = {
   ),
 };
 
-init();
+if (!window.MCQ_HEADLESS) init();
 
 async function init() {
   bindEvents();
@@ -455,6 +455,7 @@ function validateCasListExpressionResults() {
 }
 
 function renderCasVariables() {
+  if (window.MCQ_HEADLESS) return;
   el.casVariablesBody.replaceChildren();
   el.casVariableCount.textContent = String(state.casEvaluation.variables.length);
   if (!state.casEvaluation.variables.length) {
@@ -1643,6 +1644,7 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  if (window.MCQ_HEADLESS) return;
   if (state.aiTranslationRunning) {
     el.xmlOutput.value = "";
     return; // Partial language results must not trigger repeated XML warnings.

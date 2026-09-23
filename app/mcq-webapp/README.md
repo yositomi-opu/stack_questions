@@ -37,6 +37,32 @@ clone直後の`make check`はセットアップ前診断として動作します
 
 GitHub Pages上でも静的な入力・CSV保存・XML生成は動作しますが、PagesではPython／Maxima／Dockerを実行できません。そのため、問題変数の評価、CAS式の`length`取得、STACK APIプレビューには、この手順で起動したローカル版を使用してください。
 
+## CSVをCLIでXMLに変換する
+
+Python 3.10以降とNode.js 18以降があれば、ブラウザを開かずに変換できます。npmパッケージの追加は不要です。リポジトリのルートから次のように実行します。
+
+```sh
+python3 scripts/mcq_csv2xml.py question.csv
+python3 scripts/mcq_csv2xml.py question.csv -o output.xml
+python3 scripts/mcq_csv2xml.py question.csv -o output.xml --force
+```
+
+既定ではCSVと同じフォルダに、アプリと同じ `001.(Title)-(cb/rb/rb2).xml` という名前で出力します。CSVの `config,xml_filename,...` があれば優先します。Titleがなければ入力CSVのファイル名を使います。既存ファイルは `--force` がない限り上書きしません。`-o -` でXMLを標準出力へ出し、警告・エラーは標準エラーへ出します。失敗時の終了コードは1です。
+
+CSV schema 1・2・3をアプリ本体と同じJavaScript処理で読み込み、現在のCASTextテンプレートでXMLを生成します。テンプレートはリポジトリのルートにあるXMLを直接参照するため、変換だけなら `make setup` は不要です。生成には翻訳不足・パターン上限・選択肢数などの検証を含みます。入力の設定を画面の制約で自動調整せず、不整合はエラーにします。問題変数はXML内に含めます（問題変数自身に書かれた `stack_include` はそのままです）。外部includeを取得・公開する機能ではありません。
+
+通常の変換ではMaximaコードを実行しません。動的な `list` 型の長さを検証する場合、または問題変数・CAS選択肢を評価してから変換する場合は、信頼できるCSVに対して `--evaluate` を使います。これは起動済みWebAppの評価機能を利用します。
+
+```sh
+make start
+python3 scripts/mcq_csv2xml.py question.csv --evaluate
+python3 scripts/mcq_csv2xml.py question.csv --evaluate --webapp-url http://127.0.0.1:4173/
+```
+
+`--webapp-url` はSTACK APIの3080番ポートではなくWebAppのURLです。評価失敗時は出力しません。通常の変換成功は、STACKでの実行・描画・採点成功まで保証するものではないため、公開前にはプレビューも確認してください。
+
+テンプレートincludeの公開先を変える場合は `--include-base-url https://example.org/questions/001/` を指定します。Node.jsをPATHに登録していない場合は `--node /path/to/node` で指定できます。コマンドの全オプションは `python3 scripts/mcq_csv2xml.py --help` で確認できます。
+
 ## 管理コマンド
 
 リポジトリのルートで実行します。
