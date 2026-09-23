@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    'CSVの引用符が不正です。引用されたセル内の引用符は二重にしてください（例: ""abc""）。行': 'Invalid CSV quoting. Double quotes inside a quoted cell must be doubled (e.g. ""abc""). Line',
     "候補の翻訳が不足しています": "A candidate translation is missing",
     "未対応のCSV schemaです": "Unsupported CSV schema",
     "不正な言語・候補識別子です": "Invalid language or candidate identifier",

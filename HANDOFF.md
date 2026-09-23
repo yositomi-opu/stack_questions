@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- CSVの引用セル内で二重化されていないMaxima文字列の引用符が、旧parseDelimitedで黙って除去され、プレビュー時の構文エラーにつながることを確認。利用者もCSVの不備を確認。parseDelimitedは閉じ忘れ／引用符後の不正文字／非引用セル内の引用符を物理行番号付きで拒否し、既存編集状態を保持。正常なCSV/TSV・複数行・BOM・CRLFは維持。日英エラー・schema説明・JSキャッシュを更新。
+- 検証: test_csv_schema_v3.cjs（引用符、改行、行番号、エラー時状態保持を追加）、test_variant_parameters.cjs、app.js/i18n.js構文、git diff --check成功。同梱CSV61件のparse成功。利用者CSVの引用符だけ修正した一時コピーからXMLを生成し、ローカルSTACK APIプレビューでHTTP 200・ok=true・選択肢4件を確認。元CSVは変更していない。実ブラウザ操作は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
+
 - CSV保存時、設定・問題文・問題変数の後に、数値パターン順でoptionNC→optionNW→feedbackNC/feedbackNW（共通はfeedbackN）をまとめる。各項目内の候補・言語順と候補IDは保持。読込仕様・schema番号は変更しない。README・schema文書更新。アプリ表示をv0.81（開発版）に更新し、日英表記・更新日時・JSキャッシュを更新。
 - 検証: `node scripts/tests/test_csv_schema_v3.cjs`成功（1/2/10の数値順、共通／個別FB、複数候補と言語対応、qvar順序、保存→読込→保存の完全一致を追加）。`node scripts/tests/test_editor_metadata.cjs`、`node --check app/mcq-webapp/app.js`、`node --check app/mcq-webapp/i18n.js`、`git diff --check`成功。実ブラウザ確認は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。利用者のmcq_readme.txtは未変更。
 

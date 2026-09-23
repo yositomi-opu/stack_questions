@@ -123,3 +123,15 @@ for (const paired of [false, true]) {
  assert.deepEqual(JSON.parse(JSON.stringify(context.currentCsvRecords('ordered'))),JSON.parse(JSON.stringify(ordered)));
 }
 console.log('Passed: numeric pattern grouping, shared/separate feedback, candidate/language and qvar order, CSV roundtrip.');
+// CSV quoting preserves Maxima strings and rejects malformed input before resetting the editor.
+const quotedRows=[['qvar','cas','n/a','a:1;\r\ntexput(WR, "\\\\mathbb{R}");'],['qtextL','string','ja','comma, "quote"']];
+assert.deepEqual(JSON.parse(JSON.stringify(context.parseDelimited(context.csvText(quotedRows),',').filter(r=>r.some(Boolean)))),quotedRows);
+assert.deepEqual(JSON.parse(JSON.stringify(context.parseDelimited('a,b\r\nc,d',','))),[['a','b'],['c','d']]);
+assert.deepEqual(JSON.parse(JSON.stringify(context.parseDelimited('a\t"b\tc"','\t'))),[['a','b\tc']]);
+const beforeInvalid=JSON.stringify(state.rows);
+for(const bad of ['"qvar","cas","n/a","texput(WR, "abc");"','a,"unclosed','a,b"c','a,"b"tail']) {
+ assert.throws(()=>context.applyRecords(context.parseDelimited(bad,',')),/CSV.*引用符/);
+ assert.equal(JSON.stringify(state.rows),beforeInvalid);
+}
+assert.throws(()=>context.parseDelimited('a,b\r\n"qvar","cas","n/a","a:1;\r\ntexput(WR, "abc");"',','),/行: 3/);
+console.log('Passed: strict CSV quotes, multiline/CRLF/TSV preservation, physical error lines and non-destructive rejection.');

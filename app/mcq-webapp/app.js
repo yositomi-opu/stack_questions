@@ -3508,30 +3508,28 @@ async function readDelimited(file) {
 function parseDelimited(text, delimiter) {
   text = String(text).replace(/^\uFEFF/, "");
   const rows = [];
-  let row = [];
-  let value = "";
-  let quoted = false;
+  let row = [], value = "", quoted = false, closed = false, line = 1;
+  const invalid = () => new Error(uiText('CSVの引用符が不正です。引用されたセル内の引用符は二重にしてください（例: ""abc""）。行') + ": " + line);
   for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    const next = text[i + 1];
-    if (char === '"' && quoted && next === '"') {
-      value += '"';
-      i += 1;
-    } else if (char === '"') {
-      quoted = !quoted;
-    } else if (char === delimiter && !quoted) {
-      row.push(value);
-      value = "";
-    } else if ((char === "\n" || char === "\r") && !quoted) {
-      if (char === "\r" && next === "\n") i += 1;
-      row.push(value);
-      rows.push(row);
-      row = [];
-      value = "";
+    const char = text[i], next = text[i + 1];
+    if (quoted) {
+      if (char === '"' && next === '"') { value += '"'; i += 1; }
+      else if (char === '"') { quoted = false; closed = true; }
+      else value += char;
+    } else if (char === delimiter) {
+      row.push(value); value = ""; closed = false;
+    } else if (char === "\n" || char === "\r") {
+      row.push(value); rows.push(row); row = []; value = ""; closed = false;
+    } else if (char === '"' && !value && !closed) {
+      quoted = true;
     } else {
+      if (closed || char === '"') throw invalid();
       value += char;
     }
+    if (char === "\n" || (char === "\r" && next !== "\n")) line += 1;
+    if (char === "\r" && next === "\n" && !quoted) { i += 1; line += 1; }
   }
+  if (quoted) throw invalid();
   row.push(value);
   rows.push(row);
   return rows;
