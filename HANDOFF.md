@@ -13,6 +13,24 @@
 
 ## 直近の変更と決定事項
 
+- 2026-09-23 c-p: 全言語一括ファイル翻訳・依頼文の検証手順強化・API翻訳の文章スロット方式をまとめてcommit/push対象とする。直前検証は `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_ai_translation.py`（11件）、`node scripts/tests/test_ai_translation.cjs`、`node scripts/tests/test_translation_cas.cjs`、`node scripts/tests/test_translation_files.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、app.js/i18n.jsの構文検査、`git diff --check` がすべて成功。Claude Pro・Gemini無料版の実ファイル検証結果は下記。以前の「未実施」は各作業時点の記録であり、現在の送信状態はgit履歴で確認する。利用者の未追跡mcq_readme.txtおよび私的なテスト入出力はコミット対象外。利用環境は更新後 `make restart` とブラウザ再読込が必要。
+
+- 利用者提供のGemini無料版の一括翻訳JSONも、同じ元CSVとアプリ本体関数を使うNodeハーネスで検証し成功。10言語・計210項目の充足、候補ID、数式・STACK記法・プレースホルダー保持、1回の反映とstale解除、CSV/XML再出力・XML構文解析を確認。元データは未変更。これでClaude ProとGemini無料版の提供結果で成功例を確認（具体的モデル名は不明）。利用者の方針により訳文品質は今回の検証対象外とし、将来各言語の編集者が確認・修正する。ブラウザ操作・STACKプレビューは未実施。追加API呼出しなし。commit/push未実施。
+
+- 利用者がClaude Proのチャットから生成した一括翻訳JSONを検証（2026-09-23）。元CSVを実際のparseDelimited/applyRecordsで読み込むNodeハーネスで、readTranslationFile/validateTranslationFile/applyTranslationResultを実行し、10言語（en/fr/it/de/pt/zh/ko/ru/sv/es）を1回で正常反映。各言語の問題文・10選択肢・10フィードバック、計210項目の充足と保護構文検査を通過し、stale解除。以前失敗した最終誤答フィードバックも通過した。generateXmlとcurrentCsvRecordsによる再出力、およびXML構文解析も成功。元CSV・提供JSONは変更せず、生成物はリポジトリ外。英語の主張の肯否などを確認したが、全言語の訳文品質を精査したものではない。ブラウザ操作・STACKプレビューは今回未実施。Claudeの具体的モデル名は不明で、Proは利用者申告。この実例では一括ファイル方式が成功したが、他モデルでの成功率は未検証。追加API呼出しなし。commit/push未実施。
+
+- 一括ファイル再テストの保存済みAIツール応答を精査したところ、AIは検査を作成していたが、途中で照合元source_rowsの数式区切りを変更し、その後訳文からも開始区切りを削除、最後の保存では数式検査を省略していた。プロンプト改善が不可能とする結論は早計。原文JSONを解析して固定の検証基準にする／原文の手入力再構成・基準や検査の変更禁止／訳文だけを修正／意図的な誤答も保持／保存した最終ファイルを再読込して全検査、を日英依頼に追加した。追加の有料API呼出しは実施していないため、改善後の実AI成功率は未検証。test_translation_cas.cjs、test_translation_files.cjs、JS構文・差分検査成功。commit/push未実施。
+
+- 利用者CSVによる一括ファイル実テスト（2026-09-23）: アプリが作成した依頼を登録済みOpenAI gpt-6-luna + Responses Code Interpreterへ送り、10言語・10選択肢とフィードバック入りJSON（約44KB）の生成・ダウンロードは2回とも完了。しかし両回とも同じフィードバックの数式区切りが欠落し、実際のreadTranslationFile / validateTranslationFileで拒否。全翻訳の正常反映・CSV/XML再保存の成功は未確認。元CSVは変更していない。無料版ChatGPT UIのテストではない。
+- 1回目の結果を受け、日英の依頼文に数式区切り全体の保持と、アプリと同じtranslationProtectedParts関数による保存前照合を追加。再生成でも欠落したため、依頼文だけでは解決していない。手動ファイル方式にも、API翻訳と同じく保護構文をローカル保持し文章だけ受け取る方式を検討する必要がある。検証を緩めたり、欠落を黙って補正したりしていない。
+- 追加検証: test_translation_cas.cjs / test_translation_files.cjs、app.js・i18n.js構文、git diff --check成功。ブラウザのテスト用タブではCSVファイル選択がタイムアウトし、実画面での一括読込確認は未完了。アプリ本体関数を使ったNodeハーネスで上記拒否を再現。API再送信は自動承認レビューに一度拒否された後、利用者が内容送信と課金を明示許可し実施した。秘密情報・問題本文・生成結果はリポジトリに保存していない。commit/push未実施。
+
+- 手動JSONファイル翻訳の既定対象を「選択した全言語（一括）」へ変更。依頼payloadに全対象言語を含め、mcq-translations-all.jsonを1ファイル作成する指示へ変更。AI側で分割処理して最終結合・全言語全候補を確認し、未完成は完成扱いしない旨を依頼。個別言語指定はフォールバックとして維持。1回の読込で全言語を反映し、部分ファイルでは不足言語名を通知。日英UI・README・ChangeLog・キャッシュ更新。
+- 検証: `node scripts/tests/test_translation_cas.cjs`（all既定、全対象payload、単一ファイル名、個別言語も保持）と `node scripts/tests/test_translation_files.cjs`（複数言語1回反映、stale解除、原子的エラー拒否）成功。app.js/i18n.js構文・git diff --check成功。AIチャットでの全言語ファイル実生成・実ブラウザ確認は未実施。ファイル化はAI生成上限をなくすものではない。利用者からAPI翻訳zhまで進行との報告あり、実行中の画面・サーバーには操作していない。前の文章スロット修正とともにcommit/push未実施。
+
+- v0.82の保護マーカー方式でもoption5Cで欠落エラーとの利用者報告を受け、API翻訳を文章スロット方式へ変更。数式・STACK・HTML・プレースホルダーをローカル保持し、全項目の文脈と文章スロットを送り、応答schemaは必要な文章キーのみを必須にする。AIは保護文字列を返さない。数式等を同じ順序で再結合するため、原文で空の前後スロットへの文章移動も許可する。キー不足・未知キー・型不正・構文追加・文章全欠落は拒否し、再構成後も既存検証。旧マーカー処理は削除。CSV/XML・手動JSON形式は変更なし。
+- 検証: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_ai_translation.py` 11件成功（3社mock、新schema、再構成、欠落／構文注入／空文拒否、語順調整、数式のみ、null）。test_ai_translation.cjs、test_translation_files.cjs、git diff --check成功。利用者CSVの日本語21項目の分離→再構成が完全一致。登録済みOpenAI gpt-6-lunaで、失敗報告のoption5Cを英訳し成功、最終バッチ相当のoption5C/Wとfeedback5C/Wをイタリア語訳して検証成功（計2リクエスト、利用料金あり）。元CSVは変更していない。全言語・全バッチ連続実行、実ブラウザ、Claude/Geminiの実接続は未確認。文意の完全保証ではなく、数式順序固定による語順制約はREADMEに記載。サーバー再起動が必要。commit/push未実施。
+
 - 利用者のc-p依頼により、v0.82のAPI翻訳・JSONファイル方式・取得ガイド・保護マーカーと通知修正をまとめてcommit/push対象とする。検証結果は以下の記録を参照。送信状態はgit履歴で確認。利用者の未追跡mcq_readme.txtは対象外。
 
 - 利用者のOpenAI実翻訳で一部言語まで進み、it付近で保護構文検査エラーとの報告。元応答は保存していないため具体的な変更箇所・誤判定は未特定。対策としてAPI送信前に保護構文をランダム接頭辞＋項目別の一意マーカーへ置換し、同じ項目内の個数一致を確認して完全復元後に既存検証。欠落・重複・別項目からの混入は拒否。生応答／キーは表示せず、エラーに候補ID・choice/feedback/question_text、画面に言語・バッチ番号を追加。

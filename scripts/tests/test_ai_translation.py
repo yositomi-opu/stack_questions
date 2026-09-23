@@ -39,9 +39,8 @@ class TranslationTest(unittest.TestCase):
         self.assertTrue(ai.public_settings()['profiles']['gemini']['configured'])
         self.assertNotIn('environment-secret', json.dumps(ai.public_settings()))
     def test_all_providers(self):
-        masked, maps, prefix = ai.protect_source(self.source)
-        translated = {'question_text': masked['question_text'].replace('選べ', 'Choose'),
-                      'rows': [{**masked['rows'][0], 'choice': masked['rows'][0]['choice'].replace('数式', 'Formula')}]}
+        slots, fields, schema = ai.translation_slots(self.source)
+        translated = {key: value['text'].replace('選べ', 'Choose').replace('数式','Formula') for key,value in slots.items()}
         encoded = json.dumps(translated)
         responses = {'openai': {'status': 'completed', 'output': [{'content': [{'type': 'output_text', 'text': encoded}]}]},
                      'claude': {'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': encoded}]},
@@ -49,7 +48,7 @@ class TranslationTest(unittest.TestCase):
         for provider, result in responses.items():
             with self.subTest(provider=provider):
                 self.register(provider)
-                with patch.object(ai, 'protect_source', return_value=(masked, maps, prefix)), patch.object(ai, 'send_request', return_value=result) as send:
+                with patch.object(ai, 'send_request', return_value=result) as send:
                     value = ai.translate({'target': 'en', 'source': self.source})
                 self.assertEqual(value['translations']['en'], self.result)
                 req = send.call_args.args[0]
@@ -59,24 +58,30 @@ class TranslationTest(unittest.TestCase):
                 if provider == 'openai': self.assertEqual(body['text']['format']['type'], 'json_schema')
                 if provider == 'claude': self.assertEqual(body['output_config']['format']['type'], 'json_schema')
                 if provider == 'gemini': self.assertEqual(body['generationConfig']['responseFormat']['text']['mimeType'], 'application/json')
-    def test_mask_restore_and_tampering(self):
+    def test_slots_preserve_syntax_and_reject_invalid_output(self):
         source = {'source_language':'ja', 'question_text': r'<b>次の \(x<2\) と {@a@} __SELTYPE__</b>',
                   'rows':[{'id':'option1C_0','choice':'[[if a]]本文[[/if]]','feedback':None}]}
-        masked, maps, prefix = ai.protect_source(source)
-        self.assertNotIn('x<2', masked['question_text'])
-        self.assertNotIn('{@a@}', masked['question_text'])
-        result = {k:masked[k] for k in ('question_text','rows')}
-        self.assertEqual(ai.validate_result(source, ai.restore_result(json.loads(json.dumps(result)),maps,prefix))['question_text'],source['question_text'])
-        token = next(iter(maps['question_text']))
-        for replacement in ['',token+token,token.lower()]:
-            broken=json.loads(json.dumps(result)); broken['question_text']=broken['question_text'].replace(token,replacement)
-            with self.assertRaisesRegex(ValueError,'question_text'):
-                ai.restore_result(broken,maps,prefix)
-        broken=json.loads(json.dumps(result)); broken['rows'][0]['choice'] += token
-        with self.assertRaisesRegex(ValueError,'option1C_0.choice'):
-            ai.restore_result(broken,maps,prefix)
-        with self.assertRaisesRegex(ValueError,'option1C_0.choice'):
-            ai.validate_result(self.source, {**self.result,'rows':[{**self.result['rows'][0],'choice':'changed'}]})
+        slots, fields, schema = ai.translation_slots(source)
+        output = {key: value['text'] for key,value in slots.items()}
+        self.assertEqual(set(schema['required']), set(slots))
+        self.assertFalse(schema['additionalProperties'])
+        result=ai.assemble_translation(source,slots,fields,output)
+        self.assertEqual(result['question_text'],source['question_text'])
+        self.assertEqual(result['rows'],source['rows'])
+        key=next(iter(slots))
+        for invalid in [{k:v for k,v in output.items() if k!=key}, {**output,'unknown':''}, {**output,key:None},
+                        {**output,key:'{@new@}'}, {**output,key:'<b>'}, {k:'' for k in output}]:
+            with self.assertRaises(ValueError):ai.assemble_translation(source,slots,fields,invalid)
+
+    def test_math_only_fields_and_empty_slots(self):
+        source={'source_language':'ja','question_text':None,'rows':[{'id':'option5C_0','choice':r'\(A\)の部分集合\(B\)は閉じている。','feedback':r'{@a@}'}]}
+        slots,fields,schema=ai.translation_slots(source)
+        texts=['In ', ', the subset ', ' is closed.', '', '']
+        output=dict(zip(slots,texts))
+        result=ai.assemble_translation(source,slots,fields,output)
+        self.assertEqual(result['rows'][0]['choice'],r'In \(A\), the subset \(B\) is closed.')
+        self.assertEqual(result['rows'][0]['feedback'],'{@a@}')
+        self.assertIsNone(result['question_text'])
 
     def test_incomplete(self):
         for provider, result in [('openai', {'status': 'incomplete'}), ('claude', {'stop_reason': 'max_tokens'}), ('gemini', {'candidates': [{'finishReason': 'MAX_TOKENS'}]})]:

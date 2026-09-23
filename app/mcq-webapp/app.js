@@ -2524,10 +2524,10 @@ function translationPayload() {
 
 function syncTranslationTarget() {
   const targets = translationTargets();
-  if (!el.translationTarget) return targets[0] || "";
+  if (!el.translationTarget) return targets.length ? "all" : "";
   const selected = el.translationTarget.value;
-  el.translationTarget.innerHTML = targets.map(lang => `<option value="${lang}">${lang}</option>`).join("");
-  el.translationTarget.value = targets.includes(selected) ? selected : targets[0] || "";
+  el.translationTarget.innerHTML = (targets.length ? `<option value="all">${uiText("選択した全言語（一括）")}</option>` : "") + targets.map(lang => `<option value="${lang}">${lang}</option>`).join("");
+  el.translationTarget.value = targets.includes(selected) ? selected : targets.length ? "all" : "";
   el.translationTarget.disabled = !targets.length;
   return el.translationTarget.value;
 }
@@ -2540,17 +2540,25 @@ function prepareTranslationRequest() {
   copyLanguageIndependentValuesToTargets();
   const target = syncTranslationTarget();
   const payload = translationPayload();
-  payload.target_languages = [target];
+  payload.target_languages = target === "all" ? translationTargets() : [target];
   el.translationJson.value = [
     uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
     uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
     uiText("CAS式は文字列内の文章だけを翻訳し、変数名・関数名・演算子・引用符を保持した式全体を返してください。nullの項目は翻訳不要です。"),
+    uiText("数式の区切りと中身は一体として保持してください。括弧を外す、数式を分割する、数式内に訳文を入れることは禁止です。以下のJavaScript関数で原文と訳文の各項目を比較し、全言語で一致するまで修正してからファイルを保存してください。"),
+    uiText("原文JSONは検証の基準です。最初にJSONとして解析して保持し、原文・候補ID・検査関数・期待値を変更したり、検査を省略したりしないでください。原文を手入力で再構成して検証に使わないでください。"),
+    uiText("不一致が出たら、直すのは訳文だけです。数式やSTACK記法が冗長・不自然に見えても、原文側を訂正・簡略化しないでください。教材には意図的に誤った主張も含まれます。主張の真偽も変更しないでください。"),
+    uiText("最終JSONをファイルへ保存した後、そのファイルを読み直し、保持した原文JSONに対して全言語・全候補の数式等の保持と翻訳の充足を再検査してください。ファイルを修正したら必ず全検査をやり直してください。検査失敗や検査未実施のファイルを完成品として返さないでください。"),
+    `const protectedParts = ${translationProtectedParts.toString()};`,
+    "// For each question_text, choice and feedback (match rows by id):",
+    "// JSON.stringify(protectedParts(source)) === JSON.stringify(protectedParts(translated))",
     uiText("翻訳結果は画面上のコードブロックではなく、ダウンロード可能なUTF-8のJSONファイルとして作成してください。文字列内の引用符・バックスラッシュ・改行をJSONとしてエスケープし、プレースホルダーを変更しないでください。"),
     `Filename: mcq-translations-${target}.json`,
     uiText("ファイルを保存する前にJSONとして解析できることと、すべての候補IDと翻訳がそろっていることを検証してください。返答はファイルへのリンクだけにしてください。"),
+    uiText("量が多い場合は、作業環境内で言語・候補ごとに分割して翻訳し、最後に1つのファイルへ結合してください。全対象言語と全候補がそろうまでは完成とせず、未完成の場合はその旨を伝えてください。"),
     uiText("CAS式をJSON文字列にする例:"),
     JSON.stringify({question_text: 'sconcat("...", tex2(%_rk), " __SELTYPE__")'}),
-    uiText("指定された1言語だけに翻訳してください。返答の最上位キーはtranslationsだけにし、その中に対象言語のquestion_textとrowsを入れてください。ptはポルトガル語です。"),
+    uiText("target_languagesの全言語を翻訳し、1つのJSONファイルにまとめてください。返答の最上位キーはtranslationsだけにし、その中に各言語のquestion_textとrowsを入れてください。ptはポルトガル語です。"),
     uiText("原文・schema・設定は返答に再掲しないでください。rowsには元のidと翻訳したchoice・feedbackだけを含め、最後の括弧まで閉じた完全なJSONを返してください。説明文は不要です。"),
     uiText("translations は次の言語キーと形式で返してください:"),
     JSON.stringify(Object.fromEntries(payload.target_languages.map((lang) => [lang, {
@@ -2560,7 +2568,7 @@ function prepareTranslationRequest() {
     JSON.stringify(payload, null, 2),
   ].join("\n");
   el.translationPanel.open = true;
-  setTranslationStatus(`${target}: ${uiText("翻訳依頼を作成しました。ChatGPTへ貼り付けてください。")}`, "");
+  setTranslationStatus(`${payload.target_languages.join(", ")}: ${uiText("翻訳依頼を作成しました。ChatGPTへ貼り付けてください。")}`, "");
   return true;
 }
 
@@ -2650,7 +2658,8 @@ async function readTranslationFile(event) {
       state.fileTranslationProgress = progress;
       state.translationsStale = progress.needsRefresh && translationTargets().some(lang => !progress.languages.includes(lang));
       updateOutput();
-      if (state.translationsStale) setTranslationStatus(uiText("翻訳ファイルを反映しました。残りの言語のファイルも読み込んでください。"), "stale");
+      const missing = translationTargets().filter(lang => !progress.languages.includes(lang));
+      if (missing.length) setTranslationStatus(`${uiText("翻訳ファイルに未収録の言語があります")}: ${missing.join(", ")}. ${uiText("AIに残りの言語を追加したJSONファイルを作成してもらってください。")}`, "stale");
     }
   } catch (error) {
     setTranslationStatus(`${uiText("翻訳ファイルを反映できません")}: ${error.message}`, "error");

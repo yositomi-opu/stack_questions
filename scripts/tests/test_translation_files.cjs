@@ -57,6 +57,17 @@ const snapshot=()=>JSON.stringify({rows:state.rows,q:Object.fromEntries(Object.e
  assert.equal(state.rows[0].choice_pt,portuguese);
  assert.equal(state.rows[0].feedback_en,'Feedback');
  assert.equal(state.translationsStale,false);
+ // One file applies all selected languages and clears stale state in one read.
+ state.translationsStale=true;state.fileTranslationProgress=null;
+ const combined={translations:{...result('en').translations,...result('pt').translations}};
+ combined.translations.en.rows[0].feedback='Combined English';
+ combined.translations.pt.rows[0].feedback='Combined Portuguese';
+ await context.readTranslationFile(event(JSON.stringify(combined)));
+ assert.notEqual(context.status.kind,'error',context.status.message);
+ assert.equal(state.rows[0].feedback_en,'Combined English');
+ assert.equal(state.rows[0].feedback_pt,'Combined Portuguese');
+ assert.equal(state.translationsStale,false);
+ assert.match(context.status.message,/2言語/);
  const baseline=snapshot();
  for(const mutation of [
   r=>r.translations.pt.rows.pop(),
