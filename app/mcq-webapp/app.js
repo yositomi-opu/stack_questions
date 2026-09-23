@@ -97,10 +97,11 @@ const el = {
   languageChoices: document.querySelector("#languageChoices"),
   baseLanguage: document.querySelector("#baseLanguage"),
   prepareTranslationButton: document.querySelector("#prepareTranslationButton"),
+  translationTarget: document.querySelector("#translationTarget"),
   translationPanel: document.querySelector("#translationPanel"),
   translationJson: document.querySelector("#translationJson"),
   copyTranslationButton: document.querySelector("#copyTranslationButton"),
-  applyTranslationButton: document.querySelector("#applyTranslationButton"),
+  translationFileInput: document.querySelector("#translationFileInput"),
   translationStatus: document.querySelector("#translationStatus"),
   choiceLanguageHeading: document.querySelector("#choiceLanguageHeading"),
   feedbackLanguageHeading: document.querySelector("#feedbackLanguageHeading"),
@@ -212,6 +213,7 @@ function bindEvents() {
   Object.values(el.languageChecks).forEach((node) => {
     node.addEventListener("change", () => {
       ensureOneLanguage(node);
+      syncTranslationTarget();
       saveLanguageSettings();
       updateQuestionLanguageVisibility();
       markTranslationsStale("展開先言語が変更されました");
@@ -221,8 +223,11 @@ function bindEvents() {
   document.querySelector("#selectAllLanguagesButton").addEventListener("click", selectAllLanguages);
   el.baseLanguage.addEventListener("change", changeBaseLanguage);
   el.prepareTranslationButton.addEventListener("click", prepareTranslationRequest);
+  document.querySelector("#createTranslationRequestButton").addEventListener("click", prepareTranslationRequest);
   el.copyTranslationButton.addEventListener("click", copyTranslationRequest);
-  el.applyTranslationButton.addEventListener("click", applyTranslationResult);
+  document.querySelector("#translationFileButton").addEventListener("click", () => el.translationFileInput.click());
+  el.translationFileInput.addEventListener("change", readTranslationFile);
+  document.querySelector("#downloadTranslationRequestButton").addEventListener("click", downloadTranslationRequest);
   el.questionId.addEventListener("input", () => { state.xmlFilename = ""; updateOutput(); });
   el.radioMultiplePrompt.addEventListener("change", () => { state.xmlFilename = ""; markCasEvaluationStale(); updateOutput(); });
   el.xmlFilename.addEventListener("input", () => { state.xmlFilename = el.xmlFilename.value; });
@@ -749,6 +754,7 @@ function changeBaseLanguage() {
 }
 
 function updateBaseLanguageUi() {
+  syncTranslationTarget();
   const lang = baseLang();
   LANGS.forEach((code) => {
     el.languageChecks[code].disabled = code === lang;
@@ -1637,6 +1643,10 @@ function removeButton(index) {
 }
 
 function updateOutput() {
+  if (state.aiTranslationRunning) {
+    el.xmlOutput.value = "";
+    return; // Partial language results must not trigger repeated XML warnings.
+  }
   syncXmlFilename();
   syncCastextQuestionInputs();
   syncIncludeFilename();
@@ -2512,36 +2522,50 @@ function translationPayload() {
   };
 }
 
+function syncTranslationTarget() {
+  const targets = translationTargets();
+  if (!el.translationTarget) return targets[0] || "";
+  const selected = el.translationTarget.value;
+  el.translationTarget.innerHTML = targets.map(lang => `<option value="${lang}">${lang}</option>`).join("");
+  el.translationTarget.value = targets.includes(selected) ? selected : targets[0] || "";
+  el.translationTarget.disabled = !targets.length;
+  return el.translationTarget.value;
+}
+
 function prepareTranslationRequest() {
   if (!translationTargets().length) {
     setTranslationStatus("基本言語以外の展開先言語を1つ以上選択してください", "error");
     return;
   }
   copyLanguageIndependentValuesToTargets();
+  const target = syncTranslationTarget();
   const payload = translationPayload();
+  payload.target_languages = [target];
   el.translationJson.value = [
     uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
     uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
     uiText("CAS式は文字列内の文章だけを翻訳し、変数名・関数名・演算子・引用符を保持した式全体を返してください。nullの項目は翻訳不要です。"),
-    uiText("返答はJSONコードブロックで囲み、文字列内の二重引用符・バックスラッシュ・改行をJSONとしてエスケープしてください。プレースホルダーのアンダースコアを保持し、太字記法に変更しないでください。"),
+    uiText("翻訳結果は画面上のコードブロックではなく、ダウンロード可能なUTF-8のJSONファイルとして作成してください。文字列内の引用符・バックスラッシュ・改行をJSONとしてエスケープし、プレースホルダーを変更しないでください。"),
+    `Filename: mcq-translations-${target}.json`,
+    uiText("ファイルを保存する前にJSONとして解析できることと、すべての候補IDと翻訳がそろっていることを検証してください。返答はファイルへのリンクだけにしてください。"),
     uiText("CAS式をJSON文字列にする例:"),
     JSON.stringify({question_text: 'sconcat("...", tex2(%_rk), " __SELTYPE__")'}),
-    uiText("元のquestion_textとrowsは翻訳元として保持し、翻訳結果はtranslations内の各target_languagesのキーに入れてください。ptはポルトガル語です。"),
-    uiText("説明文を付けず、入力と同じ構造に translations を追加した有効なJSONだけを返してください。"),
+    uiText("指定された1言語だけに翻訳してください。返答の最上位キーはtranslationsだけにし、その中に対象言語のquestion_textとrowsを入れてください。ptはポルトガル語です。"),
+    uiText("原文・schema・設定は返答に再掲しないでください。rowsには元のidと翻訳したchoice・feedbackだけを含め、最後の括弧まで閉じた完全なJSONを返してください。説明文は不要です。"),
     uiText("translations は次の言語キーと形式で返してください:"),
     JSON.stringify(Object.fromEntries(payload.target_languages.map((lang) => [lang, {
-      question_text: "...", rows: [{id: "0", choice: "...", feedback: "..."}],
+      question_text: "...", rows: [{id: payload.rows[0]?.id || "option1C_0", choice: "...", feedback: "..."}],
     }]))),
     "",
     JSON.stringify(payload, null, 2),
   ].join("\n");
   el.translationPanel.open = true;
-  setTranslationStatus("翻訳依頼を作成しました。ChatGPTへ貼り付けてください。", "");
+  setTranslationStatus(`${target}: ${uiText("翻訳依頼を作成しました。ChatGPTへ貼り付けてください。")}`, "");
+  return true;
 }
 
 async function copyTranslationRequest() {
-  if (!el.translationJson.value.trim()) prepareTranslationRequest();
-  if (!el.translationJson.value.trim()) return;
+  if (!prepareTranslationRequest()) return;
   try {
     await navigator.clipboard.writeText(el.translationJson.value);
     setTranslationStatus("クリップボードへコピーしました", "");
@@ -2550,6 +2574,87 @@ async function copyTranslationRequest() {
     el.translationJson.select();
     setTranslationStatus("欄を選択しました。コピー操作を行ってください。", "");
   }
+}
+
+function downloadTranslationRequest() {
+  if (!prepareTranslationRequest()) return;
+  downloadText(`mcq-translation-request-${syncTranslationTarget()}.txt`, el.translationJson.value, "text/plain;charset=utf-8");
+}
+
+function translationSourceSignature() {
+  const payload = translationPayload();
+  return JSON.stringify({ title: el.questionId?.value || "", source_language: payload.source_language,
+    question_type: payload.question_type, question_text: payload.question_text, rows: payload.rows });
+}
+
+function translationProtectedParts(text) {
+  return (String(text).match(/\{@[\s\S]*?@\}|\[\[[\s\S]*?\]\]|__[A-Z][A-Z0-9_]*__|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]|<[^>]+>|\\[A-Za-z]+/g) || []).sort();
+}
+
+function validateTranslationFile(result) {
+  const source = translationPayload();
+  if (!result?.translations || typeof result.translations !== "object" || Array.isArray(result.translations)
+      || !Object.keys(result.translations).length) throw new Error(uiText("翻訳データがありません"));
+  if (result.source_language && result.source_language !== source.source_language) throw new Error(uiText("翻訳元の言語が一致しません"));
+  const expected = new Map(source.rows.map((row, index) => [row.id, {row, index}]));
+  const check = (original, translated, label) => {
+    if (original === null) {
+      if (translated != null) throw new Error(`${label}: ${uiText("言語非依存の項目が変更されています")}`);
+      return;
+    }
+    if (typeof translated !== "string" || (original.trim() && !translated.trim())) {
+      throw new Error(`${label}: ${uiText("翻訳が不足しています")}`);
+    }
+    if (JSON.stringify(translationProtectedParts(original)) !== JSON.stringify(translationProtectedParts(translated))) {
+      throw new Error(`${label}: ${uiText("数式・プレースホルダー・タグが変更されています")}`);
+    }
+  };
+  for (const [lang, translation] of Object.entries(result.translations)) {
+    if (!LANGS.includes(lang) || lang === source.source_language) throw new Error(`${lang}: ${uiText("翻訳先の言語が不正です")}`);
+    if (!translation || !Array.isArray(translation.rows)) throw new Error(`${lang}: ${uiText("翻訳行がありません")}`);
+    check(source.question_text, translation.question_text, `${lang} question_text`);
+    const seen = new Set();
+    for (const item of translation.rows) {
+      if (!item || !["string", "number"].includes(typeof item.id)) throw new Error(uiText("候補IDが不正です"));
+      const id = String(item.id);
+      // Accept old numeric IDs for files created by earlier versions.
+      const entry = expected.get(id) || (/^\d+$/.test(id) && source.rows[Number(id)] ? {row: source.rows[Number(id)]} : null);
+      if (!entry || seen.has(entry.row.id)) throw new Error(`${lang} ${id}: ${uiText("候補IDが不正または重複しています")}`);
+      seen.add(entry.row.id);
+      for (const field of ["choice", "feedback"]) check(entry.row[field], item[field], `${lang} ${id} ${field}`);
+    }
+    for (const row of source.rows) {
+      if ((row.choice !== null || row.feedback !== null) && !seen.has(row.id)) throw new Error(`${lang} ${row.id}: ${uiText("翻訳候補が不足しています")}`);
+    }
+  }
+  return result;
+}
+
+async function readTranslationFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const signature = translationSourceSignature();
+  try {
+    if (file.size > 4 * 1024 * 1024) throw new Error(uiText("翻訳ファイルは4MB以下にしてください"));
+    const text = await file.text();
+    if (translationSourceSignature() !== signature) throw new Error(uiText("読込中に原文が変更されました。もう一度読み込んでください。"));
+    let result;
+    try { result = JSON.parse(text.replace(/^\uFEFF/, "")); }
+    catch { throw new Error(uiText("JSONファイルが未完成または不正です。AIに完全なJSONファイルを作り直してもらってください。")); }
+    validateTranslationFile(result); // Validate every language before modifying any editor value.
+    const previous = state.fileTranslationProgress;
+    const progress = previous?.signature === signature ? previous
+      : {signature, languages: [], needsRefresh: state.translationsStale};
+    if (applyTranslationResult(result)) {
+      progress.languages = [...new Set([...progress.languages, ...Object.keys(result.translations)])];
+      state.fileTranslationProgress = progress;
+      state.translationsStale = progress.needsRefresh && translationTargets().some(lang => !progress.languages.includes(lang));
+      updateOutput();
+      if (state.translationsStale) setTranslationStatus(uiText("翻訳ファイルを反映しました。残りの言語のファイルも読み込んでください。"), "stale");
+    }
+  } catch (error) {
+    setTranslationStatus(`${uiText("翻訳ファイルを反映できません")}: ${error.message}`, "error");
+  } finally { event.target.value = ""; }
 }
 
 function parseTranslationResponse(input) {
@@ -2586,9 +2691,9 @@ function parseTranslationResponse(input) {
   throw new Error(uiText("translationsを含む有効なJSONが見つかりません。回答を末尾までコピーしてください。引用符やバックスラッシュの不備は、ChatGPTに有効なJSONとして出し直すよう依頼してください。"));
 }
 
-function applyTranslationResult() {
+function applyTranslationResult(data) {
   try {
-    const result = parseTranslationResponse(el.translationJson.value);
+    const result = data || parseTranslationResponse(el.translationJson.value);
     if (!result.translations || typeof result.translations !== "object") {
       throw new Error("translations が見つかりません");
     }
@@ -2626,8 +2731,10 @@ function applyTranslationResult() {
     updateBaseLanguageUi();
     updateOutput();
     setTranslationStatus(`${applied}言語の翻訳を反映しました`, "");
+    return true;
   } catch (error) {
     setTranslationStatus(`翻訳結果を反映できません: ${error.message}`, "error");
+    return false;
   }
 }
 
@@ -3559,6 +3666,7 @@ function resetDerivedResults() {
   state.evaluationRequestId = (state.evaluationRequestId || 0) + 1;
   state.casEvaluation = { status: "idle", stale: false, variables: [], expressions: {} };
   state.translationsStale = false;
+  state.fileTranslationProgress = null;
   for (const key of ["casDiagnostics", "casDiagnosticSummary", "casEvaluationSource", "translationStatus", "stackApiResult", "stackApiStatus"]) {
     if (el[key]) el[key].textContent = "";
   }

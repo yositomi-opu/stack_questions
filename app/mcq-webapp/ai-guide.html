@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APIキー取得ガイド / API key guide — STACK MCQ</title>
+<style>
+body{font-family:system-ui,sans-serif;line-height:1.8;color:#233047;background:#f5f7fa;margin:0}main{max-width:850px;margin:auto;padding:24px}section{background:white;border:1px solid #dce2ea;border-radius:12px;padding:24px;margin:20px 0}h1{font-size:1.6rem}h2{font-size:1.3rem}h3{font-size:1.1rem}a{color:#1456a0}li{margin:8px 0}code{overflow-wrap:anywhere}nav{display:flex;gap:24px;flex-wrap:wrap}.note{border-left:4px solid #4575ae;padding-left:14px}a:focus-visible{outline:3px solid #4575ae}
+</style>
+</head>
+<body><main>
+<nav aria-label="Guide navigation"><a href="#ja">日本語</a><a href="#en" lang="en">English</a><a href="./">XML Generator</a></nav>
+<section id="ja" lang="ja">
+<h1>APIキーの取得と登録</h1>
+<p>確認日：2026年9月23日。各社の画面・料金・利用可能モデルは変更されます。最新情報は以下の公式リンクで確認してください。</p>
+<p>APIキーは、このアプリからAIへ翻訳を依頼するための専用の認証情報です。チャット画面にログインするだけでは登録できません。API側の利用条件・料金を確認してください。APIを使わない場合は「ファイルで翻訳」を選べます。</p>
+<h2>1. 利用するAIのキーを取得</h2>
+<h3>OpenAI（ChatGPTの提供元）</h3>
+<ol>
+<li><a href="https://platform.openai.com/api-keys">OpenAIのAPIキー管理画面</a>へログインします。</li>
+<li>利用するプロジェクトを選び、APIキーを新規作成します。名前は「STACK MCQ」など、用途が分かるものにします。</li>
+<li>表示されたキーをコピーし、このアプリの「AI設定」に登録します。</li>
+<li>API管理画面でBilling・Usage・Limitsを確認し、利用に必要な課金設定と使用量の確認を行います。</li>
+</ol>
+<p>公式：<a href="https://developers.openai.com/api/docs/quickstart">開始手順</a> · <a href="https://developers.openai.com/api/docs/models">モデル一覧</a> · <a href="https://developers.openai.com/api/docs/pricing">API料金</a></p>
+<h3>Claude（Anthropic）</h3>
+<ol>
+<li><a href="https://platform.claude.com/">Claude Console</a>へログインし、Settings → API keys → Create key を開きます。</li>
+<li>個人利用では自分に紐づくキーを作り、<strong>特定のワークスペースに限定</strong>します。このアプリにはワークスペースIDを指定する欄がありません。有効期限も確認します。</li>
+<li>キーをコピーして「AI設定」に登録し、ConsoleのBillingで利用可能残高・支出設定を確認します。</li>
+</ol>
+<p>公式：<a href="https://platform.claude.com/docs/en/manage-claude/authentication">キー作成・認証</a> · <a href="https://platform.claude.com/docs/en/api/overview">利用開始・課金設定の案内</a> · <a href="https://platform.claude.com/docs/en/about-claude/models/overview">モデル一覧</a></p>
+<h3>Gemini（Google）</h3>
+<ol>
+<li><a href="https://aistudio.google.com/apikey">Google AI StudioのAPI Keys</a>へGoogleアカウントでログインします。</li>
+<li>プロジェクトとキーを確認し、必要ならCreate API keyで作成します。既存のCloudプロジェクトを使う場合は、Projectsからインポートが必要なことがあります。</li>
+<li>AI Studioで作成したキーをコピーし、「AI設定」に登録します。古いキーが拒否される場合は、公式の移行案内を確認し、新しい認証キーを作成してください。</li>
+<li>無料枠の対象モデル・制限を確認します。有料枠が必要ならSet up billingから課金を設定し、Usageで使用量を確認します。無料枠・有料枠のデータ利用条件も確認してください。</li>
+</ol>
+<p>公式：<a href="https://ai.google.dev/gemini-api/docs/api-key">キー取得・移行</a> · <a href="https://ai.google.dev/gemini-api/docs/billing">課金設定</a> · <a href="https://ai.google.dev/gemini-api/docs/models">モデル一覧</a> · <a href="https://ai.google.dev/gemini-api/docs/pricing">料金・データ利用</a></p>
+<h2>2. アプリに登録して翻訳</h2>
+<ol>
+<li>ローカル版を起動し、<code>http://localhost:4173/</code>を開きます。公開サイトではAPI機能を利用できません。</li>
+<li>「多言語対応」→「AI設定」でサービスを選び、モデルIDとAPIキーを入力して「保存」を押します。</li>
+<li>モデルIDには公式一覧のAPI用IDをそのまま指定します。モデルの表示名ではありません。OpenAIのResponses API、ClaudeのMessages API、GeminiのgenerateContent APIで<strong>構造化JSON出力に対応し、自分のアカウントで利用可能</strong>なモデルが必要です。全モデルでの動作を保証するものではありません。</li>
+<li>まず展開言語を1つ選んで「自動翻訳」を実行し、訳文を確認してCSV保存します。設定の「保存」は登録のみで、接続確認や翻訳は実行しません。</li>
+</ol>
+<p>キー欄が次回空欄でも、登録済みの表示があれば保存されています。空欄のまま保存すると既存キーを維持します。保存先は実行端末の<code>~/.config/stack-mcq-webapp/ai.json</code>（所有者のみ読書可能、暗号化なし）。CSV・XMLには含めません。「保存キーを削除」は端末内の保存分だけを削除し、各社でのキー失効は行いません。</p>
+<p class="note">キーはパスワードと同様に扱い、問題ファイル・GitHub・質問文へ貼り付けないでください。翻訳対象の問題文・選択肢・フィードバックは選択したAIへ送信されます。利用料金は各社の管理画面で確認してください。</p>
+<h2>うまくいかないとき</h2>
+<ul>
+<li>401／403：キーのコピー漏れ、有効期限、権限を確認します。</li>
+<li>400／404：モデルIDと構造化出力対応を確認します。Claudeではキーのワークスペース指定も確認します。</li>
+<li>429：使用量・残高・利用制限を確認し、時間をおいて再実行します。</li>
+<li>設定画面が動かない：更新後に<code>make restart</code>を実行し、localhostで開き直します。</li>
+<li>翻訳未完成・検証エラー：原文の埋込構文を確認し、別の対応モデルを試すか「ファイルで翻訳」を利用します。正常に反映された言語は保持されます。</li>
+</ul>
+</section>
+<section id="en" lang="en">
+<h1>Get and register an API key</h1>
+<p>Checked September 23, 2026. Provider screens, prices and models change; use the official links above for current details. API access requires its own setup. You can use “Translate via file” without an API key.</p>
+<h2>Choose a provider</h2>
+<ul>
+<li><strong>OpenAI:</strong> Sign in to <a href="https://platform.openai.com/api-keys">API keys</a>, select your project and create a key. Copy it into AI settings. Check Billing, Usage and Limits in the API dashboard. See the <a href="https://developers.openai.com/api/docs/quickstart">official quickstart</a>.</li>
+<li><strong>Claude:</strong> In <a href="https://platform.claude.com/">Claude Console</a>, open Settings → API keys → Create key. For personal use, link it to yourself and scope it to a single workspace; this app has no workspace ID field. Check expiration and Billing. See <a href="https://platform.claude.com/docs/en/manage-claude/authentication">authentication guidance</a>.</li>
+<li><strong>Gemini:</strong> Open <a href="https://aistudio.google.com/apikey">AI Studio API Keys</a>, select or create a project and create a key. Existing Cloud projects may need importing. Use newly issued keys if an old key requires migration. Check free-tier eligibility, quotas, data-use terms and billing before upgrading. See <a href="https://ai.google.dev/gemini-api/docs/api-key">key guidance</a> and <a href="https://ai.google.dev/gemini-api/docs/billing">billing</a>.</li>
+</ul>
+<h2>Register and try a translation</h2>
+<ol>
+<li>Open the local app at <code>http://localhost:4173/</code>. API translation is unavailable on public sites.</li>
+<li>Open AI settings in the multilingual section. Select the provider, enter its API model ID and your key, then Save. Saving does not test the connection or run a translation.</li>
+<li>Use an accessible model supporting structured JSON output through OpenAI Responses, Claude Messages or Gemini generateContent. Copy the API ID from the provider’s model catalog, not its display name. Not every model is supported.</li>
+<li>Select one target language, run Auto-translate, review the result and save your CSV.</li>
+</ol>
+<p>Keys are stored in <code>~/.config/stack-mcq-webapp/ai.json</code> on the server computer, owner-readable/writable and not encrypted. They are excluded from CSV/XML. A blank key field preserves the saved key. Removing a saved key does not revoke it at the provider. Never publish keys in problem files, GitHub or prompts. Translation text is sent to the selected provider; check charges in its dashboard.</p>
+<h2>Troubleshooting</h2>
+<p>401/403: check key, expiration and permissions. 400/404: check model ID and structured-output support; for Claude, check workspace scope. 429: check balance, quotas and usage, then retry later. After updating the app, run <code>make restart</code> and reopen localhost. For incomplete translations, inspect embedded syntax, try another supported model or use the file workflow. Successfully applied languages are retained.</p>
+</section>
+</main></body></html>

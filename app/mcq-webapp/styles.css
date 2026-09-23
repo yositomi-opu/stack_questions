@@ -1344,3 +1344,10 @@ td:nth-child(5) {
   .include-filename-row { flex-basis: 280px; }
   .include-base-field { flex-basis: 100%; }
 }
+
+.ai-settings-dialog { width: min(520px, calc(100vw - 40px)); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+.ai-settings-dialog::backdrop { background: rgb(0 0 0 / 35%); }
+.ai-settings-dialog label { display: block; margin-top: 12px; }
+.ai-settings-dialog input, .ai-settings-dialog select { width: 100%; }
+.ai-settings-dialog p, #aiTranslationProgress { font-size: 12px; overflow-wrap: anywhere; }
+.ai-settings-dialog .row-actions { flex-wrap: wrap; }

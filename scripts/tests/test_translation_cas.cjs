@@ -8,7 +8,7 @@ const field = value => ({value});
 const el = {questions:{ja:field('sconcat("階数が", tex2(%_rk), "の行列を __SELTYPE__")'),en:field('sconcat("rank ", tex2(%_rk))'),pt:field('')},
   questionModes:{ja:field('cas'),en:field('cas'),pt:field('text')},
   languageChecks:{ja:{checked:true},en:{checked:true},pt:{checked:true}},
-  translationJson:field(''),translationPanel:{open:false},requirePairs:{checked:false}};
+  translationTarget:field('pt'),translationJson:field(''),translationPanel:{open:false},requirePairs:{checked:false}};
 const state = {questionTypes:{ja:'cas',en:'cas',pt:'text'},questionLanguageIndependent:false,translationsStale:true,
   rows:[{pattern:'01',truth:'C',choice_type_ja:'cas',choice_ja:'["正しい行列", tex2(matA)]',choice_list_expr_ja:true,
     choice_en:'["Correct matrix", tex2(matA)]',choice_type_en:'cas',feedback_ja:'正解です',feedback_type_ja:'text',feedback_en:'Correct'},
@@ -83,3 +83,31 @@ if(process.env.MCQ_TRANSLATION_RESPONSE) {
  console.log('Passed: supplied ten-language response parses and its supported languages apply unchanged.');
 }
 console.log('Passed: JSON/fences/prose/request+response extraction, request-only guidance, malformed/ambiguous rejection, lossless strings.');
+// Requests contain one selected target, stable IDs and no instruction to echo the source.
+for (const lang of ['en','pt']) {
+ el.translationTarget.value=lang;
+ context.prepareTranslationRequest();
+ const request=el.translationJson.value;
+ const input=JSON.parse(request.slice(request.indexOf('\n{\n')+1));
+ assert.deepEqual(input.target_languages,[lang]);
+ assert.equal(input.rows[0].id,'option1C_0');
+ assert.match(request,/最上位キーはtranslationsだけ/);
+ assert.match(request,/原文・schema・設定は返答に再掲しない/);
+ assert.ok(!request.includes('入力と同じ構造に translations を追加'));
+ assert.throws(()=>context.parseTranslationResponse(request),/翻訳依頼文が残っています/);
+ el.translationJson.value=JSON.stringify({translations:{[lang]:{question_text:`${lang} question`,rows:[{id:'option1C_0',choice:`${lang} choice`,feedback:`${lang} feedback`}]}}});
+ context.applyTranslationResult();
+ assert.notEqual(context.status.kind,'error');
+}
+assert.equal(el.questions.en.value,'en question');
+assert.equal(el.questions.pt.value,'pt question');
+assert.equal(state.rows[0].choice_en,'en choice');
+assert.equal(state.rows[0].choice_pt,'pt choice');
+el.translationTarget.value='ja';
+assert.equal(context.syncTranslationTarget(),'en','base language is not a target');
+vm.runInContext("function activeLangs(){return ['ja'];}",context);
+const responseBefore=el.translationJson.value;
+assert.equal(context.prepareTranslationRequest(),undefined);
+assert.equal(el.translationJson.value,responseBefore,'no-target errors must preserve the pasted response');
+context.syncTranslationTarget();assert.equal(el.translationTarget.disabled,true);
+console.log('Passed: single-language requests, compact response instructions, stable IDs, sequential merge and unavailable target handling.');

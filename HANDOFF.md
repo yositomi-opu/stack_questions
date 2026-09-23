@@ -13,6 +13,26 @@
 
 ## 直近の変更と決定事項
 
+- 利用者のc-p依頼により、v0.82のAPI翻訳・JSONファイル方式・取得ガイド・保護マーカーと通知修正をまとめてcommit/push対象とする。検証結果は以下の記録を参照。送信状態はgit履歴で確認。利用者の未追跡mcq_readme.txtは対象外。
+
+- 利用者のOpenAI実翻訳で一部言語まで進み、it付近で保護構文検査エラーとの報告。元応答は保存していないため具体的な変更箇所・誤判定は未特定。対策としてAPI送信前に保護構文をランダム接頭辞＋項目別の一意マーカーへ置換し、同じ項目内の個数一致を確認して完全復元後に既存検証。欠落・重複・別項目からの混入は拒否。生応答／キーは表示せず、エラーに候補ID・choice/feedback/question_text、画面に言語・バッチ番号を追加。
+- 翻訳途中の言語反映ごとにupdateOutputがXMLを生成しstale警告していたため、API実行中はXML出力を空にして生成を保留し、finallyで再生成。途中CSV保存・既存言語の保持は継続。README・ChangeLog・キャッシュ更新。
+- 検証: test_ai_translation.py 10件（3社mock、保護復元とマーカー欠落・重複・混入）成功、test_ai_translation.cjs（言語・バッチ表示、終了時フラグ復帰、実updateOutputの生成保留）成功。JS構文・git diff --check確認。修正版の実API翻訳・実ブラウザ通知は未確認。利用者の課金・キーには操作していない。commit/push未実施。
+
+- `ai-guide.html` に日英のAPIキー取得・登録ガイドを追加し、AI設定・READMEからリンク。2026-09-23の公式OpenAI／Claude／Gemini資料で取得先・キー作成・課金案内を確認。モデルIDと構造化出力対応、localhost限定、保存と実接続の違い、削除と失効の違い、エラー対処を説明。Claudeはworkspace ID欄がないため単一workspaceに限定したキーを案内。ChangeLog・i18nキャッシュ更新。
+- 検証: Python HTMLParserで日英アンカー・アプリからのリンク確認、`node --check app/mcq-webapp/i18n.js`、`git diff --check`成功。ガイドの実ブラウザ表示と各社へのサインイン・キー取得・実API接続は未実施。先行変更を含めcommit/push未実施。
+
+- v0.82へ更新し `app/mcq-webapp/CHANGELOG.md` を追加。翻訳結果の貼付欄を廃止し、依頼のコピー／テキスト保存→AIが生成するUTF-8 JSONファイル→「翻訳JSONを読込」の方式へ変更。依頼表示は読取専用、1言語ずつ完全なファイルの作成を要求。ファイル方式は公開静的サイトでも利用可能。API設定・自動翻訳はlocalhost以外で非表示。commit/pushだけで公開サイトのAPI利用が可能になるものではない。
+- ファイル読込は4MB制限、JSON構文、対象言語、全候補ID・重複・翻訳欠落、数式／STACK／プレースホルダー／HTML保持を検査し、全言語の検証後に反映。未完成ファイルや読込中の原文変更は既存データを変更せず拒否。原文更新後は必要な全言語がそろうまで未更新状態を保持。日英UI・README・キャッシュを更新。
+- 検証: `node scripts/tests/test_translation_files.cjs` 成功（BOM、複数言語の順次反映、全体検証、欠落・重複・保護構文・不正JSON・容量・原文変更、旧ID互換）。test_translation_cas.cjs、test_ai_translation.cjs、test_csv_schema_v3.cjs、test_editor_metadata.cjs、JS構文・git diff --check成功。ブラウザでv0.82、読取専用依頼、英語JSONファイルの反映、途中で切れたJSONの拒否を確認。実AIへの依頼・ファイル生成、実APIキーでの翻訳は未検証。公開サイトへの配備も未実施。先行変更を含めcommit/push未実施。利用者のmcq_readme.txtは未変更。
+
+- AI API自動翻訳を追加。ai_translation.pyがOpenAI Responses／Claude Messages／Gemini generateContentの構造化JSON出力を呼び出す（各社公式ドキュメントを確認）。AI設定ダイアログでprovider・任意モデルID・キーを登録、公開設定には登録有無だけを返す。キーはリポジトリ／Web配信領域外のユーザー設定ファイルに0600で保存、環境変数も対応。APIルートはloopback・Host・Origin・JSON content-typeを検査し、固定の各社HTTPS URLのみ、リダイレクトを拒否。LAN／Pagesでは未提供。
+- ai-translation.jsは選択言語を順番に最大4行ずつ送信。1言語の全バッチが検証されてから反映、出力打切り・空欄・候補ID欠落重複・保護構文変更で停止。完了言語は同一画面／同一原文で再開時に省略、全完了後の再実行は再翻訳。原文変更時の遅延応答は拒否。停止・135秒タイムアウト・進捗表示。キーや問題変数定義は翻訳本文に送らない。実行中の原文更新・残る古い翻訳のstale状態を考慮。日英UI、README、キャッシュ更新。新規依存パッケージなし。
+- 検証: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_ai_translation.py` 9件成功（3社リクエスト／応答mock、未完了、保護構文、欠落重複、0600、キー非露出・環境変数、ローカル経路制限）。`node scripts/tests/test_ai_translation.cjs`成功（分割、言語単位反映、再開、原文変更、停止）。test_translation_cas.cjs、test_csv_schema_v3.cjs、test_stack_preview.py 7件、test_app_cache.py 3件、JS構文・git diff --check成功。確認用サーバー4174で設定ダイアログ、Gemini選択、キー未設定の案内をブラウザ確認。キー保存は一時ディレクトリ内テストのみ。実APIキーによる3社接続・実翻訳・課金は未検証。利用にはサーバー再起動が必要。commit/push未実施。先行の1言語手動翻訳変更も未commitのまま含まれる。
+
+- 多言語展開の依頼を1言語ずつ作成する方式へ変更。「今回の翻訳先」ドロップダウンと「依頼を作成」を追加し、展開先チェックから基本言語を除いた対象を選択。依頼は原文・schema・設定の再掲を禁止し、translationsだけの完全なJSONを要求。例示IDを実際の候補IDに統一。「依頼をコピー」は現在の入力と翻訳先から必ず再生成。既存の複数言語／原文付き回答の読込、他言語の翻訳保持は維持。日英UI、README、JSキャッシュ更新。
+- 検証: `node scripts/tests/test_translation_cas.cjs`成功（単一対象、最小回答指示、候補ID、en→pt順次反映で他言語保持、対象なし、依頼文の誤反映拒否を追加）。`node scripts/tests/test_csv_schema_v3.cjs`、app.js/i18n.js構文、git diff --check成功。ブラウザでen/frチェック→展開→enのみの依頼、frへ切替→再生成、日英UI表示を確認。ChatGPTへの実送信は未実施のため、出力完了を保証するものではない。commit/push未実施。
+
 - CSVの引用セル内で二重化されていないMaxima文字列の引用符が、旧parseDelimitedで黙って除去され、プレビュー時の構文エラーにつながることを確認。利用者もCSVの不備を確認。parseDelimitedは閉じ忘れ／引用符後の不正文字／非引用セル内の引用符を物理行番号付きで拒否し、既存編集状態を保持。正常なCSV/TSV・複数行・BOM・CRLFは維持。日英エラー・schema説明・JSキャッシュを更新。
 - 検証: test_csv_schema_v3.cjs（引用符、改行、行番号、エラー時状態保持を追加）、test_variant_parameters.cjs、app.js/i18n.js構文、git diff --check成功。同梱CSV61件のparse成功。利用者CSVの引用符だけ修正した一時コピーからXMLを生成し、ローカルSTACK APIプレビューでHTTP 200・ok=true・選択肢4件を確認。元CSVは変更していない。実ブラウザ操作は未実施。利用者依頼によりcommit/push対象。送信状態はgit履歴で確認。
 

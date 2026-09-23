@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import base64
 import json
 import locale as locale_module
@@ -29,6 +30,9 @@ from urllib.request import Request, urlopen
 
 WEB_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = WEB_ROOT.parents[1]
+_ai_spec = importlib.util.spec_from_file_location("mcq_ai_translation", WEB_ROOT / "ai_translation.py")
+ai_translation = importlib.util.module_from_spec(_ai_spec)
+_ai_spec.loader.exec_module(ai_translation)
 LOCAL_CONFIG = WEB_ROOT / ".local-config.json"
 LOCAL_DIR = WEB_ROOT / ".local"
 DOCKER_EVALUATION_DIR = LOCAL_DIR / "docker-evaluation"
@@ -987,8 +991,27 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
 
+    def ai_local_request(self) -> bool:
+        host = self.headers.get("Host", "")
+        try:
+            local_host = urlparse("http://" + host).hostname in {"localhost", "127.0.0.1", "::1"}
+        except ValueError:
+            local_host = False
+        origin = self.headers.get("Origin")
+        same_origin = origin is None or origin == "http://" + host
+        return self.client_address[0] in {"127.0.0.1", "::1"} and local_host and same_origin
+
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        if parsed.path == "/api/ai/settings":
+            if not self.ai_local_request():
+                self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Open this app on localhost / localhostから利用してください"})
+                return
+            try:
+                self.send_json(HTTPStatus.OK, ai_translation.public_settings())
+            except ValueError as exc:
+                self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            return
         if parsed.path in {f"/templates/001.MCQ{variant}-{mode}.xml" for variant in ("", "_cas") for mode in ("rb", "cb")}:
             target = REPO_ROOT / Path(parsed.path).name
             if not target.is_file():
@@ -1071,6 +1094,24 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path in {"/api/ai/settings", "/api/ai/translate"}:
+            if not self.ai_local_request() or self.headers.get_content_type() != "application/json":
+                self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Open this app on localhost / localhostから利用してください"})
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if not 0 < length <= MAX_BODY_BYTES:
+                    raise ValueError("Invalid request size / リクエストサイズが不正です")
+                payload = json.loads(self.rfile.read(length))
+                if not isinstance(payload, dict):
+                    raise ValueError("Expected JSON object / JSONオブジェクトが必要です")
+                result = ai_translation.save_settings(payload) if self.path.endswith("settings") else ai_translation.translate(payload)
+                self.send_json(HTTPStatus.OK, result)
+            except ValueError as exc:
+                self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
+            except Exception:
+                self.send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": "AI operation failed / AI処理に失敗しました"})
+            return
         if self.path == "/api/server/shutdown":
             if self.client_address[0] not in {"127.0.0.1", "::1"}:
                 self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "ローカル接続だけが停止できます"})

@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260921-qvars-resize1">
+    <link rel="stylesheet" href="./styles.css?v=20260923-v082">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260923-csv-quotes"></script>
-    <script defer src="./app.js?v=20260923-csv-quotes"></script>
+    <script defer src="./i18n.js?v=20260923-v082-guide"></script>
+    <script defer src="./app.js?v=20260923-v082-protected"></script>
+    <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
     <script defer src="./file-ui.js?v=20260921-v08"></script>
     <script defer src="./preview.js?v=20260914-es1"></script>
   </head>
@@ -19,9 +20,9 @@
           <p class="eyebrow">STACK / MCQ</p>
           <div class="app-title-row">
             <h1>XML Generator</h1>
-            <details class="version-info"><summary>v0.81</summary><div class="version-info-body">
-              <p>バージョン0.81（開発版）</p><p>1.0を正式リリースとする予定です。</p>
-              <p><time datetime="2026-09-23T05:37:51+09:00">2026-09-23 05:37 JST</time></p>
+            <details class="version-info"><summary>v0.82</summary><div class="version-info-body">
+              <p>バージョン0.82（開発版）</p><p><a href="./CHANGELOG.md" target="_blank" rel="noopener">変更履歴</a></p><p>1.0を正式リリースとする予定です。</p>
+              <p><time datetime="2026-09-23T16:15:52+09:00">2026-09-23 16:15 JST</time></p>
             </div></details>
           </div>
         </div>
@@ -274,10 +275,12 @@
                   <button type="button" class="question-text-help-button" aria-label="多言語対応について" aria-describedby="languageHelp">?</button>
                   <div id="languageHelp" class="question-text-tooltip" role="tooltip">
                     <p>問題文と、「言語非依存」にチェックが入っていない選択肢・フィードバックを、選択した言語へ多言語展開します。</p>
-                    <p>「展開」で翻訳依頼を作成します。ChatGPTへ渡し、返された翻訳JSONを「翻訳結果を確認・修正」に貼り付けて反映してください。</p>
+                    <p>APIで自動翻訳するか、「ファイルで翻訳」でAIへの依頼を作成できます。AIが作成したJSONファイルを読み込んで反映してください。</p>
                   </div>
                 </div>
-                <button id="prepareTranslationButton" type="button" class="primary" title="多言語展開">展開</button>
+                <button id="aiTranslateButton" type="button" class="primary">自動翻訳</button>
+                <button id="aiSettingsButton" type="button" class="ghost">AI設定</button>
+                <button id="prepareTranslationButton" type="button" class="ghost">ファイルで翻訳</button>
               </div>
               <div class="base-language-row">
                 <label for="baseLanguage">基本言語</label>
@@ -288,13 +291,23 @@
               <span class="language-choices-label">展開言語</span>
               <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択">ALL</button>
             </div>
+            <p id="aiTranslationNotice" class="translation-guide">自動翻訳は、選択したAIへ問題文・選択肢・フィードバックを送信します。APIの利用料金が発生する場合があります。翻訳後は内容を確認してください。</p>
+            <div class="row-actions"><button id="aiTranslateStop" type="button" class="ghost" hidden>停止</button><span id="aiTranslationProgress" role="status" aria-live="polite"></span></div>
             <details id="translationPanel" class="translation-panel">
-              <summary>翻訳結果を確認・修正</summary>
-              <p class="translation-guide">生成された依頼をChatGPTへ貼り付け、返されたJSONでこの欄を置き換えてから「結果を反映」を押してください。</p>
-              <textarea id="translationJson" rows="12" spellcheck="false"></textarea>
+              <summary>翻訳ファイル</summary>
+              <p class="translation-guide">依頼をコピーまたは保存してAIへ渡し、作成されたJSONファイルをダウンロードして「翻訳JSONを読込」で反映します。1言語ずつ繰り返してください。ファイル作成に対応したAIが必要です。</p>
+              <div class="row-actions translation-actions">
+                <label for="translationTarget">今回の翻訳先</label>
+                <select id="translationTarget"></select>
+                <button id="createTranslationRequestButton" type="button" class="ghost">依頼を作成</button>
+              </div>
+              <label for="translationJson">AIへの依頼（読取専用）</label>
+              <textarea id="translationJson" rows="8" spellcheck="false" readonly></textarea>
               <div class="row-actions translation-actions">
                 <button id="copyTranslationButton" type="button" class="ghost">依頼をコピー</button>
-                <button id="applyTranslationButton" type="button" class="primary">結果を反映</button>
+                <button id="downloadTranslationRequestButton" type="button" class="ghost">依頼を保存</button>
+                <button id="translationFileButton" type="button" class="primary">翻訳JSONを読込</button>
+                <input id="translationFileInput" type="file" accept=".json,application/json" hidden>
               </div>
               <p id="translationStatus" class="translation-status" aria-live="polite"></p>
             </details>
@@ -339,5 +352,17 @@
       </dialog>
       <p id="actionNotice" class="action-notice" role="status" hidden></p>
     </main>
+    <dialog id="aiSettingsDialog" class="ai-settings-dialog">
+      <h2>AI設定</h2>
+      <p><a href="./ai-guide.html" target="_blank" rel="noopener">APIキーの取得・登録ガイド（日本語 / English）</a></p>
+      <p>モデルIDは各社のAPIで利用できる、JSON形式の出力に対応したものを指定してください。</p>
+      <label for="aiProvider">AIサービス</label>
+      <select id="aiProvider"><option value="openai">OpenAI (ChatGPT)</option><option value="claude">Claude</option><option value="gemini">Gemini</option></select>
+      <label for="aiModel">モデルID</label><input id="aiModel" type="text" autocomplete="off" spellcheck="false">
+      <label for="aiKey">APIキー</label><input id="aiKey" type="password" autocomplete="off" spellcheck="false">
+      <p id="aiKeyStatus" role="status"></p>
+      <p>APIキーはこのサーバー端末に保存されます。CSV・XMLには含まれません。チャットの契約とは別にAPIの利用設定が必要です。</p>
+      <div class="row-actions"><button id="aiKeyRemove" type="button" class="ghost">保存キーを削除</button><button id="aiSettingsSave" type="button" class="primary">保存</button><button id="aiSettingsClose" type="button" class="ghost">閉じる</button></div>
+    </dialog>
   </body>
 </html>
