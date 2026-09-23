@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-23
+更新日: 2026-09-24
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,9 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 2026-09-24: プレビュー／CASTextビューアの `\boldsymbol` 読込失敗を修正。MathJax 3.2.2公式配布のboldsymbol拡張をvendorに同梱し、両画面で `[mathjax]` 基準のローカルURLから明示ロード。HTMLのJSキャッシュ識別子も更新。CSV/XMLとMoodle出力は変更なし。
+- 検証: `node scripts/tests/test_preview_ui.cjs`、`node scripts/tests/test_castext_viewer.cjs`、両JSの `node --check`、`git diff --check` 成功。実ブラウザ＋ローカルSTACK APIでビューアと問題プレビューに `A\boldsymbol{x}=\boldsymbol{0}` を描画し成功。プレビューSVGで太字斜体x（1D499）・太字0（1D7CE）を確認。初回に旧HTMLキャッシュを確認したため更新版URLで再検証。Moodle実機は未実施。利用者のc-p依頼により本修正と検証記録をcommit/push対象とする。送信状態はgit履歴で確認。利用者の未追跡mcq_readme.txtは対象外。
 
 - 最終方針: 利用者が「直接タグを削除すればよい」を撤回。変数参照だけではSTACKが言語を認識せず英語表示になっていたとの実機報告。generateXmlで問題文・specific/general/true/falsefeedback内の専用langcode参照と空langブロックを選択言語の直接宣言1組へ置換する方式を採用。本文付き翻訳ブロックと空フィードバックを保持。既存の問題変数内langcode定義は互換性のため維持するが、出力の表示欄では参照しない。原本テンプレートのマーカーは生成時に展開。README・ChangeLog・キャッシュ更新。
 - 検証: `node scripts/tests/test_language_declarations.cjs`（4テンプレート、en/ja→pt、PRT、重複除去、非空翻訳保持）、`node scripts/tests/test_variant_parameters.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、app.js構文・git diff --check成功。利用者P02のコピーで問題文とPRT3欄の計4箇所だけ変換し、元ファイルは未変更。ローカルSTACK APIでseed=1のja/enをそれぞれ指定し、問題文が指定言語になり他方の言語ではないことを検証して両方成功。大学Moodle上での警告消滅は未確認。利用者のc-p依頼により本変更と検証をcommit/push対象とする。送信状態はgit履歴で確認。未追跡mcq_readme.txtは対象外。

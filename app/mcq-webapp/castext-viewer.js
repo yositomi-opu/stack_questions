@@ -46,7 +46,8 @@
   }
   function loadMath() {
     if (!mathReady) mathReady=new Promise((resolve,reject)=>{
-      window.MathJax={startup:{typeset:false},svg:{fontCache:"none"},options:{enableMenu:false}};
+      window.MathJax={loader:{load:["[tex]/boldsymbol"],source:{"[tex]/boldsymbol":"[mathjax]/mathjax-boldsymbol-3.2.2.js"}},
+        tex:{packages:{"[+]":["boldsymbol"]}},startup:{typeset:false},svg:{fontCache:"none"},options:{enableMenu:false}};
       const script=document.createElement("script"); script.src="./vendor/mathjax-tex-svg-3.2.2.js";
       script.onload=()=>window.MathJax.startup.promise.then(resolve,reject);
       script.onerror=()=>{mathReady=null;script.remove();reject(new Error(t("数式表示を読み込めません。再実行してください。","Cannot load math display. Please retry.")));};
