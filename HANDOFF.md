@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- 最終方針: 利用者が「直接タグを削除すればよい」を撤回。変数参照だけではSTACKが言語を認識せず英語表示になっていたとの実機報告。generateXmlで問題文・specific/general/true/falsefeedback内の専用langcode参照と空langブロックを選択言語の直接宣言1組へ置換する方式を採用。本文付き翻訳ブロックと空フィードバックを保持。既存の問題変数内langcode定義は互換性のため維持するが、出力の表示欄では参照しない。原本テンプレートのマーカーは生成時に展開。README・ChangeLog・キャッシュ更新。
+- 検証: `node scripts/tests/test_language_declarations.cjs`（4テンプレート、en/ja→pt、PRT、重複除去、非空翻訳保持）、`node scripts/tests/test_variant_parameters.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、app.js構文・git diff --check成功。利用者P02のコピーで問題文とPRT3欄の計4箇所だけ変換し、元ファイルは未変更。ローカルSTACK APIでseed=1のja/enをそれぞれ指定し、問題文が指定言語になり他方の言語ではないことを検証して両方成功。大学Moodle上での警告消滅は未確認。利用者のc-p依頼により本変更と検証をcommit/push対象とする。送信状態はgit履歴で確認。未追跡mcq_readme.txtは対象外。
+
 - 2026-09-23 c-p: 全言語一括ファイル翻訳・依頼文の検証手順強化・API翻訳の文章スロット方式をまとめてcommit/push対象とする。直前検証は `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_ai_translation.py`（11件）、`node scripts/tests/test_ai_translation.cjs`、`node scripts/tests/test_translation_cas.cjs`、`node scripts/tests/test_translation_files.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、app.js/i18n.jsの構文検査、`git diff --check` がすべて成功。Claude Pro・Gemini無料版の実ファイル検証結果は下記。以前の「未実施」は各作業時点の記録であり、現在の送信状態はgit履歴で確認する。利用者の未追跡mcq_readme.txtおよび私的なテスト入出力はコミット対象外。利用環境は更新後 `make restart` とブラウザ再読込が必要。
 
 - 利用者提供のGemini無料版の一括翻訳JSONも、同じ元CSVとアプリ本体関数を使うNodeハーネスで検証し成功。10言語・計210項目の充足、候補ID、数式・STACK記法・プレースホルダー保持、1回の反映とstale解除、CSV/XML再出力・XML構文解析を確認。元データは未変更。これでClaude ProとGemini無料版の提供結果で成功例を確認（具体的モデル名は不明）。利用者の方針により訳文品質は今回の検証対象外とし、将来各言語の編集者が確認・修正する。ブラウザ操作・STACKプレビューは未実施。追加API呼出しなし。commit/push未実施。

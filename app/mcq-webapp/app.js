@@ -1678,11 +1678,9 @@ function generateXml() {
     ? [...parameterPreamble(), `stack_include("${state.includeSource.url}");`].join("\n")
     : generatedVariables;
   return template
-    // STACK discovers available languages in top-level question CASText.
-    // Keep these invisible declarations as well as the reusable langcode variable.
-    .replace(/(<questiontext[^>]*>\s*<text><!\[CDATA\[)/, (start) => el.castextTemplate?.checked ? start + languageBlocks() : start)
     .replace(/\{@__mcq_noidea_checked@\}/g, "{@%__mcq_noidea_checked@}")
-    .replace(/(?:\[\[lang code=['"][^'"]+['"]\]\]\[\[\/lang\]\])+/g, languageBlocks())
+    .replace(/<(questiontext|specificfeedback|generalfeedback|truefeedback|falsefeedback)\b[^>]*>[\s\S]*?<\/\1>/g,
+      (field, tag) => inlineLanguageDeclarations(field, tag === "questiontext" && el.castextTemplate?.checked))
     .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
     .replace(/%__mcq_rb_cb\s*:\s*"(?:rb2?|cb)"\s*;/, `%__mcq_rb_cb:"${state.mode === "cb" ? "cb" : el.radioMultiplePrompt?.checked ? "rb2" : "rb"}";`)
     .replace(
@@ -1695,6 +1693,22 @@ function generateXml() {
     )
     .replace(/(\]\]><\/text>\s*<\/questionvariables>)/, (end) => el.castextTemplate?.checked
       ? `\n%__mcq_langcode:${casttextLiteral(languageBlocks())};\n${end}` : end);
+}
+
+function inlineLanguageDeclarations(field, required = false) {
+  // STACK discovers languages before CAS evaluation, including in PRT feedback.
+  // Replace only empty declarations and our marker, never translated content.
+  return field.replace(/(<text\b[^>]*>)([\s\S]*?)(<\/text>)/, (_match, open, content, close) => {
+    const cdata = content.startsWith("<![CDATA[") && content.endsWith("]]>");
+    let body = cdata ? content.slice(9, -3) : content;
+    let found = false;
+    body = body.replace(/\{@\s*%__mcq_langcode\s*@\}|\[\[lang\s+code=["'][^"']+["']\]\]\s*\[\[\/lang\]\]/g, () => {
+      found = true;
+      return "";
+    });
+    if (found || required) body = languageBlocks() + body;
+    return open + (cdata ? "<![CDATA[" + body + "]]>" : body) + close;
+  });
 }
 
 // Preview takes a separate snapshot; saved XML and shared include files are unchanged.
