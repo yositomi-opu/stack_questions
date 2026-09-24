@@ -23,7 +23,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 /* get_assoc_array is also defined in ky_linear_algebra.txt */
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
-%__mcq_lang2(L):=%__mcq_lang(L, %__STACK_LANG);
+%__mcq_lang2(L):=%__mcq_lang(L, %_STACK_LANG);
 
 /* MCQ_CASTEXTP_BEGIN
  * Conservative structural predicate for evaluated CASText values (STACK 2026062900).
@@ -144,8 +144,8 @@ mcq_castextp(x):=block([tag,n,k,valid:true],
 /** use new options flag %__mcq_rb_cb="rb2" **/
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL
   else if %__mcq_rb_cb="rb2" then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
-if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ALL_L);
-  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ANY_L);
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ALL_L)
+  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ANY_L)
   else %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ONE_L);
 %__SELTYPE:%__mcq_seltype;
 %__SELPROMPT:%__mcq_selprompt;

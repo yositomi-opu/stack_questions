@@ -13,6 +13,8 @@
 
 ## 直近の変更と決定事項
 
+- 2026-09-24: `mcq_template_pre_cas.txt` のSELPROMPT分岐でelse前のセミコロン2個を除去し、`%__mcq_lang2` の参照言語変数を `%__STACK_LANG` から `%_STACK_LANG` に訂正。`make mcq_template_pre_cas.mac` で再生成し、txt/macとも差分はこの3行のみ。提供の10言語CSVは変更せず、CLIで一時XMLを生成、ローカルSTACK APIでseed=1・ja/enの両方のプレビューに成功。問題文内の動的な操作説明が日本語／英語へ切り替わることと8選択肢を確認。`make -q mcq_template_pre_cas.mac`、`git diff --check` 成功。大学Moodle・他8言語の実機確認は未実施。利用者のc-p依頼によりテンプレート修正と検証記録をcommit/push対象とする。送信状態はgit履歴で確認。既存のscripts/mcq_csv2xml.pyの変更と未追跡mcq_readme.txtは対象外。
+
 - 2026-09-24: `scripts/mcq_csv2xml.py` と `app/mcq-webapp/headless.cjs` を追加。Python CLIからNode.js 18+を呼び、app.js全体を画面なしのホストで実行する。正規表現による関数切出しや変換ロジックの複製は行わない。app.jsは初期化・画面生成の4箇所だけheadless分岐。ルートXMLテンプレートを直接参照し、schema 1〜3・rb/cb/rb2・多言語検証・パターン上限を共有する。動的listは未評価のまま推測せず、`--evaluate` で起動済みWebAppの `/api/maxima/evaluate` を利用。標準ではコードを実行しない。出力名・stdout・明示上書き・入力保護・XML構文検証に対応。README・ChangeLogを更新。
 - 検証: `node scripts/tests/test_csv_cli.cjs`（変換、対モード、3形式、翻訳不足・型/構文/上限、リスト、mock評価、CLI出力名・stdout・別cwd・上書き保護）成功。既存のtest_csv_schema_v3.cjs / test_preview_ui.cjs / test_language_declarations.cjs / test_variant_parameters.cjs / test_choice_capacity.cjs / test_legacy_xml_import.cjs、JS構文、git diff --check成功。同梱CSVは59件を無評価で変換し、動的リストのSTA10は実WebApp評価付きで変換成功。利用者CSVのコピーも評価なし／あり双方で変換し、CLI出力XMLをローカルSTACK APIで描画、8選択肢を確認。今回ブラウザ操作と大学Moodle実機確認は未実施。CLIはXML生成・任意評価用で、include公開や自動翻訳は行わない。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はgit履歴で確認。未追跡mcq_readme.txtは対象外。
 
