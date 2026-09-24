@@ -23,6 +23,7 @@ if %__mcq_subsc then %__mcq_ssc:1 else %__mcq_ssc:0;
 /* get_assoc_array is also defined in ky_linear_algebra.txt */
 %__mcq_gaa(L, s):=block([k, lgL, mL], lgL:map(first, L), mL:map(second, L), if member(s, lgL) then for k:1 thru length(lgL) do (if lgL[k]=s then return(mL[k])) else return(""));
 %__mcq_lang(L, s):=block([m], m:%__mcq_gaa(L, s), if m="" then m:%__mcq_gaa(L, "en"), if m="" and listp(L) and length(L)>0 then m:second(first(L)), return (m));
+%__mcq_lang2(L):=%__mcq_lang(L, %__STACK_LANG);
 
 /* MCQ_CASTEXTP_BEGIN
  * Conservative structural predicate for evaluated CASText values (STACK 2026062900).
@@ -83,7 +84,7 @@ mcq_castextp(x):=block([tag,n,k,valid:true],
  ["ru", castext("Ни один из предложенных вариантов.")],
  ["sv", castext("Inget av ovanstående.")]
 ];
-%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %__STACK_LANG);
+%__mcq_nocoptS:%__mcq_lang2(%__mcq_nocoptSL);
 %__mcq_noidSL:[
  ["en", castext("I don't know yet.")], ["es", castext("Todavía no lo sé.")],
  ["ja", castext("まだわからない.")],
@@ -96,7 +97,7 @@ mcq_castextp(x):=block([tag,n,k,valid:true],
  ["ru", castext("Пока не знаю.")],
  ["sv", castext("Jag vet inte ännu.")]
 ];
-%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %__STACK_LANG);
+%__mcq_noidS:%__mcq_lang2(%__mcq_noidSL);
 %__mcq_CLbase:[];/* list of correct answer patterns */
 %__mcq_WLbase:[];/* list of incorrect(wrong) answer patterns */
 %__mcq_CmsgL:[];/* list of feedback messages(castext) for correct patterns */
@@ -118,19 +119,19 @@ mcq_castextp(x):=block([tag,n,k,valid:true],
  ["ru", castext("Был выбран/отмечен вариант «Пока не знаю». Оценка — 0 баллов.")],
  ["sv", castext("Alternativet ”Jag vet inte ännu” valdes/markerades. Poängen är 0.")]
 ];
-%__mcq_noidea_checked:%__mcq_lang(%__mcq_noidea_checkedL, %_STACK_LANG);
+%__mcq_noidea_checked:%__mcq_lang2(%__mcq_noidea_checkedL);
 
 /******** Def of seltype / selprompt ***************/
 
 /********** __SELPROMPT__ / legacy __SELTYPE__ (%__mcq_qtext_auto) **********/
 /* Legacy fragment for question texts which put __SELTYPE__ next to the object. */
 %__mcq_SELL:[["en", "Choose"], ["es", "Elige"], ["fr", "Choisissez"], ["de", "Wählen Sie"], ["it", "Scegli"], ["ja", "選べ"], ["pt", "Escolha"], ["zh", "选择"], ["ko", "선택하시오"], ["ru", "Выберите"], ["sv", "Välj"]];
-%__mcq_SEL:%__mcq_lang(%__mcq_SELL, %_STACK_LANG);
+%__mcq_SEL:%__mcq_lang2(%__mcq_SELL);
 %__mcq_SELALLL:[["en", "Choose all"], ["es", "Elige todas"], ["fr", "Choisissez toutes les"], ["de", "Wählen Sie alle"], ["it", "Scegli tutte le"], ["ja", "すべて選べ"], ["pt", "Escolha todas as"], ["zh", "选择所有"], ["ko", "모두 선택하시오"], ["ru", "Выберите все"], ["sv", "Välj alla"]];
-%__mcq_SELALL:%__mcq_lang(%__mcq_SELALLL, %_STACK_LANG);
+%__mcq_SELALL:%__mcq_lang2(%__mcq_SELALLL);
 %__mcq_SELONEANYL:[
  ["en", "Choose one of the"], ["es", "Elige una de las"], ["fr", "Choisissez une des"], ["de", "Wählen Sie eine der"], ["it", "Scegli una delle"], ["ja", "1つ選べ（正解が複数あっても1つでよい）"], ["pt", "Escolha uma das"], ["zh", "选择其中一个"], ["ko", "그중 하나를 선택하시오"], ["ru", "Выберите один из"], ["sv", "Välj ett av"]];
-%__mcq_SELONEANY:%__mcq_lang(%__mcq_SELONEANYL, %_STACK_LANG);
+%__mcq_SELONEANY:%__mcq_lang2(%__mcq_SELONEANYL);
 
 /* Complete instruction without terminal punctuation. Add punctuation in each question text. */
 %__mcq_SELPROMPT_ONE_L:[
@@ -143,9 +144,9 @@ mcq_castextp(x):=block([tag,n,k,valid:true],
 /** use new options flag %__mcq_rb_cb="rb2" **/
 if %__mcq_rb_cb="cb" then %__mcq_seltype:%__mcq_SELALL
   else if %__mcq_rb_cb="rb2" then %__mcq_seltype:%__mcq_SELONEANY else %__mcq_seltype:%__mcq_SEL;
-if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ALL_L, %_STACK_LANG)
-  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ANY_L, %_STACK_LANG)
-  else %__mcq_selprompt:%__mcq_lang(%__mcq_SELPROMPT_ONE_L, %_STACK_LANG);
+if %__mcq_rb_cb="cb" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ALL_L);
+  else if %__mcq_rb_cb="rb2" then %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ANY_L);
+  else %__mcq_selprompt:%__mcq_lang2(%__mcq_SELPROMPT_ONE_L);
 %__SELTYPE:%__mcq_seltype;
 %__SELPROMPT:%__mcq_selprompt;
 /*********************************************/
