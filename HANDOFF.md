@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-24
+更新日: 2026-09-25
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,8 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 2026-09-25: 利用者作成の `texput_W.txt` と生成した `texput_W.mac` を追加。MakefileのTXTFILESへ登録し、通常の `make` と `make texput_W.mac` の両方で生成可能にした。既存の `ky_linear_algebra` は互換性のため変更しない。検証: `make texput_W.mac`、`make -q texput_W.mac` 成功、`make -n all` は生成残なし。Pythonで33個のtexput定義が原文と完全一致し、コメントのみ除去されることを確認。`git diff --check` 成功。Moodleでの新includeの実機確認は未実施。今後の分割include選択UI（関数・設定の説明、依存関係・読込順の管理）は設計候補にとどめ、利用者指定により今回は未実装。利用者のc-p依頼によりこの4ファイルをcommit/push対象とする。送信状態はgit履歴で確認。既存のCLI変更・未追跡メモ・バックアップファイルは対象外。
 
 - 2026-09-24: `mcq_template_pre_cas.txt` のSELPROMPT分岐でelse前のセミコロン2個を除去し、`%__mcq_lang2` の参照言語変数を `%__STACK_LANG` から `%_STACK_LANG` に訂正。`make mcq_template_pre_cas.mac` で再生成し、txt/macとも差分はこの3行のみ。提供の10言語CSVは変更せず、CLIで一時XMLを生成、ローカルSTACK APIでseed=1・ja/enの両方のプレビューに成功。問題文内の動的な操作説明が日本語／英語へ切り替わることと8選択肢を確認。`make -q mcq_template_pre_cas.mac`、`git diff --check` 成功。大学Moodle・他8言語の実機確認は未実施。利用者のc-p依頼によりテンプレート修正と検証記録をcommit/push対象とする。送信状態はgit履歴で確認。既存のscripts/mcq_csv2xml.pyの変更と未追跡mcq_readme.txtは対象外。
 

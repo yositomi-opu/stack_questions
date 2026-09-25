@@ -1,6 +1,6 @@
 TXTFILES := mcq_template_pre_cas.txt mcq_template_post_cas.txt mcq_template_fvar_cas.txt \
 		mcq_template_pre.txt mcq_template_post.txt mcq_template_fvar.txt \
-		ky_linear_algebra.txt mcq_flags.txt tex_library.txt \
+		ky_linear_algebra.txt mcq_flags.txt tex_library.txt texput_W.txt \
 		multilang_library.txt
 MACFILES := $(TXTFILES:.txt=.mac)
 

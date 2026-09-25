@@ -1,0 +1,44 @@
+/* texput setting */
+
+/**************/
+/* boldsymbol */
+/**************/
+
+texput(Wa,"\\boldsymbol{a}");
+texput(Wb,"\\boldsymbol{b}");
+texput(Wc,"\\boldsymbol{c}");
+texput(Wd,"\\boldsymbol{d}");
+texput(We,"\\boldsymbol{e}");
+texput(Wf,"\\boldsymbol{f}");
+texput(Wg,"\\boldsymbol{g}");
+texput(Wh,"\\boldsymbol{h}");
+texput(Wi,"\\boldsymbol{i}");
+texput(Wj,"\\boldsymbol{j}");
+texput(Wk,"\\boldsymbol{k}");
+texput(Wm,"\\boldsymbol{m}");
+texput(Wn,"\\boldsymbol{n}");
+texput(Wo,"\\boldsymbol{o}");
+texput(Wp,"\\boldsymbol{p}");
+texput(Wq,"\\boldsymbol{q}");
+texput(Wr,"\\boldsymbol{r}");
+texput(Ws,"\\boldsymbol{s}");
+texput(Wt,"\\boldsymbol{t}");
+texput(Wu,"\\boldsymbol{u}");
+texput(Wv,"\\boldsymbol{v}");
+texput(Ww,"\\boldsymbol{w}");
+texput(Wx,"\\boldsymbol{x}");
+texput(Wy,"\\boldsymbol{y}");
+texput(Wz,"\\boldsymbol{z}");
+texput(Wzr, "\\boldsymbol{0}");
+
+/**********/
+/* mathbb */
+/**********/
+
+texput(WK,"{\\mathbb K}");
+texput(WH,"{\\mathbb H}");
+texput(WC,"{\\mathbb C}");
+texput(WR,"{\\mathbb R}");
+texput(WQ,"{\\mathbb Q}");
+texput(WZ,"{\\mathbb Z}");
+texput(WN,"{\\mathbb N}");
