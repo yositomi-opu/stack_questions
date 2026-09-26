@@ -1,0 +1,54 @@
+
+
+
+
+
+
+
+%_tex1h(c):=if c=0 or c=1 then "" else if c=-1 then "-" else tex1(c);
+%_tex1c(c):=if c=1 then "+" else if c=-1 then "-" else if c>0 then sconcat("+", tex1(c)) else tex1(c);
+%_tex1n(c):=if c>0 then sconcat("+", tex1(c)) else if c<0 then tex1(c) else "";
+%_tex1const(x):=if x=1 then "" else tex1(x);
+
+
+
+
+
+polynomial_to_list(px, x):=block([cL:[], c, d:0, qx:px], while(not qx=0) do (c:coeff(qx, x, d), cL:push(c,cL), qx:qx-c*x^d, d:d+1), return(cL));
+
+
+
+polynomial_to_list_varlist(px, xL):=block([cL:[], c, d:1, qx:px],
+  while(d<=length(xL)) do (c:coeff(qx, xL[d]), cL:append(cL, [c]), qx:qx-c*xL[d], d:d+1), cL:append(cL, [qx]), return(cL));
+
+_scon_lincomb(cL, vL):=block([s:"", k, ln:length(cL), hflag:true], for k:1 thru ln do (
+  if not cL[k]=0 then (
+    if hflag then s:sconcat(s, %_tex1h(cL[k])) else s:sconcat(s, if vL[k]="" then %_tex1n(cL[k]) else %_tex1c(cL[k])), hflag:false,
+    if stringp(vL[k]) then s:sconcat(s, vL[k]) else s:sconcat(s, tex1(vL[k])))),
+  return(s));
+_scon_lincomb_paren(cL,vL):=block([s:"", k, ln:length(cL)],
+  for k:1 thru ln do if not cL[k]=tex1(0) then s:sconcat(s, cL[k], "(", vL[k], ")"), return(s));
+
+
+display_polynomial_tex1(px, x, adf):=block([cL:polynomial_to_list(px, x), cLr, cL1, sL, xpL, k, ln],
+  cLr:reverse(cL), ln:length(cL),
+  if adf=1 then cL1:cLr else cL1:cL,
+  if adf=1 then sL:makelist(if k=1 then %_tex1h(cLr[k]) else %_tex1c(cLr[k]), k, 1, ln)
+  else sL:makelist(if k=1 then %_tex1h(cL[k]) else %_tex1c(cL[k]), k, 1, ln),
+  if adf=1 then xpL:makelist(if k=1 then (if sL[1]="" or sL[1]="-" then "1" else "") else tex1(x^(k-1)), k, 1, ln)
+           else xpL:makelist(if k=ln then (if sL[1]="" or sL[1]="-" then "1" else "") else tex1(x^(ln-k)), k, 1, ln),
+  return(_scon_lincomb(cL1, xpL)));
+
+display_polynomial_varlist_tex1(px, xL):=block([cL:polynomial_to_list_varlist(px, xL), vL],
+  if length(xL)=length(cL)-1 then vL:endcons("", xL) else vL:xL, return(_scon_lincomb(cL, vL)));
+
+texput(%__tmpIJ, "tt");
+display_polynomial_matrix_varlist_tex1(mx, xL):=block([s, %__tmpIJ, rw, cl, i, j], [rw, cl]:matrix_size(mx),
+  texput(%__tmpIJ, "tt"),
+  s:tex1(genmatrix(lambda([i, j], %__tmpIJ[i, j]), rw, cl)),
+  for j:1 thru cl do
+    for i:1 thru rw do
+      s:ssubst(display_polynomial_varlist_tex1(mx[i, j], xL), sconcat("tt_{", i, ",", j, "}"), s),
+  return(s));
+
+display_polynomial(px, x, adf):=sconcat("\\(", display_polynomial_tex1(px, x, adf), "\\)");

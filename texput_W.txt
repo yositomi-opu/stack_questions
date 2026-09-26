@@ -1,4 +1,6 @@
-/* texput setting */
+/*****************************/
+/* texput setting Wa, WR etc */
+/*****************************/
 
 /**************/
 /* boldsymbol */
@@ -42,3 +44,5 @@ texput(WR,"{\\mathbb R}");
 texput(WQ,"{\\mathbb Q}");
 texput(WZ,"{\\mathbb Z}");
 texput(WN,"{\\mathbb N}");
+
+/********** EOF **********/

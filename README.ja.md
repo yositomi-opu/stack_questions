@@ -58,6 +58,15 @@ Maximaで直接記述する場合、問題文やフィードバックを言語�
 
 Moodleへログインした教員にWebAppを公開する構成と、Workshop用アカウントの一括作成・管理については [Moodle連携・管理ガイド](deploy/moodle-auth/README.ja.md) を参照してください。
 
+## 線形代数ライブラリの生成
+
+`make` で `genmatrix_lib.txt`、`trans_mat.txt`、`rref_lib.txt`、
+`polynomial_disp.txt`、`texput_W.txt`、`linalg_misc.txt` から各 `.mac` を生成します。
+さらに、この順で6つの `.txt` を結合して `ky_linear_algebra.txt`、
+6つの `.mac` を結合して互換用の `ky_linear_algebra.mac` を生成します。
+編集は6つの元ファイルに対して行ってください。結合ファイルの直接編集は再生成時に上書きされます。
+このライブラリ群と両結合ファイルだけを更新する場合は `make ky_linear_algebra.mac` を使えます。
+
 ## 開発に参加する
 
 現在の開発状況・検証結果・未完了事項は [HANDOFF.md](HANDOFF.md)、開発エージェント向けのルールは [AGENTS.md](AGENTS.md) に記載しています。ライセンスは [LICENSE](LICENSE) を参照してください。

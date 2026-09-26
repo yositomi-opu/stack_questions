@@ -1,7 +1,9 @@
+LINALG_TXTFILES := genmatrix_lib.txt trans_mat.txt rref_lib.txt polynomial_disp.txt texput_W.txt linalg_misc.txt
+LINALG_MACFILES := $(LINALG_TXTFILES:.txt=.mac)
 TXTFILES := mcq_template_pre_cas.txt mcq_template_post_cas.txt mcq_template_fvar_cas.txt \
 		mcq_template_pre.txt mcq_template_post.txt mcq_template_fvar.txt \
-		ky_linear_algebra.txt mcq_flags.txt tex_library.txt texput_W.txt \
-		multilang_library.txt
+		ky_linear_algebra.txt mcq_flags.txt tex_library.txt \
+		multilang_library.txt $(LINALG_TXTFILES)
 MACFILES := $(TXTFILES:.txt=.mac)
 
 ifeq ($(OS),Windows_NT)
@@ -25,6 +27,13 @@ SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if
 .PHONY: all clean check-python setup check install-deps start stop restart status install-moodle-auth workshop-users
 
 all: $(MACFILES)
+
+# The six split libraries are the editable sources; these bundles are generated.
+ky_linear_algebra.txt: $(LINALG_TXTFILES) scripts/concat_libraries.py Makefile
+	$(PYTHON) scripts/concat_libraries.py $@ $(LINALG_TXTFILES)
+
+ky_linear_algebra.mac: $(LINALG_MACFILES) ky_linear_algebra.txt scripts/concat_libraries.py Makefile
+	$(PYTHON) scripts/concat_libraries.py $@ $(LINALG_MACFILES)
 
 %.mac: %.txt scripts/txt2mac.py
 	$(PYTHON) scripts/txt2mac.py $< $@

@@ -58,6 +58,15 @@ Use `%__CoptL1L` and `%__WoptL1L` for language-specific options, or `%__CoptL1` 
 
 See the [Moodle integration and administration guide](deploy/moodle-auth/README.md) for restricting WebApp access to teachers logged in to Moodle and for creating and managing workshop accounts in bulk.
 
+## Build the linear algebra libraries
+
+Run `make` to generate `.mac` files from `genmatrix_lib.txt`, `trans_mat.txt`,
+`rref_lib.txt`, `polynomial_disp.txt`, `texput_W.txt`, and `linalg_misc.txt`.
+It also concatenates these sources, in that order, into `ky_linear_algebra.txt`
+and their generated `.mac` files into `ky_linear_algebra.mac` for compatibility.
+Edit the six source files; edits to the combined files are overwritten when rebuilt.
+Use `make ky_linear_algebra.mac` to rebuild just these libraries and both combined files.
+
 ## Contribute to development
 
 [HANDOFF.md](HANDOFF.md) records the current development state, validation results, and outstanding work. [AGENTS.md](AGENTS.md) provides instructions for development agents. Both are currently in Japanese. See [LICENSE](LICENSE) for licensing terms.

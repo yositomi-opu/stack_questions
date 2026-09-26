@@ -1,0 +1,37 @@
+
+
+
+
+
+get_first_non_zero_column(M, r):=block([t, p, q], [p, q]:matrix_size(M),
+  if M[r]=makelist(0, q) then return(q+1) else for t: 1 thru q do (if not M[r,t]=0 then return(t)));
+getFirstNZ(M, i):=get_first_non_zero_column(M, i);
+
+
+
+redeche(M):=block([p,q,r,i,j,t],[p,q]:matrix_size(M),M:echelon(M),r:rank(M),if r=1 then return (M),for i:r thru 2 step -1 do (j:getFirstNZ(M,i),for t:1  thru i-1 do (M:rowop(M,t,i,M[t,j]))),M);
+
+
+
+randechelon(i1, j1, pv, rL):=block([i, j, ret],
+  genmatrix(lambda([i, j], if i>length(pv) then 0 elseif j < pv[i] then 0 elseif j=pv[i] then 1 elseif member(j,pv) then 0 else rand(rL)), i1, j1));
+
+
+isechelon(M):=block([pv, i, rw, cl, rt:true], [rw, cl]:matrix_size(M),
+  pv:makelist(getFirstNZ(M, i), i, 1, rw),
+  if not sort(pv)=pv then return(false),
+  for i:2 thru rank(M) do (rt:rt and is(pv[i-1]<pv[i])), return(rt));
+echelonp(M):=isechelon(M);
+
+
+
+
+nullspace2(A):=block([rk, pv:[], pv1:[], F, FL:[], F1, rw, cl, rz, k, k1:1],
+  rk:rank(A), [rw, cl]:matrix_size(A), F:redeche(A),
+  for k:1 thru rk do pv:append(pv, [get_first_non_zero_column(F, k)]),
+  rz:genmatrix(lambda([i,j], 0), 1, cl),
+  for k:1 thru cl do
+    if member(k, pv) then (FL:append(FL, [row(F, k1)]), k1:k1+1)
+    else (FL:append(FL, [rz]), pv1:append(pv1, [k])),
+  F1:-apply(addrow, FL)+genmatrix(lambda([i,j], if i=j then 1 else 0), cl, cl),
+  return(makelist(col(F1, pv1[k]), k, 1, length(pv1))));
