@@ -1758,16 +1758,23 @@ function syncLibraryControls() {
     for (const [id, name, description] of libraryCatalog()) {
       const label = document.createElement("label");
       label.className = "check-row library-check";
-      label.title = description;
+      const tooltip = document.createElement("span");
+      tooltip.className = "question-text-tooltip library-tooltip";
+      tooltip.setAttribute("role", "tooltip");
+      tooltip.id = `libraryTooltip-${id}`;
       const input = document.createElement("input");
       input.type = "checkbox";
       input.dataset.library = id;
+      input.setAttribute("aria-describedby", tooltip.id);
       input.addEventListener("change", () => setLibraryIncluded(id, input.checked));
       const span = document.createElement("span");
       span.textContent = name;
       const filename = document.createElement("small");
-      filename.textContent = id;
-      label.append(input, span, filename);
+      filename.textContent = `${id}.mac`;
+      const explanation = document.createElement("span");
+      explanation.textContent = description;
+      tooltip.append(filename, explanation);
+      label.append(input, span, tooltip);
       host.append(label);
     }
     window.mcqI18n?.translateTree();

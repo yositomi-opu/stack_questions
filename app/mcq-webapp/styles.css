@@ -1352,8 +1352,12 @@ td:nth-child(5) {
 .ai-settings-dialog p, #aiTranslationProgress { font-size: 12px; overflow-wrap: anywhere; }
 .ai-settings-dialog .row-actions { flex-wrap: wrap; }
 
-.library-includes { display:flex; flex-wrap:wrap; gap:0.5rem 1rem; margin-bottom:0.8rem; }
-.library-settings .panel-heading { justify-content:flex-start; gap:0.4rem; }
-.library-check { cursor:pointer; }
-
-.library-check small { color:var(--muted, #667085); font-size:0.75em; }
+.library-settings { position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem 1rem; margin-bottom:0.8rem; }
+.library-includes { display:contents; }
+.library-settings .panel-heading { justify-content:flex-start; gap:0.4rem; margin:0; flex:none; }
+.library-settings .question-text-help { position:static; }
+.library-settings .question-text-tooltip { left:0; right:auto; max-width:100%; }
+.library-check { cursor:pointer; white-space:nowrap; }
+.library-tooltip { white-space:normal; }
+.library-tooltip small { display:block; color:var(--muted, #667085); margin-bottom:0.3rem; }
+.library-check:hover .library-tooltip, .library-check:focus-within .library-tooltip { visibility:visible; }

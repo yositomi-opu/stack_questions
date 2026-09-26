@@ -13,6 +13,8 @@
 
 ## 直近の変更と決定事項
 
+- 2026-09-26: 共通ライブラリ見出し・?・チェック項目を同じflex行に配置（狭い画面では項目単位で折返し）。常時表示のファイル名を各項目の説明ポップアップに移動し、hover／キーボードフォーカスで表示。?と項目のポップアップをセクション左端基準にして左へのはみ出しを防止。日英翻訳対象の説明文を維持し、READMEとキャッシュ識別子更新。検証: `node --check app/mcq-webapp/app.js`、`node scripts/tests/test_library_includes.cjs`、`git diff --check` 成功。実ブラウザ確認は未実施（検証サーバーの起動がsandboxのポートbind制限で失敗）。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。
+
 - 2026-09-26: 問題変数下に共通ライブラリ選択UIを追加。6分割＋旧一括版、日英の機能説明とファイル名表示。チェックで選択したincludeをXML冒頭に出力し、テンプレートの固定ky_linear_algebra読込を生成時に置換。新規・クリアは未選択、include_libraries設定のない旧CSVは互換用一括版を選択。分割版と一括版はチェック操作で相互切替。CSV config include_librariesは識別子→URLのJSON、XMLは本文の実includeを優先して復元。問題変数・パラメータの独立した手書きincludeを認識し、チェック解除時は対応文のみ除去（コメント・条件式内は対象外）。別ファイルの問題変数とは別に外側XMLで共通ライブラリを読み込み、二重読込を回避。評価リクエストとheadless CLIにmanagedLibrariesを追加し、サーバーの無条件旧一括版preloadを抑止。旧クライアントは従来動作。README・CSV_SCHEMA_V3・CHANGELOG・キャッシュ識別子更新。
 - 検証: `node scripts/tests/test_library_includes.cjs`（選択、旧CSV、CSV/XML往復、本文優先、手書きinclude解除、クリア、別ファイル、評価コード）、test_csv_schema_v3.cjs、test_variant_parameters.cjs、test_preview_ui.cjs、test_legacy_xml_import.cjs、test_language_declarations.cjs、test_csv_cli.cjs、`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_evaluation_diagnostics.py`（4件）成功。JS構文・git diff --check成功。別ポートの検証サーバーで実ブラウザの日英UI・配置とrref_lib選択時のSTACK APIプレビュー成功。Docker評価は起動済みコンテナのworkspaceがこのcloneと異なるため一時評価ファイルを参照できず失敗（既存環境の問題）。システムMaximaを指定して同じevaluate_payloadを実行し、rref_libありではnullspace2が長さ1のベクトルリスト、なしでは未評価式になることを確認。大学Moodleは未確認。サーバー変更反映にはmake restartが必要。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。既存CLIファイルのモード変更・未追跡メモ・バックアップは変更していない。
 
