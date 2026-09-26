@@ -2931,6 +2931,16 @@ function setTranslationStatus(message, kind = "") {
   el.translationStatus.className = `translation-status${kind ? ` ${kind}` : ""}`;
 }
 
+async function evaluateImportedQuestion() {
+  // Library selection alone does not require evaluating an otherwise static question.
+  const source = stripMaximaComments(`${el.qvars.value || ""}\n${el.parameters.value || ""}`).trim();
+  if (!source && !casChoiceExpressions().length) {
+    setCasEvaluationStatus("評価対象なし（問題変数は省略できます）", "idle");
+    return;
+  }
+  await evaluateCasLocally();
+}
+
 async function readSelectedFile(event) {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -2945,7 +2955,7 @@ async function readSelectedFile(event) {
     } else {
       setStatus(`${file.name} を読み込みました`);
     }
-    await evaluateCasLocally();
+    await evaluateImportedQuestion();
   } catch (error) {
     setStatus(error.message, true);
   } finally {
@@ -2963,7 +2973,7 @@ async function readSelectedXml(event) {
     const summary = importXmlText(xmlText, file.name, includeSource);
     const includeNote = includeSource ? `／include: ${includeSource.path}` : "";
     setStatus(`${file.name} を読み込みました（基本言語: ${summary.baseLanguage}／言語: ${summary.languages.join(", ")}／パターン: ${summary.patterns}${includeNote}）`);
-    await evaluateCasLocally();
+    await evaluateImportedQuestion();
   } catch (error) {
     setStatus(`XMLを読み込めません: ${error.message}`, true);
   } finally {

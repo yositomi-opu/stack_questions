@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-09-26
+更新日: 2026-09-27
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,8 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 2026-09-27: qvar省略CSVについて、利用者ファイルは修正前のCLI・ブラウザ双方で読込可能であり、空欄になる事象は再現せず。空の問題変数・補助パラメータ（コメントのみを含む）かつCAS選択肢なしの場合、CSV/XML読込直後の自動評価を省略し、日英で評価対象なしを表示するよう改善。共通ライブラリ選択だけでは自動評価しない。手動評価は維持。qvar省略仕様をREADMEに追記。検証: test_import_evaluation.cjs、test_csv_schema_v3.cjs、test_library_includes.cjs、app.js/i18n.js構文確認、git diff --check成功。利用者CSVを一時見本経由で実ブラウザ読込し、問題変数空欄・タイトル・正解1行/誤答8行・評価対象なし表示を確認。CLIでXML生成も成功。STACK/Moodleでの問題実行は未確認。検証用CSV・サーバーは撤去。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。
 
 - 2026-09-26: 共通ライブラリ見出し・?・チェック項目を同じflex行に配置（狭い画面では項目単位で折返し）。常時表示のファイル名を各項目の説明ポップアップに移動し、hover／キーボードフォーカスで表示。?と項目のポップアップをセクション左端基準にして左へのはみ出しを防止。日英翻訳対象の説明文を維持し、READMEとキャッシュ識別子更新。検証: `node --check app/mcq-webapp/app.js`、`node scripts/tests/test_library_includes.cjs`、`git diff --check` 成功。実ブラウザ確認は未実施（検証サーバーの起動がsandboxのポートbind制限で失敗）。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。
 

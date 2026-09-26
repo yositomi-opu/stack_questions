@@ -135,3 +135,17 @@ for(const bad of ['"qvar","cas","n/a","texput(WR, "abc");"','a,"unclosed','a,b"c
 }
 assert.throws(()=>context.parseDelimited('a,b\r\n"qvar","cas","n/a","a:1;\r\ntexput(WR, "abc");"',','),/行: 3/);
 console.log('Passed: strict CSV quotes, multiline/CRLF/TSV preservation, physical error lines and non-destructive rejection.');
+// Missing optional qvar/parameters must clear previous input without losing the question.
+for (const schema of ['2', '3']) {
+  el.qvars.value='old:99;'; state.qvars=['old:99;']; el.parameters.value='oldparam:2;';
+  context.applyRecords([
+    ['config','csv_schema',schema], ['config','castext_template','true'], ['config','title','NoVariables'],
+    ['qtextL','string','ja','変数を使わない問題'],
+    ['option1C','string','ja','正解'], ['option1W','string','ja','誤答'],
+    ['feedback1C','string','ja','説明']
+  ]);
+  assert.equal(el.qvars.value,''); assert.equal(state.qvars.length,0); assert.equal(el.parameters.value,'');
+  assert.equal(el.questions.ja.value,'変数を使わない問題'); assert.equal(state.rows.length,2);
+  assert.ok(context.generateXml().includes('変数を使わない問題'));
+}
+console.log('Passed: optional question variables and parameters, stale-input clearing, XML generation.');

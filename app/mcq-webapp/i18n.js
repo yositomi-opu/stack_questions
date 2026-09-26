@@ -224,6 +224,7 @@
     "問題変数": "Question variables",
     "評価": "Evaluate",
     "問題変数を評価": "Evaluate question variables",
+    "評価対象なし（問題変数は省略できます）": "Nothing to evaluate (question variables are optional)",
     "未評価": "Not evaluated",
     "問題文": "Question text",
     "パラメータ": "Parameters",
