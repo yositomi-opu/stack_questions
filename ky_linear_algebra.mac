@@ -159,7 +159,7 @@ display_polynomial_tex1(px, x, adf):=block([cL:polynomial_to_list(px, x), cLr, c
   if adf=1 then sL:makelist(if k=1 then %_tex1h(cLr[k]) else %_tex1c(cLr[k]), k, 1, ln)
   else sL:makelist(if k=1 then %_tex1h(cL[k]) else %_tex1c(cL[k]), k, 1, ln),
   if adf=1 then xpL:makelist(if k=1 then (if sL[1]="" or sL[1]="-" then "1" else "") else tex1(x^(k-1)), k, 1, ln)
-           else xpL:makelist(if k=ln then (if sL[1]="" or sL[1]="-" then "1" else "") else tex1(x^(ln-k)), k, 1, ln),
+           else xpL:makelist(if k=ln then (if cL1[k]=1 or cL1[k]=-1 then "1" else "") else tex1(x^(ln-k)), k, 1, ln),
   return(_scon_lincomb(cL1, xpL)));
 
 display_polynomial_varlist_tex1(px, xL):=block([cL:polynomial_to_list_varlist(px, xL), vL],

@@ -13,6 +13,8 @@
 
 ## 直近の変更と決定事項
 
+- 2026-09-26: 利用者によるpolynomial_dispの降順定数項判定修正（cL1[k]の±1判定）を確認し、編集時に抜けたmakelistの範囲引数 `k, 1, ln)` を補完。`make` でpolynomial_disp.macと結合txt/macを更新。`make -q`、`git diff --check` 成功。ローカルMaximaで7式（x^3-3*x^2-1、x^2+1、2*x^2-1、x^2+2、定数±1、正の分数係数を含む式）を昇順・降順の計14通り実行し、符号・定数項・項順が正しい出力を確認。STACK/Moodle実機は未実施。今回の変更と引き継ぎを利用者依頼によりcommit/push対象とする。既存CLI変更・メモ・バックアップは除外。
+
 - 2026-09-26: 6分割txtを正本とし、Makefileで各macを生成後、txt同士／mac同士を指定順（genmatrix_lib, trans_mat, rref_lib, polynomial_disp, texput_W, linalg_misc）で結合するよう変更。`scripts/concat_libraries.py` を追加。`make ky_linear_algebra.mac` でも両結合ファイルを更新する。日英READMEに編集先・生成手順を記載。利用者によるnullspace2のrref_libへの移動、echelonp追加、polynomial_dispのsL代入コメント解除を収録。元ファイルの行末空白のみ整理し、関数内容は変更なし。多項式表示には定数項判定でsL[1]を使う問題が残り、修正済みとは扱わない。検証: `make -j4`、`make -q`、`git diff --check` 成功。Pythonで両結合出力と6ファイル連結の完全一致を確認。一時ディレクトリでmac無しからの並列生成と、rref_lib.txt更新時に対応mac・両結合ファイルだけが再生成されることを確認（makeの時刻判定精度を考慮して更新間隔を確保）。全103文の静的照合一致。Maxima/Moodle実行は未実施。利用者のc-p依頼で本変更をcommit/push対象とする。既存CLI変更、未追跡メモ、バックアップは除外。include選択UIはまだ未実装。
 
 - 2026-09-26: 利用者が分割した `genmatrix_lib.txt`、`trans_mat.txt`、`rref_lib.txt`、`polynomial_disp.txt`、`texput_W.txt`、`linalg_misc.txt` と作業ツリーの `ky_linear_algebra.txt` を静的比較。Pythonの一時比較スクリプトでコメント・文字列外の空白を除き、文字列内容を保持してトップレベル文を照合。元の102文はすべて完全一致し、欠落・重複なし。分割側は103文で、追加は `rref_lib.txt` の `echelonp(M):=isechelon(M);` のみ。各分割ファイル内の既存定義の相対順も一致。別途、両版のdisplay_polynomial_tex1にsL代入をコメントアウトしたままsL[1]を参照する箇所が残ること、linalg_miscのnullspace2がrref_libのredeche/get_first_non_zero_columnに依存することを確認。ライブラリ本文は変更せず、Maxima実行・mac再生成・commit/pushは未実施。
