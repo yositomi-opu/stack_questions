@@ -12,6 +12,7 @@ const context = vm.createContext({state,el,selected:['en','ja']});
 vm.runInContext(`${code}
 function activeLangs(){return selected;}
 function rewriteTemplateIncludeUrls(s){return s;}
+function templateWithLibraryIncludes(s){return s;}
 function refreshGeneratedIncludeSource(){}
 function baseTitle(s){return s;} function xmlFileStem(s){return s;} function escapeXml(s){return s;}
 function generateVariableBlock(){return '/* generated */';}

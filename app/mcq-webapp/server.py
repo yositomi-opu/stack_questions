@@ -593,9 +593,10 @@ def build_maxima_program(
     variable_file: Path,
     variable_names: list[str],
     expressions: list[dict[str, str]],
+    managed_libraries: bool = False,
 ) -> str:
     libraries = [
-        REPO_ROOT / "ky_linear_algebra.mac",
+        *([] if managed_libraries else [REPO_ROOT / "ky_linear_algebra.mac"]),
         REPO_ROOT / "tex_library.mac",
         REPO_ROOT / "mcq_template_pre.mac",
     ]
@@ -708,7 +709,8 @@ def evaluate_payload(payload: dict[str, Any]) -> dict[str, Any]:
         program_file = temp / "evaluate.mac"
         variable_file.write_text(rewritten_variables + "\n", encoding="utf-8")
         program_file.write_text(
-            build_maxima_program(maxima, variable_file, variable_names, normalized_expressions),
+            build_maxima_program(maxima, variable_file, variable_names, normalized_expressions,
+                                 managed_libraries=payload.get("managedLibraries") is True),
             encoding="utf-8",
         )
         if maxima == DOCKER_STACK_MAXIMA:

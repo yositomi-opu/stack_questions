@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260923-v082">
+    <link rel="stylesheet" href="./styles.css?v=20260926-libraries">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260923-v082-all-verify"></script>
-    <script defer src="./app.js?v=20260923-lang-static"></script>
+    <script defer src="./i18n.js?v=20260926-libraries"></script>
+    <script defer src="./app.js?v=20260926-libraries"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
     <script defer src="./file-ui.js?v=20260921-v08"></script>
     <script defer src="./preview.js?v=20260924-boldsymbol2"></script>
@@ -82,6 +82,14 @@
             <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 
+          <section class="library-settings" aria-labelledby="libraryHeading">
+            <div class="panel-heading"><h3 id="libraryHeading">共通ライブラリ</h3>
+              <span class="question-text-help"><button type="button" class="question-text-help-button" aria-label="共通ライブラリについて" aria-describedby="libraryHelp">?</button>
+                <span id="libraryHelp" class="question-text-tooltip" role="tooltip">必要なライブラリだけを選択してください。各項目にカーソルを合わせると内容を確認できます。選択したファイルを問題変数より先に読み込みます。旧一括版には6つすべてが含まれます。</span>
+              </span>
+            </div>
+            <div id="libraryIncludes" class="library-includes"></div>
+          </section>
           <section class="include-settings">
             <div class="include-settings-heading">
               <label class="check-row" for="saveVariablesSeparately">

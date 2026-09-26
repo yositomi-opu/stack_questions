@@ -1351,3 +1351,9 @@ td:nth-child(5) {
 .ai-settings-dialog input, .ai-settings-dialog select { width: 100%; }
 .ai-settings-dialog p, #aiTranslationProgress { font-size: 12px; overflow-wrap: anywhere; }
 .ai-settings-dialog .row-actions { flex-wrap: wrap; }
+
+.library-includes { display:flex; flex-wrap:wrap; gap:0.5rem 1rem; margin-bottom:0.8rem; }
+.library-settings .panel-heading { justify-content:flex-start; gap:0.4rem; }
+.library-check { cursor:pointer; }
+
+.library-check small { color:var(--muted, #667085); font-size:0.75em; }

@@ -80,3 +80,18 @@ feedback1C,string,en,"Correct"
 各候補の番号は翻訳依頼のidにも含めます。古い翻訳JSONの行番号idも互換読込できますが、作成後に候補を削除・並べ替えた古いJSONは使わず、依頼を作り直してください。フィードバックは従来どおりパターン（または正解・不正解）単位であり、候補番号別ではありません。
 
 XMLは生成した変数定義の本文を優先して読み込みます。複数string候補の識別番号は可読編集メタデータに保持します。メタデータを削除したXMLや、候補数を直接変更してメタデータと対応しなくなったXMLは、候補リストとして復元する場合があります。編集形式・候補番号を確実に引き継ぐにはCSVを保存してください。
+
+
+## 共通ライブラリ設定
+
+`config,include_libraries` の第3列は、ライブラリ識別子から公開URLへのJSONオブジェクトです。
+識別子は `genmatrix_lib`、`trans_mat`、`rref_lib`、`polynomial_disp`、`texput_W`、`linalg_misc`、互換用の `ky_linear_algebra` です。
+URLは対応する `.mac` または `.txt` を指すHTTP(S) URLを指定します。
+空のオブジェクトは共通ライブラリなしを意味します。
+
+```csv
+config,include_libraries,"{""texput_W"":""https://yositomi-opu.github.io/stack_questions/texput_W.mac""}"
+```
+
+旧CSVでこのconfigがない場合は、従来のXMLテンプレートと同様に `ky_linear_algebra.mac` を読み込みます。
+qvarや補助パラメータに直接記載された独立したinclude文は保持し、configによる二重出力は行いません。

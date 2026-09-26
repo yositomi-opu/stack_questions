@@ -47,7 +47,7 @@ async function convertCsv(csv, options = {}) {
   if (options.evaluate) {
     const endpoint = new URL('api/maxima/evaluate', (options.webappUrl || 'http://127.0.0.1:4173').replace(/\/?$/, '/'));
     const response = await fetch(endpoint, {method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({variables:api.evaluationVariableCode(), variableNames:api.problemVariableNames(), expressions}),
+      body:JSON.stringify({managedLibraries:true, variables:api.evaluationVariableCode(), variableNames:api.problemVariableNames(), expressions}),
       signal:AbortSignal.timeout(90000)});
     const result = await response.json();
     if (!response.ok || !result.ok) throw new Error(result.error || `Evaluation HTTP ${response.status}`);

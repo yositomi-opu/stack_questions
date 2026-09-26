@@ -3,6 +3,25 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "共通ライブラリ": "Shared libraries",
+    "共通ライブラリについて": "About shared libraries",
+    "ライブラリ設定が不正です": "Invalid library settings",
+    "行列生成": "Matrix generation",
+    "基本変形": "Elementary operations",
+    "階段行列・核": "Echelon forms / nullspace",
+    "多項式表示": "Polynomial display",
+    "太字・数集合": "Bold symbols / number sets",
+    "その他": "Other utilities",
+    "旧一括版": "Legacy bundle",
+    "必要なライブラリだけを選択してください。各項目にカーソルを合わせると内容を確認できます。選択したファイルを問題変数より先に読み込みます。旧一括版には6つすべてが含まれます。": "Select only the libraries you need. Hover over each item for details. Selected files load before question variables. The legacy bundle contains all six modules.",
+    "指定した行列式を持つ行列や正則行列の生成、行列比較。random_matrix_det_list、random_invertible_matrix、distMatなど。": "Generate matrices with specified determinants or invertible matrices; compare matrices. Includes random_matrix_det_list, random_invertible_matrix and distMat.",
+    "基本行列と掃き出し操作。elementary_matrix_rowadd・swap・mult、sweepout、SweepCijなど。": "Elementary matrices and elimination operations. Includes elementary_matrix_rowadd, elementary_matrix_swap, elementary_matrix_mult, sweepout and SweepCij.",
+    "階段行列の生成・判定と簡約化、核の基底。randechelon、echelonp、redeche、nullspace2など。": "Generate, check and reduce echelon forms; find a nullspace basis. Includes randechelon, echelonp, redeche and nullspace2.",
+    "多項式の昇順・降順表示、変数順を指定した一次式や行列成分の表示。display_polynomialなど。": "Display polynomials in ascending or descending order, and linear expressions or matrix entries in a specified variable order. Includes display_polynomial.",
+    "Wa〜Wz（Wlを除く）とWzrの太字表示、WR・WC・WQ・WZ・WN・WK・WHの黒板太字表示を設定します。": "Set bold display for Wa–Wz (except Wl) and Wzr, and blackboard bold for WR, WC, WQ, WZ, WN, WK and WH.",
+    "基底の判定、整数ベクトル化、外積、転倒数など。check_basis_colspace、integer_vector、cross_product、inversion_numberなど。": "Basis checks, integer vector scaling, cross products and inversion counts. Includes check_basis_colspace, integer_vector, cross_product and inversion_number.",
+    "互換用に6つのライブラリをまとめて読み込みます。通常は必要な分割版だけを選んでください。": "Loads all six libraries for compatibility. Normally select only the individual modules you need.",
+
     "言語非依存の項目が変更されています": "A language-independent field was changed",
     "翻訳ファイルを反映しました。残りの言語のファイルも読み込んでください。": "Translation file applied. Load the files for the remaining languages as well.",
     "変更履歴": "Changelog",

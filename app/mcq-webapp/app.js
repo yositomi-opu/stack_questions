@@ -28,6 +28,7 @@ const state = {
   translationsStale: false,
   questionTypes: Object.fromEntries(LANGS.map((lang) => [lang, "text"])),
   questionLanguageIndependent: false,
+  libraryIncludes: {},
   includeSource: null,
   includeFilename: "",
   xmlFilename: "",
@@ -325,6 +326,7 @@ async function evaluateCasLocally() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         variables: variableSource,
+        managedLibraries: true,
         variableNames: problemVariableNames(),
         expressions,
       }),
@@ -1643,12 +1645,144 @@ function removeButton(index) {
   return button;
 }
 
+// Shared library selections are authoring settings, not Maxima conditionals.
+function libraryCatalog() {
+  return [
+    ["genmatrix_lib", "行列生成", "指定した行列式を持つ行列や正則行列の生成、行列比較。random_matrix_det_list、random_invertible_matrix、distMatなど。"],
+    ["trans_mat", "基本変形", "基本行列と掃き出し操作。elementary_matrix_rowadd・swap・mult、sweepout、SweepCijなど。"],
+    ["rref_lib", "階段行列・核", "階段行列の生成・判定と簡約化、核の基底。randechelon、echelonp、redeche、nullspace2など。"],
+    ["polynomial_disp", "多項式表示", "多項式の昇順・降順表示、変数順を指定した一次式や行列成分の表示。display_polynomialなど。"],
+    ["texput_W", "太字・数集合", "Wa〜Wz（Wlを除く）とWzrの太字表示、WR・WC・WQ・WZ・WN・WK・WHの黒板太字表示を設定します。"],
+    ["linalg_misc", "その他", "基底の判定、整数ベクトル化、外積、転倒数など。check_basis_colspace、integer_vector、cross_product、inversion_numberなど。"],
+    ["ky_linear_algebra", "旧一括版", "互換用に6つのライブラリをまとめて読み込みます。通常は必要な分割版だけを選んでください。"],
+  ];
+}
+
+function defaultLibraryUrl(id) {
+  return new URL(`${id}.mac`, normalizedIncludeBaseUrl(SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL)).href;
+}
+
+function libraryIdFromUrl(value) {
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol)) return "";
+    const file = decodeURIComponent(url.pathname.split("/").pop());
+    return libraryCatalog().find(([id]) => file === `${id}.mac` || file === `${id}.txt`)?.[0] || "";
+  } catch { return ""; }
+}
+
+function parseLibraryConfig(value) {
+  const data = typeof value === "string" ? JSON.parse(value) : value;
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(uiText("ライブラリ設定が不正です"));
+  const result = {};
+  for (const [id, url] of Object.entries(data)) {
+    if (typeof url !== "string" || libraryIdFromUrl(url) !== id || /["\\\r\n]/.test(url)) throw new Error(uiText("ライブラリ設定が不正です"));
+    result[id] = url;
+  }
+  return result;
+}
+
+// Match whole top-level calls only; comments, strings and conditional calls stay intact.
+function libraryIncludeRanges(code) {
+  const result = [];
+  for (let start = 0; start < code.length;) {
+    const end = scanMaximaStatementEnd(code, start);
+    const statement = code.slice(start, end);
+    const match = stripMaximaComments(statement).trim().match(/^stack_include\s*\(\s*"([^"\\\r\n]+)"\s*\)\s*[;$]?$/);
+    const id = match && libraryIdFromUrl(match[1]);
+    if (id) {
+      const offset = maskMaximaCommentsAndStrings(statement).indexOf("stack_include");
+      result.push({id, url:match[1], start:start+offset, end});
+    }
+    start = end;
+  }
+  return result;
+}
+
+function manualLibraryIncludes() {
+  return [...libraryIncludeRanges(el.parameters.value || ""), ...libraryIncludeRanges(el.qvars.value || "")];
+}
+
+function effectiveLibraryIncludes() {
+  return {...(state.libraryIncludes || {}), ...Object.fromEntries(manualLibraryIncludes().map(item => [item.id, item.url]))};
+}
+
+function libraryIncludeLines() {
+  const manual = new Set(manualLibraryIncludes().map(item => item.id));
+  return libraryCatalog().filter(([id]) => state.libraryIncludes?.[id] && !manual.has(id))
+    .map(([id]) => `stack_include("${state.libraryIncludes[id]}");`);
+}
+
+function removeLibraryCalls(code, id = null) {
+  for (const item of libraryIncludeRanges(code).reverse()) {
+    if (!id || item.id === id) code = code.slice(0,item.start) + code.slice(item.end);
+  }
+  return code;
+}
+
+function templateWithLibraryIncludes(template) {
+  return template.replace(/(<questionvariables>\s*<text><!\[CDATA\[)([\s\S]*?)(\]\]><\/text>)/,
+    (_all, open, code, close) => open + libraryIncludeLines().join("\n") + "\n" + removeLibraryCalls(code) + close);
+}
+
+function setLibraryIncluded(id, checked) {
+  if (!libraryCatalog().some(item => item[0] === id)) return;
+  state.libraryIncludes ||= {};
+  if (checked) {
+    // Selecting individual modules replaces the legacy bundle, and vice versa.
+    const replaced = libraryCatalog().map(item => item[0]).filter(other => other !== id && (id === "ky_linear_algebra" || other === "ky_linear_algebra"));
+    for (const other of replaced) {
+      delete state.libraryIncludes[other];
+      el.qvars.value = removeLibraryCalls(el.qvars.value, other).trim();
+      el.parameters.value = removeLibraryCalls(el.parameters.value, other).trim();
+    }
+    state.qvars = [el.qvars.value];
+    if (manualLibraryIncludes().some(item => item.id === id)) delete state.libraryIncludes[id];
+    else state.libraryIncludes[id] = state.libraryIncludes[id] || defaultLibraryUrl(id);
+  }
+  else {
+    delete state.libraryIncludes[id];
+    el.qvars.value = removeLibraryCalls(el.qvars.value, id).trim();
+    el.parameters.value = removeLibraryCalls(el.parameters.value, id).trim();
+    state.qvars = [el.qvars.value];
+  }
+  markCasEvaluationStale();
+  updateOutput();
+}
+
+function syncLibraryControls() {
+  if (window.MCQ_HEADLESS || typeof document === "undefined" || typeof document.getElementById !== "function") return;
+  const host = document.getElementById("libraryIncludes");
+  if (!host) return;
+  if (!host.children.length) {
+    for (const [id, name, description] of libraryCatalog()) {
+      const label = document.createElement("label");
+      label.className = "check-row library-check";
+      label.title = description;
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.dataset.library = id;
+      input.addEventListener("change", () => setLibraryIncluded(id, input.checked));
+      const span = document.createElement("span");
+      span.textContent = name;
+      const filename = document.createElement("small");
+      filename.textContent = id;
+      label.append(input, span, filename);
+      host.append(label);
+    }
+    window.mcqI18n?.translateTree();
+  }
+  const selected = effectiveLibraryIncludes();
+  host.querySelectorAll("input").forEach(input => {input.checked = Boolean(selected[input.dataset.library]);});
+}
+
 function updateOutput() {
   if (window.MCQ_HEADLESS) return;
   if (state.aiTranslationRunning) {
     el.xmlOutput.value = "";
     return; // Partial language results must not trigger repeated XML warnings.
   }
+  syncLibraryControls();
   syncXmlFilename();
   syncCastextQuestionInputs();
   syncIncludeFilename();
@@ -1671,7 +1805,7 @@ function updateOutput() {
 function generateXml() {
   const sourceTemplate = state.templates[el.castextTemplate?.checked ? `${state.mode}Cas` : state.mode];
   if (!sourceTemplate) throw new Error("テンプレート読込待ち");
-  const template = rewriteTemplateIncludeUrls(sourceTemplate);
+  const template = templateWithLibraryIncludes(rewriteTemplateIncludeUrls(sourceTemplate));
   refreshGeneratedIncludeSource();
   const id = xmlFileStem(baseTitle(el.questionId.value));
   const generatedVariables = generateVariableBlock();
@@ -1792,7 +1926,7 @@ function parameterPreamble() {
 }
 
 function evaluationVariableCode() {
-  return [...parameterPreamble(), el.qvars.value].join("\n");
+  return [...libraryIncludeLines(), ...parameterPreamble(), el.qvars.value].join("\n");
 }
 
 function baseVariableLines(numOptions, counts, includePreamble = true) {
@@ -1810,6 +1944,7 @@ function baseVariableLines(numOptions, counts, includePreamble = true) {
 function appStateSnapshot() {
   return {
     version: 1,
+    libraryIncludes: effectiveLibraryIncludes(),
     questionId: el.questionId.value,
     mode: state.mode,
     baseLanguage: baseLang(),
@@ -2833,7 +2968,7 @@ async function resolveMainInclude(xmlText) {
   const documentNode = new DOMParser().parseFromString(xmlText, "application/xml");
   const variables = documentNode.querySelector("questionvariables > text")?.textContent || "";
   const main = extractMainVariableSection(variables);
-  const match = stripMaximaComments(main).match(/stack_include\s*\(\s*"([^"]+)"\s*\)/);
+  const match = [...stripMaximaComments(main).matchAll(/stack_include\s*\(\s*"([^"]+)"\s*\)/g)].find(item => !libraryIdFromUrl(item[1]));
   if (!match) return null;
   const url = match[1];
   const path = includePathFromUrl(url);
@@ -3031,6 +3166,9 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
     restoreIncludeDirectory();
     syncIncludeControls();
   }
+  // Executable XML/includes take precedence over editing metadata.
+  state.libraryIncludes = Object.fromEntries(libraryIncludeRanges(variables + "\n" + (includeSource?.content || "")).map(item => [item.id, item.url]));
+  for (const item of manualLibraryIncludes()) delete state.libraryIncludes[item.id];
   // XML declarations are grouped by truth, but the paired editor needs each
   // pattern's C/W rows together. Sort only after restoring original pattern IDs.
   if (el.requirePairs.checked) {
@@ -3054,6 +3192,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
 
 function applyAppStateSnapshot(snapshot) {
   if (!snapshot || snapshot.version !== 1 || !Array.isArray(snapshot.rows)) throw new Error("再編集用データが不正です");
+  state.libraryIncludes = snapshot.libraryIncludes ? parseLibraryConfig(snapshot.libraryIncludes) : {};
   el.questionId.value = baseTitle(snapshot.questionId);
   setMode(snapshot.mode === "cb" ? "cb" : "rb");
   el.baseLanguage.value = normalizeLang(snapshot.baseLanguage);
@@ -3678,9 +3817,16 @@ function applyRecords(records) {
   const schema = String(version || "").trim();
   if (schema && !["1", "2", "3"].includes(schema)) throw new Error(uiText("未対応のCSV schemaです") + ": " + schema);
   resetCsvImportState();
-  return ["2", "3"].includes(schema) || hasV2Record
+  // Earlier CSVs relied on the unconditional legacy include in the templates.
+  if (!meaningful.some(record => csvRecordKind(record) === "config" && String(record[1]).trim().toLowerCase() === "include_libraries")) {
+    state.libraryIncludes = {ky_linear_algebra: defaultLibraryUrl("ky_linear_algebra")};
+  }
+  const result = ["2", "3"].includes(schema) || hasV2Record
     ? applyCsvV2Records(meaningful, schema === "3" ? 3 : 2)
     : applyLegacyRecords(meaningful);
+  for (const item of manualLibraryIncludes()) delete state.libraryIncludes[item.id];
+  syncLibraryControls();
+  return result;
 }
 
 function csvRecordKind(record) {
@@ -3724,6 +3870,8 @@ function clearAllEntries() {
 }
 
 function resetCsvImportState() {
+  state.libraryIncludes = {};
+  syncLibraryControls();
   state.legacyQuestionInputs = {};
   state.xmlFilename = "";
   if (el.xmlFilename) el.xmlFilename.value = "";
@@ -3757,6 +3905,7 @@ function resetCsvImportState() {
   });
   state.questionLanguageIndependent = false;
   el.feedbackByTruth.checked = false;
+  syncLibraryControls();
 }
 
 function applyCsvV2Records(records, schema = 2) {
@@ -4106,6 +4255,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "include_libraries") state.libraryIncludes = parseLibraryConfig(value);
   if (key === "xml_filename") state.xmlFilename = normalizedXmlFilename(value);
   if (key === "legacy_question_inputs") state.legacyQuestionInputs = value ? JSON.parse(value) : {};
   if (key === "radio_multiple_prompt" && el.radioMultiplePrompt) el.radioMultiplePrompt.checked = parseBoolean(value);
@@ -4152,6 +4302,7 @@ function downloadSampleCsv() {
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
+    ["config", "include_libraries", JSON.stringify(effectiveLibraryIncludes())],
     ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
@@ -4240,6 +4391,7 @@ function csvSettingsAndFeedbackRecords(title) {
     ["config", "radio_multiple_prompt", el.radioMultiplePrompt?.checked ? "true" : "false"],
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
+    ["config", "include_libraries", JSON.stringify(effectiveLibraryIncludes())],
     ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
