@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260927-optional-qvars">
+    <link rel="stylesheet" href="./styles.css?v=20260927-file-save">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260927-optional-qvars"></script>
-    <script defer src="./app.js?v=20260927-optional-qvars"></script>
+    <script defer src="./i18n.js?v=20260927-file-save"></script>
+    <script defer src="./app.js?v=20260927-file-save"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
-    <script defer src="./file-ui.js?v=20260921-v08"></script>
+    <script defer src="./file-ui.js?v=20260927-file-save"></script>
     <script defer src="./preview.js?v=20260924-boldsymbol2"></script>
   </head>
   <body>
@@ -29,16 +29,16 @@
         <div class="actions">
           <button id="clearAllButton" type="button" class="ghost">クリア</button>
           <details class="file-menu"><summary>CSV</summary><div class="file-menu-list">
-            <button id="sampleCsvButton" type="button">見本</button>
             <button id="dataFileButton" type="button">読込</button>
             <button id="showCsvButton" type="button">表示</button>
             <button id="saveCsvButton" type="button">保存</button>
+            <button id="overwriteCsvButton" type="button">上書</button>
           </div></details>
           <details class="file-menu"><summary>XML</summary><div class="file-menu-list">
-            <button id="sampleXmlButton" type="button">見本</button>
             <button id="xmlFileButton" type="button">読込</button>
             <button id="showXmlButton" type="button">表示</button>
             <button id="downloadButton" type="button">保存</button>
+            <button id="overwriteXmlButton" type="button">上書</button>
           </div></details>
           <button id="previewButton" type="button" class="primary">プレビュー</button>
           <label class="sr-only" for="uiLanguageSelect">表示言語</label>
@@ -352,11 +352,6 @@
           <button type="button" data-close-dialog>閉じる</button></div></div>
         <p id="sourceMessage" aria-live="polite"></p>
         <textarea id="sourceText" readonly spellcheck="false" aria-labelledby="sourceTitle"></textarea>
-      </dialog>
-      <dialog id="samplesDialog" class="samples-dialog" aria-labelledby="samplesTitle">
-        <div class="panel-heading"><h2 id="samplesTitle">見本を読み込む</h2><button type="button" data-close-dialog>閉じる</button></div>
-        <label for="sampleSearch">ファイル名で検索</label><input id="sampleSearch" type="search">
-        <p id="samplesStatus" aria-live="polite"></p><div id="samplesList"></div>
       </dialog>
       <p id="actionNotice" class="action-notice" role="status" hidden></p>
     </main>

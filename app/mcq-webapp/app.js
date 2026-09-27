@@ -89,7 +89,6 @@ const el = {
   addRowButton: document.querySelector("#addRowButton"),
   addCorrectPatternButton: document.querySelector("#addCorrectPatternButton"),
   addWrongPatternButton: document.querySelector("#addWrongPatternButton"),
-  sampleCsvButton: document.querySelector("#sampleCsvButton"),
   saveCsvButton: document.querySelector("#saveCsvButton"),
   downloadButton: document.querySelector("#downloadButton"),
   copyCasButton: document.querySelector("#copyCasButton"),
@@ -178,8 +177,8 @@ function bindEvents() {
   el.addWrongPatternButton.addEventListener("click", () => addFixedPattern("W"));
   el.dataFileInput.addEventListener("change", readSelectedFile);
   el.xmlFileInput.addEventListener("change", readSelectedXml);
-  el.saveCsvButton.addEventListener("click", downloadCurrentCsv);
-  el.downloadButton.addEventListener("click", downloadXml);
+  el.saveCsvButton.addEventListener("click", () => downloadCurrentCsv());
+  el.downloadButton.addEventListener("click", () => downloadXml());
   el.copyCasButton.addEventListener("click", copyCasDebugCode);
   el.evaluateCasButton.addEventListener("click", evaluateCasLocally);
   el.includeBaseUrl.addEventListener("input", () => {
@@ -2947,7 +2946,9 @@ async function readSelectedFile(event) {
   const ext = file.name.split(".").pop().toLowerCase();
   try {
     const records = ext === "xlsx" || ext === "xls" ? await readWorkbook(file) : await readDelimited(file);
+    window.mcqFileTargets?.reset();
     const summary = applyRecords(records);
+    window.mcqFileTargets?.imported("csv", file, event.fileHandle);
     renderRows();
     updateOutput();
     if (summary.warnings.length) {
@@ -2970,7 +2971,9 @@ async function readSelectedXml(event) {
     if (!window.confirm(uiText(`${file.name} を読み込みます。\n現在の入力内容は置き換えられます。`))) return;
     const xmlText = await file.text();
     const includeSource = await resolveMainInclude(xmlText);
+    window.mcqFileTargets?.reset();
     const summary = importXmlText(xmlText, file.name, includeSource);
+    window.mcqFileTargets?.imported("xml", file, event.fileHandle);
     const includeNote = includeSource ? `／include: ${includeSource.path}` : "";
     setStatus(`${file.name} を読み込みました（基本言語: ${summary.baseLanguage}／言語: ${summary.languages.join(", ")}／パターン: ${summary.patterns}${includeNote}）`);
     await evaluateImportedQuestion();
@@ -3873,6 +3876,7 @@ function resetDerivedResults() {
 function clearAllEntries() {
   if (!window.confirm(uiText("すべての問題入力をクリアします。よろしいですか？"))) return;
   resetCsvImportState();
+  window.mcqFileTargets?.reset();
   el.languageChecks[baseLang()].checked = true;
   for (const id of ["sourceText", "sampleSearch", "dataFileInput", "xmlFileInput"]) {
     const field = document.getElementById(id);
@@ -4352,15 +4356,16 @@ function downloadSampleCsv() {
   downloadText("mcq_sample.csv", csvText(records), "text/csv;charset=utf-8");
 }
 
-function downloadCurrentCsv() {
+async function downloadCurrentCsv(overwrite = false) {
   const title = titleForSave();
   if (!title) return;
   try {
     const records = currentCsvRecords(title);
     const warnings = csvCoverageWarnings();
     const filename = `${title}.csv`;
-    downloadText(filename, csvText(records), "text/csv;charset=utf-8");
-    setStatus([`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`, ...warnings].join("\n"));
+    const saved = await window.mcqSaveQuestionFile("csv", filename, csvText(records), "text/csv;charset=utf-8", overwrite);
+    if (!saved) return;
+    setStatus([saved.downloaded ? `${saved.name} のダウンロードを開始しました。保存状況はブラウザで確認してください` : `${saved.name} ${uiText("を保存しました")}`, ...warnings].join("\n"));
   } catch (error) {
     setStatus(`CSVを保存できません: ${error.message}`, true);
   }
@@ -4479,7 +4484,7 @@ function csvText(records) {
   return `\ufeff${records.map(csvLine).join("\n")}`;
 }
 
-function downloadXml() {
+async function downloadXml(overwrite = false) {
   const title = titleForSave();
   if (!title) return;
   try {
@@ -4487,8 +4492,9 @@ function downloadXml() {
     el.xmlOutput.value = xml;
     syncXmlFilename();
     const filename = normalizedXmlFilename(state.xmlFilename) || `${xmlFileStem(title)}.xml`;
-    downloadText(filename, xml, "application/xml;charset=utf-8");
-    setStatus(`${filename} のダウンロードを開始しました。保存状況はブラウザで確認してください`);
+    const saved = await window.mcqSaveQuestionFile("xml", filename, xml, "application/xml;charset=utf-8", overwrite);
+    if (!saved) return;
+    setStatus(saved.downloaded ? `${saved.name} のダウンロードを開始しました。保存状況はブラウザで確認してください` : `${saved.name} ${uiText("を保存しました")}`);
   } catch (error) {
     setStatus(`XMLを保存できません: ${error.message}`, true);
   }

@@ -13,6 +13,9 @@
 
 ## 直近の変更と決定事項
 
+- 2026-09-27: CSV/XMLメニューを読込・表示・保存・上書に変更し、見本UIと見本取得処理を撤去（サンプル資産/APIは保持）。File System Access対応環境では「保存」で保存先を選び、成功した読込/保存先を形式別に保持して「上書」で更新。未指定なら保存先選択。キャンセル/書込失敗では保存成功と表示せず、書込ストリームをabortし以前の保存先を維持。別問題への読込・クリアで両形式の上書き先解除、処理途中のリセットでも古い保存先を再登録しない。Excel/TSV読込は上書き先として保持せずCSV保存先を選ぶ。非対応ブラウザは上書無効＋日英説明、保存は既存ダウンロード。include保存は既存動作。README・CHANGELOG・キャッシュ識別子更新。
+- 検証: `node scripts/tests/test_file_overwrite.cjs`（保存APIモックで形式別保持、Save As、クリア、Excel/TSV保護、キャンセル、書込失敗、非対応fallback）、test_import_evaluation.cjs、test_csv_schema_v3.cjs、app.js/file-ui.js/i18n.js構文確認、git diff --check成功。ローカル検証サーバーの実ブラウザでCSV日本語・XML英語の4項目表示、コンソールエラーなしを確認。実際のOSファイル選択・ディスク上書きは未確認。検証サーバー終了。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。既存CLIモード変更・未追跡メモ等は対象外。
+
 - 2026-09-27: qvar省略CSVについて、利用者ファイルは修正前のCLI・ブラウザ双方で読込可能であり、空欄になる事象は再現せず。空の問題変数・補助パラメータ（コメントのみを含む）かつCAS選択肢なしの場合、CSV/XML読込直後の自動評価を省略し、日英で評価対象なしを表示するよう改善。共通ライブラリ選択だけでは自動評価しない。手動評価は維持。qvar省略仕様をREADMEに追記。検証: test_import_evaluation.cjs、test_csv_schema_v3.cjs、test_library_includes.cjs、app.js/i18n.js構文確認、git diff --check成功。利用者CSVを一時見本経由で実ブラウザ読込し、問題変数空欄・タイトル・正解1行/誤答8行・評価対象なし表示を確認。CLIでXML生成も成功。STACK/Moodleでの問題実行は未確認。検証用CSV・サーバーは撤去。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。
 
 - 2026-09-26: 共通ライブラリ見出し・?・チェック項目を同じflex行に配置（狭い画面では項目単位で折返し）。常時表示のファイル名を各項目の説明ポップアップに移動し、hover／キーボードフォーカスで表示。?と項目のポップアップをセクション左端基準にして左へのはみ出しを防止。日英翻訳対象の説明文を維持し、READMEとキャッシュ識別子更新。検証: `node --check app/mcq-webapp/app.js`、`node scripts/tests/test_library_includes.cjs`、`git diff --check` 成功。実ブラウザ確認は未実施（検証サーバーの起動がsandboxのポートbind制限で失敗）。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。
