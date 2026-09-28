@@ -149,3 +149,29 @@ for (const schema of ['2', '3']) {
   assert.ok(context.generateXml().includes('変数を使わない問題'));
 }
 console.log('Passed: optional question variables and parameters, stale-input clearing, XML generation.');
+// Candidate compaction preserves translated content and pattern feedback.
+context.applyRecords([
+ ['config','csv_schema','3'],['config','castext_template','true'],['config','languages','ja,en'],
+ ['option1C','string','ja_01',''],['option1C','string','en_01',''],
+ ['option1C','string','ja_02','A\nsecond line'],['option1C','string','en_02','A translated'],
+ ['option1C','string','ja_03',''],['option1C','string','en_03','Still translated'],
+ ['option1W','string','ja','wrong'],['option1W','string','en','wrong'],
+ ['feedback1C','string','ja','共通説明'],['feedback1C','string','en','Shared feedback']
+]);
+vm.runInContext('function markCasEvaluationStale(){}',context);
+assert.equal(context.compactCandidatesForSave(),true);
+let candidates=state.rows.filter(r=>r.truth==='C');
+assert.equal(candidates.length,2);
+assert.deepEqual(Array.from(candidates,r=>r.candidate_id),['1','2']);
+assert.equal(candidates[0].choice_ja,'A\nsecond line');
+assert.equal(candidates[0].choice_en,'A translated');
+assert.equal(candidates[1].choice_en,'Still translated');
+assert.ok(candidates.some(r=>r.feedback_ja==='共通説明'));
+assert.ok(candidates.some(r=>r.feedback_en==='Shared feedback'));
+assert.equal(context.compactCandidatesForSave(),false);
+context.addPatternCandidate(candidates[0]);
+candidates=state.rows.filter(r=>r.truth==='C');
+assert.equal(candidates.length,3);assert.equal(candidates[2].candidate_id,'3');
+assert.equal(candidates[2].choice_ja,'');assert.equal(candidates[2].choice_en,'');
+context.compactCandidatesForSave();assert.equal(state.rows.filter(r=>r.truth==='C').length,2);
+console.log('Passed: candidate addition, empty-only deletion, multilingual compaction, multiline text and shared feedback.');

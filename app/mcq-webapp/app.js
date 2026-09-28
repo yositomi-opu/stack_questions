@@ -832,6 +832,7 @@ function pairedPatternEditor(row, index) {
   const editor = document.createElement("div");
   editor.className = "typed-editor";
   editor.append(patternNumberSelect(patternRowsFor(row), patternLimit()));
+  editor.append(candidateNumber(row, patternRowsFor(row).filter(item => item.truth === row.truth)));
   if (patternRowsFor(row)[0] === row) {
     const button = document.createElement("button");
     button.type = "button";
@@ -923,16 +924,86 @@ function patternChoiceCapacity(pattern, truth) {
 
 function renderFixedGroups(truth, target) {
   target.replaceChildren();
-  fixedGroups(truth).forEach((group) => {
-    const tr = document.createElement("tr");
-    tr.append(
-      cell(fixedPatternInput(group)),
-      cell(fixedChoicesTextarea(group)),
-      cell(fixedFeedbackTextarea(group)),
-      cell(removeFixedGroupButton(group))
-    );
-    target.append(tr);
+  fixedGroups(truth).forEach(group => {
+    group.rows.forEach((row, candidateIndex) => {
+      const tr = document.createElement("tr");
+      const pattern = document.createElement("div");
+      pattern.className = "candidate-pattern";
+      if (!candidateIndex) pattern.append(fixedPatternInput(group));
+      pattern.append(candidateNumber(row, group.rows));
+      tr.append(cell(pattern), cell(typedTextareaInput(row, state.rows.indexOf(row), "choice")));
+      if (!candidateIndex) {
+        const feedback = cell(fixedFeedbackTextarea(group));
+        feedback.rowSpan = group.rows.length;
+        const remove = cell(removeFixedGroupButton(group));
+        remove.rowSpan = group.rows.length;
+        tr.append(feedback, remove);
+      }
+      target.append(tr);
+    });
   });
+}
+
+function candidateNumber(row, rows) {
+  const label = document.createElement("span");
+  label.className = "candidate-number";
+  label.textContent = String(row.candidate_id || rows.indexOf(row) + 1).padStart(2, "0");
+  label.title = uiText("枝番（同じパターンの候補）");
+  return label;
+}
+
+function addPatternCandidate(row) {
+  const rows = state.rows.filter(item => item.pattern === row.pattern && item.truth === row.truth);
+  ensureCandidateIds();
+  let next = Math.max(rows.length, ...rows.map(item => Number(item.candidate_id) || 0)) + 1;
+  const added = {...row, candidate_id: String(next), choice_verbatim: false};
+  for (const lang of LANGS) {
+    added[`choice_${lang}`] = "";
+    added[`choice_type_${lang}`] = "text";
+    added[`choice_list_expr_${lang}`] = false;
+    added[`feedback_${lang}`] = "";
+  }
+  state.rows.splice(state.rows.indexOf(rows[rows.length - 1]) + 1, 0, added);
+  markCasEvaluationStale();
+  markTranslationsStale("基本言語の選択肢が変更されました");
+  renderRows();
+  updateOutput();
+}
+
+function candidateHelp(text) {
+  const help = document.createElement("button");
+  help.type = "button";
+  help.className = "question-text-help-button candidate-help";
+  help.textContent = "?";
+  help.title = uiText(text);
+  help.setAttribute("aria-label", uiText(text));
+  return help;
+}
+
+function compactCandidatesForSave() {
+  let changed = false;
+  for (const truth of ["C", "W"]) for (const group of fixedGroups(truth)) {
+    const kept = group.rows.filter(row => LANGS.some(lang => String(row[`choice_${lang}`] || "").trim()));
+    if (kept.length === group.rows.length) continue;
+    changed = true;
+    // Feedback belongs to the pattern, not to the candidate which happened to hold it.
+    if (kept.length) for (const lang of LANGS) {
+      const source = group.rows.find(row => String(row[`feedback_${lang}`] || "").trim());
+      if (source && !kept.some(row => String(row[`feedback_${lang}`] || "").trim())) {
+        for (const key of [`feedback_${lang}`, `feedback_type_${lang}`, "feedback_language_independent", "feedback_verbatim", "feedback_by_truth"])
+          if (source[key] !== undefined) kept[0][key] = source[key];
+      }
+    }
+    state.rows = state.rows.filter(row => !group.rows.includes(row) || kept.includes(row));
+    kept.forEach((row, index) => { row.candidate_id = String(index + 1); });
+  }
+  if (changed) {
+    resetDerivedResults();
+    markTranslationsStale("空の候補を削除し枝番を詰めました。翻訳依頼は作り直してください");
+    renderRows();
+    updateOutput();
+  }
+  return changed;
 }
 
 function fixedGroups(truth) {
@@ -1400,7 +1471,13 @@ function typedTextareaInput(row, index, field) {
       updateOutput();
     }));
   }
-  controls.append(badge, mode);
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "ghost candidate-add";
+  add.textContent = uiText("枝番追加");
+  add.addEventListener("click", () => addPatternCandidate(row));
+  controls.append(badge, add, candidateHelp("多言語化する候補は枝番追加で個別に入力します。各枝番は同じパターンのリスト要素です。問題変数で作ったリストも指定できますが、その中身は自動翻訳できないため、言語依存の選択肢には非推奨です。"), mode,
+    candidateHelp("文字列：STACKのCASText本文を入力します。CAS式：互換用の式を入力します。リスト：問題変数で定義したリスト変数やリスト式を指定します。各要素はCASTextとし、必要な言語処理は問題変数側で行ってください。"));
   editor.append(controls, textarea);
   return editor;
 }
@@ -4360,6 +4437,7 @@ async function downloadCurrentCsv(overwrite = false) {
   const title = titleForSave();
   if (!title) return;
   try {
+    compactCandidatesForSave();
     const records = currentCsvRecords(title);
     const warnings = csvCoverageWarnings();
     const filename = `${title}.csv`;
@@ -4488,6 +4566,7 @@ async function downloadXml(overwrite = false) {
   const title = titleForSave();
   if (!title) return;
   try {
+    compactCandidatesForSave();
     const xml = generateXml();
     el.xmlOutput.value = xml;
     syncXmlFilename();

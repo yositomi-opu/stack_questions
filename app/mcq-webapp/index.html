@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20260927-file-save">
+    <link rel="stylesheet" href="./styles.css?v=20260928-candidates">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260927-file-save"></script>
-    <script defer src="./app.js?v=20260927-file-save"></script>
+    <script defer src="./i18n.js?v=20260928-candidates"></script>
+    <script defer src="./app.js?v=20260928-candidates"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
-    <script defer src="./file-ui.js?v=20260927-file-save"></script>
+    <script defer src="./file-ui.js?v=20260928-candidates"></script>
     <script defer src="./preview.js?v=20260924-boldsymbol2"></script>
   </head>
   <body>
@@ -256,7 +256,7 @@
               </div>
               <div class="table-wrap">
                 <table class="fixed-table">
-                  <thead><tr><th>パターン</th><th>選択肢リスト（1行1要素）</th><th>フィードバック</th><th></th></tr></thead>
+                  <thead><tr><th>パターン</th><th>選択肢（枝番ごとに1候補）</th><th>フィードバック</th><th></th></tr></thead>
                   <tbody id="correctPatternsBody"></tbody>
                 </table>
               </div>
@@ -268,7 +268,7 @@
               </div>
               <div class="table-wrap">
                 <table class="fixed-table">
-                  <thead><tr><th>パターン</th><th>選択肢リスト（1行1要素）</th><th>フィードバック</th><th></th></tr></thead>
+                  <thead><tr><th>パターン</th><th>選択肢（枝番ごとに1候補）</th><th>フィードバック</th><th></th></tr></thead>
                   <tbody id="wrongPatternsBody"></tbody>
                 </table>
               </div>

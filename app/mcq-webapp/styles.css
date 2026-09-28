@@ -1361,3 +1361,8 @@ td:nth-child(5) {
 .library-tooltip { white-space:normal; }
 .library-tooltip small { display:block; color:var(--muted, #667085); margin-bottom:0.3rem; }
 .library-check:hover .library-tooltip, .library-check:focus-within .library-tooltip { visibility:visible; }
+
+.candidate-pattern { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.candidate-number { color:var(--muted); font-size:12px; }
+.candidate-add { padding:4px 7px; white-space:nowrap; }
+.candidate-help { flex:none; }
