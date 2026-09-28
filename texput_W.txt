@@ -32,6 +32,7 @@ texput(Wx,"\\boldsymbol{x}");
 texput(Wy,"\\boldsymbol{y}");
 texput(Wz,"\\boldsymbol{z}");
 texput(Wzr, "\\boldsymbol{0}");
+texput(W0, "\\boldsymbol{0}");
 
 /**********/
 /* mathbb */
