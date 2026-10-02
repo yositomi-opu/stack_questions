@@ -18,6 +18,8 @@ Then open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). Edit question text, 
 
 For later sessions, use `make start` to start, `make stop` to stop, and `make check` to diagnose the environment. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
 
+If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or recreating a clone, run `make repair-docker` from the clone you intend to use. This recreates the containers with that clone mounted, restarts the WebApp, and verifies Maxima evaluation. Cached images and repository files are retained; container temporary state is reset. Save browser edits first. See the troubleshooting FAQ in the [WebApp guide](app/mcq-webapp/README.md).
+
 If question variables are loaded from a separate file using `stack_include`, publish that file at a URL accessible to Moodle. The [WebApp guide](app/mcq-webapp/README.md) explains how to configure the URL and create variants using parameters such as matrix rank.
 
 ## Samples and main files

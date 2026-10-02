@@ -84,6 +84,7 @@ make install-deps  # 不足コマンドのOS別導入案を表示し、確認後
 make start    # STACK APIとWebAppを開始
 make stop     # 両サービスを停止
 make restart  # 両サービスを再起動
+make repair-docker  # コンテナ・共有フォルダを再作成し、Maxima評価を確認
 make status   # 保存設定とWebAppの状態を表示
 ```
 
@@ -540,3 +541,21 @@ XMLは実際のinclude文を優先してチェック状態を復元します。
 共通ライブラリの既定URLはサーバーのリポジトリURL設定を使い、問題変数の別ファイル保存用「URLベース」とは独立しています。
 別ファイル保存時も、チェックで追加した共通ライブラリは外側のXMLで読み込みます。
 問題変数の評価でも同じ選択を使うため、更新後は `make restart` でサーバーを再起動してください。
+
+## FAQ：Maximaで evaluate.mac が見つからない
+
+`make setup` や問題変数の評価時に、次のようなエラーが出る場合があります。
+
+```text
+file_search1: /workspace/app/mcq-webapp/.local/docker-evaluation/.../evaluate.mac not found in file_search_maxima.
+```
+
+Mac側で生成した評価ファイルをDocker内から参照できない状態です。cloneを移動・作り直した後など、既存コンテナの共有フォルダが古い状態になっている場合は、**今後使用するcloneのルート**で次を実行してください。
+
+```sh
+make repair-docker
+```
+
+WebAppを停止し、現在のcloneを共有するようSTACK API・Maximaコンテナを再作成して、WebAppを起動し、Maxima評価まで確認します。取得済みイメージは再利用し、問題ファイル・Git履歴・保存設定は削除しません。コンテナ内の一時状態は失われます。ブラウザの未保存の入力は先に保存してください。復旧中はプレビュー・評価が一時的に利用できません。
+
+通常の再起動は `make restart` です。`repair-docker` は共有状態を作り直す必要がある場合に使います。複数cloneは同じDockerプロジェクト名を使うため、利用するcloneを決めて実行してください。直らない場合はDocker Desktopのファイル共有設定とアクセス権を確認し、診断ログを調べてください。

@@ -24,7 +24,7 @@ WORKSHOP_ARGS ?= --help
 RUNTIME_ARGS := $(if $(INCLUDE_BASE_URL),--include-base-url "$(INCLUDE_BASE_URL)")
 SETUP_ARGS := $(if $(HOST),--host "$(HOST)") $(if $(PORT),--port "$(PORT)") $(if $(STACK_API_PORT),--stack-api-port "$(STACK_API_PORT)") $(if $(LOCALE),--locale "$(LOCALE)") $(RUNTIME_ARGS)
 
-.PHONY: all clean check-python setup check install-deps start stop restart status install-moodle-auth workshop-users
+.PHONY: all clean check-python setup check install-deps start stop restart repair-docker status install-moodle-auth workshop-users
 
 all: $(MACFILES)
 
@@ -66,6 +66,9 @@ stop: check-python
 
 restart: check-python
 	@$(PYTHON) scripts/mcq-webapp.py restart $(RUNTIME_ARGS)
+
+repair-docker: check-python
+	@$(PYTHON) scripts/mcq-webapp.py repair-docker $(RUNTIME_ARGS)
 
 status: check-python
 	@$(PYTHON) scripts/mcq-webapp.py status $(RUNTIME_ARGS)

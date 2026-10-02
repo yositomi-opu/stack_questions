@@ -762,17 +762,18 @@ def check_maxima_evaluation() -> None:
         return
     raise ManagerError(
         "Maxima評価を設定できませんでした。直前のMaxima diagnosticsとDocker側のmaximaサービスを確認してください。\n"
+        "evaluate.mac not found の場合は、使用するcloneで make repair-docker を実行してください。\n"
         f"ログ確認: {subprocess.list2cmdline(compose_command(runtime_config(), 'logs', 'maxima'))}"
     )
 
 
-def start_services(config: dict[str, Any]) -> None:
+def start_services(config: dict[str, Any], *, recreate: bool = False) -> None:
     run([sys.executable, str(REPO_ROOT / "scripts" / "sync_mcq_templates.py")])
     require_basic_dependencies()
     require_docker_daemon(auto_start=True)
     print_step("STACK APIを起動")
     run(
-        compose_command(config, "up", "-d", "--pull", "missing"),
+        compose_command(config, "up", "-d", "--pull", "missing", *(["--force-recreate"] if recreate else [])),
         env=compose_environment(config),
     )
     wait_for_stack_api(config)
@@ -798,6 +799,18 @@ def stop_services(config: dict[str, Any]) -> None:
                 [*prefix, "-p", COMPOSE_PROJECT, "-f", str(COMPOSE_FILE), "stop"],
                 env=compose_environment(config),
             )
+
+
+def repair_docker(config: dict[str, Any]) -> None:
+    """Recreate containers with this checkout mounted, then verify evaluation."""
+    repair_permissions()
+    require_basic_dependencies()
+    require_docker_daemon(auto_start=True)
+    stop_web(config)
+    print_step("Dockerコンテナを再作成し、現在のcloneを共有し直します")
+    start_services(config, recreate=True)
+    check_maxima_evaluation()
+    print("Dockerの再作成とMaxima評価の確認が完了しました。")
 
 
 def setup(config: dict[str, Any]) -> None:
@@ -901,7 +914,7 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="MCQ WebAppとローカルSTACK APIを管理します")
     parser.add_argument(
         "command",
-        choices=("setup", "check", "install-deps", "start", "stop", "restart", "status", "launch"),
+        choices=("setup", "check", "install-deps", "start", "stop", "restart", "repair-docker", "status", "launch"),
     )
     parser.add_argument("--host", help="MCQ WebAppのbind address（setup時に保存）")
     parser.add_argument("--port", help="MCQ WebAppのポート（setup時に保存）")
@@ -944,6 +957,8 @@ def main() -> int:
         elif args.command == "restart":
             stop_services(config)
             start_services(config)
+        elif args.command == "repair-docker":
+            repair_docker(config)
         elif args.command == "launch":
             first_setup = not all(
                 load_config().get(key)

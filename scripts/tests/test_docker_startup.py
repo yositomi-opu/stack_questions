@@ -35,6 +35,35 @@ class DockerStartupTests(unittest.TestCase):
                 ["compose", "up", "-d", "--pull", "missing"],
             ])
 
+    def test_repair_recreates_then_checks_evaluation(self):
+        config = {"locale": "ja", "locale_mode": "auto", "host": "127.0.0.1",
+                  "web_port": 4173, "stack_api_port": 3080,
+                  "include_base_url": "https://example.org/",
+                  "stack_api_url": "http://127.0.0.1:3080"}
+        events = []
+        with ExitStack() as mocks:
+            for name in ["repair_permissions", "require_basic_dependencies", "require_docker_daemon",
+                         "stop_web", "start_web", "wait_for_stack_api", "check_maxima_evaluation"]:
+                mocks.enter_context(patch.object(manager, name,
+                    side_effect=lambda *args, _name=name, **kwargs: events.append(_name)))
+            mocks.enter_context(patch.object(manager, "compose_command", side_effect=lambda config, *args: ["compose", *args]))
+            run = mocks.enter_context(patch.object(manager, "run", side_effect=lambda *a, **k: events.append("run")))
+            manager.repair_docker(config)
+            self.assertEqual(run.call_args_list[-1].args[0],
+                ["compose", "up", "-d", "--pull", "missing", "--force-recreate"])
+            self.assertEqual(run.call_args_list[-1].kwargs["env"]["MCQ_REPO_ROOT"], str(manager.REPO_ROOT))
+            self.assertLess(events.index("stop_web"), events.index("run"))
+            self.assertLess(events.index("start_web"), events.index("check_maxima_evaluation"))
+            self.assertEqual(events[-1], "check_maxima_evaluation")
+
+    def test_repair_reports_evaluation_failure(self):
+        with ExitStack() as mocks:
+            for name in ["repair_permissions", "require_basic_dependencies", "require_docker_daemon", "stop_web", "start_services"]:
+                mocks.enter_context(patch.object(manager, name))
+            mocks.enter_context(patch.object(manager, "check_maxima_evaluation", side_effect=manager.ManagerError("failed")))
+            with self.assertRaisesRegex(manager.ManagerError, "failed"):
+                manager.repair_docker({})
+
     def test_running_docker_is_not_launched_again(self):
         with patch.object(manager, "docker_daemon_probe", return_value=result()), patch.object(manager, "start_macos_docker_desktop") as launch:
             manager.require_docker_daemon(auto_start=True)
