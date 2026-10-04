@@ -1,0 +1,21 @@
+[Unit]
+Description=STACK MCQ guest practice
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mcq-practice
+Group=mcq-practice
+WorkingDirectory=/opt/stack_questions
+ExecStart=/usr/bin/python3 /opt/stack_questions/app/mcq-webapp/practice_server.py --catalog /var/lib/mcq-practice/catalog.json
+Environment=PYTHONDONTWRITEBYTECODE=1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

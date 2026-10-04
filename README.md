@@ -22,6 +22,10 @@ If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or
 
 If question variables are loaded from a separate file using `stack_include`, publish that file at a URL accessible to Moodle. The [WebApp guide](app/mcq-webapp/README.md) explains how to configure the URL and create variants using parameters such as matrix rank.
 
+## Guest practice site
+
+A separate practice server can render and grade teacher-registered CSV/XML questions without Moodle or student accounts. It reuses STACK API and does not expose the editor or arbitrary question-code endpoints. Scores are not stored. See the [Ubuntu VPS deployment guide (Japanese)](deploy/practice/README.md).
+
 ## Samples and main files
 
 | Location | Contents |

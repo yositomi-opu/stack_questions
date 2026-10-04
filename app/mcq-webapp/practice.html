@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STACK MCQ Practice</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{display:block;margin:0;background:#f4f7fa;padding:24px}
+    .practice-main{max-width:900px;margin:0 auto;background:white;padding:24px;border-radius:12px}
+    .practice-main header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .practice-main select{max-width:100%}.practice-main label{display:block;margin:20px 0 8px}
+    #question{width:100%;margin-bottom:20px}#catalogStatus{white-space:pre-wrap}
+  </style>
+  <script defer src="/practice.js"></script>
+  <script defer src="/preview.js"></script>
+</head>
+<body><main class="practice-main">
+  <header><h1 id="heading">STACK MCQ 練習</h1><select id="uiLanguage" aria-label="Language"><option value="ja">🌐 日本語</option><option value="en">🌐 English</option></select></header>
+  <p id="intro">ログイン不要で練習できます。回答・成績は保存されません。</p>
+  <label id="questionLabel" for="question">問題を選択</label>
+  <select id="question" disabled></select>
+  <button id="previewButton" type="button" disabled>練習を開始</button>
+  <p id="catalogStatus" role="status" aria-live="polite"></p>
+</main></body></html>

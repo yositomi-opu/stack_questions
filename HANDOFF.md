@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-10-02
+更新日: 2026-10-04
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,11 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 2026-10-04: Ubuntu VPSへのゲスト練習サイトの導入準備。`practice_server.py` は登録カタログだけを受け付ける独立HTTPサーバー（既定127.0.0.1:4174）。エディターのAPI・ファイルを非公開とし、出題時XML/seed/langをランダムtokenに紐付け1時間メモリ保持、採点はtokenと回答のみ。永続成績なし、同時計算2件、セッション最大1024件/定義合計32MiBを目安に旧セッション破棄。`practice.html/js` と既存preview.jsの任意アダプターで日英UI・言語変更・採点・再出題を提供。エディターの通常プレビューは維持。
+- `scripts/mcq_practice_catalog.py` で教員指定CSV/XMLを一括登録。CSVは既存CLIを使用し、includeはclone内で解決・埋込、不明/動的includeを拒否。ファイル名由来の安定ID、原子的なカタログ置換、`--check-api`で各登録言語のseed=1描画確認、`--evaluate`で必要なCSVリスト評価を指定可能。カタログは非公開領域。`deploy/practice` にUbuntu24.04/systemd/Nginx/HTTPS・問題登録更新手順。README/CHANGELOG追記。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。VPS配備は未実施。
+- 検証: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_practice.py` 9件、同 `test_stack_preview.py` 7件、`node scripts/tests/test_preview_ui.cjs`（既存プロキシ経路と練習アダプター）、JS構文、両CLI --help、`git diff --check` 成功。Nginx設定は一時ラッパーで `nginx -t` 成功（Mac、Ubuntuのsystemdは未検証）。同梱sample.csvと001.mcq_sample01.xmlでカタログ生成＋ローカルSTACK API全登録言語描画検査成功。実ブラウザでCSV由来Radio問題の100%/0%採点・フィードバック・seed変更再出題、XML由来問題のen→ja問題文切替・英語UIを確認、ブラウザエラーログなし。実HTTPで編集API/ソースファイル404、任意XML指定400、カタログにXMLなしを確認。検証用4184サーバーとタブは終了。既存編集サーバー・STACKコンテナ・利用者のky_linear_algebra変更等は変更していない。
+- 未確認/次: VPS契約後に実際のUbuntuへ配備、DNS/TLS、教材でCheckbox/部分点/未回答/数式・解説等の一連の動作、授業規模の負荷試験。HTTPのhealthzはPython稼働のみ。公開時には教員確認済み問題だけ登録し、編集用ポートは開かない。外部includeファイルはGitHub公開に加えcloneへの配置も必要。既存sample.csvの旧CAS言語警告は変換時に通知し、保持したまま登録。
 
 - 2026-10-02: `make repair-docker` / 管理スクリプトrepair-docker追加。WebApp停止→現在のREPO_ROOTを共有するCompose up --force-recreate --pull missing→API起動待ち・WebApp再起動→Maxima評価確認。通常start/restartの挙動は維持。評価ファイルnot foundのエラー案内に復旧コマンド追記。WebApp READMEに管理コマンド・FAQ、英語ルートREADMEに対処案内を追加。コンテナ一時状態は破棄、リポジトリ・保存設定・取得済みイメージは保持。利用者が手動の同等操作で復旧したことを確認済み。
 - 検証: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_docker_startup.py`、`make -n repair-docker`、管理スクリプト --help、git diff --check。Docker呼出しはモックで再作成フラグ・現在cloneの共有・実行順・評価失敗伝播を検証。稼働中サービスに影響するため新コマンドによる実コンテナ再作成は未実施。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。既存ky_linear_algebra.txt/macの変更、CLIモード変更、未追跡ファイルは対象外。

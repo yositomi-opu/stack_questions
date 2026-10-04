@@ -1,6 +1,7 @@
 /* Isolated, opt-in preview. No editor event handlers or saved state are replaced. */
 (() => {
   "use strict";
+  const practice = window.MCQ_PRACTICE;
   const t = (ja, en) => document.documentElement.lang === "en" ? en : ja;
   let dialog, frame, status, seed, renderButton, gradeButton, solutionButton, languageSelect;
   let snapshot, rendered, busy = false, mathReady;
@@ -40,8 +41,8 @@
     dialog = document.createElement("dialog");
     dialog.className = "preview-dialog";
     dialog.setAttribute("aria-labelledby", "preview-title");
-    dialog.innerHTML = `<div class="preview-heading"><h2 id="preview-title">${t("問題プレビュー", "Question preview")}</h2><button type="button" data-close>${t("閉じる", "Close")}</button></div>
-      <p>${t("表示時点の編集内容で確認します。編集後は閉じてから再度プレビューしてください。", "Uses a snapshot of the editor. Close and reopen after editing.")}</p>
+    dialog.innerHTML = `<div class="preview-heading"><h2 id="preview-title">${practice ? t("練習問題", "Practice question") : t("問題プレビュー", "Question preview")}</h2><button type="button" data-close>${t("閉じる", "Close")}</button></div>
+      <p>${practice ? t("何度でも練習できます。成績は保存されません。", "Practice as often as you like. Scores are not saved.") : t("表示時点の編集内容で確認します。編集後は閉じてから再度プレビューしてください。", "Uses a snapshot of the editor. Close and reopen after editing.")}</p>
       <div class="preview-controls"><label>${t("乱数の種", "Seed")} <input type="number" min="1" max="2147483647" value="1" step="1" data-seed></label>
       <button type="button" data-render>${t("この種で表示", "Render this seed")}</button>
       <button type="button" data-next>${t("別バリエーション", "Another variant")}</button>
@@ -59,13 +60,13 @@
     solutionButton = dialog.querySelector("[data-solution]");
     languageSelect = dialog.querySelector("[data-language]");
     const names = {ja:"日本語", en:"English", fr:"Français", it:"Italiano", de:"Deutsch", pt:"Português", zh:"中文", ko:"한국어", ru:"Русский", sv:"Svenska", es:"Español"};
-    activeLangs().forEach(lang => {
+    (practice ? practice.languages() : activeLangs()).forEach(lang => {
       const option = document.createElement("option");
       option.value = lang;
       option.textContent = `${names[lang] || lang} (${lang})`;
       languageSelect.append(option);
     });
-    languageSelect.value = baseLang();
+    languageSelect.value = practice ? practice.language() : baseLang();
     languageSelect.onchange = () => {
       if (busy || !snapshot) return;
       snapshot = {...snapshot, lang: languageSelect.value};
@@ -94,6 +95,7 @@
   }
 
   async function request(route, extra = {}) {
+    if (practice) return practice.request(route, {...snapshot, seed: Number(seed.value), ...extra});
     const response = await fetch(webappUrl(`/api/stack/${route}`), {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({...snapshot, seed: Number(seed.value), ...extra}),
@@ -175,6 +177,7 @@
       if (typeof result.questionrender !== "string") throw new Error(t("APIから問題表示を取得できませんでした。", "The API returned no question display."));
       if (result.iframes?.length || result.isinteractive) throw new Error(t("この問題は対話型の図を含むため、このプレビューでは表示できません。Moodleで確認してください。", "This question contains interactive graphics. Please preview it in Moodle."));
       await display(assetHtml(questionHtml(result), result.previewassets));
+      if (result.practiceToken) snapshot = {...snapshot, token: result.practiceToken};
       if (result.previewDefinition) snapshot = {...snapshot, questionDefinition: result.previewDefinition};
       rendered = result;
       frame.hidden = false;
@@ -229,7 +232,7 @@
     dialog.showModal();
     try {
       snapshot = null;
-      snapshot = previewQuestionSnapshot();
+      snapshot = practice ? practice.snapshot() : previewQuestionSnapshot();
       render();
     } catch (error) {
       setBusy(false);

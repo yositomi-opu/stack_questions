@@ -8,7 +8,7 @@ source = source.slice(0, source.indexOf('  document.getElementById("previewButto
     setRequestState: (lang="ja") => {snapshot = {questionDefinition:"<quiz/>",url:"http://127.0.0.1:3080",lang}; seed = {value:"7"};},
     setControls: controls => {frame = {contentDocument:{querySelectorAll:()=>controls}};}};
 })();`;
-const context = vm.createContext({document:{documentElement:{lang:'ja'}}});
+const context = vm.createContext({window:{},document:{documentElement:{lang:'ja'}}});
 vm.runInContext(source, context);
 const h = context.helpers;
 assert.equal(h.questionHtml({questionrender:'<p>[[input:ans1]] [[validation:ans1]] [[feedback:prt1]]</p>',questioninputs:{ans1:{render:'<input name="mcqpreview_ans1">'}}}), '<p><input name="mcqpreview_ans1">  </p>');
@@ -59,5 +59,14 @@ console.log('Passed: API input/feedback placeholders, repeated assets, Radio and
     c.fetch=async()=>({ok:true,status:200,json:async()=>null});
     await assert.rejects(c.helpers.request('preview'), /HTTP 200/);
   }
+  const practiceRequests = [];
+  const practiceContext = vm.createContext({window:{MCQ_PRACTICE:{request:async(route,payload)=>{
+    practiceRequests.push({route,payload}); return {practiceToken:'server-token'};
+  }}},document:{documentElement:{lang:'ja'}}});
+  vm.runInContext(source,practiceContext);
+  practiceContext.helpers.setRequestState();
+  assert.equal((await practiceContext.helpers.request('preview')).practiceToken,'server-token');
+  assert.equal(practiceRequests[0].route,'preview');
+  assert.equal(practiceRequests[0].payload.seed,7);
   console.log('Passed: preview/grade paths at root and both proxy prefixes; HTML 404/login and JSON errors.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
