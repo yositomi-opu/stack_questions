@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css?v=20260928-candidates">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20260928-candidates"></script>
-    <script defer src="./app.js?v=20260928-candidates"></script>
+    <script defer src="./i18n.js?v=20261004-language-toggle"></script>
+    <script defer src="./app.js?v=20261004-language-toggle"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
     <script defer src="./file-ui.js?v=20260928-candidates"></script>
     <script defer src="./preview.js?v=20260924-boldsymbol2"></script>
@@ -297,7 +297,7 @@
             </div>
             <div id="languageChoices" class="language-choices">
               <span class="language-choices-label">展開言語</span>
-              <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択">ALL</button>
+              <button id="selectAllLanguagesButton" type="button" class="ghost" title="全言語を選択／解除（基本言語は常に選択）">ALL</button>
             </div>
             <p id="aiTranslationNotice" class="translation-guide">自動翻訳は、選択したAIへ問題文・選択肢・フィードバックを送信します。APIの利用料金が発生する場合があります。翻訳後は内容を確認してください。</p>
             <div class="row-actions"><button id="aiTranslateStop" type="button" class="ghost" hidden>停止</button><span id="aiTranslationProgress" role="status" aria-live="polite"></span></div>

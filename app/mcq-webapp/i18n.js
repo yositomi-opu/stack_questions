@@ -126,6 +126,7 @@
     "「展開」で翻訳依頼を作成します。ChatGPTへ渡し、返された翻訳JSONを「翻訳結果を確認・修正」に貼り付けて反映してください。": "Select Translate to prepare a request for ChatGPT. Paste the returned translation JSON into Review and edit translations, then apply it.",
     "展開言語": "Languages",
     "全言語を選択": "Select all languages",
+    "全言語を選択／解除（基本言語は常に選択）": "Select/deselect all languages (the base language stays selected)",
     "展開": "Translate",
     "パターン番号がテンプレートの上限を超えています。": "The pattern number exceeds the template capacity.",
     "一対モードの選択肢数はパターン数以下にしてください。": "In paired mode, the number of choices must not exceed the number of patterns.",

@@ -13,6 +13,10 @@
 
 ## 直近の変更と決定事項
 
+- 2026-10-04: 展開言語ALLを全選択／基本言語以外解除のトグルへ変更。日英ツールチップ、README、キャッシュ識別子を更新。`node scripts/tests/test_startup_languages.cjs`に基本言語を維持した往復切替・保存/更新呼出しを追加して成功。JS構文・差分チェック成功。ブラウザ実機は未確認。利用者のc-p依頼により直前の初期言語修正とともにcommit/push対象とする。送信状態はGit履歴で確認。
+
+- 2026-10-04: 初期サンプルにja/enしかない一方、restoreLanguageSettingsが保存されたfr等も復元し、init末尾のXML生成で翻訳不足になる経路を確認。init時のみDEFAULT_QUESTION_TEXTSの言語に復元を制限、対応外の基本言語はINITIAL_LOCALEへ戻す。localStorageは書換えず、ファイル読込や通常の翻訳不足検証は維持。README/CHANGELOG・app.jsキャッシュ識別子を更新。`node scripts/tests/test_startup_languages.cjs`（ja/en/fr/pt基本言語、選択絞込み、保存値維持）、`node scripts/tests/test_csv_schema_v3.cjs`、JS構文・`git diff --check`成功。ブラウザ実機確認は未実施。利用者のc-p依頼によりcommit/push対象とする。
+
 - 2026-10-04: Ubuntu VPSへのゲスト練習サイトの導入準備。`practice_server.py` は登録カタログだけを受け付ける独立HTTPサーバー（既定127.0.0.1:4174）。エディターのAPI・ファイルを非公開とし、出題時XML/seed/langをランダムtokenに紐付け1時間メモリ保持、採点はtokenと回答のみ。永続成績なし、同時計算2件、セッション最大1024件/定義合計32MiBを目安に旧セッション破棄。`practice.html/js` と既存preview.jsの任意アダプターで日英UI・言語変更・採点・再出題を提供。エディターの通常プレビューは維持。
 - `scripts/mcq_practice_catalog.py` で教員指定CSV/XMLを一括登録。CSVは既存CLIを使用し、includeはclone内で解決・埋込、不明/動的includeを拒否。ファイル名由来の安定ID、原子的なカタログ置換、`--check-api`で各登録言語のseed=1描画確認、`--evaluate`で必要なCSVリスト評価を指定可能。カタログは非公開領域。`deploy/practice` にUbuntu24.04/systemd/Nginx/HTTPS・問題登録更新手順。README/CHANGELOG追記。利用者のc-p依頼により本変更と検証記録をcommit/push対象とする。送信状態はGit履歴で確認。VPS配備は未実施。
 - 検証: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests -p test_practice.py` 9件、同 `test_stack_preview.py` 7件、`node scripts/tests/test_preview_ui.cjs`（既存プロキシ経路と練習アダプター）、JS構文、両CLI --help、`git diff --check` 成功。Nginx設定は一時ラッパーで `nginx -t` 成功（Mac、Ubuntuのsystemdは未検証）。同梱sample.csvと001.mcq_sample01.xmlでカタログ生成＋ローカルSTACK API全登録言語描画検査成功。実ブラウザでCSV由来Radio問題の100%/0%採点・フィードバック・seed変更再出題、XML由来問題のen→ja問題文切替・英語UIを確認、ブラウザエラーログなし。実HTTPで編集API/ソースファイル404、任意XML指定400、カタログにXMLなしを確認。検証用4184サーバーとタブは終了。既存編集サーバー・STACKコンテナ・利用者のky_linear_algebra変更等は変更していない。

@@ -134,7 +134,8 @@ async function init() {
     localStorage.removeItem(INCLUDE_BASE_URL_STORAGE_KEY);
   }
   populateBaseLanguage();
-  restoreLanguageSettings();
+  // Startup uses the built-in sample, whose translations are only ja/en.
+  restoreLanguageSettings(Object.keys(DEFAULT_QUESTION_TEXTS));
   updateQuestionLanguageVisibility();
   updateCorrectCountControls();
   renderRows();
@@ -712,13 +713,15 @@ function populateBaseLanguage() {
   updateBaseLanguageUi();
 }
 
-function restoreLanguageSettings() {
+function restoreLanguageSettings(availableLanguages = LANGS) {
   try {
     const saved = JSON.parse(localStorage.getItem(LANGUAGE_SETTINGS_STORAGE_KEY));
     if (!saved || !LANGS.includes(saved.baseLanguage) || !Array.isArray(saved.languages)) return;
-    el.baseLanguage.value = saved.baseLanguage;
+    const base = availableLanguages.includes(saved.baseLanguage) ? saved.baseLanguage : INITIAL_LOCALE;
+    el.baseLanguage.value = base;
     LANGS.forEach((lang) => {
-      el.languageChecks[lang].checked = lang === saved.baseLanguage || saved.languages.includes(lang);
+      el.languageChecks[lang].checked = lang === base
+        || (availableLanguages.includes(lang) && saved.languages.includes(lang));
     });
     updateBaseLanguageUi();
   } catch (_error) { /* Use defaults if storage is unavailable or invalid. */ }
@@ -737,7 +740,8 @@ function baseLang() {
 }
 
 function selectAllLanguages() {
-  LANGS.forEach(lang => { el.languageChecks[lang].checked = true; });
+  const allSelected = LANGS.every(lang => el.languageChecks[lang].checked);
+  LANGS.forEach(lang => { el.languageChecks[lang].checked = !allSelected || lang === baseLang(); });
   saveLanguageSettings();
   updateQuestionLanguageVisibility();
   markTranslationsStale("展開先言語が変更されました");
