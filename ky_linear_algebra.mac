@@ -258,7 +258,7 @@ colspace_basisp(matA, vec_list):=block([r, ba1, ba2, ba4],
   else if ba4 then %_msgL:endcons("the system of vectors include outside vectors", %_msgL),
   else if ba2 then %_msgL:endcons("the system of vectors is not linear independent", %_msgL),
   else if ba1 then %_msgL:endcons("the vectors of the system do not span the space.", %_msgL),
-  else %_msgL:endcons("ok, the list is basis.", %_msgL), return(;
+  else %_msgL:endcons("ok, the list is basis.", %_msgL), return(r));
 
 
 gcd_list(L):=block([k, g],g:L[1], for k:1 while (k<length(L)) do (g:gcd(g, L[k+1])), return(g));
