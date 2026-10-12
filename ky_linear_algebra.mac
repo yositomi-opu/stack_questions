@@ -209,6 +209,7 @@ texput(Wx,"\\boldsymbol{x}");
 texput(Wy,"\\boldsymbol{y}");
 texput(Wz,"\\boldsymbol{z}");
 texput(Wzr, "\\boldsymbol{0}");
+texput(W0, "\\boldsymbol{0}");
 
 
 
@@ -241,19 +242,23 @@ all_sublist_leq(L,n):=apply(union,makelist(all_sublist_len(L,k),k,1,min(length(L
 
 check_basis_colspace(matA, vec_list):=block([matB, rw, cl, vlen:length(vec_list), ret:0],
   [rw,cl]:matrix_size(matA),
-  if not apply("and", makelist(is(matrix_size(vec_list[k])=[rw, 1]), k, 1, vlen)) then return(-8),
+  if not apply("and", makelist(is(matrix_size(vec_list[k])=[rw, 1]), k, 1, vlen)) then return(64),
   matB:apply(addcol, vec_list),
-  if rank(addcol(matA, matB))>rank(matA) then return(-4),
-  if not rank(matB)=vlen then ret:ret-2,
-  if rank(matB)<rank(matA) then ret:ret-1, return(ret));
+  if rank(addcol(matA, matB))>rank(matA) then ret:ret+4,
+  if not rank(matB)=vlen then ret:ret+2,
+  if rank(matB)<rank(matA) then ret:ret+1, return(ret));
 
-colspace_basisp(matA, vec_list):=block([r], r:check_basis_colspace(matA,vec_list),
-  if r=-8 then __msg:"the list of vectors include illegal size vectors"
-  else if r=-4 then __msg:"the system of vectors include outside vectors"
-  else if r=-3 then __msg:"the system of vectors are neither linearly independent nor span the space."
-  else if r=-2 then __msg:"the system of vectors is not linear independent"
-  else if r=-1 then __msg:"the vectors of the system do not span the space."
-  else __msg:"ok, the list is basis.", return(is(r=0)));
+colspace_basisp(matA, vec_list):=block([r, ba1, ba2, ba4],
+  r:check_basis_colspace(matA,vec_list),
+  ba4:is(bit_and(r, 4)=4),
+  ba2:is(bit_and(r, 2)=2),
+  ba1:is(bit_and(r, 1)=1),
+  %_msgL:[],
+  if r=99 then %_msgL:endcons("the list of vectors include illegal size vectors", %_msgL),
+  else if ba4 then %_msgL:endcons("the system of vectors include outside vectors", %_msgL),
+  else if ba2 then %_msgL:endcons("the system of vectors is not linear independent", %_msgL),
+  else if ba1 then %_msgL:endcons("the vectors of the system do not span the space.", %_msgL),
+  else %_msgL:endcons("ok, the list is basis.", %_msgL), return(;
 
 
 gcd_list(L):=block([k, g],g:L[1], for k:1 while (k<length(L)) do (g:gcd(g, L[k+1])), return(g));
