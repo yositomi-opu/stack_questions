@@ -45,7 +45,7 @@
       <p>${practice ? t("何度でも練習できます。成績は保存されません。", "Practice as often as you like. Scores are not saved.") : t("表示時点の編集内容で確認します。編集後は閉じてから再度プレビューしてください。", "Uses a snapshot of the editor. Close and reopen after editing.")}</p>
       <div class="preview-controls"><label>${t("乱数の種", "Seed")} <input type="number" min="1" max="2147483647" value="1" step="1" data-seed></label>
       <button type="button" data-render>${t("この種で表示", "Render this seed")}</button>
-      <button type="button" data-next>${t("別バリエーション", "Another variant")}</button>
+      <button type="button" data-next>${t("別の変形", "Another variant")}</button>
       <button type="button" data-grade class="primary">${t("回答を採点", "Grade answer")}</button>
       <button type="button" data-solution>${t("解説を表示", "Show explanation")}</button>
       <label class="preview-language" title="${t("プレビュー言語", "Preview language")}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6h14M5 18h14"/></svg><select data-language aria-label="${t("プレビュー言語", "Preview language")}"></select></label></div>

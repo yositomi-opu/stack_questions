@@ -4,13 +4,35 @@ const vm = require('node:vm');
 const path = require('node:path');
 let source = fs.readFileSync(path.resolve(__dirname, '../../app/mcq-webapp/preview.js'), 'utf8');
 source = source.slice(0, source.indexOf('  document.getElementById("previewButton")')) + `
-  globalThis.helpers = {questionHtml, feedbackHtml, assetHtml, answers, request,
+  globalThis.helpers = {createDialog, questionHtml, feedbackHtml, assetHtml, answers, request,
     setRequestState: (lang="ja") => {snapshot = {questionDefinition:"<quiz/>",url:"http://127.0.0.1:3080",lang}; seed = {value:"7"};},
     setControls: controls => {frame = {contentDocument:{querySelectorAll:()=>controls}};}};
 })();`;
 const context = vm.createContext({window:{},document:{documentElement:{lang:'ja'}}});
 vm.runInContext(source, context);
 const h = context.helpers;
+// Build the actual dialog in both UI languages, including the shared practice UI.
+for (const practice of [false, true]) for (const lang of ['ja', 'en']) {
+  let dialog;
+  const node = () => ({append(){}, value:'', disabled:false});
+  const doc = {documentElement:{lang}, body:{append(){}}, createElement(tag) {
+    if (tag !== 'dialog') return node();
+    const controls = new Map();
+    dialog = {setAttribute(){}, querySelector(selector) {
+      if (!controls.has(selector)) controls.set(selector, node());
+      return controls.get(selector);
+    }};
+    return dialog;
+  }};
+  const c = vm.createContext({document:doc, window:practice ? {MCQ_PRACTICE:{languages:()=>['en','ja'],language:()=>lang}} : {},
+    activeLangs:()=>['en','ja'],baseLang:()=>lang});
+  vm.runInContext(source,c);
+  c.helpers.createDialog();
+  assert.ok(dialog.innerHTML.includes(`data-next>${lang === 'ja' ? '別の変形' : 'Another variant'}</button>`));
+  assert.ok(!dialog.innerHTML.includes('別バリエーション'));
+  assert.equal(typeof dialog.querySelector('[data-next]').onclick, 'function');
+}
+
 assert.equal(h.questionHtml({questionrender:'<p>[[input:ans1]] [[validation:ans1]] [[feedback:prt1]]</p>',questioninputs:{ans1:{render:'<input name="mcqpreview_ans1">'}}}), '<p><input name="mcqpreview_ans1">  </p>');
 assert.equal(h.feedbackHtml({specificfeedback:'<div>[[feedback:prt1]]</div>',prts:{prt1:'正解です'}}),'<div>正解です</div>');
 assert.equal(h.feedbackHtml({prts:{prt1:'解説1',prt2:'解説2'}}),'解説1\n解説2');

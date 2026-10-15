@@ -6,7 +6,7 @@
       <text>001.MCQ_cas-cb-2026-09-20</text>
     </name>
     <questiontext format="moodle_auto_format">
-      <text><![CDATA[{@%__mcq_langcode@}
+      <text><![CDATA[[[lang code="en"]][[/lang]][[lang code="ja"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]]{@%__mcq_langcode@}
 <p>{@qtext@}</p>
 <p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
     </questiontext>
@@ -140,7 +140,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <truenextnode>-1</truenextnode>
         <trueanswernote>prt1-1-T</trueanswernote>
         <truefeedback format="html">
-          <text><![CDATA[{@%__mcq_langcode@}
+          <text><![CDATA[[[lang code="en"]][[/lang]][[lang code="ja"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]]{@%__mcq_langcode@}
 <p>{@%__mcq_noidea_checked@}</p>]]></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
@@ -167,7 +167,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <trueanswernote>prt1-2-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[<!-- ラジオボタンで正解オプションが 2個以上ある場合に対応 -->
-{@%__mcq_langcode@}
+[[lang code="en"]][[/lang]][[lang code="ja"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]]{@%__mcq_langcode@}
 <p>{@msg@}</p>]]></text>
         </truefeedback>
         <falsescoremode>=</falsescoremode>
@@ -177,7 +177,7 @@ stack_include("https://yositomi-opu.github.io/stack_questions/mcq_template_post_
         <falseanswernote>prt1-2-F</falseanswernote>
         <falsefeedback format="html">
           <text><![CDATA[<!-- general error / 一般の誤り -->
-{@%__mcq_langcode@}
+[[lang code="en"]][[/lang]][[lang code="ja"]][[/lang]][[lang code="fr"]][[/lang]][[lang code="de"]][[/lang]]{@%__mcq_langcode@}
 <p>{@msg@}. </p>
 <p>Score: {@sc@}</p>]]></text>
         </falsefeedback>

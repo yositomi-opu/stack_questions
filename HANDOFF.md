@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-10-04
+更新日: 2026-10-15
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -12,6 +12,12 @@
 - 日本語サンプルCSVを `app/mcq-webapp/samples.ja` 直下へ統合。看護学の重複10件をNUR識別子へ統一し、全6分野60問を収録。
 
 ## 直近の変更と決定事項
+
+- 2026-10-15: Issue #1/#2対応。`001/Sample.txt`にサンプルのen/ja/fr/deを空のlangブロックで宣言するCASText変数`%__mcq_langcode`を追加。ルートとWebApp同梱のCASText cb/rbテンプレートの問題文・PRTフィードバックにも同じ宣言を直接追加。STACKはCAS/include評価前にXMLから言語を検出するため、変数定義だけでは不足する。`%_STACK_LANG`は上書きせず、STACKのMoodle言語選択・親言語・先頭言語fallbackに任せ、既存の`%__mcq_lang`による英語fallbackを維持。WebApp生成時には既存処理が宣言を選択言語へ置換・重複除去する。旧バックアップXMLは変更しない。
+- プレビュー共通UI（編集・練習）の日本語を「別の変形」に変更、英語Another variantとseed操作を維持。index.htmlのpreview.jsキャッシュ識別子を更新。公式Moodle 5.0日本語言語パックのqtype_stack.phpでvariant=変形を確認。
+- 検証: `python3 -m unittest discover -s scripts/tests -p test_mcq_pre_castext.py`（6件）、`node scripts/tests/test_preview_ui.cjs`、`test_language_declarations.cjs`、`test_csv_cli.cjs`、`test_translation_cas.cjs`、`test_startup_languages.cjs`、`node --check app/mcq-webapp/preview.js`、`git diff --check`成功。サンプルの言語集合とCASText定義、XML内直接宣言、配布コピー一致、WebAppの選択言語置換、日英×編集/練習の実dialog生成を検査。
+- 仕様確認: STACK公式`doc/en/Authoring/Languages.md`、`lang/multilang.php`、`question.php`を参照。Moodle/STACK/Maxima実行環境がないため実機描画・採点は未確認。次は両テンプレートをMoodleへ取り込み、en/ja/fr/deで問題文・選択肢・フィードバックの一致、fr_ca→frと未対応言語→en、cb/rb採点、同一seedの言語切替を確認する。ローカルテストを実機検証の代用とは扱わない。
+
 
 - 2026-10-04: 展開言語ALLを全選択／基本言語以外解除のトグルへ変更。日英ツールチップ、README、キャッシュ識別子を更新。`node scripts/tests/test_startup_languages.cjs`に基本言語を維持した往復切替・保存/更新呼出しを追加して成功。JS構文・差分チェック成功。ブラウザ実機は未確認。利用者のc-p依頼により直前の初期言語修正とともにcommit/push対象とする。送信状態はGit履歴で確認。
 

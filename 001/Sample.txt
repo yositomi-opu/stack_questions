@@ -6,6 +6,10 @@
 if not numberp(%_MCQ_NUM_OPTS) then %_MCQ_NUM_OPTS:5;
 if not numberp(%_MCQ_NUM_COPTS) then %_MCQ_NUM_COPTS:2;
 /*******************************************************************************/
+/* Declare the sample languages for inline CASText (not a language override). */
+/* XML fields must also declare these languages directly for STACK discovery. */
+%__mcq_langcode:castext("[[lang code=\"en\"]][[/lang]][[lang code=\"ja\"]][[/lang]][[lang code=\"fr\"]][[/lang]][[lang code=\"de\"]][[/lang]]");
+/*******************************************************************************/
 /* key parameters(e.g. which control the only level of the question) here if required */
 [rw, cl]:rand([[3, 4], [4, 5], [3, 5]]);
 pv:rand([[1, 2], [1, 3], [1, 2, 3]]);

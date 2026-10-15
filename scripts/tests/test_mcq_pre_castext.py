@@ -47,6 +47,28 @@ class McqPreCastextTests(unittest.TestCase):
                 self.assertIn(f'mcq_template_{stem}_cas.mac', source)
                 self.assertNotIn(f'mcq_template_{stem}.mac', source)
 
+    def test_sample_language_discovery_and_casttext_definition(self):
+        # STACK discovers languages from XML fields BEFORE evaluating includes.
+        # Defining only a castext variable in Sample.txt cannot set %_STACK_LANG.
+        import xml.etree.ElementTree as ET
+        sample = (ROOT / '001/Sample.txt').read_text()
+        literal = re.search(r'%__mcq_langcode:castext\(("(?:\\.|[^"\\])*")\);', sample)[1]
+        declaration = json.loads(literal)
+        languages = re.findall(r'\[\[lang code="([^"]+)"\]\]\[\[/lang\]\]', declaration)
+        self.assertEqual(languages, ['en', 'ja', 'fr', 'de'])
+        self.assertNotRegex(sample, r'%_STACK_LANG\s*:')
+        for mode in ['rb', 'cb']:
+            question = ET.parse(ROOT / f'001.MCQ_cas-{mode}.xml').find('question')
+            self.assertIn('/001/Sample.txt', question.findtext('questionvariables/text'))
+            fields = [element.text for element in question.iter('text')
+                      if element.text and '{@%__mcq_langcode@}' in element.text]
+            self.assertEqual(len(fields), 4)
+            for field in fields:
+                self.assertIn(declaration + '{@%__mcq_langcode@}', field)
+            # All translated sample arrays use exactly the advertised language set.
+            for array in re.findall(r'%__(?:mcq_qtext|CoptL\d+|WoptL\d+|Cmsg\d+|Wmsg\d+)L:(\[.*?);', sample, re.S):
+                self.assertEqual(set(re.findall(r'\["([a-z]+)",', array)), set(languages))
+
     def test_standard_and_cas_pattern_nodes_match(self):
         import xml.etree.ElementTree as ET
         for mode in ['rb', 'cb']:
