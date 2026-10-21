@@ -1043,13 +1043,29 @@ function patternNumberSelect(rows, maximum) {
     select.append(option);
   }
   select.value = current;
+  select.title = uiText("使用中の番号を選ぶと、パターン番号を入れ替えます。");
   select.addEventListener("change", () => {
-    rows.forEach(row => { row.pattern = select.value; });
+    renumberPattern(rows, select.value);
+    markTranslationsStale("選択肢パターンが変更されました");
     markCasEvaluationStale();
     renderRows();
     updateOutput();
   });
   return select;
+}
+
+// Renumber complete groups without silently merging their candidates/feedback.
+function renumberPattern(rows, target) {
+  const previous = rows[0].pattern;
+  const moved = new Set(rows);
+  const truths = new Set(rows.map(row => normalizeTruth(row.truth)));
+  state.rows.forEach(row => {
+    if (!moved.has(row) && Number(row.pattern) === Number(target)
+        && (el.requirePairs.checked || truths.has(normalizeTruth(row.truth)))) {
+      row.pattern = previous;
+    }
+  });
+  rows.forEach(row => { row.pattern = target; });
 }
 
 function fixedPatternInput(group) {
@@ -1498,12 +1514,8 @@ function feedbackTextarea(row, index) {
   textarea.rows = 2;
   textarea.value = groupRows.find((candidate) => String(candidate[feedbackKey] || "").trim())?.[feedbackKey] || "";
   textarea.dataset.feedbackGroup = key;
-  textarea.disabled = index !== firstIndex;
-  if (textarea.disabled) {
-    textarea.title = patternFeedbackSeparate(row)
-      ? "フィードバックは同じパターン・正解・不正解の先頭行で編集します"
-      : "フィードバックは同じパターンの先頭行で編集します";
-  }
+  textarea.disabled = false;
+  textarea.title = uiText("同じパターンのフィードバックに反映します。");
   textarea.addEventListener("input", () => {
     groupRows.forEach((candidate) => {
       candidate[feedbackKey] = textarea.value;
@@ -2279,7 +2291,12 @@ function generatedChoiceLanguages(sources) {
 }
 
 function generatePairedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
-  if (numOptions > patterns.length) throw new Error(uiText("一対モードの選択肢数はパターン数以下にしてください。"));
+  if (numOptions > patterns.length) throw new Error(
+    uiText("一対モードの選択肢数はパターン数以下にしてください。") + " "
+    + uiText("選択肢数") + ": " + numOptions + "; "
+    + uiText("内容のあるパターン数") + ": " + patterns.length
+    + " (" + patterns.map(pattern => Number(pattern.id)).join(", ") + ")"
+  );
   patterns.forEach(pattern => {
     if (!pattern.C.length || !pattern.W.length) throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
     if (!patternChoiceCapacity(pattern, "C") || !patternChoiceCapacity(pattern, "W")) throw new Error(uiText("各パターンの正解・不正解に少なくとも1候補が必要です。"));
