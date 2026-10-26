@@ -23,7 +23,7 @@ def dumps(source,fields):
                 for k,v in row.items():w.writerow([key,str(i),k,json.dumps(v,ensure_ascii=False) if isinstance(v,(dict,list)) else v])
         elif key in ('validation','correct'):
             for k,v in value.items():w.writerow([key,'',k,v])
-        else:w.writerow(['template','',key,str(value)])
+        else:w.writerow(['template','',key,json.dumps(value,ensure_ascii=False) if isinstance(value,(dict,list)) else str(value)])
     return ('\ufeff'+out.getvalue()).encode('utf-8')
 
 def loads(raw):
@@ -53,6 +53,7 @@ def loads(raw):
     if set(fields)!={'name','questionvariables','questiontext','generalfeedback'}:raise ValueError('Invalid question fields')
     model=single('template')
     if 'version' in model:model['version']=int(model['version'])
+    if 'settings' in model:model['settings']=json.loads(model['settings'])
     model['validation']=single('validation');model['correct']=single('correct')
     for kind in ('inputs','checks'):
         indexed=groups.get(kind,{})

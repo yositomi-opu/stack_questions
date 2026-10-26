@@ -19,7 +19,7 @@ import xml.etree.ElementTree as E
 import zipfile
 from authoring import apply_template, read_template
 from preview import Preview, NoRedirect
-from prt_nodes import import_pattern, base_variables
+from prt_nodes import import_pattern, base_variables, compact_fields
 import csv_codec
 
 LIMIT = 8 * 1024 * 1024
@@ -51,6 +51,12 @@ def default_xml():
     return E.tostring(root)
 
 
+def validate_fields(fields):
+    if not isinstance(fields,dict) or not set(fields).issubset(FIELDS):raise ValueError('Invalid fields')
+    for key,val in fields.items():
+        if not isinstance(val,str) or len(val.encode())>1024*1024 or any((ord(c)<32 and c not in '\n\r\t') or 0xD800<=ord(c)<=0xDFFF or ord(c) in (0xFFFE,0xFFFF) for c in val):raise ValueError('Invalid field')
+
+
 def edited(raw, fields):
     root,q=parse(raw)
     if not isinstance(fields,dict) or not set(fields).issubset(FIELDS):raise ValueError('Invalid fields')
@@ -79,7 +85,7 @@ def xml_fields(raw):
             fields['template']=json.dumps(model,ensure_ascii=False)
             fields['questionvariables']=base_variables(fields['questionvariables'])
     if fields.get('template') and json.loads(fields['template']).get('version')==2:
-        fields['questionvariables']=base_variables(fields['questionvariables'])
+        fields['questionvariables']=base_variables(fields['questionvariables'],keep_functions=json.loads(fields['template']).get('layout')=='compact')
     return fields
 
 
@@ -133,7 +139,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.session()
                 import translation
                 d=json.loads(raw)
-                if not isinstance(d.get('messages'),dict) or not 1<=len(d['messages'])<=100:raise ValueError('Invalid translation checkpoints')
+                if not isinstance(d.get('messages'),dict) or not 1<=len(d['messages'])<=101:raise ValueError('Invalid translation checkpoints')
                 translation.validate(d['messages'],d['messages'])
                 result=translation.translate(d) if self.path=='/api/translation' else translation.validate(d['messages'],d['result'])
                 return self.reply({'result':result})
@@ -149,7 +155,7 @@ class Handler(BaseHTTPRequestHandler):
                     xml=d.get('xml') or default_xml().decode();parse(xml.encode())
                     s={'created':time.monotonic(),'xml':xml.encode(),'original':xml.encode(),'fields':d.get('fields') or {},'revision':uuid.uuid4().hex,'callback':callback,'token':d.get('token'),'previewError':d.get('previewError'),'reference':(d.get('referenceXml') or xml).encode(),'callbackOrigin':callback.rsplit('/',2)[0] if callback else None}
                     if not self.server.general and s['fields'].get('template') and json.loads(s['fields']['template']).get('version')==2:
-                        s['fields']['questionvariables']=base_variables(s['fields'].get('questionvariables',''))
+                        s['fields']['questionvariables']=base_variables(s['fields'].get('questionvariables',''),keep_functions=json.loads(s['fields']['template']).get('layout')=='compact')
                     self.server.sessions[sid]=s
                     return self.reply({'session':sid,'url':f'http://127.0.0.1:{self.server.server_port}/?session={sid}&lang='+d.get('lang','ja')})
                 s=self.session()
@@ -158,7 +164,7 @@ class Handler(BaseHTTPRequestHandler):
                     original=raw;current=raw
                     imported_fields=None
                     if raw.lstrip(b'\xef\xbb\xbf').startswith(b'kind,id,key,value'):
-                        original,imported_fields=csv_codec.loads(raw);current=edited(original,imported_fields)
+                        original,imported_fields=csv_codec.loads(raw);validate_fields(imported_fields);current=original
                     if raw.startswith(b'PK'):
                         with zipfile.ZipFile(io.BytesIO(raw)) as z:
                             if len(z.infolist())!=3 or set(z.namelist())!={'source.xml','current.xml','project.json'} or sum(i.file_size for i in z.infolist())>2*LIMIT+65536:raise ValueError('Invalid editor project')
@@ -170,17 +176,24 @@ class Handler(BaseHTTPRequestHandler):
                         fields['questionvariables']=parse(current)[1].findtext('questionvariables/text','')
                     report=[]
                     if not self.server.general and 'template' not in fields:report.append('PRT pattern not recognized; basic fields only. Inputs, PRTs and unsupported content remain intact. / PRTパターンを認識できないため基本項目のみ編集できます。入力欄・PRT・非対応内容は保持します。')
-                    if fields.get('template') and json.loads(fields['template']).get('version')==2 and not read_template(parse(original)[1]):
+                    if not imported_fields and fields.get('template') and json.loads(fields['template']).get('version')==2 and not read_template(parse(original)[1]):
                         report=['Fixed PRT pattern recognized. Node weights replace feedback-variable scL; feedback is emitted per visited node. Original XML is retained. / 固定PRTを認識しました。配点はノード設定から生成し、フィードバックは訪問ノードから返します。元XMLは保持します。']
                     if imported_fields:report.append('CSV loaded with original XML retained / 原本XMLを保持してCSVを読み込みました。')
                     s.update(xml=current,original=original,reference=original,fields=fields,report=report,revision=uuid.uuid4().hex)
                     return self.reply(self.detail(s))
                 d=json.loads(raw)
                 if d.get('revision')!=s['revision']:raise ValueError('Editor view is outdated')
+                if self.path=='/api/project-export':
+                    definition=edited(s['xml'],d['fields']);out=io.BytesIO()
+                    with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as z:
+                        z.writestr('source.xml',s['original']);z.writestr('current.xml',definition);z.writestr('project.json',json.dumps({'schema':1,'source_sha256':hashlib.sha256(s['original']).hexdigest(),'current_sha256':hashlib.sha256(definition).hexdigest()}))
+                    return self.reply(out.getvalue(),mime='application/zip',filename='stack-project.zip')
+                if self.path=='/api/prepare':return self.reply({'fields':compact_fields(d['fields'])})
                 if self.path=='/api/export':
-                    fields=d.get('fields',s['fields']);definition=edited(s['xml'],fields)
+                    fields=d.get('fields',s['fields']);validate_fields(fields)
                     if d.get('format')=='csv':return self.reply(csv_codec.dumps(s['original'],fields),mime='text/csv; charset=utf-8',filename='prt-question.csv')
                     if d.get('format')!='xml':raise ValueError('Unknown export format')
+                    definition=edited(s['xml'],fields)
                     return self.reply(definition,mime='application/xml',filename='prt-question.xml')
                 if self.path in ('/api/action','/api/create-stack'):
                     fields=d['fields'];edited(s['xml'],fields)

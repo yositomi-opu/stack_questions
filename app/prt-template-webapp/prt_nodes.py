@@ -109,6 +109,7 @@ def import_pattern(q):
     for s in statements(code):
         if defined(s)=='%_validate':model['validationCode']=s.strip()
         if defined(s)=='%_chkfunc':model['checkCode']=s.strip()
+    model['answerBinding']=next((s.strip() for s in statements(p.findtext('feedbackvariables/text','')) if defined(s)=='ansL'),'')
     for inp in q.findall('input'):
         model['inputs'].append({c.tag:c.text or '' for c in inp})
     for i,x in enumerate(nodes[2:]):
@@ -133,7 +134,7 @@ def comment_spans(code):
         elif pair=='/*':start=i;depth=1;i+=2;continue
         i+=1
 
-def base_variables(code):
+def base_variables(code,keep_functions=False):
     ranges=[];begin=None
     for start,end in comment_spans(code):
         text=code[start:end]
@@ -146,7 +147,7 @@ def base_variables(code):
                 if data.get('schema')=='prt-template-webapp-v1':ranges.append((start,end))
             except (ValueError,AttributeError):pass
     for start,end in sorted(ranges,reverse=True):code=code[:start]+code[end:]
-    return ''.join(s for s in statements(code) if not(managed_name(defined(s)) or defined(s) in ('%_validate','%_chkfunc'))).rstrip()
+    return ''.join(s for s in statements(code) if not(managed_name(defined(s)) or (not keep_functions and defined(s) in ('%_validate','%_chkfunc')))).rstrip()
 
 def quote(text):return '"'+text.replace('\\','\\\\').replace('"','\\"')+'"'
 
@@ -164,6 +165,7 @@ def validate(m):
     if not isinstance(m.get('inputs'),list) or not 1<=len(m['inputs'])<=32:raise ValueError('Use 1–32 inputs')
     for key in ('validationCode','checkCode'):
         if not isinstance(m.get(key),str) or not m[key].strip():raise ValueError('Define Validation and check functions / Validation・チェック関数を定義してください。')
+    if m.get('layout')=='compact':validate_settings(m)
     names=set()
     for inp in m['inputs']:
         name=inp.get('name','')
@@ -174,6 +176,7 @@ def validate(m):
     ids=set();total=Decimal(0)
     for row in m['checks']:
         if not isinstance(row.get('id'),str) or not row['id'] or row['id'] in ids:raise ValueError('Duplicate checkpoint ID')
+        if m.get('layout')=='compact' and row['id']=='__question__':raise ValueError('Reserved checkpoint ID')
         ids.add(row['id'])
         try:w=Decimal(row['weight'])
         except (InvalidOperation,KeyError,TypeError):raise ValueError('Invalid checkpoint weight')
@@ -203,8 +206,10 @@ def compile_nodes(m):
     for k,v in dict(name='prt1',value='1',autosimplify='1',feedbackstyle='1').items():put(p,k,v)
     n=len(m['checks'])
     fv='ansL:['+', '.join(x['name'] for x in m['inputs'])+'];\nchkV:%_validate(ansL);\nif chkV then chkL:%_chkfunc(ansL) else chkL:makelist(false,%_Num_Nodes+1);\nsc:0;\nif chkV then for k:1 thru %_Num_Nodes do if chkL[k+1] then sc:sc+scL[k];\n'
-    rich(p,'feedbackvariables',fv)
+    rich(p,'feedbackvariables',m['settings']['feedbackVariables'] if m.get('layout')=='compact' else fv)
     for i,row in enumerate([m['validation'],m['correct']]+m['checks']):
+        if m.get('layout')=='compact':
+            row=dict(row,answertest='AlgEquiv',sans='chkV' if i==0 else f'chkL[{i}]',tans='false' if i==0 else 'true',testoptions='')
         x=E.SubElement(p,'node');nxt=i+1 if i<n+1 else -1
         config=dict(name=i,description=row.get('description','Validation' if i==0 else 'Correctness' if i==1 else row['id']),answertest=row['answertest'],sans=row['sans'],tans=row['tans'],testoptions=row['testoptions'],quiet='1',truescoremode='=' if i<2 else '+',truescore='1' if i==1 else '0',truepenalty='',truenextnode=nxt if i>=2 and m['mode']=='chain' else -1,trueanswernote=f'prt1-{i}-T',falsescoremode='=' if i<2 else '+',falsescore='sc' if i==1 else '0',falsepenalty='',falsenextnode=nxt,falseanswernote=f'prt1-{i}-F')
         for k,v in config.items():put(x,k,v)
@@ -214,7 +219,9 @@ def compile_nodes(m):
     return root
 
 def generated_variables(code,m):
-    validate(m);base=base_variables(code)
+    validate(m)
+    if m.get('layout')=='compact':return compact_variables(code,m)
+    base=base_variables(code)
     # Keep user MCQ helper when already defined; otherwise use the same interface/fallback.
     helpers='' if '%__mcq_lang(' in base else HELPERS
     lines=[BEGIN,helpers,m['validationCode'],m['checkCode'],f'%_Num_Nodes:{len(m["checks"])};', 'scL:['+', '.join(x['weight'] for x in m['checks'])+'];']
@@ -223,3 +230,132 @@ def generated_variables(code,m):
     lines.append('%_fmsgL:['+', '.join(f'[%_fmsg{i}T,%_fmsg{i}F]' for i in range(1,len(m['checks'])+1))+'];')
     lines.append(END)
     return base+'\n'+'\n'.join(lines)+'\n'
+
+LIBRARY_IDS=('genmatrix_lib','trans_mat','rref_lib','polynomial_disp','texput_W','linalg_misc','ky_linear_algebra','multilang_library')
+LINEAR_IDS=set(LIBRARY_IDS[:6])
+DEFAULT_INCLUDE='https://yositomi-opu.github.io/stack_questions/'
+LANGUAGES=('ja','en','fr','it','de','pt','zh','ko','ru','sv','es')
+
+def include_call(statement):
+    match=re.fullmatch(r'stack_include\s*\(\s*"([^"\\\r\n]+)"\s*\)\s*[;$]?',clean_prefix(statement))
+    if not match:return None
+    from urllib.parse import urlsplit
+    url=match.group(1);path=urlsplit(url)
+    name=path.path.rsplit('/',1)[-1]
+    key=name[:-4] if name.endswith('.mac') else ''
+    return (key,url) if key in LIBRARY_IDS and path.scheme in ('http','https') and not path.username and not path.password else None
+
+def default_feedback(inputs):
+    return 'ansL:['+', '.join(x['name'] for x in inputs)+'];\nchkV:%_validate(ansL);\nif chkV then chkL:%_chkfunc(ansL) else chkL:makelist(false,%_Num_Nodes+1);\nsc:0;\nif chkV then for k:1 thru %_Num_Nodes do if chkL[k+1] then sc:sc+scL[k];\n'
+
+def fixed_pattern(m):
+    expected=[('chkV','false'),('chkL[1]','true')]+[(f'chkL[{i+2}]','true') for i in range(len(m['checks']))]
+    return all(row.get('answertest')=='AlgEquiv' and (row.get('sans'),row.get('tans'))==pair and not row.get('testoptions') for row,pair in zip([m['validation'],m['correct']]+m['checks'],expected))
+
+def literal_messages(expression):
+    expression=expression.strip()
+    if expression.startswith('%__lang(') and expression.endswith(')'):args=expression[len('%__lang('):-1]
+    elif expression.startswith('%__mcq_lang(') and expression.endswith(')'):
+        # Only the literal list is parsed; language selection remains generated code.
+        args=split_list('['+expression[len('%__mcq_lang('):-1]+']')[0]
+    else:return None
+    try:
+        result={}
+        for item in split_list(args):
+            key,value=split_list(item)
+            if value.startswith('castext(') and value.endswith(')'):value=value[8:-1]
+            if not(key.startswith('"') and key.endswith('"') and value.startswith('"') and value.endswith('"')):return None
+            result[as_string(key)]=as_string(value)
+        return result or None
+    except (ValueError,IndexError):return None
+
+def compact_fields(fields):
+    """Migrate only fixed templates; retain unsupported models unchanged."""
+    import copy
+    fields=copy.deepcopy(fields)
+    if 'template' not in fields:return fields
+    m=json.loads(fields['template'])
+    if m.get('version')!=2 or not fixed_pattern(m):return fields
+    if m.get('layout')=='compact':
+        settings=m['settings'];known=dict(settings['libraryIncludes']);known.setdefault('multilang_library',DEFAULT_INCLUDE+'multilang_library.mac')
+        base=base_variables(fields.get('questionvariables',''),keep_functions=True)
+        fields['questiontext']=strip_language_header(fields.get('questiontext',''))
+        fields['questionvariables']=''.join(s for s in statements(base) if not((inc:=include_call(s)) and known.get(inc[0])==inc[1])).lstrip('\n').rstrip()
+        return fields
+    base=base_variables(fields.get('questionvariables',''),keep_functions=True)
+    settings={'baseLanguage':'ja','languages':['ja','en'],'libraryIncludes':{},'questionMessages':{},'questionEnabled':False,'questionVariable':'qtext','feedbackVariables':default_feedback(m['inputs'])}
+    kept=[]
+    for statement in statements(base):
+        inc=include_call(statement)
+        if inc:settings['libraryIncludes'][inc[0]]=inc[1];continue
+        if defined(statement)=='qtext' and ':=' not in clean_prefix(statement):
+            expr=clean_prefix(statement).split(':',1)[1].rstrip(';$').strip();messages=literal_messages(expr)
+            if messages:settings.update(questionMessages=messages,questionEnabled=True);continue
+        kept.append(statement)
+    base=''.join(kept).rstrip()
+    existing={defined(s) for s in statements(base)}
+    for key,name in [('validationCode','%_validate'),('checkCode','%_chkfunc')]:
+        if name not in existing:base+='\n'+m[key]
+    m['layout']='compact';m['settings']=settings
+    for row in m['checks']:
+        for code in list(row['trueMessages'])+list(row['falseMessages']):
+            if code not in settings['languages']:settings['languages'].append(code)
+    if m.get('answerBinding'):settings['feedbackVariables']=settings['feedbackVariables'].replace(settings['feedbackVariables'].split('\n')[0],m['answerBinding'],1)
+    settings['libraryIncludes'].setdefault('multilang_library',DEFAULT_INCLUDE+'multilang_library.mac')
+    fields['questiontext']=strip_language_header(fields.get('questiontext',''))
+    fields['questionvariables']=base.lstrip('\n');fields['template']=json.dumps(m,ensure_ascii=False)
+    return fields
+
+def validate_settings(m):
+    settings=m['settings'];languages=settings['languages']
+    if not isinstance(languages,list) or not languages or len(languages)!=len(set(languages)) or settings.get('baseLanguage') not in languages or any(not isinstance(x,str) or not re.fullmatch(r'[a-zA-Z][\w-]{0,20}',x) for x in languages):raise ValueError('Invalid language selection')
+    if not isinstance(settings.get('questionMessages'),dict) or any(not isinstance(k,str) or not isinstance(v,str) for k,v in settings['questionMessages'].items()):raise ValueError('Invalid question messages')
+    if not re.fullmatch(r'[A-Za-z][\w]*',settings.get('questionVariable','')):raise ValueError('Invalid question text variable')
+    if not isinstance(settings.get('feedbackVariables'),str):raise ValueError('Invalid feedback variables')
+    includes=settings.get('libraryIncludes')
+    if not isinstance(includes,dict) or any(not isinstance(url,str) or include_call('stack_include('+quote(url)+');')!=(key,url) for key,url in includes.items()):raise ValueError('Invalid include selection')
+
+def compact_variables(code,m):
+    settings=m['settings'];validate_settings(m)
+    base=base_variables(code,keep_functions=True)
+    functions={defined(s) for s in statements(base)}
+    for name in ('%_validate','%_chkfunc'):
+        if name not in functions:raise ValueError('Define '+name+' in question variables / 問題変数で'+name+'を定義してください。')
+    includes=dict(settings['libraryIncludes']);includes.setdefault('multilang_library',DEFAULT_INCLUDE+'multilang_library.mac')
+    if 'ky_linear_algebra' in includes:
+        for key in LINEAR_IDS:includes.pop(key,None)
+    # Explicit source includes retain their original positions; add only missing ones.
+    manual={inc[0] for statement in statements(base) if (inc:=include_call(statement))}
+    prefix='\n'.join('stack_include('+quote(url)+');' for key,url in includes.items() if key not in manual)
+    helpers='' if any(defined(s)=='%__mcq_lang' for s in statements(base)) else HELPERS
+    lines=[BEGIN,helpers,f'%_Num_Nodes:{len(m["checks"])};', 'scL:['+', '.join(x['weight'] for x in m['checks'])+'];']
+    def selected(messages):
+        source=messages.get(settings['baseLanguage'],'')
+        for lang in settings['languages']:
+            if source.strip() and not messages.get(lang,'').strip():raise ValueError('Missing translation: '+lang+' / 翻訳が未入力です: '+lang)
+        return {k:messages.get(k,'') for k in settings['languages']}
+    if settings.get('questionEnabled'):
+        variable=settings['questionVariable']
+        # A new explicit question-text edit replaces only its previous named definition.
+        base=''.join(s for s in statements(base) if defined(s)!=variable).rstrip()
+        lines.append(variable+':'+msg_expr(selected(settings['questionMessages']))+';')
+    for i,row in enumerate(m['checks'],1):
+        for suffix,key in [('T','trueMessages'),('F','falseMessages')]:lines.append(f'%_fmsg{i}{suffix}:'+msg_expr(selected(row[key]))+';')
+    lines.append('%_fmsgL:['+', '.join(f'[%_fmsg{i}T,%_fmsg{i}F]' for i in range(1,len(m['checks'])+1))+'];');lines.append(END)
+    return (prefix+'\n' if prefix else '')+base+'\n'+'\n'.join(lines)+'\n'
+
+def layout_text(text,m):
+    settings=m['settings'];names={x['name'] for x in m['inputs']}
+    def expand(match):
+        name=match.group(1)
+        if name not in names:raise ValueError('Unknown answer placeholder: '+name)
+        return '[[input:'+name+']][[validation:'+name+']]'
+    text=re.sub(r'\[\[(ans[A-Za-z0-9_]+)\]\]',expand,text)
+    # Strip only a previous empty language header, never real language content.
+    text=strip_language_header(text)
+    header='<p>'+''.join('[[lang code="'+code+'"]][[/lang]]' for code in settings['languages'])+'<br></p>'
+    return header+'\n'+text
+
+
+def strip_language_header(text):
+    return re.sub(r'^\s*(?:<p>\s*)?(?:\[\[lang code="[\w-]+"\]\]\s*\[\[/lang\]\]\s*)+(?:<br\s*/?>\s*</p>)?\s*','',text,count=1)

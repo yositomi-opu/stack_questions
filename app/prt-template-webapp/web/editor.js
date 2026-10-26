@@ -1,143 +1,85 @@
-/* Basic STACK field editing. Source versions and unsupported fields stay intact. */
-(() => {
+/* Fixed PRT authoring: source stays text; structure is generated on export. */
+(()=>{
  const tr=(ja,en)=>lang==='ja'?ja:en;
- let original=null, editorRevision='', editorId='', editorVersion=0, creating=false, templateEnabled=false;
- const newCheck=(n)=>({id:'check'+n,skills:'',description:'',answertest:'AlgEquiv',sans:'chkL['+(n+1)+']',tans:'true',testoptions:'',weight:'0',trueMessages:{ja:'',en:''},falseMessages:{ja:'',en:''}});
- const initialModel=()=>({version:2,mode:'chain',inputs:[{name:'ans1',type:'algebraic',tans:'ta1',options:'allowempty'}],validationCode:'%_validate(ansL):=not is(ansL[1]=EMPTYANSWER);',checkCode:'%_chkfunc(ansL):=[is(ansL[1]=ta1), false];',validation:{answertest:'AlgEquiv',sans:'chkV',tans:'false',testoptions:'',feedback:'[[lang code="ja"]]解答を確認してください。[[/lang]][[lang code="en"]]Check your answer.[[/lang]]'},correct:{answertest:'AlgEquiv',sans:'chkL[1]',tans:'true',testoptions:'',feedback:''},checks:[newCheck(1)]});
-
- let model=initialModel();
- const fields=()=>({name:$('stackName').value,questionvariables:$('stackVariables').value,
-   questiontext:$('stackText').value,generalfeedback:$('stackFeedback').value,...(templateEnabled?{template:JSON.stringify(model)}:{})});
- window.PRT_EDITOR={fields:()=>fields(),isOpen:()=>$('stackEditor').open,markSaved:()=>{original=fields();}};
- const changed=()=>original && JSON.stringify(fields())!==JSON.stringify(original);
- function labels(){
-  $('originalXmlLabel').textContent=tr('編集前のXMLを表示','View original XML');
-  $('editStack').textContent=tr('STACKを編集・プレビュー','Edit / preview STACK');
-  $('stackEditorTitle').textContent=window.generalEditor?'STACK Edit WebApp':tr('PRTテンプレート問題の編集','Edit PRT template question');
-  $('closeStack').textContent=tr('閉じる','Close');
-  $('stackHelp').textContent=window.generalEditor?tr('既存の入力欄・PRT・テストを保持して、本文と問題変数を編集します。','Edit question text and variables while preserving existing inputs, PRTs and tests.'):tr('基本編集では入力欄・PRT・問題テストを保持します。テンプレート設定時は入力欄とPRTを置き換えます。本文はHTML／CASTextで編集できます。適用後は「作業を保存」でZIPを保存してください。プレビューにはMCQ webappとSTACK APIが必要です。','Basic edits preserve inputs, PRTs and tests. Configuring a template replaces inputs and PRTs. Edit text as HTML / CASText. After applying changes, use Save project to download your ZIP. Preview requires the local MCQ webapp and STACK API.');
-  $('stackNameLabel').textContent=tr('問題名','Question name');
-  $('stackVariablesLabel').textContent=tr('問題変数（Maxima）','Question variables (Maxima)');
-  $('stackTextLabel').textContent=tr('問題文（HTML / CASText）','Question text (HTML / CASText)');
-  $('stackFeedbackLabel').textContent=tr('全般的フィードバック（HTML / CASText）','General feedback (HTML / CASText)');
-  $('previewButton').textContent=tr('編集中の内容をプレビュー','Preview current edits');
-  if(window.PRT_FILES_LABELS)window.PRT_FILES_LABELS();
-  $('saveStack').textContent=tr('編集を適用','Apply edits');
-  document.querySelector('[data-i18n="staticHelp"]').textContent=tr('本文のソース表示です。STACKは「STACKを編集・プレビュー」から編集・表示できます。','Source text view. Use Edit / preview STACK to edit or render STACK questions.');
+ const LANGS=['ja','en','fr','it','de','pt','zh','ko','ru','sv','es'];
+ const LIBS=['genmatrix_lib','trans_mat','rref_lib','polynomial_disp','texput_W','linalg_misc','ky_linear_algebra'];
+ const BASE='https://yositomi-opu.github.io/stack_questions/';
+ let model,original=null,revision='',creating=false,ready=false,translating=false;
+ const el=(tag,text,parent)=>{const e=document.createElement(tag);if(text)e.textContent=text;if(parent)parent.append(e);return e;};
+ const button=(parent,text,fn)=>{const b=el('button',text,parent);b.type='button';b.onclick=fn;return b;};
+ function help(parent,ja,en){const box=el('span',null,parent);box.className='help-anchor';const b=button(box,'?',()=>{});b.className='help-button';b.setAttribute('aria-label',tr('ヘルプ','Help'));const tip=el('span',tr(ja,en),box);tip.className='help-tooltip';tip.setAttribute('role','tooltip');b.setAttribute('aria-describedby',tip.id='help-'+(++help.id));const place=()=>{const r=b.getBoundingClientRect(),w=Math.min(440,innerWidth-32);tip.style.width=w+'px';tip.style.left=Math.max(16,Math.min(r.left,innerWidth-w-16))+'px';tip.style.top=Math.max(12,Math.min(r.bottom+7,innerHeight-tip.offsetHeight-12))+'px';};box.onmouseenter=place;b.onfocus=place;return box;}help.id=0;
+ function heading(parent,title,ja,en){const row=el('div',null,parent);row.className='section-heading';el('h2',title,row);if(ja)help(row,ja,en);return row;}
+ function field(parent,label,value,oninput,tag='input'){const l=el('label',null,parent);l.className='field';el('span',label,l);const e=el(tag,null,l);e.value=value??'';if(tag==='textarea'){e.rows=3;e.spellcheck=false;}e.oninput=()=>oninput(e.value);return e;}
+ const test=(sans,tans,feedback='')=>({answertest:'AlgEquiv',sans,tans,testoptions:'',feedback});
+ const check=n=>({id:'check'+n,skills:'',description:'',...test('chkL['+(n+1)+']','true'),weight:'0.25',trueMessages:{ja:'',en:''},falseMessages:{ja:'',en:''}});
+ const validationSample='%_validate(ansL):=block([v,ret:true],\n  for v in [ansL[1],ansL[2]] do\n    if not is(v=EMPTYANSWER) then (\n      if not matrixp(v) then ret:false\n      else if not is(matrix_size(v)=[%_cl,1]) then ret:false),\n  return(ret and not is(ansL[3]=EMPTYANSWER)));';
+ const checkSample='%_chkfunc(ansL):=block([vL,r],\n  vL:sublist([ansL[1],ansL[2]],lambda([v],not is(v=EMPTYANSWER))),\n  r:if length(vL)=0 then 1 else check_basis_colspace(ta1,vL),\n  [is(r=0 and ansL[3]=taD),is(bit_and(r,4)=0),\n   is(bit_and(r,2)=0),is(bit_and(r,1)=0),is(ansL[3]=taD)]);';
+ const defaultFeedback=inputs=>'ansL:['+inputs.map(x=>x.name).join(', ')+'];\nchkV:%_validate(ansL);\nif chkV then chkL:%_chkfunc(ansL) else chkL:makelist(false,%_Num_Nodes+1);\nsc:0;\nif chkV then for k:1 thru %_Num_Nodes do if chkL[k+1] then sc:sc+scL[k];\n';
+ function initial(){const inputs=[{name:'ans1',type:'varmatrix',tans:'ta1',boxsize:'4',options:'allowempty'},{name:'ans2',type:'varmatrix',tans:'ta2',boxsize:'4',options:'allowempty'},{name:'ansD',type:'numerical',tans:'taD',boxsize:'4',options:'allowempty'}];return {version:2,layout:'compact',mode:'chain',inputs,validationCode:validationSample,checkCode:checkSample,validation:test('chkV','false','[[lang code="ja"]]ベクトルのサイズと次元の解答を確認してください。[[/lang]][[lang code="en"]]Check vector sizes and the dimension answer.[[/lang]]'),correct:test('chkL[1]','true'),checks:[1,2,3,4].map((n)=>{const row=check(n);const ja=[['各ベクトルは解空間に含まれます。','解空間に含まれないベクトルがあります。'],['ベクトルは一次独立です。','ベクトルが一次従属です。'],['解空間を生成しています。','解空間を生成するベクトルが不足しています。'],['次元は正しいです。','次元を確認してください。']][n-1];const en=[['All vectors belong to the nullspace.','Some vectors do not belong to the nullspace.'],['The vectors are linearly independent.','The vectors are linearly dependent.'],['The vectors span the nullspace.','The vectors do not span the nullspace.'],['The dimension is correct.','Check the dimension.']][n-1];row.trueMessages={ja:ja[0],en:en[0]};row.falseMessages={ja:ja[1],en:en[1]};return row;}),settings:{baseLanguage:lang,languages:['ja','en'],libraryIncludes:{ky_linear_algebra:BASE+'ky_linear_algebra.mac',multilang_library:BASE+'multilang_library.mac'},questionVariable:'qtext',questionEnabled:true,questionMessages:{ja:'行列 \\(A=\\){@matA@} の解空間の基底と次元を求めよ。不要な基底欄は空欄にすること。',en:'Find a basis and the dimension of the nullspace of \\(A=\\){@matA@}. Leave unused basis fields blank.'},feedbackVariables:defaultFeedback(inputs)}};}
+ function fields(){return {name:$('stackName').value,questionvariables:$('stackVariables').value,questiontext:$('stackText').value,generalfeedback:$('stackFeedback').value,...(model?{template:JSON.stringify(model)}:{})};}
+ function isOpen(){return ready&&!$('stackEditor').hidden;}
+ function changed(){return original&&JSON.stringify(fields())!==JSON.stringify(original);}
+ function markSaved(){original=fields();}
+ function labels(){document.title=window.generalEditor?'STACK Edit WebApp':'PRT Template WebApp';$('stackEditorTitle').textContent=document.title;$('stackNameLabel').textContent=tr('問題名','Question name');$('stackVariablesLabel').textContent=tr('問題変数','Question variables');$('stackTextLabel').textContent=model?.layout==='compact'?tr('問題文・解答欄の配置（HTML / CASText）','Question and input layout (HTML / CASText)'):tr('問題文（HTML / CASText）','Question text (HTML / CASText)');$('stackFeedbackLabel').textContent=tr('全般的フィードバック','General feedback');$('previewButton').textContent=tr('プレビュー','Preview');$('saveStack').textContent=tr('問題バンクに反映 / 編集を適用','Apply edits / return to question bank');$('newStack').textContent=tr('＋ 新規作成','＋ New question');if(window.PRT_FILES_LABELS)window.PRT_FILES_LABELS();}
+ async function load(d){ready=false;let f=d.editFields;
+  if(!window.generalEditor&&f.template){try{f=(await(await request('/api/prepare',{fields:f,revision:d.revision})).json()).fields;}catch(e){message(e.message);}}
+  model=!window.generalEditor&&f.template?JSON.parse(f.template):null;creating=false;revision=d.revision;
+  $('stackName').value=f.name||'';$('stackVariables').value=f.questionvariables||'';$('stackText').value=f.questiontext||'';$('stackFeedback').value=f.generalfeedback||'';
+  $('stackEditor').hidden=false;ready=true;render();original=fields();$('stackStatus').textContent='';
  }
- labels();$('language').addEventListener('change',labels);
- $('editStack').onclick=()=>{
-  const d=window.stackDetail;creating=false;templateEnabled=!window.generalEditor&&!!d.editFields.template;model=templateEnabled?JSON.parse(d.editFields.template):initialModel();renderTemplate();original=null;editorId=d.id;editorVersion=d.version;editorRevision=d.revision;
-  $('stackName').value=d.editFields.name;$('stackVariables').value=d.editFields.questionvariables;
-  $('stackText').value=d.editFields.questiontext;$('stackFeedback').value=d.editFields.generalfeedback;
-  original=fields();$('stackStatus').textContent='';labels();$('stackEditor').showModal();
- };
- function close(){if(!changed()||confirm(tr('適用していない編集を破棄しますか？','Discard unapplied edits?'))){$('stackEditor').close();original=null;}}
- $('closeStack').onclick=close;
- $('stackEditor').addEventListener('cancel',e=>{e.preventDefault();close();});
- window.addEventListener('beforeunload',e=>{if($('stackEditor').open&&changed()){e.preventDefault();e.returnValue='';}});
- $('stackForm').onsubmit=async e=>{
-  e.preventDefault();if($('saveStack').disabled)return;
-  $('saveStack').disabled=true;$('stackStatus').textContent='';
-  try{
-   state=await(await request(creating?'/api/create-stack':'/api/action',{op:'edit_stack',id:editorId,version:editorVersion,fields:fields(),revision:editorRevision,parent:category})).json();
-   dirty=true;render();original=null;$('stackEditor').close();if(!creating)await showDetail(editorId,false);message(t('updated'));
-  }catch(error){$('stackStatus').textContent=error.message;}
-  finally{$('saveStack').disabled=false;}
- };
-
- const createButton=document.createElement('button');createButton.type='button';createButton.id='newStack';
- document.querySelector('header nav').prepend(createButton);
- const panel=document.createElement('section');$('stackFeedback').parentElement.after(panel);
- function element(tag,text,parent){const e=document.createElement(tag);if(text)e.textContent=text;if(parent)parent.append(e);return e;}
- function input(parent,label,value,change,type='input'){
-  const l=element('label',null,parent);element('span',label,l);const e=element(type,null,l);e.value=value;e.addEventListener('input',()=>change(e.value));return e;
+ function insertDefinition(code,name){if($('stackVariables').value.includes(name+'(')&&!confirm(tr('既存の定義を残してサンプルを末尾へ追加しますか？','Append the sample while retaining the existing definition?')))return;$('stackVariables').value+='\n\n'+code;$('stackVariables').focus();$('stackVariables').selectionStart=$('stackVariables').selectionEnd=$('stackVariables').value.length;}
+ function renderLibraries(){const box=$('libraryPanel');box.replaceChildren();box.hidden=!model||model.layout!=='compact';if(box.hidden)return;const settings=model.settings;
+  heading(box,tr('ライブラリー','Libraries'),'選択したライブラリーはXML出力時に読み込みます。multilang_libraryは必須です。一括版と分割版は重複しません。','Includes are generated on XML export. multilang_library is required. The bundle and split modules are mutually exclusive.');
+  const url=field(box,tr('ライブラリーURLベース','Library URL base'),settings.libraryBase||BASE,v=>{settings.libraryBase=v;try{const url=new URL(v);if(!['http:','https:'].includes(url.protocol))return;for(const key of Object.keys(settings.libraryIncludes))settings.libraryIncludes[key]=new URL(key+'.mac',v).href;}catch{}});url.type='url';url.className='library-url';
+  const options=el('div',null,box);options.className='inline-options';
+  for(const id of ['multilang_library',...LIBS]){const l=el('label',null,options);const cb=el('input',null,l);cb.type='checkbox';cb.dataset.library=id;cb.checked=id==='multilang_library'||!!settings.libraryIncludes[id];cb.disabled=id==='multilang_library';el('span',id,l);cb.onchange=()=>{if(cb.checked){if(id==='ky_linear_algebra')for(const other of LIBS.slice(0,6))delete settings.libraryIncludes[other];else delete settings.libraryIncludes.ky_linear_algebra;try{const u=new URL(id+'.mac',settings.libraryBase||BASE);if(!['http:','https:'].includes(u.protocol))throw Error('URL');settings.libraryIncludes[id]=u.href;}catch{message(tr('URLを確認してください。','Check the URL.'));}}else delete settings.libraryIncludes[id];renderLibraries();};}
  }
- function renderTemplate(){
-  if(window.generalEditor){createButton.hidden=true;panel.replaceChildren();return;}
-  createButton.textContent=tr('＋ STACK新規作成','＋ New STACK');panel.replaceChildren();
-  const enable=element('button',tr('Validation・Tree／Chainテンプレートを設定','Configure Validation / Tree / Chain template'),panel);enable.type='button';enable.hidden=templateEnabled;
-  enable.onclick=()=>{if(confirm(tr('現在の版の入力欄とPRTをテンプレートで置き換えます。元XML・旧版・問題テストは保持します。続けますか？','Replace inputs and PRTs in this version with the template? Original XML, versions and tests are retained. Continue?'))){templateEnabled=true;renderTemplate();}};
-  if(!templateEnabled)return;
-  if(model.version===2){renderNodes();return;}
-  element('p',tr('Validation: Trueで停止、Falseで正解判定へ。正解: Trueで停止。Tree: 最初の誤答一致で停止。Chain: すべての誤答チェックを実行。フィードバックは問題変数の参照（例 {@fb1@}）を指定できます。','Validation: True stops, False checks correctness. Correct answers stop. Tree stops at the first matching error; Chain visits all error checks. Feedback can reference question variables, e.g. {@fb1@}.'),panel);
-  for(const mode of ['tree','chain']){const l=element('label',null,panel);const r=element('input',null,l);r.type='radio';r.name='stackMode';r.checked=model.mode===mode;r.onchange=()=>model.mode=mode;element('span',mode==='tree'?tr('Tree（最初の一致で停止）','Tree (First Match)'):tr('Chain（すべての一致を表示）','Chain (all matching feedback)'),l);}
-  model.inputs.forEach((row,i)=>{const box=element('fieldset',null,panel);element('legend',tr('解答欄 ','Input ')+(i+1),box);
-   input(box,tr('解答欄名','Name'),row.name,v=>row.name=v);input(box,tr('正解（問題変数）','Model answer (variable)'),row.tans,v=>row.tans=v);
-   const select=element('select',null,box);for(const type of ['algebraic','matrix','numerical','string']){const opt=element('option',type,select);opt.value=type;}select.value=row.type;select.onchange=()=>row.type=select.value;
-   const remove=element('button',tr('解答欄を削除','Remove input'),box);remove.type='button';remove.disabled=model.inputs.length===1;remove.onclick=()=>{model.inputs.splice(i,1);renderTemplate();};
-  });
-  const add=element('button',tr('解答欄を追加','Add input'),panel);add.type='button';add.onclick=()=>{let n=1;while(model.inputs.some(r=>r.name==='ans'+n))n++;model.inputs.push({name:'ans'+n,type:'algebraic',tans:'ta'+n});renderTemplate();};
-  function checkpoint(row,title,index){const box=element('fieldset',null,panel);element('legend',title,box);
-   input(box,tr('判定する式（SAns）','Expression (SAns)'),row.sans,v=>row.sans=v);
-   input(box,tr('比較対象（TAns / AlgEquiv）','Compare with (TAns / AlgEquiv)'),row.tans,v=>row.tans=v);
-   input(box,tr('True時のフィードバック（CASText）','Feedback when True (CASText)'),row.feedback,v=>row.feedback=v,'textarea');
-   if(index!==undefined){const del=element('button',tr('チェックを削除','Remove checkpoint'),box);del.type='button';del.onclick=()=>{model.checks.splice(index,1);renderTemplate();};
-    if(index>0){const up=element('button',tr('上へ','Move up'),box);up.type='button';up.onclick=()=>{[model.checks[index-1],model.checks[index]]=[model.checks[index],model.checks[index-1]];renderTemplate();};}}
-  }
-  checkpoint(model.validation,tr('Node 1: Validation（不正ならTrue）','Node 1: Validation (True means invalid)'));
-  checkpoint(model.correct,tr('Node 2: 正解判定','Node 2: Correctness'));
-  model.checks.forEach((row,i)=>checkpoint(row,tr('チェックポイント ','Checkpoint ')+(i+1),i));
-  const more=element('button',tr('チェックポイントを追加','Add checkpoint'),panel);more.type='button';more.onclick=()=>{model.checks.push({sans:'false',tans:'true',feedback:'{@fb'+(model.checks.length+1)+'@}'});renderTemplate();};
+ function translationSource(){const code=model.settings.baseLanguage;return {__question__:{true:model.settings.questionMessages[code]||'',false:''},...Object.fromEntries(model.checks.map(r=>[r.id,{true:r.trueMessages[code]||'',false:r.falseMessages[code]||''}]))};}
+ function renderLanguages(){const box=$('languagePanel');box.replaceChildren();box.hidden=!model||model.layout!=='compact';if(box.hidden)return;const s=model.settings;
+  heading(box,tr('多言語対応','Languages'),'標準言語で問題文とメッセージを入力し、選択した言語へ展開します。数式・CASText・変数名は保持します。翻訳した内容はCSVにも保存されます。','Write question text and messages in the base language, then translate to selected languages. Math, CASText and variable case are preserved, including in CSV.');
+  const line=el('div',null,box);line.className='inline-options';const label=el('label',tr('標準言語','Base language'),line);const select=el('select',null,label);select.id='baseLanguage';for(const code of LANGS){const o=el('option',code,select);o.value=code;}select.value=s.baseLanguage;select.onchange=()=>{s.baseLanguage=select.value;if(!s.languages.includes(select.value))s.languages.unshift(select.value);render();};
+  const all=button(line,'ALL',()=>{s.languages=LANGS.every(x=>s.languages.includes(x))?[s.baseLanguage]:[...LANGS];render();});all.title=tr('全選択／標準言語以外を解除','Select all / keep only the base language');
+  for(const code of [...new Set([...LANGS,...s.languages])]){const l=el('label',null,line);const cb=el('input',null,l);cb.type='checkbox';cb.dataset.language=code;cb.checked=s.languages.includes(code);cb.disabled=code===s.baseLanguage;el('span',code,l);cb.onchange=()=>{s.languages=cb.checked?[...s.languages,code]:s.languages.filter(x=>x!==code);render();};}
+  const tools=el('div',null,box);tools.className='translation-tools';let prepared=null;
+  const jsonDetails=el('details',null,box);jsonDetails.className='translations';el('summary',tr('手動翻訳JSON','Manual translation JSON'),jsonDetails);const area=el('textarea',null,jsonDetails);area.rows=6;area.id='translationJson';const status=el('p','',box);status.id='translationStatus';
+  button(tools,tr('翻訳依頼を作成','Prepare translation'),()=>{prepared=JSON.stringify(translationSource());area.value=JSON.stringify({sourceLanguage:s.baseLanguage,translations:Object.fromEntries(s.languages.filter(c=>c!==s.baseLanguage).map(c=>[c,translationSource()]))},null,2);jsonDetails.open=true;});
+  const apply=async(translations,signature)=>{const originalSource=translationSource();if(JSON.stringify(originalSource)!==signature)throw Error(tr('翻訳元が変更されました。依頼を作り直してください。','Source changed; prepare translation again.'));const staged={};for(const [code,result] of Object.entries(translations)){if(!s.languages.includes(code)||code===s.baseLanguage)throw Error('Unexpected target language / 翻訳先言語が不正です。');staged[code]=(await(await request('/api/translation-validate',{messages:originalSource,result})).json()).result;}if(JSON.stringify(translationSource())!==signature)throw Error('Source changed / 翻訳元が変更されました。');for(const [code,result] of Object.entries(staged)){s.questionMessages[code]=result.__question__.true;for(const row of model.checks){row.trueMessages[code]=result[row.id].true;row.falseMessages[code]=result[row.id].false;}}render();};
+  button(tools,tr('翻訳を反映','Apply translation'),async()=>{try{if(!prepared)throw Error(tr('先に翻訳依頼を作成してください。','Prepare the translation first.'));const data=JSON.parse(area.value);if(data.sourceLanguage!==s.baseLanguage)throw Error('Base language changed');await apply(data.translations,prepared);}catch(e){status.textContent=e.message;}});
+  const ai=button(tools,tr('AIで展開（MCQ共通設定）','Translate with AI (MCQ settings)'),async()=>{if(translating)return;translating=true;ai.disabled=true;const signature=JSON.stringify(translationSource());const targets=s.languages.filter(c=>c!==s.baseLanguage);try{if(!targets.length)throw Error(tr('展開先の言語を選択してください。','Select a target language.'));const sourceLanguage=s.baseLanguage;for(const target of targets){status.textContent=tr('翻訳中: ','Translating: ')+target;const data=await(await request('/api/translation',{messages:JSON.parse(signature),sourceLanguage,target})).json();if(s.baseLanguage!==sourceLanguage||!s.languages.includes(target))throw Error('Language selection changed');await apply({[target]:data.result},signature);}}catch(e){$('translationStatus').textContent=e.message;}finally{translating=false;ai.disabled=false;}});
+  help(tools,'AI設定はMCQ WebAppと共用します。このボタンを押したときだけ、問題文とフィードバックを設定済みサービスへ送信します。','AI settings are shared with MCQ WebApp. Only this button sends question prose and feedback to the configured provider.');
  }
- function renderNodes(){
-  element('p',tr('Validationの成功時だけチェック関数を呼びます。chkL[1]は正解判定、残りはチェックポイントです。Trueの配点を合計したscを正解判定のFalse側で設定します。','Checks run only after Validation succeeds. chkL[1] means correct; remaining flags correspond to checkpoints. True weights sum to sc, assigned on the incorrect branch.'),panel);
-  element('p',tr('ノードの追加・削除・並べ替え後は、チェック関数の戻り値を表示順に合わせてください。','After adding, removing or reordering nodes, align the check function result list with the displayed order.'),panel);
-  const counter=element('p','%_Num_Nodes: '+model.checks.length,panel);counter.id='nodeCount';
-  for(const mode of ['tree','chain']){const l=element('label',null,panel);const r=element('input',null,l);r.type='radio';r.name='stackMode';r.checked=model.mode===mode;r.onchange=()=>model.mode=mode;element('span',mode==='tree'?tr('Tree（Trueで終了）','Tree (stop on True)'):tr('Chain（全チェック）','Chain (all checks)'),l);}
-  input(panel,tr('Validation関数（trueで有効）','Validation function (true means valid)'),model.validationCode,v=>model.validationCode=v,'textarea').id='validationCode';
-  input(panel,tr('チェック関数（正解判定＋各チェックの真偽リスト）','Check function (correctness + checkpoint flags)'),model.checkCode,v=>model.checkCode=v,'textarea').id='checkCode';
-  model.inputs.forEach((row,i)=>{const box=element('fieldset',null,panel);element('legend',tr('解答欄 ','Input ')+(i+1),box);
-   for(const key of ['name','type','tans'])input(box,key,row[key]||'',v=>row[key]=v);
-   const extra=element('details',null,box);element('summary',tr('STACK入力設定','STACK input settings'),extra);
-   const defaults={boxsize:'4',strictsyntax:'1',insertstars:'1',forbidfloat:'1',requirelowestterms:'0',checkanswertype:'0',mustverify:'0',showvalidation:'0',options:'allowempty'};
-   for(const key of new Set([...Object.keys(defaults),...Object.keys(row)])){if(['name','type','tans'].includes(key))continue;input(extra,key,row[key]??defaults[key]??'',v=>row[key]=v);}
-   const remove=element('button',tr('解答欄を削除','Remove input'),box);remove.type='button';remove.disabled=model.inputs.length===1;remove.onclick=()=>{model.inputs.splice(i,1);renderTemplate();};
-  });
-  const add=element('button',tr('解答欄を追加','Add input'),panel);add.type='button';add.onclick=()=>{let n=1;while(model.inputs.some(x=>x.name==='ans'+n))n++;model.inputs.push({name:'ans'+n,type:'algebraic',tans:'ta'+n,options:'allowempty'});renderTemplate();};
-  function testFields(row,box){for(const key of ['answertest','sans','tans','testoptions'])input(box,key,row[key]||'',v=>row[key]=v);}
-  for(const [key,title] of [['validation',tr('Node 0: Validation（無効なら終了）','Node 0: Validation (stop if invalid)')],['correct',tr('Node 1: 正解判定','Node 1: Correctness')]]){const box=element('fieldset',null,panel);element('legend',title,box);testFields(model[key],box);input(box,tr('True側フィードバック（CASText）','True feedback (CASText)'),model[key].feedback||'',v=>model[key].feedback=v,'textarea');}
-  let languages=[...new Set(['ja','en',...model.checks.flatMap(r=>[...Object.keys(r.trueMessages),...Object.keys(r.falseMessages)])])];
-  const languageBox=element('fieldset',null,panel);element('legend',tr('フィードバック言語','Feedback languages'),languageBox);
-  const languageInput=input(languageBox,tr('言語コード（例 fr, zh_cn）','Language code (e.g. fr, zh_cn)'),'',()=>{});
-  const addLanguage=element('button',tr('言語を追加','Add language'),languageBox);addLanguage.type='button';addLanguage.onclick=()=>{const code=languageInput.value.trim();if(!/^[a-zA-Z][\w-]*$/.test(code))return;for(const row of model.checks){row.trueMessages[code]??='';row.falseMessages[code]??='';}renderTemplate();};
-  const sourceLanguage=input(languageBox,tr('翻訳元言語','Source language'),'ja',()=>{});
-  const targetLanguage=input(languageBox,tr('翻訳先言語','Target language'),'en',()=>{});
-  const translationText=input(languageBox,tr('翻訳用JSON（True／Falseの本文のみ編集）','Translation JSON (edit True/False prose only)'),'',()=>{},'textarea');
-  const translationStatus=element('p','',languageBox);
-  const sourceMessages=()=>Object.fromEntries(model.checks.map(r=>[r.id,{true:r.trueMessages[sourceLanguage.value]||'',false:r.falseMessages[sourceLanguage.value]||''}]));
-  let signature='';
-  const prepare=element('button',tr('翻訳用JSONを作成','Prepare translation JSON'),languageBox);prepare.type='button';prepare.onclick=()=>{const messages=sourceMessages();signature=JSON.stringify(messages);translationText.value=JSON.stringify(messages,null,2);};
-  const applyTranslation=async(result,messages)=>{if(signature!==JSON.stringify(sourceMessages()))throw Error(tr('翻訳元が変更されました。作り直してください。','Source changed; prepare the translation again.'));if(!/^[a-zA-Z][\w-]*$/.test(targetLanguage.value)||targetLanguage.value===sourceLanguage.value)throw Error(tr('翻訳先言語を確認してください。','Check the target language.'));const checked=await(await request('/api/translation-validate',{messages,result})).json();for(const r of model.checks){r.trueMessages[targetLanguage.value]=checked.result[r.id].true;r.falseMessages[targetLanguage.value]=checked.result[r.id].false;}renderTemplate();};
-  const apply=element('button',tr('翻訳JSONを反映','Apply translation JSON'),languageBox);apply.type='button';apply.onclick=async()=>{try{await applyTranslation(JSON.parse(translationText.value),sourceMessages());}catch(e){translationStatus.textContent=e.message;}};
-  const ai=element('button',tr('AIでフィードバックを翻訳（MCQ共通設定）','Translate feedback with AI (shared MCQ settings)'),languageBox);ai.type='button';ai.onclick=async()=>{ai.disabled=true;try{const messages=sourceMessages();const target=targetLanguage.value,source=sourceLanguage.value;signature=JSON.stringify(messages);translationStatus.textContent=tr('翻訳中…','Translating…');const result=await(await request('/api/translation',{messages,sourceLanguage:sourceLanguage.value,target:targetLanguage.value})).json();if(target!==targetLanguage.value||source!==sourceLanguage.value)throw Error('Translation language changed / 翻訳言語が変更されました。');await applyTranslation(result.result,messages);}catch(e){translationStatus.textContent=e.message;}finally{ai.disabled=false;}};
-  element('p',tr('AIのモデルとキーはMCQ WebAppのAI設定を共用します。AIボタンを押すと本文を設定済みサービスへ送信します。問題変数内の多言語文字列は問題変数欄で編集します。','Provider settings are shared with MCQ WebApp. The AI button sends prose to the configured service. Edit multilingual strings in question variables directly.'),languageBox);
-  function renumber(){model.checks.forEach((r,i)=>{if(/^chkL\[\d+\]$/.test(r.sans))r.sans='chkL['+(i+2)+']';});}
-  model.checks.forEach((row,i)=>{const box=element('fieldset',null,panel);box.className='checkpoint';element('legend',tr('チェックポイント ','Checkpoint ')+(i+1),box);
-   input(box,tr('チェックID','Checkpoint ID'),row.id,v=>row.id=v);input(box,tr('スキルID（カンマ区切り）','Skill IDs (comma separated)'),row.skills||'',v=>row.skills=v);
-   input(box,tr('説明','Description'),row.description||'',v=>row.description=v);testFields(row,box);
-   input(box,tr('True時の配点（0～1）','Weight when True (0–1)'),row.weight,v=>row.weight=v).className='checkpoint-weight';
-   for(const code of languages){for(const [key,label] of [['trueMessages','True'],['falseMessages','False']]){row[key][code]??='';const e=input(box,code+' · '+label+' · CASText',row[key][code],v=>row[key][code]=v,'textarea');e.dataset.language=code;e.dataset.branch=label;}}
-   const remove=element('button',tr('チェックを削除','Remove checkpoint'),box);remove.type='button';remove.disabled=model.checks.length===1;remove.onclick=()=>{model.checks.splice(i,1);renumber();renderTemplate();};
-   for(const [offset,label] of [[-1,tr('上へ','Move up')],[1,tr('下へ','Move down')]]){const move=element('button',label,box);move.type='button';move.disabled=i+offset<0||i+offset>=model.checks.length;move.onclick=()=>{[model.checks[i],model.checks[i+offset]]=[model.checks[i+offset],model.checks[i]];renumber();renderTemplate();};}
-  });
-  const more=element('button',tr('チェックポイントを追加','Add checkpoint'),panel);more.type='button';more.onclick=()=>{let n=1;while(model.checks.some(x=>x.id==='check'+n))n++;const row=newCheck(n);row.sans='chkL['+(model.checks.length+2)+']';for(const code of languages){row.trueMessages[code]='';row.falseMessages[code]='';}model.checks.push(row);renderTemplate();};
+ function messageEditors(parent,messages,label,onchange){const base=model.settings.baseLanguage;
+  const fieldBase=field(parent,label+' ('+base+')',messages[base]||'',v=>{messages[base]=v;if(onchange)onchange();},'textarea');fieldBase.dataset.messageLanguage=base;
+  const extras=model.settings.languages.filter(c=>c!==base);if(extras.length){const details=el('details',null,parent);details.className='translations';el('summary',tr('翻訳','Translations')+' · '+extras.join(', '),details);for(const code of extras){const e=field(details,code,messages[code]||'',v=>messages[code]=v,'textarea');e.dataset.messageLanguage=code;}}
  }
- const libraries=element('fieldset',null);$('stackVariables').parentElement.before(libraries);
- function renderLibraries(){libraries.replaceChildren();element('legend',tr('ライブラリー読み込み（MCQ共通）','Library includes (shared with MCQ)'),libraries);
-  const url=input(libraries,tr('includeディレクトリーURL','Include directory URL'),localStorage.getItem('qbank-include-base')||'https://yositomi-opu.github.io/stack_questions/',v=>localStorage.setItem('qbank-include-base',v));
-  for(const id of ['genmatrix_lib','trans_mat','rref_lib','polynomial_disp','texput_W','linalg_misc','ky_linear_algebra','multilang_library']){
-   const b=element('button',id,libraries);b.type='button';b.onclick=()=>{try{const path=new URL(id+'.mac',url.value);if(!['http:','https:'].includes(path.protocol)||/["\\\r\n]/.test(path.href))throw Error('URL');const line='stack_include("'+path.href+'");';if(!$('stackVariables').value.includes(line))$('stackVariables').value=line+'\n'+$('stackVariables').value;}catch{$('stackStatus').textContent=tr('有効なincludeディレクトリーURLを指定してください。','Enter a valid include directory URL.');}};
-  }
+ function renderQuestion(){const box=$('questionPanel');box.replaceChildren();box.hidden=!model||model.layout!=='compact';if(box.hidden)return;heading(box,tr('問題文（標準言語・CASText）','Question text (base language · CASText)'),'問題変数を {@matA@} のようなCASTextとして使えます。引用符やcastext()は付けません。選択言語の本文からqtextの定義を問題変数の末尾へ生成します。','Use question variables as CASText, e.g. {@matA@}. Do not add quotes or castext(). A qtext definition is generated at the end of question variables for selected languages.');messageEditors(box,model.settings.questionMessages,'CASText',()=>model.settings.questionEnabled=true);}
+ function renderInputs(parent){const headingRow=heading(parent,tr('解答欄','Inputs'),'[[ans1]] と書くだけで、XML出力時に [[input:ans1]][[validation:ans1]] へ展開します。Tabでも展開できます。ansDなども使えます。不要な欄を許す場合はallowemptyを選択します。','Write [[ans1]] to generate [[input:ans1]][[validation:ans1]] on XML export, or press Tab to expand it. Names such as ansD also work. Select allowempty for optional fields.');
+  const scroll=el('div',null,parent);scroll.className='input-scroll';model.inputs.forEach((row,i)=>{const line=el('div',null,scroll);line.className='input-row';field(line,tr('変数名','Variable'),row.name,v=>row.name=v);const l=el('label',tr('タイプ','Type'),line);const select=el('select',null,l);for(const [type,ja,en] of [['matrix','行列','Matrix'],['varmatrix','可変行列','Variable matrix'],['algebraic','数式','Algebraic'],['numerical','数値','Numerical']]){const o=el('option',tr(ja,en),select);o.value=type;}if(!['matrix','varmatrix','algebraic','numerical'].includes(row.type)){const o=el('option',row.type,select);o.value=row.type;}select.value=row.type;select.onchange=()=>row.type=select.value;field(line,tr('正解例（Teacher’s answer）','Teacher’s answer'),row.tans,v=>row.tans=v);const size=field(line,tr('サイズ','Size'),row.boxsize||'4',v=>row.boxsize=v);size.type='number';size.min='1';size.max='100';for(const option of ['allowempty','hideanswer']){const label=el('label',null,line);label.className='check-label';const cb=el('input',null,label);cb.type='checkbox';cb.dataset.option=option;cb.checked=(row.options||'').split(/\s*,\s*/).includes(option);el('span',option,label);cb.onchange=()=>{const opts=(row.options||'').split(/\s*,\s*/).filter(Boolean).filter(x=>x!==option);if(cb.checked)opts.push(option);row.options=opts.join(',');};}const remove=button(line,'×',()=>{model.inputs.splice(i,1);renderTemplate();});remove.disabled=model.inputs.length===1;remove.setAttribute('aria-label',tr('解答欄を削除','Remove input'));});
+  button(headingRow,tr('＋ 解答欄','＋ Input'),()=>{let n=1;while(model.inputs.some(x=>x.name==='ans'+n))n++;model.inputs.push({name:'ans'+n,type:'algebraic',tans:'ta'+n,boxsize:'4',options:'allowempty'});renderTemplate();});
  }
- createButton.onclick=()=>{creating=true;editorId='';editorVersion=0;editorRevision=state?.revision;model=initialModel();templateEnabled=true;
-  $('stackName').value=tr('新しいSTACK問題','New STACK question');$('stackVariables').value='ta1:1;';$('stackText').value='[[lang code="ja"]][[/lang]][[lang code="en"]][[/lang]]\n<p>[[input:ans1]][[validation:ans1]]</p>';$('stackFeedback').value='';$('stackStatus').textContent='';renderTemplate();original=fields();$('previewButton').disabled=false;$('stackEditor').showModal();};
- $('editStack').addEventListener('click',()=>{$('previewButton').disabled=false;});
- $('stackText').addEventListener('keydown',e=>{if(e.key!=='Tab'||e.shiftKey||e.ctrlKey||e.metaKey||e.altKey)return;const text=e.target;const prefix=text.value.slice(0,text.selectionStart);const m=prefix.match(/\[\[(ans[A-Za-z0-9_]+)\]\]$/);if(!m||text.selectionStart!==text.selectionEnd)return;e.preventDefault();text.setRangeText('[[input:'+m[1]+']][[validation:'+m[1]+']]',text.selectionStart-m[0].length,text.selectionEnd,'end');text.dispatchEvent(new Event('input'));});
- renderTemplate();renderLibraries();$('language').addEventListener('change',()=>{renderTemplate();renderLibraries();});
- window.MCQ_PRACTICE={
-  languages:()=>[...new Set(['ja','en',...model.checks.flatMap(r=>[...Object.keys(r.trueMessages||{}),...Object.keys(r.falseMessages||{})])])], language:()=>lang,
-  snapshot:()=>({id:editorId,fields:fields(),revision:editorRevision,lang}),
-  request:async(route,payload)=>(await request('/api/stack/'+route,payload)).json()
- };
+ function renderTemplate(){const panel=$('templatePanel');panel.replaceChildren();panel.hidden=!model;if(!model)return;
+  if(model.layout!=='compact'){el('p',tr('この版には旧式または個別の判定設定があります。既存設定を保持して本文を編集できます。','This version has legacy or custom tests. Edit basic fields while preserving those settings.'),panel);return;}
+  const modeBox=el('section',null,panel);modeBox.className='panel';const modeLine=el('div',null,modeBox);modeLine.className='inline-options';el('strong',tr('判定方式','Mode'),modeLine);for(const mode of ['tree','chain']){const l=el('label',null,modeLine);const r=el('input',null,l);r.type='radio';r.name='stackMode';r.checked=model.mode===mode;r.onchange=()=>model.mode=mode;el('span',mode==='tree'?'Tree':'Chain',l);}help(modeLine,'Treeは最初のTrueで終了し、Chainは全ノードを通ります。配点はチェック関数の結果から計算します。','Tree stops on the first True; Chain visits every node. Weights are computed from the check-function results.');
+  const inputs=el('section',null,panel);inputs.className='panel';renderInputs(inputs);
+  const feedback=el('section',null,panel);feedback.className='panel';const row=heading(feedback,tr('フィードバック変数','Feedback variables'),'通常はansLへ渡す解答変数を調整します。Validation・チェック関数は問題変数で定義します。ノードの追加・削除・順序変更後はチェック関数の戻り値も合わせてください。','Usually adjust the answer variables passed in ansL. Define Validation/check functions in question variables. Align function results after changing node count or order.');
+  const actions=el('div',null,row);button(actions,tr('解答変数を定義','Define answer variables'),()=>{const code=defaultFeedback(model.inputs);const old=model.settings.feedbackVariables;if(/^\s*ansL\s*:/.test(old))model.settings.feedbackVariables=old.replace(/^\s*ansL\s*:[\s\S]*?;/,code.split('\n')[0]);else model.settings.feedbackVariables=code.split('\n')[0]+'\n'+old;renderTemplate();});
+  button(actions,tr('Validation関数定義','Define Validation'),()=>insertDefinition(validationSample,'%_validate'));button(actions,tr('チェック関数定義','Define check function'),()=>insertDefinition(checkSample,'%_chkfunc'));
+  const fv=el('textarea',null,feedback);fv.rows=6;fv.id='feedbackVariables';fv.value=model.settings.feedbackVariables;fv.oninput=()=>model.settings.feedbackVariables=fv.value;
+  const fixed=el('details',null,panel);fixed.className='panel';el('summary',tr('Validation（解答内容の書式検査）・正解時のフィードバック','Validation (answer format) / correct feedback'),fixed);for(const [key,label] of [['validation','Validation'],['correct',tr('正解時','Correct')]])field(fixed,label+' · CASText',model[key].feedback||'',v=>model[key].feedback=v,'textarea');
+  model.checks.forEach((r,i)=>{const box=el('section',null,panel);box.className='panel checkpoint';const top=el('div',null,box);top.className='node-heading';el('strong','Node '+(i+1),top);const weight=field(top,tr('配点','Weight'),r.weight,v=>r.weight=v);weight.className='checkpoint-weight';weight.type='number';weight.min='0';weight.max='1';weight.step='0.05';help(top,'Trueのときに加算する配点です。合計は1以下にしてください。','Weight for a True result. The total must not exceed one.');
+   for(const [offset,label] of [[-1,tr('上へ','Up')],[1,tr('下へ','Down')]]){const b=button(top,label,()=>{[model.checks[i],model.checks[i+offset]]=[model.checks[i+offset],model.checks[i]];renumber();renderTemplate();});b.disabled=i+offset<0||i+offset>=model.checks.length;}
+   const remove=button(top,tr('削除','Remove'),()=>{model.checks.splice(i,1);renumber();renderTemplate();});remove.disabled=model.checks.length===1;
+   const messages=el('div',null,box);messages.className='node-messages';const t=el('div',null,messages),f=el('div',null,messages);messageEditors(t,r.trueMessages,'Msg'+(i+1)+'T');messageEditors(f,r.falseMessages,'Msg'+(i+1)+'F');
+   const skill=el('details',null,box);el('summary',tr('知識項目との対応','Knowledge mapping'),skill);field(skill,tr('スキルID','Skill IDs'),r.skills||'',v=>r.skills=v);
+  });button(panel,tr('＋ ノードを追加','＋ Add node'),()=>{let n=1;while(model.checks.some(x=>x.id==='check'+n))n++;const row=check(n);row.weight='0';model.checks.push(row);renumber();renderTemplate();});
+ }
+ function renumber(){model.checks.forEach((r,i)=>{r.sans='chkL['+(i+2)+']';});}
+ function render(){labels();renderLibraries();renderLanguages();renderQuestion();renderTemplate();$('layoutHelp').replaceChildren();help($('layoutHelp'),'[[ans1]] と書くだけで入力欄とvalidationをXML出力時に生成します。{@qtext@}は上の問題文です。','Write [[ans1]] to generate input and validation tags on export. {@qtext@} references the question text above.');$('definitionButtons').replaceChildren();if(model?.layout==='compact'){help($('definitionButtons'),'関数はここで定義します。Validationのサンプルは空欄を許し、行列のサイズを確認します。問題に合わせて行数・列数・解答変数を調整してください。','Define functions here. The Validation sample allows empty matrix fields and checks sizes. Adapt dimensions and answer variables to your problem.');}}
+ const create=el('button',null,document.querySelector('header nav'));create.type='button';create.id='newStack';create.onclick=()=>{if(changed()&&!confirm(tr('現在の編集を置き換えますか？','Replace current edits?')))return;model=initial();creating=true;revision=state.revision;$('stackName').value=tr('新しいPRT問題','New PRT question');$('stackVariables').value='%_cl:3;\nmatA:matrix([1,0,0],[0,1,0]);\nta1:matrix([0],[0],[1]);\nta2:EMPTYANSWER;\ntaD:1;\nBASE:%__lang([["ja","基底"],["en","Basis"]]);\nDIM:%__lang([["ja","次元"],["en","Dimension"]]);\n\n'+validationSample+'\n\n'+checkSample;$('stackText').value='<p>{@qtext@}</p>\n<p>{@BASE@}: [[ans1]] [[ans2]]</p>\n<p>{@DIM@}: [[ansD]]</p>';$('stackFeedback').value='';$('stackEditor').hidden=false;ready=true;render();original=fields();$('stackStatus').textContent='';if(window.PRT_FILES)window.PRT_FILES.clearHandles();};
+ $('editStack').onclick=()=>load(window.stackDetail);
+ $('stackForm').onsubmit=async e=>{e.preventDefault();$('saveStack').disabled=true;try{state=await(await request(creating?'/api/create-stack':'/api/action',{fields:fields(),revision})).json();revision=state.revision;creating=false;dirty=true;window.render();render();markSaved();window.stackDetail=state;message(t('updated'));}catch(e){$('stackStatus').textContent=e.message;}finally{$('saveStack').disabled=false;}};
+ $('stackText').addEventListener('keydown',e=>{if(e.key!=='Tab'||e.shiftKey)return;const t=e.target;const m=t.value.slice(0,t.selectionStart).match(/\[\[(ans[A-Za-z0-9_]+)\]\]$/);if(m&&t.selectionStart===t.selectionEnd){e.preventDefault();t.setRangeText('[[input:'+m[1]+']][[validation:'+m[1]+']]',t.selectionStart-m[0].length,t.selectionEnd,'end');}});
+ $('language').addEventListener('change',()=>{if(ready)render();});window.addEventListener('beforeunload',e=>{if(changed()){e.preventDefault();e.returnValue='';}});
+ window.PRT_EDITOR={fields,isOpen,markSaved,load};
+ window.MCQ_PRACTICE={languages:()=>model?.settings?.languages||['ja','en'],language:()=>model?.settings?.baseLanguage||lang,snapshot:()=>({fields:fields(),revision,lang:model?.settings?.baseLanguage||lang}),request:async(route,payload)=>(await request('/api/stack/'+route,payload)).json()};
 })();

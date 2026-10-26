@@ -30,3 +30,9 @@ One UTF-8 CSV with BOM stores one question. Columns are `kind,id,key,value`; ord
 `source` retains original XML bytes as Base64 plus SHA-256. `question` holds basic fields; `template` holds mode and function code; `inputs`, `validation`, `correct`, and `checks` hold their respective editable properties. Message cells contain language-to-CASText JSON objects. Input/check row IDs are contiguous, starting at 1.
 
 The generated node count excludes Validation and correctness. The check function returns correctness followed by checkpoint flags; align it manually after changing the checkpoint list. Weights are between zero and one with total at most one. All True flags contribute to sc, including in Tree mode; only visited nodes emit feedback and answer notes. Correct answers receive one, incorrect answers receive sc. Generated sections are replaced from the dedicated editors; arbitrary source content is never executed in the browser.
+
+## Compact editor settings
+
+The version-2 template optionally has `layout=compact` and a `settings` JSON cell. It stores the base/selected languages, library URLs, language-to-CASText question messages, the generated question-variable name, and the editable feedback-variable program. Input options and unselected translations remain in the CSV. Existing version-2 CSVs are migrated only when their tests match the fixed pattern. Original XML and unsupported custom tests remain intact.
+
+日本語: ページ編集用の設定は`settings`のJSONセルに保存します。標準／展開言語、ライブラリーURL、問題文の翻訳、フィードバック変数の実装もCSV一つで復元できます。旧CSVは固定パターンだけを変換し、独自のテストを隠れて変更しません。未選択の翻訳も消しません。

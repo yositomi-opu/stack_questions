@@ -57,3 +57,23 @@ New questions use the fixed node-list pattern. Validation returns true when vali
 CSV and XML each provide Open, View, Save as and Overwrite, including unapplied current edits. Supporting browsers retain independent file handles per format; other browsers download files and disable Overwrite. Opening another file or creating a question resets handles. One CSV retains the question, nodes and original XML. See [CSV format](CSV_FORMAT.md).
 
 Enter CASText prose without quotes or castext(). Generated messages use MCQ's castext() and %__mcq_lang interface. Add languages, prepare/apply manual translation JSON, or explicitly request AI feedback translation using shared MCQ provider settings. Math, tags and placeholders are checked before applying translations. Multilingual strings already in question variables remain editable source code.
+
+## ページ内の編集画面
+
+編集はMCQと同様にページ内で行います。ライブラリーはチェックボックスで選択し、XML生成時に読み込みます。`multilang_library`は必須で、一括版`ky_linear_algebra`と分割ライブラリーは相互に選択を解除します。選択操作で問題変数の本文は書き換えません。
+
+標準言語の問題文は専用のCASText欄に入力します。選択した展開言語への手動翻訳・AI翻訳はMCQ共通の保護処理を使い、問題文とノードのTrue/Falseメッセージをまとめて扱います。生成する`qtext`とメッセージの定義は問題変数の末尾に置きます。本文中の変数名・TeX・HTML・STACKプレースホルダーは保持します。未翻訳の言語を選択したままのXML出力は理由を表示して拒否します。翻訳途中の状態もCSVへ保存・再読込できます。
+
+「問題文・解答欄の配置」には`<p>{@qtext@}</p>`や`[[ans1]]`を書きます。XML生成時に選択言語の空の`[[lang]]`ブロックを`<p>…<br></p>`で囲んで先頭へ追加し、短い解答タグをinput/validationタグへ展開します。入力設定は変数名・4種のタイプ・正解例・サイズ・allowempty/hideanswerを1行で編集します。狭い画面では入力行の内部を横スクロールできます。
+
+`%_validate`と`%_chkfunc`は問題変数で定義します。フィードバック変数欄の定義ボタンで関数サンプルを問題変数へ挿入できます。通常は`ansL`の解答変数の対応だけを調整します。件数や各ノードの判定式は生成するため表示しません。説明は「?」のホバー・キーボードフォーカスで確認できます。個別の判定テストを持つ旧問題は自動変換せず、既存設定を保持する基本編集となります。
+
+## Page editor
+
+Author questions directly on the page, as in MCQ. Library checkboxes are applied at XML generation; `multilang_library` is mandatory and the linear-algebra bundle replaces its individual modules. Choosing libraries does not edit the source textarea.
+
+Use a dedicated base-language CASText field for question prose, language checkboxes for targets, and shared MCQ translation protection for both question prose and node feedback. Generated `qtext` and message definitions are appended to question variables. Missing translations block XML export with a reason; incomplete translation work can still be saved and reopened as CSV.
+
+Write layout source such as `<p>{@qtext@}</p>` and `[[ans1]]`. Export adds the selected empty language blocks inside `<p>…<br></p>` and expands short inputs into input/validation tags. Each input occupies one row with name, one of four types, teacher's answer, size, allowempty and hideanswer. Narrow screens scroll these rows horizontally.
+
+Define `%_validate` and `%_chkfunc` in question variables; definition buttons beside feedback variables insert editable examples there. Normally only the `ansL` binding needs adaptation in feedback variables. Internal node counts and comparisons are generated and hidden. Hover or focus “?” for help. Legacy custom tests are preserved without automatic conversion. `tests/browser_compact.cjs` exercises the page UI with Playwright and a disposable session; set `PRT_TEST_URL` to choose a test server.

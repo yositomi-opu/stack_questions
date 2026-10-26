@@ -11,7 +11,7 @@ async function request(url,data,raw=false){
  if(!response.ok){let error;try{error=(await response.json()).error;}catch{error='Request failed';}throw Error(error);}
  return response;
 }
-function render(){window.stackDetail=state;$('currentName').textContent=state.name;$('continueEdit').hidden=false;
+function render(){window.stackDetail=state;$('currentName').textContent=state.name;$('continueEdit').hidden=true;
  if(state.callbackOrigin&&window.opener)window.opener.postMessage({type:'qbank-editor-saved',token:state.token},state.callbackOrigin);
 }
 async function showDetail(){state=await(await request('/api/state')).json();window.stackDetail=state;}
@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
  $('language').value=lang;document.documentElement.lang=lang;
  $('continueEdit').onclick=()=>$('editStack').click();
  $('openXml').onclick=()=>$('sourceFile').click();
- $('exportXml').onclick=()=>download('/api/xml');$('saveProject').onclick=()=>download('/api/project');$('originalDownload').onclick=()=>download('/api/original');
+ $('exportXml').onclick=()=>download('/api/xml');$('saveProject').onclick=async()=>{try{const r=await request('/api/project-export',{revision:state.revision,fields:window.PRT_EDITOR.fields()});const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='stack-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);window.PRT_EDITOR.markSaved();dirty=false;}catch(e){message(e.message);}};$('originalDownload').onclick=()=>download('/api/original');
  const source=document.createElement('details');const summary=document.createElement('summary');summary.textContent='XMLを参照 / View XML';const code=document.createElement('pre');source.append(summary,code);document.querySelector('main').append(source);source.ontoggle=async()=>{if(source.open){try{code.textContent=await(await request('/api/reference')).text();}catch(e){message(e.message);}}};
  $('sourceFile').onchange=async()=>{const f=$('sourceFile').files[0];if(!f)return;try{state=await(await request('/api/open',await f.arrayBuffer(),true)).json();render();$('editStack').click();}catch(e){message(e.message);}finally{$('sourceFile').value='';}};
  try{
@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   await showDetail();window.generalEditor=state.editorMode==='general';if(window.generalEditor){document.title='STACK Edit WebApp';document.querySelector('header b').textContent='STACK Edit WebApp';}
   $('openXml').disabled=!!state.callbackOrigin;
   if(window.generalEditor&&!Object.keys(state.editFields).length){state.editFields={name:'New STACK',questionvariables:'',questiontext:'',generalfeedback:''};}
-  if(Object.keys(state.editFields).length){render();$('editStack').click();}else $('newStack').click();
+  if(Object.keys(state.editFields).length){render();await window.PRT_EDITOR.load(state);}else $('newStack').click();
  }catch(e){message(e.message);}
 });
 

@@ -147,6 +147,11 @@ def apply_template(element, text, backup=False):
             if child is None:child = E.SubElement(node, tag)
             node = child
         node.text = generated_variables(node.text or '', model)
+    if model.get('layout') == 'compact':
+        from prt_nodes import layout_text
+        path = 'plugin_qtype_stack_question/stackoptions/questiontext' if backup else 'questiontext/text'
+        target = element.find(path)
+        if target is not None:target.text = layout_text(target.text or '', model)
     write_provenance(element, text, backup)
 
 
