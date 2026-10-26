@@ -22,6 +22,10 @@ If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or
 
 If question variables are loaded from a separate file using `stack_include`, publish that file at a URL accessible to Moodle. The [WebApp guide](app/mcq-webapp/README.md) explains how to configure the URL and create variants using parameters such as matrix rank.
 
+## PRT Template WebApp
+
+Run `make prt-template-webapp` and open [http://127.0.0.1:4175/](http://127.0.0.1:4175/) for the standalone Tree/Chain STACK editor. It also accepts editing sessions opened by Moodle Qbank on a separate localhost port. See the [PRT Template WebApp guide](app/prt-template-webapp/README.md).
+
 ## Guest practice site
 
 A separate practice server can render and grade teacher-registered CSV/XML questions without Moodle or student accounts. It reuses STACK API and does not expose the editor or arbitrary question-code endpoints. Scores are not stored. See the [Ubuntu VPS deployment guide (Japanese)](deploy/practice/README.md).
@@ -76,3 +80,5 @@ Use `make ky_linear_algebra.mac` to rebuild just these libraries and both combin
 ## Contribute to development
 
 [HANDOFF.md](HANDOFF.md) records the current development state, validation results, and outstanding work. [AGENTS.md](AGENTS.md) provides instructions for development agents. Both are currently in Japanese. See [LICENSE](LICENSE) for licensing terms.
+
+`make start` starts MCQ WebApp (4173), PRT Template WebApp (4175) and STACK Edit WebApp (4176). `make stop`, `make restart` and `make status` manage these applications together. Existing `make stack-editor` remains an alias for `make prt-template-webapp`. Qbank identifies originating applications from metadata stored in question variables and transfers XML content through localhost sessions.

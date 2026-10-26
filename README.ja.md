@@ -70,3 +70,9 @@ Moodleへログインした教員にWebAppを公開する構成と、Workshop用
 ## 開発に参加する
 
 現在の開発状況・検証結果・未完了事項は [HANDOFF.md](HANDOFF.md)、開発エージェント向けのルールは [AGENTS.md](AGENTS.md) に記載しています。ライセンスは [LICENSE](LICENSE) を参照してください。
+
+## PRT Template WebApp（Tree / Chain）
+
+`make prt-template-webapp` で起動し、[http://127.0.0.1:4175/](http://127.0.0.1:4175/) を開きます。MCQ webappとは別アプリで、別ポートの問題バンクマネージャーからも起動できます。[PRT Template WebAppの利用方法](app/prt-template-webapp/README.md)を参照してください。
+
+`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も3アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。

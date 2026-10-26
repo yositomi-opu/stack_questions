@@ -465,3 +465,10 @@ git diff --check
 ## 更新時に残す情報
 
 実装内容、設計上の決定、関連コミット、実施した検証と結果、未確認事項、次の作業を簡潔に更新する。完了した課題は未完了一覧から外し、過去の状態を現在の事実として残さない。公開文書のため、個人の絶対パス、認証情報、非公開の問題・個人情報は記載しない。
+
+## PRT Template WebApp release candidate (2026-10-26)
+
+- Added app/prt-template-webapp (4175), app/stack-edit-webapp (4176), and scripts/local_apps.py. make start/restart now starts these apps with MCQ (4173). make status reports all three.
+- PRT node editing supports Validation/correctness, Tree/Chain, weights, skill IDs, multilingual CASText, and one-question CSV/XML read/save/overwrite. Original XML bytes are retained. Old stack-editor command remains an alias. Qbank source handoffs were added to MCQ; the qbank manager requires its corresponding update separately.
+- 日本語: GitHub mainにはPRTが未反映だったためgit pull/make restartでも4175は起動しなかった。今回PRTと起動処理のみを候補ブランチへまとめ、無関係な練習サイト作業は含めない。元XML・全版保持の管理側変更はmoodle-qbank側で別途必要。
+- Validation: PRT Python14 tests plus Python/JS syntax checks; lifecycle3 and MCQ handoff2 tests; browser file menus/round trips and qbank handoffs previously passed. No real AI provider request. Current candidate Moodle import/grading and Mac local startup remain unverified. Earlier Moodle results do not verify this candidate.

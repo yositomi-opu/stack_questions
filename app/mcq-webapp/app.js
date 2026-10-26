@@ -116,7 +116,7 @@ const el = {
   ),
 };
 
-if (!window.MCQ_HEADLESS) init();
+if (!window.MCQ_HEADLESS) window.MCQ_WEBAPP_READY = init();
 
 async function init() {
   bindEvents();

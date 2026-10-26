@@ -30,6 +30,9 @@ from urllib.request import Request, urlopen
 
 WEB_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = WEB_ROOT.parents[1]
+_handoff_spec = importlib.util.spec_from_file_location("mcq_qbank_handoff", WEB_ROOT / "qbank_handoff.py")
+qbank_handoff = importlib.util.module_from_spec(_handoff_spec)
+_handoff_spec.loader.exec_module(qbank_handoff)
 _ai_spec = importlib.util.spec_from_file_location("mcq_ai_translation", WEB_ROOT / "ai_translation.py")
 ai_translation = importlib.util.module_from_spec(_ai_spec)
 _ai_spec.loader.exec_module(ai_translation)
@@ -1005,6 +1008,9 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        if parsed.path.startswith('/api/qbank/'):
+            qbank_handoff.route(self)
+            return
         if parsed.path == "/api/ai/settings":
             if not self.ai_local_request():
                 self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Open this app on localhost / localhostから利用してください"})
@@ -1096,6 +1102,9 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path.startswith('/api/qbank/'):
+            qbank_handoff.route(self)
+            return
         if self.path in {"/api/ai/settings", "/api/ai/translate"}:
             if not self.ai_local_request() or self.headers.get_content_type() != "application/json":
                 self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Open this app on localhost / localhostから利用してください"})

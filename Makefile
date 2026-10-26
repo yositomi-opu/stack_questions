@@ -59,19 +59,19 @@ install-deps: check-python
 	@$(PYTHON) scripts/mcq-webapp.py install-deps
 
 start: check-python
-	@$(PYTHON) scripts/mcq-webapp.py start $(RUNTIME_ARGS)
+	@$(PYTHON) scripts/local_apps.py start $(RUNTIME_ARGS)
 
 stop: check-python
-	@$(PYTHON) scripts/mcq-webapp.py stop
+	@$(PYTHON) scripts/local_apps.py stop
 
 restart: check-python
-	@$(PYTHON) scripts/mcq-webapp.py restart $(RUNTIME_ARGS)
+	@$(PYTHON) scripts/local_apps.py restart $(RUNTIME_ARGS)
 
 repair-docker: check-python
 	@$(PYTHON) scripts/mcq-webapp.py repair-docker $(RUNTIME_ARGS)
 
 status: check-python
-	@$(PYTHON) scripts/mcq-webapp.py status $(RUNTIME_ARGS)
+	@$(PYTHON) scripts/local_apps.py status $(RUNTIME_ARGS)
 
 install-moodle-auth:
 	@./deploy/moodle-auth/install-plugin.sh "$(MOODLE_ROOT)"
@@ -94,3 +94,15 @@ workshop-users:
 		chmod 0755 "$$workshop_tmp" "$$workshop_tmp/lib"; \
 		sudo -u "$(MOODLE_WEB_USER)" "$(PHP_BIN)" \
 			"$$workshop_tmp/workshop_users.php" --moodleroot="$(MOODLE_ROOT)" $(WORKSHOP_ARGS)
+
+.PHONY: prt-template-webapp prt-template-check stack-editor stack-editor-check
+prt-template-webapp:
+	$(PYTHON) app/prt-template-webapp/server.py
+prt-template-check:
+	$(MAKE) -C app/prt-template-webapp check
+stack-editor: prt-template-webapp
+stack-editor-check: prt-template-check
+
+.PHONY: stack-edit-webapp
+stack-edit-webapp:
+	$(PYTHON) app/stack-edit-webapp/server.py
