@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-10-21
+更新日: 2026-10-27
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -471,3 +471,26 @@ git diff --check
 - scripts/mcq_csv2xml.py supports multiple inputs and --output-dir / --outdir, preserving single-input usage. Preflight all conversions and reject colliding output names before writing.
 - scripts/moodle_xml_merge.py creates a single Moodle XML with --category, replacing category markers while retaining question bytes, comments, order and duplicates. No Moodle-side scripts are required. Existing outputs require --force; inputs cannot be overwritten.
 - Regression checks: node scripts/tests/test_csv_cli.cjs and python3 scripts/tests/test_xml_merge.py (3 tests) passed on the isolated main-based release. Actual Moodle import/grading of merged output has not been verified. See scripts/README.batch.md for browser import instructions.
+
+## PRT Template WebApp release candidate (2026-10-26)
+
+- Added app/prt-template-webapp (4175), app/stack-edit-webapp (4176), and scripts/local_apps.py. make start/restart now starts these apps with MCQ (4173). make status reports all three.
+- PRT node editing supports Validation/correctness, Tree/Chain, weights, skill IDs, multilingual CASText, and one-question CSV/XML read/save/overwrite. Original XML bytes are retained. Old stack-editor command remains an alias. Qbank source handoffs were added to MCQ; the qbank manager requires its corresponding update separately.
+- 日本語: GitHub mainにはPRTが未反映だったためgit pull/make restartでも4175は起動しなかった。今回PRTと起動処理のみを候補ブランチへまとめ、無関係な練習サイト作業は含めない。元XML・全版保持の管理側変更はmoodle-qbank側で別途必要。
+- Validation: PRT Python14 tests plus Python/JS syntax checks; lifecycle3 and MCQ handoff2 tests; browser file menus/round trips and qbank handoffs previously passed. No real AI provider request. Current candidate Moodle import/grading and Mac local startup remain unverified. Earlier Moodle results do not verify this candidate.
+
+## MCQ-style page editor (2026-10-26)
+
+- Replaced the floating editor with an inline page, hover/focus help, one-line mode choice and compact input rows (matrix/varmatrix/algebraic/numerical, size, allowempty/hideanswer). Internal node counts and tests are generated rather than displayed. Legacy custom tests remain unchanged in basic editing.
+- Library selection is exported separately from editable source; multilang_library is mandatory and bundle/split linear-algebra modules are mutually exclusive. Question prose has a dedicated base-language CASText editor and shared language checkboxes. Export generates qtext/message definitions, selected language headers and input/validation tags from short answer placeholders.
+- Validation/check function samples are inserted into question variables. The feedback-variable program is editable and preserves answer bindings/custom source. Missing translations block XML export with a reason while CSV can retain unfinished work. Original XML bytes and unselected translations remain saved.
+- 日本語: MCQに合わせページ内編集へ変更。説明は?、解答欄は1行、ライブラリーと言語は選択式。問題文とノードのメッセージを同じ翻訳処理で扱い、内部式と件数は生成側へ移した。
+- Validation: PRT20 Python tests plus Python/JS syntax checks, qbank63 Python/6 JS tests, and Chromium at 1440/760px: inline layout, library dedup, checkboxes, short tags, CASText/language header, CSV round trip and question+feedback manual translations pass with zero page errors. AI provider calls and actual Moodle import/grading of this candidate are not verified. The qbank codec update remains in its separate repository.
+
+## mainへのPRT統合（2026-10-27）
+
+- main df16b498とPR #3の4e545304を統合。README日英とHANDOFFの追記競合を双方保持で解消し、CSV一括変換/カテゴリ付きXML結合はそのまま維持。無関係な練習サイト作業やローカル未追跡データは含めない。
+- make setupもscripts/local_apps.py経由に統一。通常のmain cloneからsetup/start/restartでMCQ4173・PRT4175・汎用STACK Edit4176を起動する。stop/statusも共通。setupオプションの転送とrestartの停止順を回帰試験へ追加。
+- 隔離した実Git cloneでPRT20 Python件、起動管理5件、MCQ handoff2件、XML結合3件、MCQ CSV CLI/スキーマ3/library includes/editor metadata/preview/pattern編集のJS試験成功。Python/JS構文とdiff --check成功。CSV一括変換とXML結合のソースはmainから不変。
+- 3つの実HTTPアプリを空きポートで同時起動しHTTP200。ChromiumでMCQ/汎用編集の表示・pageerror0、PRTのページ編集/入力1行/ライブラリー重複排除/言語/CSV往復/手動翻訳/狭幅表示が成功。管理対象のPRT/汎用プロセスを専用起動管理で起動。試験終了後にそのプロセスを停止する。
+- make setup/restartの経路は単体試験とmake -nで確認。NASではDockerによるSTACK API起動、Mac起動、実CAS・AI呼出し・今回XMLの実Moodle取込/採点は未実施。アプリ統合の確認とこれらの実機確認を混同しない。qbank側codec更新は別リポジトリで必要。

@@ -4,7 +4,7 @@
 
 A collection of linear algebra and calculus questions and Maxima libraries for the STACK question type in Moodle. The repository also includes a WebApp for creating multiple-choice questions (MCQs) from CSV files or an editor and exporting XML for Moodle.
 
-## Use the WebApp
+## Use the authoring apps
 
 Install Git, Python 3.10 or later, Make, Docker, and Docker Compose. Docker Desktop can be used on macOS and Windows. See the [WebApp guide](app/mcq-webapp/README.md) (Japanese) for platform-specific setup instructions.
 
@@ -14,13 +14,25 @@ Run the initial setup from the repository root:
 make setup
 ```
 
-Then open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). Edit question text, options, and feedback; save a CSV for further editing or export XML for Moodle. Use “Evaluate question variables” to check formulas and random variables.
+Setup starts all three apps:
 
-For later sessions, use `make start` to start, `make stop` to stop, and `make check` to diagnose the environment. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
+| App | URL |
+| --- | --- |
+| MCQ WebApp | [http://localhost:4173/](http://localhost:4173/) |
+| PRT Template WebApp (Tree/Chain) | [http://localhost:4175/](http://localhost:4175/) |
+| STACK Edit WebApp (general XML editor) | [http://localhost:4176/](http://localhost:4176/) |
+
+Edit MCQs or PRT templates and save CSV/XML. STACK API runs on port 3080 for rendering and grading. Use “Evaluate question variables” in MCQ to check formulas and random variables.
+
+For later sessions, use `make start`, `make stop`, `make restart` and `make status` to manage all three apps; use `make check` to diagnose the MCQ/STACK API environment. Save work in every editor before restarting. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
 
 If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or recreating a clone, run `make repair-docker` from the clone you intend to use. This recreates the containers with that clone mounted, restarts the WebApp, and verifies Maxima evaluation. Cached images and repository files are retained; container temporary state is reset. Save browser edits first. See the troubleshooting FAQ in the [WebApp guide](app/mcq-webapp/README.md).
 
 If question variables are loaded from a separate file using `stack_include`, publish that file at a URL accessible to Moodle. The [WebApp guide](app/mcq-webapp/README.md) explains how to configure the URL and create variants using parameters such as matrix rank.
+
+## PRT Template WebApp
+
+Run `make prt-template-webapp` and open [http://127.0.0.1:4175/](http://127.0.0.1:4175/) for the standalone Tree/Chain STACK editor. It also accepts editing sessions opened by Moodle Qbank on a separate localhost port. See the [PRT Template WebApp guide](app/prt-template-webapp/README.md).
 
 ## Guest practice site
 
@@ -80,3 +92,5 @@ Use `make ky_linear_algebra.mac` to rebuild just these libraries and both combin
 ## Batch commands
 
 Convert multiple MCQ CSV files without opening the WebApp, then combine XML files under one category in a single Moodle XML file. Upload it through Moodle’s normal import page. See the [batch command guide](scripts/README.batch.md).
+
+`make setup` and `make start` start MCQ WebApp (4173), PRT Template WebApp (4175) and STACK Edit WebApp (4176). `make stop`, `make restart` and `make status` manage these applications together. Existing `make stack-editor` remains an alias for `make prt-template-webapp`. Qbank identifies originating applications from metadata stored in question variables and transfers XML content through localhost sessions.

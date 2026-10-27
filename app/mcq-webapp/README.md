@@ -2,6 +2,10 @@
 
 開発を再開する場合は、[開発引き継ぎ](../../HANDOFF.md)と[開発ルール](../../AGENTS.md)を確認してください。
 
+リポジトリルートの `make setup`・`make start`・`make restart` は、MCQ（4173）、PRT Template（4175）、STACK Edit（4176）をまとめて起動します。`make stop`・`make status` も3アプリを扱います。再起動前に各画面の作業を保存してください。
+
+From the repository root, `make setup`, `make start` and `make restart` start MCQ (4173), PRT Template (4175) and STACK Edit (4176). Stop/status manage all three; save editor work before restarting.
+
 CASText版の `001.MCQ_cas-rb.xml` / `001.MCQ_cas-cb.xml` をもとに、CSV または XLSX から MCQ 用 XML を生成するローカル WebApp です。
 
 画面上部のCSV／XMLメニューは「読込」「表示」「保存」「上書」です。「保存」は保存先とファイル名を選び、「上書」はその形式で読み込んだファイルまたは直前に保存したファイルを更新します。上書き先が未指定の場合は保存先を選びます。CSVとXMLの保存先は別々に保持し、別の問題の読込開始時や「クリア」、ページの再読込で解除します。上書き先のファイル名は「上書」のマウスオーバーで確認できます。

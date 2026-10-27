@@ -4,7 +4,7 @@
 
 Moodleの問題タイプSTACKで使う、線形代数・微積分の問題集とMaximaライブラリです。多肢選択問題（MCQ）をCSVや編集画面から作成し、Moodleへ取り込めるXMLとして保存するWebAppも含まれています。
 
-## WebAppを使う
+## 編集用WebAppを使う
 
 Git、Python 3.10以降、Make、DockerとDocker Composeを用意します。macOS・WindowsではDocker Desktopを使用できます。OS別の導入手順は [WebApp利用ガイド](app/mcq-webapp/README.md) を参照してください。
 
@@ -14,9 +14,17 @@ Git、Python 3.10以降、Make、DockerとDocker Composeを用意します。mac
 make setup
 ```
 
-セットアップ後、[http://127.0.0.1:4173/](http://127.0.0.1:4173/)を開きます。問題文・選択肢・フィードバックを編集し、CSVで編集内容を保存するか、XMLでMoodleへ取り込みます。数式やランダム変数を使う場合は「問題変数を評価」で確認してください。
+セットアップで次の3アプリが起動します。
 
-2回目以降の起動は `make start`、停止は `make stop`、環境の診断は `make check` です。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
+| アプリ | URL |
+| --- | --- |
+| MCQ WebApp | [http://localhost:4173/](http://localhost:4173/) |
+| PRT Template WebApp（Tree / Chain） | [http://localhost:4175/](http://localhost:4175/) |
+| STACK Edit WebApp（汎用XML編集） | [http://localhost:4176/](http://localhost:4176/) |
+
+MCQやPRTを編集し、CSVで編集内容を保存するか、Moodle用XMLを出力します。プレビュー・採点に使うSTACK APIは3080で動作します。MCQの数式やランダム変数は「問題変数を評価」で確認できます。
+
+2回目以降は `make start`・`make stop`・`make restart`・`make status` で3アプリをまとめて操作します。`make check` はMCQ/STACK API環境の診断です。再起動前に各編集画面の作業を保存してください。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
 
 問題変数を `stack_include` で別ファイルから読み込む場合は、そのファイルをMoodleから取得できる場所へ公開します。公開先の指定方法と、rankなどを変えるバリアントの作り方は [WebApp利用ガイド](app/mcq-webapp/README.md) にまとめています。
 
@@ -74,3 +82,9 @@ Moodleへログインした教員にWebAppを公開する構成と、Workshop用
 ## 一括処理コマンド
 
 MCQ CSVをWebAppを開かずに一括変換し、複数XMLを指定カテゴリーにまとめた1つのMoodle XMLを生成できます。Moodleの通常のインポート画面から取り込めます。[一括処理ガイド](scripts/README.batch.md)を参照してください。
+
+## PRT Template WebApp（Tree / Chain）
+
+`make prt-template-webapp` で起動し、[http://127.0.0.1:4175/](http://127.0.0.1:4175/) を開きます。MCQ webappとは別アプリで、別ポートの問題バンクマネージャーからも起動できます。[PRT Template WebAppの利用方法](app/prt-template-webapp/README.md)を参照してください。
+
+`make setup`・`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も3アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。
