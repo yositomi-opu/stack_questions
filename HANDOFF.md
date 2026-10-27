@@ -465,3 +465,9 @@ git diff --check
 ## 更新時に残す情報
 
 実装内容、設計上の決定、関連コミット、実施した検証と結果、未確認事項、次の作業を簡潔に更新する。完了した課題は未完了一覧から外し、過去の状態を現在の事実として残さない。公開文書のため、個人の絶対パス、認証情報、非公開の問題・個人情報は記載しない。
+
+## MCQ CLI batch conversion and XML merge (2026-10-27)
+
+- scripts/mcq_csv2xml.py supports multiple inputs and --output-dir / --outdir, preserving single-input usage. Preflight all conversions and reject colliding output names before writing.
+- scripts/moodle_xml_merge.py creates a single Moodle XML with --category, replacing category markers while retaining question bytes, comments, order and duplicates. No Moodle-side scripts are required. Existing outputs require --force; inputs cannot be overwritten.
+- Regression checks: node scripts/tests/test_csv_cli.cjs and python3 scripts/tests/test_xml_merge.py (3 tests) passed on the isolated main-based release. Actual Moodle import/grading of merged output has not been verified. See scripts/README.batch.md for browser import instructions.

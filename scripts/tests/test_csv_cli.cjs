@@ -61,6 +61,17 @@ feedback1C,string,ja,説明
     assert.equal(run().status,1); assert.equal(run('--force').status,0);
     assert.equal(run('-o','-').stdout,basic.xml);
     assert.equal(run('-o',input,'--force').status,1);assert.equal(fs.readFileSync(input,'utf8'),csv);
+    const second=path.join(dir,'second.csv'), out=path.join(dir,'batch');
+    fs.mkdirSync(out); fs.writeFileSync(second,csv.replaceAll('CLI-Test','Second'));
+    result=run(second,'--outdir',out); assert.equal(result.status,0,result.stderr);
+    assert.equal(fs.readdirSync(out).length,2);
+    fs.writeFileSync(second,csv); // Duplicate generated title must reject even with force.
+    assert.equal(run(second,'--output-dir',out,'--force').status,1);
+    assert.equal(fs.readdirSync(out).length,2);
+    const fresh=path.join(dir,'fresh'); fs.mkdirSync(fresh);
+    fs.writeFileSync(second,csv.replace('csv_schema,3','csv_schema,999'));
+    assert.equal(run(second,'--output-dir',fresh).status,1);
+    assert.equal(fs.readdirSync(fresh).length,0); // All conversions preflighted.
     fs.writeFileSync(input,csv.replace('csv_schema,3','csv_schema,999'));
     assert.equal(run('--force').status,1);assert.equal(fs.readFileSync(target,'utf8'),basic.xml);
   } finally {fs.rmSync(dir,{recursive:true,force:true});}

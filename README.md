@@ -76,3 +76,7 @@ Use `make ky_linear_algebra.mac` to rebuild just these libraries and both combin
 ## Contribute to development
 
 [HANDOFF.md](HANDOFF.md) records the current development state, validation results, and outstanding work. [AGENTS.md](AGENTS.md) provides instructions for development agents. Both are currently in Japanese. See [LICENSE](LICENSE) for licensing terms.
+
+## Batch commands
+
+Convert multiple MCQ CSV files without opening the WebApp, then combine XML files under one category in a single Moodle XML file. Upload it through Moodle’s normal import page. See the [batch command guide](scripts/README.batch.md).

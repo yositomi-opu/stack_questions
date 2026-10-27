@@ -70,3 +70,7 @@ Moodleへログインした教員にWebAppを公開する構成と、Workshop用
 ## 開発に参加する
 
 現在の開発状況・検証結果・未完了事項は [HANDOFF.md](HANDOFF.md)、開発エージェント向けのルールは [AGENTS.md](AGENTS.md) に記載しています。ライセンスは [LICENSE](LICENSE) を参照してください。
+
+## 一括処理コマンド
+
+MCQ CSVをWebAppを開かずに一括変換し、複数XMLを指定カテゴリーにまとめた1つのMoodle XMLを生成できます。Moodleの通常のインポート画面から取り込めます。[一括処理ガイド](scripts/README.batch.md)を参照してください。
