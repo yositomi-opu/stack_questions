@@ -6,3 +6,5 @@
 .node-heading input.checkpoint-weight{width:65px}.identity-row+#libraryPanel{margin-top:12px}#stackForm>.panel-heading:has(#stackEditorTitle[hidden]){display:none}
 
 .input-row>label{font-weight:600}.input-row>label input,.input-row>label select,.input-row>.check-label{font-weight:400}#modePanel>.inline-options{flex-wrap:nowrap;white-space:nowrap}
+
+#dirtyMark{display:inline-block;flex:0 0 1ch;width:1ch;color:var(--primary);font-weight:bold}.name-field{gap:8px}#notice.toast{position:fixed;right:24px;top:75px;z-index:30;padding:10px 16px;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 3px 12px #0002}

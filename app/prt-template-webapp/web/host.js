@@ -5,7 +5,7 @@ let state=null,category='',dirty=false;
 let session=new URLSearchParams(location.search).get('session');
 const t=key=>key==='updated'?(lang==='ja'?'保存しました':'Saved'):key;
 const startupText=(ja,en)=>lang==='ja'?ja:en;
-function message(text){$('notice').textContent=text;}
+let noticeTimer;function message(text,temporary=false){clearTimeout(noticeTimer);$('notice').textContent=text;$('notice').classList.toggle('toast',temporary);if(temporary)noticeTimer=setTimeout(()=>{$('notice').textContent='';$('notice').classList.remove('toast');},3500);}
 async function request(url,data,raw=false){
  const headers={'X-Qbank-Request':'1','X-Editor-Session':session||''};
  const response=await fetch(url,{...(data===undefined?{}:{method:'POST',body:raw?data:JSON.stringify(data)}),headers});
@@ -44,7 +44,7 @@ async function initialize(fresh=false){
  $('openXml').disabled=!!state.callbackOrigin;
  if(window.generalEditor&&!Object.keys(state.editFields).length){state.editFields={name:'New STACK',questionvariables:'',questiontext:'',generalfeedback:''};}
  $('newStack').disabled=false;
- if(Object.keys(state.editFields).length){render();await window.PRT_EDITOR.load(state);}else $('newStack').click();
+ if(Object.keys(state.editFields).length){render();await window.PRT_EDITOR.load(state);}else await $('newStack').onclick();
  if(!window.PRT_EDITOR.isOpen())throw Error(startupText('編集フォームの初期化に失敗しました。再読込してください。','The editor form did not initialize. Please reload.'));
  $('startupPanel').hidden=true;
  if(recovered)message(startupText('以前のセッションが失効したため、新規サンプルを開きました。保存済みのCSV/XMLから作業を再開できます。','The previous session expired. A new sample is open; reload your saved CSV/XML to continue.'));
@@ -57,8 +57,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
  $('startSample').onclick=async()=>{try{await initialize(true);message('');}catch(error){startupFailure(error);}};
  $('continueEdit').onclick=()=>$('editStack').click();
  $('openXml').onclick=()=>$('sourceFile').click();$('openProject').onclick=()=>{$('projectMenu').open=false;$('sourceFile').accept='.zip';$('sourceFile').click();};
- $('exportXml').onclick=()=>download('/api/xml');$('saveProject').onclick=async()=>{try{const r=await request('/api/project-export',{revision:state.revision,fields:window.PRT_EDITOR.fields()});const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='stack-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);window.PRT_EDITOR.markSaved();dirty=false;}catch(e){message(e.message);}};$('originalDownload').onclick=()=>download('/api/original');
- const source=document.createElement('details');const summary=document.createElement('summary');summary.textContent='XMLを参照 / View XML';const code=document.createElement('pre');source.append(summary,code);document.querySelector('main').append(source);source.ontoggle=async()=>{if(source.open){try{code.textContent=await(await request('/api/reference')).text();}catch(e){message(e.message);}}};
+ $('exportXml').onclick=()=>download('/api/xml');$('saveProject').onclick=async()=>{if(!window.PRT_EDITOR.requireName())return;try{const r=await request('/api/project-export',{revision:state.revision,fields:window.PRT_EDITOR.fields()});const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='stack-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);window.PRT_EDITOR.markSaved();dirty=false;message(startupText('保存しました。','Saved.'),true);}catch(e){message(e.message);}};$('originalDownload').onclick=()=>download('/api/original');
+
  $('sourceFile').onchange=async()=>{const f=$('sourceFile').files[0];if(!f)return;try{state=await(await request('/api/open',await f.arrayBuffer(),true)).json();render();$('editStack').click();}catch(e){message(e.message);}finally{$('sourceFile').value='';}};
  try{await initialize();}catch(error){startupFailure(error);}
 });

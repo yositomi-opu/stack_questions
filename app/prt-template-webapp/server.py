@@ -127,6 +127,7 @@ class Handler(BaseHTTPRequestHandler):
                 with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as z:
                     z.writestr('source.xml',s['original']);z.writestr('current.xml',raw);z.writestr('project.json',json.dumps({'schema':1,'source_sha256':hashlib.sha256(s['original']).hexdigest(),'current_sha256':hashlib.sha256(raw).hexdigest()}))
                 return self.reply(out.getvalue(),mime='application/zip',filename='stack-project.zip')
+            if self.path=='/sample.csv':return self.reply((WEB.parent/'samples/BasisDimNullSpace.csv').read_bytes(),mime='text/csv; charset=utf-8')
             name='index.html' if self.path.split('?')[0]=='/' else self.path.lstrip('/').split('?')[0]
             assets={'index.html','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
             if name not in assets:return self.reply({'error':'Not found'},404)
@@ -196,6 +197,7 @@ class Handler(BaseHTTPRequestHandler):
                 if self.path=='/api/prepare':return self.reply({'fields':compact_fields(d['fields'])})
                 if self.path=='/api/export':
                     fields=d.get('fields',s['fields']);validate_fields(fields)
+                    if not fields.get('name','').strip():raise ValueError('問題名を入力してください。 / Enter a question title.')
                     if d.get('format')=='csv':return self.reply(csv_codec.dumps(s['original'],fields),mime='text/csv; charset=utf-8',filename='prt-question.csv')
                     if d.get('format')!='xml':raise ValueError('Unknown export format')
                     definition=edited(s['xml'],fields)

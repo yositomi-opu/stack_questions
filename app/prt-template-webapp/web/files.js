@@ -2,7 +2,7 @@
 (()=>{
  const handles={csv:null,xml:null};const bars=[];
  const tr=(ja,en)=>lang==='ja'?ja:en;
- function status(text){message(text);$('stackStatus').textContent=text;}
+ function status(text){message(text);$('stackStatus').textContent='';}
  function clearHandles(){handles.csv=handles.xml=null;labels();}
  async function load(raw,format,handle){
   if(window.PRT_EDITOR.isOpen()&&!confirm(tr('現在の編集を置き換えますか？','Replace current edits?')))return;
@@ -17,14 +17,17 @@
   else{const f=document.createElement('input');f.type='file';f.accept='.'+format;f.onchange=async()=>{try{if(f.files[0])await load(await f.files[0].arrayBuffer(),format,null);}catch(e){status(e.message);}};f.click();}
  }catch(e){if(e.name!=='AbortError')status(e.message);}}
  async function save(format,overwrite=false,view=false){try{
+  if(!view&&!window.PRT_EDITOR.requireName())return;
   const fields=window.PRT_EDITOR.isOpen()?window.PRT_EDITOR.fields():state.editFields;
+  const title=fields.name.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/\.(csv|xml)$/i,'').replace(/^011\./,'').replace(/-(ch|tr)$/,'')||'question';
+  const mode=fields.template?JSON.parse(fields.template).mode:'chain';const filename=format==='csv'?title+'.csv':(window.generalEditor?title:'011.'+title+'-'+(mode==='tree'?'tr':'ch'))+'.xml';
   const response=await request('/api/export',{revision:state.revision,format,fields});const blob=await response.blob();
   if(view){const d=document.createElement('dialog');const pre=document.createElement('pre');pre.textContent=await blob.text();const close=document.createElement('button');close.textContent=tr('閉じる','Close');close.onclick=()=>d.remove();d.append(close,pre);document.body.append(d);d.showModal();return;}
   if(window.showSaveFilePicker){let handle=overwrite?handles[format]:null;
-   if(!handle)handle=await showSaveFilePicker({suggestedName:'prt-question.'+format,types:[{description:format.toUpperCase(),accept:{[format==='csv'?'text/csv':'application/xml']:['.'+format]}}]});
+   if(!handle)handle=await showSaveFilePicker({suggestedName:filename,types:[{description:format.toUpperCase(),accept:{[format==='csv'?'text/csv':'application/xml']:['.'+format]}}]});
    const writer=await handle.createWritable();await writer.write(blob);await writer.close();handles[format]=handle;labels();
-  }else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='prt-question.'+format;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-  status(tr('保存しました。','Saved.'));dirty=false;window.PRT_EDITOR.markSaved();
+  }else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+  message(tr('保存しました。','Saved.'),true);$('stackStatus').textContent='';dirty=false;window.PRT_EDITOR.markSaved();
  }catch(e){if(e.name!=='AbortError')status(e.message);}}
  function makeBar(parent){const bar=document.createElement('div');bar.className='file-menus';
   for(const format of ['csv','xml']){const group=document.createElement('details');group.className='file-menu';group.dataset.fileFormat=format;const name=document.createElement('summary');name.textContent=format.toUpperCase();group.append(name);const items=document.createElement('div');items.className='menu-items';group.append(items);

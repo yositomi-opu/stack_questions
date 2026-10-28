@@ -508,3 +508,10 @@ git diff --check
 - 独自のスキル分類案30件をweb/skills.jsonに追加。KIT数学ナビゲーションの分野構成を参考とし、公式IDではないことを画面・READMEに明記。LA/CL/ST/OD+6桁のIDを検索・選択・登録するダイアログを実装。追加はブラウザー内保存、JSONで共有。既存IDの再定義を拒否し、一括読込は衝突検査後に保存。削除なし、分類データのHTML実行なし。中央共有DBや自動同期は未実装。
 - PYTHONPATH=app/prt-template-webapp python3 -m unittest discover -s app/prt-template-webapp/tests -p 'test*.py':22件成功（CSV/原本/作業ZIP往復等）。Chromium browser_startup/compact/layout成功:初期サンプル、失効回復、既存問題保持、入力整列、ライブラリー、CSV往復・XML生成・CASText、日英切替、狭幅、ノード挿入削除、スキル登録選択・JSON共有・衝突拒否、翻訳保持、固定ヘッダー。pageerror0。Python/JS構文とgit diff --check成功。
 - 変更は隔離worktreeで検証し、無関係な練習サイトや利用者データは含めない。Mac実機、実STACK API/CAS、実Moodleインポート・採点、AIプロバイダー呼出しは今回未確認。
+
+## 添付のPRT雛形・保存UX（2026-10-28）
+
+- 利用者が公開を指定した雛形をsamples/011.PRT_template-ch.xmlに原本バイトのまま追加し、samples/BasisDimNullSpace.csvも追加。CSVの名前だけBasisDimNullSpaceとし、原本XMLを埋め込み保持。新規作成はこのCSVを読み込む。行列生成・7解答変数・7チェック・関数ソースを保持。原本の固定フラグ関数、ans4 algebraic、feedback側8項目の配点は雛形の状態としてREADMEに明記。生成時には7チェックから配点等を設定する既存の変換を適用。
+- 保存には問題名を必須とし、空なら入力欄へフォーカスと案内。CSV名は問題名.csv、XML名は011.問題名-ch.xml/treeなら-tr.xml。上書は選択済みファイルを維持。CSV export APIでも空の名前を拒否。
+- 保存済みスナップショットと比較する固定幅の*を問題名の左に追加。入力・選択・ノード操作を検知し、ファイル保存時に解除。適用だけではディスク保存扱いにしない。成功通知を一つの3.5秒表示にし、重複する末尾の原本XML参照行を撤去（XMLメニューの表示と原本保存は保持）。%_Num_Nodesの自動生成の説明を日英ヘルプへ追加。初期サンプルを非同期読込するため初期化は完了を待つ。
+- PRT Python23件成功。browser_startup/compact/layout/saveの4実Chromium試験成功、pageerror0:新規7入力/7チェック、失効セッション、問題バンク保持、CSV/XML往復、翻訳、スキル共有、狭幅、問題名未入力、保存名ch/tr、固定位置の変更マーク、通知消去、末尾参照削除。サンプルCSVから原本XMLの完全復元・関数ソース・7ノードXML生成を確認。実Moodle取込/採点、実CAS/AI、Mac実機は今回未確認。利用者のc-p依頼により対象変更だけmainへcommit/pushする。

@@ -12,9 +12,9 @@ python3 app/prt-template-webapp/server.py
 
 ブラウザーで http://127.0.0.1:4175/ を開きます。別ポートは `--port` で指定できます。MCQ webappは既定4173、STACK APIは3080です。編集中の問題を表示・採点する場合は両サービスを起動してください。接続先は `--preview-server` と `--stack-api` で変更できます。
 
-通常起動では、解空間の基底と次元を求める線形代数サンプルが編集フォームに入ります。問題文、問題変数、解答欄、4つのチェックをそのまま編集できます。再起動などで単独利用のセッションが失効すると新規サンプルへ復帰し、保存済みCSV/XMLから再開できます。問題バンク由来のセッションが失効した場合は自動で置き換えず、開き直す案内を表示します。読み込みに失敗した場合も「サンプルで新規開始」から独立した作業を始められます。
+通常起動では、解空間の基底と次元を求める線形代数サンプルが編集フォームに入ります。問題文、問題変数、解答欄、7つのチェックをそのまま編集できます。再起動などで単独利用のセッションが失効すると新規サンプルへ復帰し、保存済みCSV/XMLから再開できます。問題バンク由来のセッションが失効した場合は自動で置き換えず、開き直す案内を表示します。読み込みに失敗した場合も「サンプルで新規開始」から独立した作業を始められます。
 
-Fresh startup opens a populated linear-algebra sample about a nullspace basis and dimension, with question prose, variables, three inputs and four checks. Expired standalone sessions recover to a new sample; reload saved CSV/XML to continue. Expired bank sessions require reopening from the bank or explicitly starting an independent sample. Initialization failures display recovery controls rather than an empty editor.
+Fresh startup opens a populated linear-algebra sample about a nullspace basis and dimension, with question prose, variables, seven inputs and seven checks. Expired standalone sessions recover to a new sample; reload saved CSV/XML to continue. Expired bank sessions require reopening from the bank or explicitly starting an independent sample. Initialization failures display recovery controls rather than an empty editor.
 
 ## 作成・保存
 
@@ -101,3 +101,20 @@ Nodes offer inline skill IDs, ↑/↓ movement and +↑/+↓ insertion. Keep the
 The skill catalog is a project-defined draft, not an official knowledge-ID system. IDs use two uppercase letters plus six digits: LA (linear algebra), CL (calculus), ST (statistics), OD (ODE). Its topic organization references [KIT Mathematics Navigation](https://w3e.kanazawa-it.ac.jp/math/kousiki/henkan-tex.cgi?pcview=0&target=/math/kousiki/index.html); descriptions and official IDs are not copied. Browse, select and register skills in the dialog. Additions are browser-local; export/import catalog JSON to share them across environments. Conflicting definitions of an existing ID are rejected. Shared IDs cannot be deleted here, and existing question IDs are preserved.
 
 Project ZIP bundles the original XML and current edited XML for resuming with Open project ZIP. Original XML downloads the unchanged imported source, excluding edits. Use the XML menu for Moodle output; use CSV for incomplete work.
+
+
+## 初期サンプルと保存名
+
+初期サンプルは `samples/011.PRT_template-ch.xml` と、それを編集可能なCSVへ変換した `samples/BasisDimNullSpace.csv` です。提供されたXMLを原本としてそのまま保持しています。CSVの問題名は `BasisDimNullSpace` です。行列生成・検査関数はテキストのまま保持し、ブラウザーでは実行しません。このサンプルのチェック関数は固定フラグを返す雛形です。原本のフィードバック変数側の配点リストは8項目ありますが、アプリ出力は7ノードの配点設定から生成します。解答変数 `ans4` のalgebraic型も提供元の設定を保持します。
+
+保存時には問題名が必要です。CSVは `問題名.csv`、XMLはChainなら `011.問題名-ch.xml`、Treeなら `011.問題名-tr.xml` を候補名にします。ファイル名に使えない文字は `_` に置き換えます。上書は選択済みファイルを更新します。問題名の左の `*` は未保存の変更を示します。ファイル保存で消え、入力欄の位置は動きません。「編集を適用」だけではディスクへの保存にはならないため、変更マークは保持します。保存成功の通知は約3.5秒で消えます。
+
+`%_Num_Nodes` はValidationと正解判定を除く本質的なチェック数として、出力時に自動生成します。セッションURLは作業中の参照先を表し、再起動後に編集内容を復元するものではありません。再起動前にCSVまたは作業ZIPで保存してください。
+
+## Starter sample and save names
+
+The starter is `samples/011.PRT_template-ch.xml`, with an editable CSV at `samples/BasisDimNullSpace.csv`. The supplied XML bytes are retained as the original; the CSV title is `BasisDimNullSpace`. Matrix-generation and validation source remain text and are never executed in the browser. The sample check function returns fixed flags as a scaffold. Its original feedback-variable weights have eight entries; app exports generate weights from the seven checkpoint settings. The supplied algebraic type for `ans4` is retained.
+
+Saving requires a title. Suggested names are `title.csv`, `011.title-ch.xml` for Chain and `011.title-tr.xml` for Tree. Unsupported filename characters become `_`; Overwrite updates the selected file. A fixed-width `*` beside the title indicates unsaved changes and clears after a file save. Applying edits to the server does not clear this disk-save indicator. Save notifications disappear after about 3.5 seconds.
+
+The app generates `%_Num_Nodes` from checkpoint count, excluding Validation and correctness. Session URLs refer to in-memory work, not durable recovery. Save CSV or project ZIP before restarting the server.
