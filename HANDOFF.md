@@ -515,3 +515,9 @@ git diff --check
 - 保存には問題名を必須とし、空なら入力欄へフォーカスと案内。CSV名は問題名.csv、XML名は011.問題名-ch.xml/treeなら-tr.xml。上書は選択済みファイルを維持。CSV export APIでも空の名前を拒否。
 - 保存済みスナップショットと比較する固定幅の*を問題名の左に追加。入力・選択・ノード操作を検知し、ファイル保存時に解除。適用だけではディスク保存扱いにしない。成功通知を一つの3.5秒表示にし、重複する末尾の原本XML参照行を撤去（XMLメニューの表示と原本保存は保持）。%_Num_Nodesの自動生成の説明を日英ヘルプへ追加。初期サンプルを非同期読込するため初期化は完了を待つ。
 - PRT Python23件成功。browser_startup/compact/layout/saveの4実Chromium試験成功、pageerror0:新規7入力/7チェック、失効セッション、問題バンク保持、CSV/XML往復、翻訳、スキル共有、狭幅、問題名未入力、保存名ch/tr、固定位置の変更マーク、通知消去、末尾参照削除。サンプルCSVから原本XMLの完全復元・関数ソース・7ノードXML生成を確認。実Moodle取込/採点、実CAS/AI、Mac実機は今回未確認。利用者のc-p依頼により対象変更だけmainへcommit/pushする。
+
+## 行列解答欄のプレビュー改行（2026-10-28）
+
+- varmatrixの解答欄はSTACKがdiv.matrix*bracketsを生成する。PRT/MCQプレビューにinline-block等の行列用CSSがなかったことに加え、取込HTMLからstyle等を除去する処理が文書全体を対象にし、プレビュー自身のhead内CSSも消していたため、解答欄が個別のブロックとして改行されていた。
+- 安全化処理を取込本文の範囲に限定し、アプリ自身のCSSを保持。括弧付き行列の横並び・括弧描画・可変行列textarea用CSSを追加。PRT/MCQ双方とキャッシュ版指定を更新。取り込んだstyle/script等は引き続き削除し、sandbox/CSPを維持。利用者のCSV・問題文・XML原本は変更せずGitへ含めない。
+- 実Chromiumで本番display関数を使い、STACK形式の6個の行列入力が同じ行、次段の次元入力、狭い画面での折返し、script除去をPRT/MCQ双方で確認。scripts/tests/test_preview_ui.cjsとJS構文・git diff --check成功。STACK上流styles.cssとvarmatrixのrender実装に照合。実CAS/Moodleによる今回問題の描画・採点は未確認。

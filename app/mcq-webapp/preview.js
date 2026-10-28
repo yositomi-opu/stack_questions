@@ -144,12 +144,19 @@
     const ready = new Promise(resolve => frame.onload = resolve);
     frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'"><style>
       body{font:17px/1.7 system-ui,sans-serif;color:#202b3b;padding:18px;margin:0;overflow-wrap:anywhere}label{cursor:pointer}input{margin-right:8px}input[type=radio],input[type=checkbox]{width:18px;height:18px}table{border-collapse:collapse}td{padding:4px 8px}img,svg{max-width:100%}.option{margin:12px 0}#preview-feedback{margin-top:24px;padding:16px;background:#f1f6fa;border-radius:8px}#preview-feedback:empty{display:none}.stackinputfeedback.empty{display:none}
+
+      /* STACK matrix controls are inline widgets, not block-level answer rows. */
+      div.matrixroundbrackets,div.matrixsquarebrackets,div.matrixbarbrackets,div.matrixnobrackets,div.matrixcurlybrackets{display:inline-block;vertical-align:middle;padding:.5em;margin:.15em .3em;box-sizing:border-box}
+      div.matrixroundbrackets{border-left:2px solid;border-right:2px solid;border-radius:1em}
+      div.matrixbarbrackets{border-left:2px solid;border-right:2px solid}
+      div.matrixsquarebrackets{border-left:2px solid;border-right:2px solid;background:linear-gradient(currentColor,currentColor) top left/8px 2px no-repeat,linear-gradient(currentColor,currentColor) top right/8px 2px no-repeat,linear-gradient(currentColor,currentColor) bottom left/8px 2px no-repeat,linear-gradient(currentColor,currentColor) bottom right/8px 2px no-repeat}
+      textarea.varmatrixinput{display:inline-block;vertical-align:middle;white-space:pre;min-width:3rem;min-height:3rem;resize:both;direction:ltr;unicode-bidi:plaintext}
       </style></head><body><main id="preview-question"></main><section id="preview-feedback"></section></body></html>`;
     await ready;
     const doc = frame.contentDocument;
     doc.getElementById("preview-question").innerHTML = html;
     // Suppress unsupported active elements and prevent links from replacing the preview.
-    doc.querySelectorAll("script,iframe,object,embed,base,meta,link,style").forEach(node => node.remove());
+    doc.getElementById("preview-question").querySelectorAll("script,iframe,object,embed,base,meta,link,style").forEach(node => node.remove());
     doc.addEventListener("click", event => { if (event.target.closest("a")) event.preventDefault(); });
     doc.addEventListener("submit", event => event.preventDefault());
     doc.addEventListener("input", () => {
