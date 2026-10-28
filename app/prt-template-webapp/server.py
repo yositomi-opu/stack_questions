@@ -128,9 +128,9 @@ class Handler(BaseHTTPRequestHandler):
                     z.writestr('source.xml',s['original']);z.writestr('current.xml',raw);z.writestr('project.json',json.dumps({'schema':1,'source_sha256':hashlib.sha256(s['original']).hexdigest(),'current_sha256':hashlib.sha256(raw).hexdigest()}))
                 return self.reply(out.getvalue(),mime='application/zip',filename='stack-project.zip')
             name='index.html' if self.path.split('?')[0]=='/' else self.path.lstrip('/').split('?')[0]
-            assets={'index.html','host.js','editor.js','files.js','preview.js','style.css','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
+            assets={'index.html','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
             if name not in assets:return self.reply({'error':'Not found'},404)
-            mime='text/html; charset=utf-8' if name.endswith('.html') else ('text/css' if name.endswith('.css') else 'text/javascript')
+            mime='text/html; charset=utf-8' if name.endswith('.html') else ('application/json; charset=utf-8' if name.endswith('.json') else ('text/css' if name.endswith('.css') else 'text/javascript'))
             self.reply((WEB/name).read_bytes(),mime=mime)
         except SessionExpired as e:self.reply({'error':str(e),'code':'session_expired'},410)
         except Exception as e:self.reply({'error':str(e)},400)

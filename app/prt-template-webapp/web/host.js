@@ -56,7 +56,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
  $('reloadEditor').onclick=()=>location.reload();
  $('startSample').onclick=async()=>{try{await initialize(true);message('');}catch(error){startupFailure(error);}};
  $('continueEdit').onclick=()=>$('editStack').click();
- $('openXml').onclick=()=>$('sourceFile').click();
+ $('openXml').onclick=()=>$('sourceFile').click();$('openProject').onclick=()=>{$('projectMenu').open=false;$('sourceFile').accept='.zip';$('sourceFile').click();};
  $('exportXml').onclick=()=>download('/api/xml');$('saveProject').onclick=async()=>{try{const r=await request('/api/project-export',{revision:state.revision,fields:window.PRT_EDITOR.fields()});const a=document.createElement('a');a.href=URL.createObjectURL(await r.blob());a.download='stack-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);window.PRT_EDITOR.markSaved();dirty=false;}catch(e){message(e.message);}};$('originalDownload').onclick=()=>download('/api/original');
  const source=document.createElement('details');const summary=document.createElement('summary');summary.textContent='XMLを参照 / View XML';const code=document.createElement('pre');source.append(summary,code);document.querySelector('main').append(source);source.ontoggle=async()=>{if(source.open){try{code.textContent=await(await request('/api/reference')).text();}catch(e){message(e.message);}}};
  $('sourceFile').onchange=async()=>{const f=$('sourceFile').files[0];if(!f)return;try{state=await(await request('/api/open',await f.arrayBuffer(),true)).json();render();$('editStack').click();}catch(e){message(e.message);}finally{$('sourceFile').value='';}};

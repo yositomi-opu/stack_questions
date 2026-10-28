@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "skills": [
+    {
+      "id": "LA010100",
+      "title": {
+        "ja": "行列の演算",
+        "en": "Matrix operations"
+      }
+    },
+    {
+      "id": "LA010200",
+      "title": {
+        "ja": "行基本変形",
+        "en": "Row operations"
+      }
+    },
+    {
+      "id": "LA020100",
+      "title": {
+        "ja": "連立一次方程式",
+        "en": "Linear systems"
+      }
+    },
+    {
+      "id": "LA020200",
+      "title": {
+        "ja": "階数",
+        "en": "Rank"
+      }
+    },
+    {
+      "id": "LA030100",
+      "title": {
+        "ja": "解空間への所属",
+        "en": "Nullspace membership"
+      }
+    },
+    {
+      "id": "LA030200",
+      "title": {
+        "ja": "一次独立性",
+        "en": "Linear independence"
+      }
+    },
+    {
+      "id": "LA030300",
+      "title": {
+        "ja": "空間を張ること",
+        "en": "Spanning a space"
+      }
+    },
+    {
+      "id": "LA030400",
+      "title": {
+        "ja": "次元",
+        "en": "Dimension"
+      }
+    },
+    {
+      "id": "LA030500",
+      "title": {
+        "ja": "基底",
+        "en": "Basis"
+      }
+    },
+    {
+      "id": "LA040100",
+      "title": {
+        "ja": "線形写像",
+        "en": "Linear transformations"
+      }
+    },
+    {
+      "id": "LA040200",
+      "title": {
+        "ja": "核と像",
+        "en": "Kernel and image"
+      }
+    },
+    {
+      "id": "LA050100",
+      "title": {
+        "ja": "行列式",
+        "en": "Determinants"
+      }
+    },
+    {
+      "id": "LA060100",
+      "title": {
+        "ja": "固有値と固有ベクトル",
+        "en": "Eigenvalues and eigenvectors"
+      }
+    },
+    {
+      "id": "LA060200",
+      "title": {
+        "ja": "対角化",
+        "en": "Diagonalization"
+      }
+    },
+    {
+      "id": "CL010100",
+      "title": {
+        "ja": "極限",
+        "en": "Limits"
+      }
+    },
+    {
+      "id": "CL020100",
+      "title": {
+        "ja": "微分の定義",
+        "en": "Definition of derivative"
+      }
+    },
+    {
+      "id": "CL020200",
+      "title": {
+        "ja": "積と商の微分",
+        "en": "Product and quotient rules"
+      }
+    },
+    {
+      "id": "CL020300",
+      "title": {
+        "ja": "合成関数の微分",
+        "en": "Chain rule"
+      }
+    },
+    {
+      "id": "CL020400",
+      "title": {
+        "ja": "極値",
+        "en": "Extrema"
+      }
+    },
+    {
+      "id": "CL030100",
+      "title": {
+        "ja": "不定積分",
+        "en": "Indefinite integrals"
+      }
+    },
+    {
+      "id": "CL030200",
+      "title": {
+        "ja": "定積分",
+        "en": "Definite integrals"
+      }
+    },
+    {
+      "id": "CL030300",
+      "title": {
+        "ja": "置換積分",
+        "en": "Integration by substitution"
+      }
+    },
+    {
+      "id": "CL030400",
+      "title": {
+        "ja": "部分積分",
+        "en": "Integration by parts"
+      }
+    },
+    {
+      "id": "ST010100",
+      "title": {
+        "ja": "記述統計",
+        "en": "Descriptive statistics"
+      }
+    },
+    {
+      "id": "ST020100",
+      "title": {
+        "ja": "確率分布",
+        "en": "Probability distributions"
+      }
+    },
+    {
+      "id": "ST030100",
+      "title": {
+        "ja": "推定",
+        "en": "Estimation"
+      }
+    },
+    {
+      "id": "ST030200",
+      "title": {
+        "ja": "仮説検定",
+        "en": "Hypothesis testing"
+      }
+    },
+    {
+      "id": "OD010100",
+      "title": {
+        "ja": "変数分離形",
+        "en": "Separable equations"
+      }
+    },
+    {
+      "id": "OD020100",
+      "title": {
+        "ja": "一階線形微分方程式",
+        "en": "First-order linear equations"
+      }
+    },
+    {
+      "id": "OD030100",
+      "title": {
+        "ja": "二階定数係数線形微分方程式",
+        "en": "Second-order constant-coefficient linear equations"
+      }
+    }
+  ]
+}

@@ -500,3 +500,11 @@ git diff --check
 - 初期化時に失効したsession URLを開くとフォームがhiddenのまま停止する経路を修正。新しい単独セッションをURL/タブに明示し、その失効時は新規サンプルへ復帰。旧URLや問題バンク由来の不明/失効sessionは黙って置換せず、独立サンプル開始と再読込の操作を表示。初期化完了を確認するまで新規操作を無効化。
 - 初期サンプルは既存の線形代数（解空間の基底・次元、matrix/varmatrixを含む3入力、4チェック）をそのまま表示し、題名も内容に合わせた。JS/CSSの版指定を追加し旧アセットのキャッシュ混在を避ける。失効APIは410とsession_expiredコードを返す。
 - PRT22 Python件・起動管理5件・CSV CLI/結合3件が成功。実Chromiumで新規の入力/問題文/問題変数/4チェック、英語、単独session失効回復、問題バンク由来sessionの明示的再開始、通信失敗後の再試行、既存の問題バンク内容の保持を確認、pageerror0。従来のcompact編集/CSV往復/翻訳/狭幅試験も成功。Mac実機・実Moodle/CAS採点は今回未確認。
+
+## PRTコンパクトUI・スキル分類（2026-10-28）
+
+- タイトル重複を解消し、空の問題名（placeholder）とTree/Chainを横並びにした。ヘッダーにCSV/XMLドロップダウン・作業ZIP・プレビュー・適用を固定し、画面言語は右端へ。作業ZIPの読込もメニューから可能。日英を同時更新。
+- 解答変数のタイプ等の高さを揃え、正解例の括弧書きを廃止。多言語設定は末尾へ。ノードはスキルID・配点・↑↓・+↑/+↓を1行にまとめ、メッセージは画面言語と選択した翻訳だけを1行高さで表示。非表示翻訳と既存IDを保持。チェック関数の結果リストとノード順の対応は利用者が調整する。
+- 独自のスキル分類案30件をweb/skills.jsonに追加。KIT数学ナビゲーションの分野構成を参考とし、公式IDではないことを画面・READMEに明記。LA/CL/ST/OD+6桁のIDを検索・選択・登録するダイアログを実装。追加はブラウザー内保存、JSONで共有。既存IDの再定義を拒否し、一括読込は衝突検査後に保存。削除なし、分類データのHTML実行なし。中央共有DBや自動同期は未実装。
+- PYTHONPATH=app/prt-template-webapp python3 -m unittest discover -s app/prt-template-webapp/tests -p 'test*.py':22件成功（CSV/原本/作業ZIP往復等）。Chromium browser_startup/compact/layout成功:初期サンプル、失効回復、既存問題保持、入力整列、ライブラリー、CSV往復・XML生成・CASText、日英切替、狭幅、ノード挿入削除、スキル登録選択・JSON共有・衝突拒否、翻訳保持、固定ヘッダー。pageerror0。Python/JS構文とgit diff --check成功。
+- 変更は隔離worktreeで検証し、無関係な練習サイトや利用者データは含めない。Mac実機、実STACK API/CAS、実Moodleインポート・採点、AIプロバイダー呼出しは今回未確認。

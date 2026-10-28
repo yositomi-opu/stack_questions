@@ -27,15 +27,16 @@
   status(tr('保存しました。','Saved.'));dirty=false;window.PRT_EDITOR.markSaved();
  }catch(e){if(e.name!=='AbortError')status(e.message);}}
  function makeBar(parent){const bar=document.createElement('div');bar.className='file-menus';
-  for(const format of ['csv','xml']){const group=document.createElement('span');const name=document.createElement('b');name.textContent=format.toUpperCase()+' ';group.append(name);
-   for(const action of ['open','view','save','overwrite']){const button=document.createElement('button');button.type='button';button.dataset.format=format;button.dataset.action=action;button.onclick=()=>action==='open'?open(format):save(format,action==='overwrite',action==='view');group.append(button);}
+  for(const format of ['csv','xml']){const group=document.createElement('details');group.className='file-menu';group.dataset.fileFormat=format;const name=document.createElement('summary');name.textContent=format.toUpperCase();group.append(name);const items=document.createElement('div');items.className='menu-items';group.append(items);
+   for(const action of ['open','view','save','overwrite']){const button=document.createElement('button');button.type='button';button.dataset.format=format;button.dataset.action=action;button.onclick=()=>{group.open=false;return action==='open'?open(format):save(format,action==='overwrite',action==='view');};items.append(button);}
    bar.append(group);}
   parent.append(bar);bars.push(bar);
  }
- function labels(){for(const bar of bars)for(const b of bar.querySelectorAll('button')){b.hidden=!!window.generalEditor&&b.dataset.format==='csv';b.textContent={open:tr('読込','Open'),view:tr('表示','View'),save:tr('保存','Save as'),overwrite:tr('上書','Overwrite')}[b.dataset.action];b.disabled=b.dataset.action==='overwrite'&&!window.showSaveFilePicker||b.dataset.action==='open'&&!!state?.callbackOrigin;b.title=b.dataset.action==='overwrite'?(handles[b.dataset.format]?.name||tr('保存先を選択','Choose destination')):'';}}
+ function labels(){for(const bar of bars)for(const group of bar.querySelectorAll('[data-file-format]'))group.hidden=!!window.generalEditor&&group.dataset.fileFormat==='csv';for(const bar of bars)for(const b of bar.querySelectorAll('button')){b.hidden=!!window.generalEditor&&b.dataset.format==='csv';b.textContent={open:tr('読込','Open'),view:tr('表示','View'),save:tr('保存','Save as'),overwrite:tr('上書','Overwrite')}[b.dataset.action];b.disabled=b.dataset.action==='overwrite'&&!window.showSaveFilePicker||b.dataset.action==='open'&&!!state?.callbackOrigin;b.title=b.dataset.action==='overwrite'?(handles[b.dataset.format]?.name||tr('保存先を選択','Choose destination')):'';}}
  window.PRT_FILES_LABELS=labels;window.PRT_FILES={clearHandles,load,save};
  window.addEventListener('DOMContentLoaded',()=>{
-  makeBar(document.querySelector('header nav'));
+  makeBar($('fileMenus'));
+  document.addEventListener('click',e=>document.querySelectorAll('header details[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;}));
   $('openXml').hidden=true;$('exportXml').hidden=true;$('sourceFile').accept='.xml,.zip,.csv';
   $('sourceFile').addEventListener('change',clearHandles);
   if(window.generalEditor)for(const bar of bars)for(const b of bar.querySelectorAll('[data-format="csv"]'))b.hidden=true;

@@ -81,3 +81,23 @@ Use a dedicated base-language CASText field for question prose, language checkbo
 Write layout source such as `<p>{@qtext@}</p>` and `[[ans1]]`. Export adds the selected empty language blocks inside `<p>…<br></p>` and expands short inputs into input/validation tags. Each input occupies one row with name, one of four types, teacher's answer, size, allowempty and hideanswer. Narrow screens scroll these rows horizontally.
 
 Define `%_validate` and `%_chkfunc` in question variables; definition buttons beside feedback variables insert editable examples there. Normally only the `ansL` binding needs adaptation in feedback variables. Internal node counts and comparisons are generated and hidden. Hover or focus “?” for help. Legacy custom tests are preserved without automatic conversion. `tests/browser_compact.cjs` exercises the page UI with Playwright and a disposable session; set `PRT_TEST_URL` to choose a test server.
+
+## コンパクトな編集とスキル分類
+
+問題名は空欄から入力し、右側でTree/Chainを選択します。タイトル・ファイルメニュー・プレビュー・適用はスクロール中も上部に残ります。CSV/XMLメニューを開くと読込・表示・保存・上書を選べます。日本語／英語の画面切替は右端です。
+
+各ノードには短いスキルID欄と「参照」があります。↑↓で移動、+↑/+↓でその位置にノードを挿入します。順序や数を変更した場合、チェック関数が返すリストとの対応は問題作成者が調整してください。メッセージは画面言語を常時表示し、下の言語選択で別の翻訳を編集します。未表示の翻訳も保存されます。出力対象の言語は画面末尾で選択します。
+
+スキル分類はこのプロジェクト独自の試案で、公式な知識IDではありません。IDは英大文字2文字と数字6桁（LA:線形代数、CL:微積分、ST:統計、OD:常微分方程式）です。初期分類の分野構成は[金沢工業大学・数学ナビゲーション](https://w3e.kanazawa-it.ac.jp/math/kousiki/henkan-tex.cgi?pcview=0&target=/math/kousiki/index.html)を参考にしています。本文の転載や公式IDの流用はしていません。「参照」のダイアログから検索・選択・登録できます。追加はブラウザー内保存です。分類JSONを保存／読込して別の環境と共有できます。同一IDの異なる定義は上書きせず拒否します。共有IDの削除機能はありません。問題内の既存スキルIDは自動変更しません。
+
+「作業ZIP」は原本XMLと現在の編集済みXMLをまとめた再開用ファイルです。「作業ZIPを読込」で再開できます。「原本XML」は読込時のXMLを変更せず保存する機能で、編集内容を含みません。Moodle用の出力にはXMLメニューを使います。未完成の編集はCSVに保存してください。
+
+## Compact editing and skill catalog
+
+Enter a question title and choose Tree/Chain beside it. The title, menus, preview and apply actions stay at the top while scrolling; UI language is at the far right. CSV/XML menus provide Open, View, Save as and Overwrite. Japanese and English UI labels are provided.
+
+Nodes offer inline skill IDs, ↑/↓ movement and +↑/+↓ insertion. Keep the check-function result list aligned after changing node order/count. Messages show the UI language with one selectable translation below; other stored translations remain intact. Select export languages at the bottom.
+
+The skill catalog is a project-defined draft, not an official knowledge-ID system. IDs use two uppercase letters plus six digits: LA (linear algebra), CL (calculus), ST (statistics), OD (ODE). Its topic organization references [KIT Mathematics Navigation](https://w3e.kanazawa-it.ac.jp/math/kousiki/henkan-tex.cgi?pcview=0&target=/math/kousiki/index.html); descriptions and official IDs are not copied. Browse, select and register skills in the dialog. Additions are browser-local; export/import catalog JSON to share them across environments. Conflicting definitions of an existing ID are rejected. Shared IDs cannot be deleted here, and existing question IDs are preserved.
+
+Project ZIP bundles the original XML and current edited XML for resuming with Open project ZIP. Original XML downloads the unchanged imported source, excluding edits. Use the XML menu for Moodle output; use CSV for incomplete work.
