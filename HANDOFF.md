@@ -521,3 +521,9 @@ git diff --check
 - varmatrixの解答欄はSTACKがdiv.matrix*bracketsを生成する。PRT/MCQプレビューにinline-block等の行列用CSSがなかったことに加え、取込HTMLからstyle等を除去する処理が文書全体を対象にし、プレビュー自身のhead内CSSも消していたため、解答欄が個別のブロックとして改行されていた。
 - 安全化処理を取込本文の範囲に限定し、アプリ自身のCSSを保持。括弧付き行列の横並び・括弧描画・可変行列textarea用CSSを追加。PRT/MCQ双方とキャッシュ版指定を更新。取り込んだstyle/script等は引き続き削除し、sandbox/CSPを維持。利用者のCSV・問題文・XML原本は変更せずGitへ含めない。
 - 実Chromiumで本番display関数を使い、STACK形式の6個の行列入力が同じ行、次段の次元入力、狭い画面での折返し、script除去をPRT/MCQ双方で確認。scripts/tests/test_preview_ui.cjsとJS構文・git diff --check成功。STACK上流styles.cssとvarmatrixのrender実装に照合。実CAS/Moodleによる今回問題の描画・採点は未確認。
+
+## 修正版サンプルCSVとTab補完ヘルプ（2026-10-28）
+
+- 利用者提供の修正版BasisDimNullSpace.csvをsamples/BasisDimNullSpace.csvへバイトのまま差替え。基底6入力すべてvarmatrixとなり、埋込原本XMLは従来と一致。原本XMLファイルや数式・関数・本文は書き換えない。README日英とサンプル検証の入力型を更新。
+- 問題文・解答欄の配置の?と解答変数の?に、[[ans1]]入力直後にカーソルを置いてTabキーを押すと[[input:ans1]][[validation:ans1]]へ補完する手順を日英で明記。editor.jsのキャッシュ版を更新。
+- PRT Python23件成功。実Chromiumで初期サンプルのans4 varmatrix、日本語・英語ヘルプ、Tabキーによる実際の補完を確認。JS構文とCSV以外のdiff --check成功。CSVは提供元の改行・末尾空白をそのまま保持するため通常のdiff --checkはその箇所を報告する。実Moodle/CAS/AI・Mac実機は未確認。対象だけcommit/pushする。

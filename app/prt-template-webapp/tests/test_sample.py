@@ -14,7 +14,7 @@ class SampleTests(unittest.TestCase):
         self.assertEqual(len(m['inputs']),7);self.assertEqual(len(m['checks']),7)
         self.assertIn('randechelon(3, 5, pv',fields['questionvariables'])
         self.assertIn('%_chkfunc(ansL):=[false, true, true, false, false, true, false, true]',fields['questionvariables'])
-        self.assertEqual(m['inputs'][3]['type'],'algebraic')
+        self.assertTrue(all(i['type']=='varmatrix' for i in m['inputs'][:6]))
         xml=server.edited(source,fields)
         self.assertIn('%_Num_Nodes:7;',server.parse(xml)[1].findtext('questionvariables/text'))
         self.assertEqual(csv_codec.loads(csv_codec.dumps(source,fields)),(source,fields))

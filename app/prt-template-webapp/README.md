@@ -105,7 +105,7 @@ Project ZIP bundles the original XML and current edited XML for resuming with Op
 
 ## 初期サンプルと保存名
 
-初期サンプルは `samples/011.PRT_template-ch.xml` と、それを編集可能なCSVへ変換した `samples/BasisDimNullSpace.csv` です。提供されたXMLを原本としてそのまま保持しています。CSVの問題名は `BasisDimNullSpace` です。行列生成・検査関数はテキストのまま保持し、ブラウザーでは実行しません。このサンプルのチェック関数は固定フラグを返す雛形です。原本のフィードバック変数側の配点リストは8項目ありますが、アプリ出力は7ノードの配点設定から生成します。解答変数 `ans4` のalgebraic型も提供元の設定を保持します。
+初期サンプルは `samples/011.PRT_template-ch.xml` と、それを編集可能なCSVへ変換した `samples/BasisDimNullSpace.csv` です。提供されたXMLを原本としてそのまま保持しています。CSVの問題名は `BasisDimNullSpace` です。行列生成・検査関数はテキストのまま保持し、ブラウザーでは実行しません。このサンプルのチェック関数は固定フラグを返す雛形です。原本のフィードバック変数側の配点リストは8項目ありますが、アプリ出力は7ノードの配点設定から生成します。現行のCSVは修正版で、基底の6解答変数はすべてvarmatrix型です。埋め込まれた原本XMLは変更せず保持しています。
 
 保存時には問題名が必要です。CSVは `問題名.csv`、XMLはChainなら `011.問題名-ch.xml`、Treeなら `011.問題名-tr.xml` を候補名にします。ファイル名に使えない文字は `_` に置き換えます。上書は選択済みファイルを更新します。問題名の左の `*` は未保存の変更を示します。ファイル保存で消え、入力欄の位置は動きません。「編集を適用」だけではディスクへの保存にはならないため、変更マークは保持します。保存成功の通知は約3.5秒で消えます。
 
@@ -113,7 +113,7 @@ Project ZIP bundles the original XML and current edited XML for resuming with Op
 
 ## Starter sample and save names
 
-The starter is `samples/011.PRT_template-ch.xml`, with an editable CSV at `samples/BasisDimNullSpace.csv`. The supplied XML bytes are retained as the original; the CSV title is `BasisDimNullSpace`. Matrix-generation and validation source remain text and are never executed in the browser. The sample check function returns fixed flags as a scaffold. Its original feedback-variable weights have eight entries; app exports generate weights from the seven checkpoint settings. The supplied algebraic type for `ans4` is retained.
+The starter is `samples/011.PRT_template-ch.xml`, with an editable CSV at `samples/BasisDimNullSpace.csv`. The supplied XML bytes are retained as the original; the CSV title is `BasisDimNullSpace`. Matrix-generation and validation source remain text and are never executed in the browser. The sample check function returns fixed flags as a scaffold. Its original feedback-variable weights have eight entries; app exports generate weights from the seven checkpoint settings. The current revised CSV uses varmatrix for all six basis inputs; its embedded original XML remains unchanged.
 
 Saving requires a title. Suggested names are `title.csv`, `011.title-ch.xml` for Chain and `011.title-tr.xml` for Tree. Unsupported filename characters become `_`; Overwrite updates the selected file. A fixed-width `*` beside the title indicates unsaved changes and clears after a file save. Applying edits to the server does not clear this disk-save indicator. Save notifications disappear after about 3.5 seconds.
 
