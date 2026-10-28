@@ -27,6 +27,13 @@ class StandaloneTests(unittest.TestCase):
     def get(self,path):
         req=urllib.request.Request(self.base+path,headers={'X-Editor-Session':self.sid})
         with urllib.request.urlopen(req) as r:return r.read()
+    def test_expired_session_has_machine_readable_status(self):
+        self.server.sessions.clear()
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.get('/api/state')
+        self.assertEqual(error.exception.code,410)
+        self.assertEqual(json.load(error.exception)['code'],'session_expired')
+
     def test_project_preserves_original_and_rejects_tampering(self):
         raw=b'<quiz><question type="stack"><name><text>A</text></name><unknown>STACK Case {@X@}</unknown><!--keep--></question></quiz>'
         opened=self.post('/api/open',raw,True)

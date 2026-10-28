@@ -1,6 +1,6 @@
 # 開発引き継ぎ
 
-更新日: 2026-10-27
+更新日: 2026-10-28
 
 この文書は、別のMac・別の開発者・新しいCodexタスクでも開発を再開するための現在地です。作業開始時に読み、作業終了時に更新してください。継続的な開発ルールは [AGENTS.md](AGENTS.md)、利用方法は [WebApp README](app/mcq-webapp/README.md) を参照してください。
 
@@ -494,3 +494,9 @@ git diff --check
 - 隔離した実Git cloneでPRT20 Python件、起動管理5件、MCQ handoff2件、XML結合3件、MCQ CSV CLI/スキーマ3/library includes/editor metadata/preview/pattern編集のJS試験成功。Python/JS構文とdiff --check成功。CSV一括変換とXML結合のソースはmainから不変。
 - 3つの実HTTPアプリを空きポートで同時起動しHTTP200。ChromiumでMCQ/汎用編集の表示・pageerror0、PRTのページ編集/入力1行/ライブラリー重複排除/言語/CSV往復/手動翻訳/狭幅表示が成功。管理対象のPRT/汎用プロセスを専用起動管理で起動。試験終了後にそのプロセスを停止する。
 - make setup/restartの経路は単体試験とmake -nで確認。NASではDockerによるSTACK API起動、Mac起動、実CAS・AI呼出し・今回XMLの実Moodle取込/採点は未実施。アプリ統合の確認とこれらの実機確認を混同しない。qbank側codec更新は別リポジトリで必要。
+
+## PRT初期フォームと失効セッション（2026-10-28）
+
+- 初期化時に失効したsession URLを開くとフォームがhiddenのまま停止する経路を修正。新しい単独セッションをURL/タブに明示し、その失効時は新規サンプルへ復帰。旧URLや問題バンク由来の不明/失効sessionは黙って置換せず、独立サンプル開始と再読込の操作を表示。初期化完了を確認するまで新規操作を無効化。
+- 初期サンプルは既存の線形代数（解空間の基底・次元、matrix/varmatrixを含む3入力、4チェック）をそのまま表示し、題名も内容に合わせた。JS/CSSの版指定を追加し旧アセットのキャッシュ混在を避ける。失効APIは410とsession_expiredコードを返す。
+- PRT22 Python件・起動管理5件・CSV CLI/結合3件が成功。実Chromiumで新規の入力/問題文/問題変数/4チェック、英語、単独session失効回復、問題バンク由来sessionの明示的再開始、通信失敗後の再試行、既存の問題バンク内容の保持を確認、pageerror0。従来のcompact編集/CSV往復/翻訳/狭幅試験も成功。Mac実機・実Moodle/CAS採点は今回未確認。

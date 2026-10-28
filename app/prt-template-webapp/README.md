@@ -12,6 +12,10 @@ python3 app/prt-template-webapp/server.py
 
 ブラウザーで http://127.0.0.1:4175/ を開きます。別ポートは `--port` で指定できます。MCQ webappは既定4173、STACK APIは3080です。編集中の問題を表示・採点する場合は両サービスを起動してください。接続先は `--preview-server` と `--stack-api` で変更できます。
 
+通常起動では、解空間の基底と次元を求める線形代数サンプルが編集フォームに入ります。問題文、問題変数、解答欄、4つのチェックをそのまま編集できます。再起動などで単独利用のセッションが失効すると新規サンプルへ復帰し、保存済みCSV/XMLから再開できます。問題バンク由来のセッションが失効した場合は自動で置き換えず、開き直す案内を表示します。読み込みに失敗した場合も「サンプルで新規開始」から独立した作業を始められます。
+
+Fresh startup opens a populated linear-algebra sample about a nullspace basis and dimension, with question prose, variables, three inputs and four checks. Expired standalone sessions recover to a new sample; reload saved CSV/XML to continue. Expired bank sessions require reopening from the bank or explicitly starting an independent sample. Initialization failures display recovery controls rather than an empty editor.
+
 ## 作成・保存
 
 - 新しい問題を作るか「XMLを開く」でSTACK問題1件を含むMoodle XMLを開きます。複数問題のバンク・バックアップXMLは問題バンクマネージャーで管理してください。対応しない入力は理由を表示して拒否します。

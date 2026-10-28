@@ -89,6 +89,10 @@ def xml_fields(raw):
     return fields
 
 
+class SessionExpired(ValueError):
+    pass
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self,*args):pass
     def reply(self,obj,status=200,mime='application/json',filename=None):
@@ -103,7 +107,7 @@ class Handler(BaseHTTPRequestHandler):
         return self.headers.get('Host') in {urlsplit(v).netloc for v in origins} and (not write or (self.headers.get('Origin') in origins and self.headers.get('X-Qbank-Request')=='1'))
     def session(self):
         sid=self.headers.get('X-Editor-Session','');s=self.server.sessions.get(sid)
-        if not s or time.monotonic()-s['created']>7200:raise ValueError('Editor session expired; reopen from qbank / 編集を開き直してください。')
+        if not s or time.monotonic()-s['created']>7200:raise SessionExpired('Editor session expired; reopen from qbank or start a new sample / 編集セッションが失効しました。問題バンクから開き直すか、新規サンプルで開始してください。')
         return s
     def detail(self,s):
         return dict(id='q:1',version=0,revision=s['revision'],editFields=s['fields'],name=s['fields'].get('name','New STACK'),callbackOrigin=s.get('callbackOrigin'),token=s.get('token'),editorMode='general' if self.server.general else 'template',report=s.get('report',[]))
@@ -128,6 +132,7 @@ class Handler(BaseHTTPRequestHandler):
             if name not in assets:return self.reply({'error':'Not found'},404)
             mime='text/html; charset=utf-8' if name.endswith('.html') else ('text/css' if name.endswith('.css') else 'text/javascript')
             self.reply((WEB/name).read_bytes(),mime=mime)
+        except SessionExpired as e:self.reply({'error':str(e),'code':'session_expired'},410)
         except Exception as e:self.reply({'error':str(e)},400)
     def do_POST(self):
         if not self.valid(True):return self.reply({'error':'Invalid origin'},403)
@@ -217,6 +222,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.reply(self.server.preview.render(definition,d.get('seed',1),d.get('lang','ja')))
                 if self.path=='/api/stack/grade':return self.reply(self.server.preview.grade(d.get('token'),d.get('answers')))
                 self.reply({'error':'Not found'},404)
+        except SessionExpired as e:self.reply({'error':str(e),'code':'session_expired'},410)
         except Exception as e:self.reply({'error':str(e)},400)
 
 
