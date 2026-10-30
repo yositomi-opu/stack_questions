@@ -27,6 +27,17 @@ class StandaloneTests(unittest.TestCase):
     def get(self,path):
         req=urllib.request.Request(self.base+path,headers={'X-Editor-Session':self.sid})
         with urllib.request.urlopen(req) as r:return r.read()
+    def test_bank_new_session_starts_with_sample_without_opening_files(self):
+        result=self.post('/api/session',dict(callback='http://127.0.0.1:4191/api/editor-return',token='synthetic-new',fields=None,xml=None))
+        old=self.sid;self.sid=result['session']
+        state=json.loads(self.get('/api/state'))
+        self.assertEqual(state['editFields']['name'],'BasisDimNullSpace')
+        self.assertEqual(len(json.loads(state['editFields']['template'])['inputs']),7)
+        self.assertEqual(state['callbackOrigin'],'http://127.0.0.1:4191')
+        self.assertEqual(state['token'],'synthetic-new')
+        with self.assertRaises(urllib.error.HTTPError):self.post('/api/open',b'<quiz/>',True)
+        self.sid=old
+
     def test_expired_session_has_machine_readable_status(self):
         self.server.sessions.clear()
         with self.assertRaises(urllib.error.HTTPError) as error:

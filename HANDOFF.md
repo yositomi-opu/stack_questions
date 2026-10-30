@@ -527,3 +527,8 @@ git diff --check
 - 利用者提供の修正版BasisDimNullSpace.csvをsamples/BasisDimNullSpace.csvへバイトのまま差替え。基底6入力すべてvarmatrixとなり、埋込原本XMLは従来と一致。原本XMLファイルや数式・関数・本文は書き換えない。README日英とサンプル検証の入力型を更新。
 - 問題文・解答欄の配置の?と解答変数の?に、[[ans1]]入力直後にカーソルを置いてTabキーを押すと[[input:ans1]][[validation:ans1]]へ補完する手順を日英で明記。editor.jsのキャッシュ版を更新。
 - PRT Python23件成功。実Chromiumで初期サンプルのans4 varmatrix、日本語・英語ヘルプ、Tabキーによる実際の補完を確認。JS構文とCSV以外のdiff --check成功。CSVは提供元の改行・末尾空白をそのまま保持するため通常のdiff --checkはその箇所を報告する。実Moodle/CAS/AI・Mac実機は未確認。対象だけcommit/pushする。
+
+## 問題バンクの新規セッション初期化（2026-10-31）
+
+- qbank新規作成ではcallback付きセッションで任意ファイル読込を拒否するため、初期サンプルを/api/openで読む変更後にフォームが開けなくなっていた。PRTの新規セッション作成時に、fields/XMLがない場合だけ信頼済み同梱CSVで初期化。callback/tokenと原本を保持し、既存問題と汎用Editorは変更しない。callback付き/api/openは禁止を維持。
+- Python25件成功。合成データの実Chromium連携で、空qbankからTree作成→返却→Chainへ再編集→返却→undoと単独の英語UI・作業ZIP往復が成功、pageerror0。qbank本体の公開に必要な連携修正として別repoへ反映する。実Moodle/CAS/AI、Mac/Windows配備、利用者データ操作は今回なし。

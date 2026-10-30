@@ -158,6 +158,9 @@ class Handler(BaseHTTPRequestHandler):
                         for k in expired:del self.server.sessions[k]
                         if len(self.server.sessions)>=16:raise ValueError('Too many active sessions')
                     sid=uuid.uuid4().hex
+                    if not self.server.general and not d.get('fields') and not d.get('xml'):
+                        source,fields=csv_codec.loads((WEB.parent/'samples/BasisDimNullSpace.csv').read_bytes())
+                        d=dict(d,xml=source.decode('utf-8'),fields=fields)
                     xml=d.get('xml') or default_xml().decode();parse(xml.encode())
                     s={'created':time.monotonic(),'xml':xml.encode(),'original':xml.encode(),'fields':d.get('fields') or {},'revision':uuid.uuid4().hex,'callback':callback,'token':d.get('token'),'previewError':d.get('previewError'),'reference':(d.get('referenceXml') or xml).encode(),'callbackOrigin':callback.rsplit('/',2)[0] if callback else None}
                     if not self.server.general and s['fields'].get('template') and json.loads(s['fields']['template']).get('version')==2:
