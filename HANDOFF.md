@@ -532,3 +532,17 @@ git diff --check
 
 - qbank新規作成ではcallback付きセッションで任意ファイル読込を拒否するため、初期サンプルを/api/openで読む変更後にフォームが開けなくなっていた。PRTの新規セッション作成時に、fields/XMLがない場合だけ信頼済み同梱CSVで初期化。callback/tokenと原本を保持し、既存問題と汎用Editorは変更しない。callback付き/api/openは禁止を維持。
 - Python25件成功。合成データの実Chromium連携で、空qbankからTree作成→返却→Chainへ再編集→返却→undoと単独の英語UI・作業ZIP往復が成功、pageerror0。qbank本体の公開に必要な連携修正として別repoへ反映する。実Moodle/CAS/AI、Mac/Windows配備、利用者データ操作は今回なし。
+
+## Parsons WebApp・保存して終了（2026-11-01）
+
+- app/parsons-webapp（4177）を追加し、既存PRT runtimeのセッション/CSV/作業ZIP/翻訳検査を共有。日本語/英語UI、標準言語と翻訳、CASText問題文・選択肢・正解例・別順序・DAG、順序を試すD&D/矢印を提供。単独XML/CSV読込・保存・上書、原本付き作業ZIP、qbank返却を実装。make管理は4アプリへ。
+- PRT-TR-CH/MCQはqbank起動時の保存をcallback返却→受理後のタブ終了へ変更。XML Saveも返却し、競合時は閉じず、XMLの退避を別操作で残す。MCQはqbankの能力通知がない場合は旧field返却の制限を維持。一般STACK Editorも共有画面の保存終了に対応。
+- 添付7XMLを静的認識（単一順序4、DAG1、commutative block2）。添付自体はGitに含めず、未知構造は基本編集へ残す。prooflib/Parsonsの公式仕様に従い、CASText・language helperはMCQ/PRT共通。AI翻訳は明示操作だけでプロバイダー実送信は未検証。検証結果は下記に追記。
+
+### 最終検証（2026-11-01）
+
+- Qbank: make testでPython92件・JS7件・構文検査が成功。XML snapshot/バックアップ実効形式、元バイト・版・未知情報保持、階層、undo/redo、作業ZIP/schema6往復、競合拒否を確認。追加のXML削除属性チェック後に関連13件も再実行して成功。
+- Apps: PRT25件、Parsons4件、起動管理5件、旧MCQ handoff2件が成功。Chromiumで実MCQのradio→checkbox返却、PRT-TR-CHの直接編集、Parsons新規/直接編集/返却/undo、日本語/英語、別正解/依存関係、CSV保存再読込・XML保存を確認。テストは空の使い捨てバンクのみで実行。
+- 実Moodle: MoodleSTACKSetupの検証専用ブランチcodex/parsons-authoring-check、commit 3b7316fa5d33b70190ef1ef444ee7fe4252f3f9e、[Actions run 41254066772](https://github.com/yositomi-opu/MoodleSTACKSetup/actions/runs/41254066772)でMoodle4.5/5.3のXMLインポートとSTACK PRT採点が両方成功。自作合成問題の正順・別正順・誤順・不足・余分・重複を各方式6ケースずつ確認し、解答依存CASTextの評価エラーもなし。学生の実画面ドラッグ/履歴保存を伴う小テスト受験は未実施。利用者の添付7問は静的認識のみで実採点していない。
+- 解答依存フィードバックの文字列は問題変数/modelに保持し、CASText評価はsa/saa/saprob定義後のPRTフィードバック変数で実行。MCQローカルXML退避ボタンのi18n observerループも修正し、最終ブラウザー3シナリオを再実行して成功。
+- 未検証: Mac/Windows実機の起動、外部AI翻訳プロバイダーへの実送信、利用者稼働サイトへの配備。本変更後はmoodle-qbankとstack_questions両方を更新・再起動する。返却後にqbankの作業ZIPを保存すること。

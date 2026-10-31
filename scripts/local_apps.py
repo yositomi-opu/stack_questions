@@ -12,7 +12,7 @@ from urllib.request import build_opener,ProxyHandler
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'app/prt-template-webapp/.local/services'
-APPS=(('prt-template-webapp','PRT_WEBAPP_PORT',4175),('stack-edit-webapp','STACK_EDIT_PORT',4176))
+APPS=(('prt-template-webapp','PRT_WEBAPP_PORT',4175),('stack-edit-webapp','STACK_EDIT_PORT',4176),('parsons-webapp','PARSONS_WEBAPP_PORT',4177))
 
 
 def health(port):

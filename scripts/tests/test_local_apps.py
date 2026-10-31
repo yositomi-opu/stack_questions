@@ -16,19 +16,19 @@ class LocalAppsTests(unittest.TestCase):
         with patch.object(a.subprocess,'run',return_value=SimpleNamespace(returncode=0)) as run,patch.object(a,'start_app') as start:
             self.assertEqual(a.main(['start']),0)
             self.assertIn('mcq-webapp.py',run.call_args.args[0][1]);self.assertEqual(run.call_args.args[0][2],'start')
-            self.assertEqual([call.args[0] for call in start.call_args_list],['prt-template-webapp','stack-edit-webapp'])
+            self.assertEqual([call.args[0] for call in start.call_args_list],['prt-template-webapp','stack-edit-webapp','parsons-webapp'])
     def test_setup_passes_options_then_starts_both_editors(self):
         with patch.object(a.subprocess,'run',return_value=SimpleNamespace(returncode=0)) as run,patch.object(a,'start_app') as start:
             self.assertEqual(a.main(['setup','--locale','ja']),0)
             self.assertEqual(run.call_args.args[0][2:],['setup','--locale','ja'])
-            self.assertEqual([call.args[0] for call in start.call_args_list],['prt-template-webapp','stack-edit-webapp'])
+            self.assertEqual([call.args[0] for call in start.call_args_list],['prt-template-webapp','stack-edit-webapp','parsons-webapp'])
 
     def test_restart_stops_editors_then_restarts_all_apps(self):
         with patch.object(a.subprocess,'run',return_value=SimpleNamespace(returncode=0)) as run,patch.object(a,'start_app') as start,patch.object(a,'stop_app') as stop:
             self.assertEqual(a.main(['restart']),0)
-            self.assertEqual([call.args[0] for call in stop.call_args_list],['stack-edit-webapp','prt-template-webapp'])
+            self.assertEqual([call.args[0] for call in stop.call_args_list],['parsons-webapp','stack-edit-webapp','prt-template-webapp'])
             self.assertEqual([call.args[0][2] for call in run.call_args_list],['stop','start'])
-            self.assertEqual(start.call_count,2)
+            self.assertEqual(start.call_count,3)
 
     def test_failed_mcq_start_does_not_launch_editors(self):
         with patch.object(a.subprocess,'run',return_value=SimpleNamespace(returncode=1)),patch.object(a,'start_app') as start:

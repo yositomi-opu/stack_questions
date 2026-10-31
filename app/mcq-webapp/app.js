@@ -4589,6 +4589,7 @@ async function downloadXml(overwrite = false) {
   try {
     compactCandidatesForSave();
     const xml = generateXml();
+    if(window.MCQ_QBANK_SAVE_CLOSE){await window.MCQ_QBANK_SAVE_CLOSE();return;}
     el.xmlOutput.value = xml;
     syncXmlFilename();
     const filename = normalizedXmlFilename(state.xmlFilename) || `${xmlFileStem(title)}.xml`;

@@ -14,7 +14,7 @@ Git、Python 3.10以降、Make、DockerとDocker Composeを用意します。mac
 make setup
 ```
 
-セットアップで次の3アプリが起動します。
+セットアップで次の4アプリが起動します。
 
 | アプリ | URL |
 | --- | --- |
@@ -24,7 +24,7 @@ make setup
 
 MCQやPRTを編集し、CSVで編集内容を保存するか、Moodle用XMLを出力します。プレビュー・採点に使うSTACK APIは3080で動作します。MCQの数式やランダム変数は「問題変数を評価」で確認できます。
 
-2回目以降は `make start`・`make stop`・`make restart`・`make status` で3アプリをまとめて操作します。`make check` はMCQ/STACK API環境の診断です。再起動前に各編集画面の作業を保存してください。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
+2回目以降は `make start`・`make stop`・`make restart`・`make status` で4アプリをまとめて操作します。`make check` はMCQ/STACK API環境の診断です。再起動前に各編集画面の作業を保存してください。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
 
 問題変数を `stack_include` で別ファイルから読み込む場合は、そのファイルをMoodleから取得できる場所へ公開します。公開先の指定方法と、rankなどを変えるバリアントの作り方は [WebApp利用ガイド](app/mcq-webapp/README.md) にまとめています。
 
@@ -87,4 +87,10 @@ MCQ CSVをWebAppを開かずに一括変換し、複数XMLを指定カテゴリ�
 
 `make prt-template-webapp` で起動し、[http://127.0.0.1:4175/](http://127.0.0.1:4175/) を開きます。MCQ webappとは別アプリで、別ポートの問題バンクマネージャーからも起動できます。[PRT Template WebAppの利用方法](app/prt-template-webapp/README.md)を参照してください。
 
-`make setup`・`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も3アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。
+`make setup`・`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も4アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。
+
+## Parsons WebAppと問題バンクへの返却
+
+`make start` はMCQ（4173）、PRT-TR-CH（4175）、一般STACK Edit（4176）、Parsons（4177）の4アプリを管理します。Parsonsは問題文・選択肢・正解例・別の正解順序・前後関係の制約・多言語フィードバックを編集し、CSV/XML/作業ZIPを保存できます。[Parsonsの説明](app/parsons-webapp/README.md)を参照してください。
+
+最新版のMoodle Qbankから開いた場合、「保存して終了」で編集内容を問題バンクへ返します。XML保存も返却操作になります。単独利用時はファイル保存です。競合時は画面を閉じず、CSV/作業ZIPまたはXMLのローカルコピーを保管できます。問題バンク側も更新してください。

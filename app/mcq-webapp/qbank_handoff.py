@@ -61,16 +61,17 @@ def route(handler):
                 if p.scheme!='http' or p.hostname not in ('127.0.0.1','localhost') or p.username or p.password or p.path!='/api/editor-return' or p.query or p.fragment:raise ValueError('Invalid callback')
                 question(data['xml'])
                 if len(store)>=16:raise ValueError('Too many sessions')
-                sid=uuid.uuid4().hex;store[sid]=dict(xml=data['xml'],callback=callback,token=data['token'],created=now,name=(data.get('fields') or {}).get('name','question'))
+                sid=uuid.uuid4().hex;store[sid]=dict(returnXML=data.get('returnXML') is True,xml=data['xml'],callback=callback,token=data['token'],created=now,name=(data.get('fields') or {}).get('name','question'))
                 reply(handler,{'session':sid});return
             session=store.get(handler.headers.get('X-Editor-Session',''))
             if not session:raise ValueError('Editor session expired')
             if handler.command=='GET' and handler.path=='/api/qbank/state':
                 reply(handler,{'xml':session['xml'],'name':session['name'],'origin':session['callback'].rsplit('/',2)[0],'token':session['token']});return
             if handler.command=='POST' and handler.path=='/api/qbank/save':
-                fields=safe_fields(session['xml'],data['xml'])
+                question(data['xml'])
                 callback=session['callback'];origin=callback.rsplit('/',2)[0]
-                req=Request(callback,data=json.dumps({'token':session['token'],'fields':fields}).encode(),headers={'Origin':origin,'X-Qbank-Request':'1','Content-Type':'application/json'})
+                returned={'xml':data['xml']} if session['returnXML'] else {'fields':safe_fields(session['xml'],data['xml'])}
+                req=Request(callback,data=json.dumps({'token':session['token'],**returned}).encode(),headers={'Origin':origin,'X-Qbank-Request':'1','Content-Type':'application/json'})
                 try:
                     with build_opener(ProxyHandler({}),NoRedirect()).open(req,timeout=60) as response:answer=json.load(response)
                 except HTTPError as e:

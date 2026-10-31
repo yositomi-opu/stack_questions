@@ -53,6 +53,12 @@ def loads(raw):
     if set(fields)!={'name','questionvariables','questiontext','generalfeedback'}:raise ValueError('Invalid question fields')
     model=single('template')
     if 'version' in model:model['version']=int(model['version'])
+    if model.get('mode')=='parsons':
+        from parsons import validate as validate_parsons
+        for key in ('languages','question','steps','answer','alternatives','constraints','feedback'):
+            if key in model:model[key]=json.loads(model[key])
+        validate_parsons(model);fields['template']=json.dumps(model,ensure_ascii=False)
+        return source,fields
     if 'settings' in model:model['settings']=json.loads(model['settings'])
     model['validation']=single('validation');model['correct']=single('correct')
     for kind in ('inputs','checks'):

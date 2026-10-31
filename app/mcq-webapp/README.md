@@ -571,3 +571,9 @@ make repair-docker
 WebAppを停止し、現在のcloneを共有するようSTACK API・Maximaコンテナを再作成して、WebAppを起動し、Maxima評価まで確認します。取得済みイメージは再利用し、問題ファイル・Git履歴・保存設定は削除しません。コンテナ内の一時状態は失われます。ブラウザの未保存の入力は先に保存してください。復旧中はプレビュー・評価が一時的に利用できません。
 
 通常の再起動は `make restart` です。`repair-docker` は共有状態を作り直す必要がある場合に使います。複数cloneは同じDockerプロジェクト名を使うため、利用するcloneを決めて実行してください。直らない場合はDocker Desktopのファイル共有設定とアクセス権を確認し、診断ログを調べてください。
+
+## 問題バンクから開いた場合 / Opened by qbank
+
+「保存して終了（問題バンクへ戻る）」またはXML保存で、編集を問題バンクへ返し、受理後にタブを閉じます。単独起動の保存はファイル出力です。競合時は編集を残し、XMLのローカル退避も可能です。問題バンク側の作業ZIPは別途保存してください。MCQで入力・PRTを変更して返却する場合は最新版のqbankが必要です。
+
+Save and close / XML Save returns edits only for qbank sessions, closing after acceptance. Standalone saving downloads a file. On conflicts the tab remains open and a local XML copy is available. Save the bank project ZIP separately. Update qbank to return MCQ structural edits.

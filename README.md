@@ -14,17 +14,18 @@ Run the initial setup from the repository root:
 make setup
 ```
 
-Setup starts all three apps:
+Setup starts all four apps:
 
 | App | URL |
 | --- | --- |
 | MCQ WebApp | [http://localhost:4173/](http://localhost:4173/) |
 | PRT Template WebApp (Tree/Chain) | [http://localhost:4175/](http://localhost:4175/) |
+| Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
 | STACK Edit WebApp (general XML editor) | [http://localhost:4176/](http://localhost:4176/) |
 
 Edit MCQs or PRT templates and save CSV/XML. STACK API runs on port 3080 for rendering and grading. Use “Evaluate question variables” in MCQ to check formulas and random variables.
 
-For later sessions, use `make start`, `make stop`, `make restart` and `make status` to manage all three apps; use `make check` to diagnose the MCQ/STACK API environment. Save work in every editor before restarting. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
+For later sessions, use `make start`, `make stop`, `make restart` and `make status` to manage all four apps; use `make check` to diagnose the MCQ/STACK API environment. Save work in every editor before restarting. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
 
 If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or recreating a clone, run `make repair-docker` from the clone you intend to use. This recreates the containers with that clone mounted, restarts the WebApp, and verifies Maxima evaluation. Cached images and repository files are retained; container temporary state is reset. Save browser edits first. See the troubleshooting FAQ in the [WebApp guide](app/mcq-webapp/README.md).
 
@@ -94,3 +95,7 @@ Use `make ky_linear_algebra.mac` to rebuild just these libraries and both combin
 Convert multiple MCQ CSV files without opening the WebApp, then combine XML files under one category in a single Moodle XML file. Upload it through Moodle’s normal import page. See the [batch command guide](scripts/README.batch.md).
 
 `make setup` and `make start` start MCQ WebApp (4173), PRT Template WebApp (4175) and STACK Edit WebApp (4176). `make stop`, `make restart` and `make status` manage these applications together. Existing `make stack-editor` remains an alias for `make prt-template-webapp`. Qbank identifies originating applications from metadata stored in question variables and transfers XML content through localhost sessions.
+
+## Parsons and qbank save-and-close
+
+The managed apps now include Parsons WebApp at localhost:4177 alongside MCQ:4173, PRT-TR-CH:4175 and general STACK Edit:4176. [Parsons guide](app/parsons-webapp/README.md) covers multilingual proof steps, teacher answers, alternative orders, dependencies and CSV/XML/project saving. When launched by the updated Moodle Qbank, Save and close (including XML Save) returns edits to the bank before closing. Standalone apps keep normal file saving. Conflicts leave the editor open; local XML copies and project/CSV backups remain available. Update both repositories.

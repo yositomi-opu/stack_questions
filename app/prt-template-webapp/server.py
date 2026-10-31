@@ -80,10 +80,14 @@ def xml_fields(raw):
     fields={k:q.findtext(k+'/text','') for k in FIELDS if k!='template'}
     if read_template(q):fields['template']=read_template(q)
     else:
-        model=import_pattern(q)
+        from parsons import import_model
+        model=import_model(q) or import_pattern(q)
         if model:
             fields['template']=json.dumps(model,ensure_ascii=False)
             fields['questionvariables']=base_variables(fields['questionvariables'])
+    if fields.get('template') and json.loads(fields['template']).get('mode')=='parsons':
+        from parsons import base_variables as parsons_base
+        fields['questionvariables']=parsons_base(fields['questionvariables'])
     if fields.get('template') and json.loads(fields['template']).get('version')==2:
         fields['questionvariables']=base_variables(fields['questionvariables'],keep_functions=json.loads(fields['template']).get('layout')=='compact')
     return fields
@@ -114,7 +118,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.valid():return self.reply({'error':'Invalid host'},403)
         try:
-            if self.path=='/api/health':return self.reply({'app':'stack-edit-webapp' if self.server.general else 'prt-template-webapp','pid':os.getpid()})
+            if self.path=='/api/health':return self.reply({'app':'parsons-webapp' if self.server.parsons else 'stack-edit-webapp' if self.server.general else 'prt-template-webapp','pid':os.getpid()})
             if self.path=='/api/state':return self.reply(self.detail(self.session()))
             if self.path=='/api/reference':return self.reply(self.session().get('reference') or self.session()['xml'],mime='application/xml')
             if self.path in ('/api/xml','/api/project','/api/original'):
@@ -132,7 +136,8 @@ class Handler(BaseHTTPRequestHandler):
             assets={'index.html','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
             if name not in assets:return self.reply({'error':'Not found'},404)
             mime='text/html; charset=utf-8' if name.endswith('.html') else ('application/json; charset=utf-8' if name.endswith('.json') else ('text/css' if name.endswith('.css') else 'text/javascript'))
-            self.reply((WEB/name).read_bytes(),mime=mime)
+            asset = self.server.web/name if self.server.web and (self.server.web/name).is_file() else WEB/name
+            self.reply(asset.read_bytes(),mime=mime)
         except SessionExpired as e:self.reply({'error':str(e),'code':'session_expired'},410)
         except Exception as e:self.reply({'error':str(e)},400)
     def do_POST(self):
@@ -158,6 +163,9 @@ class Handler(BaseHTTPRequestHandler):
                         for k in expired:del self.server.sessions[k]
                         if len(self.server.sessions)>=16:raise ValueError('Too many active sessions')
                     sid=uuid.uuid4().hex
+                    if self.server.parsons and not d.get('fields') and not d.get('xml'):
+                        from parsons import sample
+                        d=dict(d,fields={'name':'','questionvariables':'','questiontext':'','generalfeedback':'','template':json.dumps(sample(),ensure_ascii=False)})
                     if not self.server.general and not d.get('fields') and not d.get('xml'):
                         source,fields=csv_codec.loads((WEB.parent/'samples/BasisDimNullSpace.csv').read_bytes())
                         d=dict(d,xml=source.decode('utf-8'),fields=fields)
@@ -187,6 +195,8 @@ class Handler(BaseHTTPRequestHandler):
                     if not self.server.general and 'template' not in fields:report.append('PRT pattern not recognized; basic fields only. Inputs, PRTs and unsupported content remain intact. / PRTパターンを認識できないため基本項目のみ編集できます。入力欄・PRT・非対応内容は保持します。')
                     if not imported_fields and fields.get('template') and json.loads(fields['template']).get('version')==2 and not read_template(parse(original)[1]):
                         report=['Fixed PRT pattern recognized. Node weights replace feedback-variable scL; feedback is emitted per visited node. Original XML is retained. / 固定PRTを認識しました。配点はノード設定から生成し、フィードバックは訪問ノードから返します。元XMLは保持します。']
+                    if not imported_fields and fields.get('template') and json.loads(fields['template']).get('mode')=='parsons' and not read_template(parse(original)[1]):
+                        report.append('Parsons proof pattern recognized. Grading is generated from accepted orders/constraints; original XML remains available. / Parsons形式を認識しました。採点は正解順序・順序制約から生成します。元XMLは保持します。')
                     if imported_fields:report.append('CSV loaded with original XML retained / 原本XMLを保持してCSVを読み込みました。')
                     s.update(xml=current,original=original,reference=original,fields=fields,report=report,revision=uuid.uuid4().hex)
                     return self.reply(self.detail(s))
@@ -231,8 +241,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:self.reply({'error':str(e)},400)
 
 
-def create_server(port=4175,preview_server='http://127.0.0.1:4173',stack_api='http://127.0.0.1:3080',general=False):
-    s=ThreadingHTTPServer(('127.0.0.1',port),Handler);s.general=general;s.sessions={};s.lock=threading.RLock();s.preview=Preview(preview_server,stack_api);return s
+def create_server(port=4175,preview_server='http://127.0.0.1:4173',stack_api='http://127.0.0.1:3080',general=False,parsons=False,web=None):
+    s=ThreadingHTTPServer(('127.0.0.1',port),Handler);s.general=general;s.parsons=parsons;s.web=web;s.sessions={};s.lock=threading.RLock();s.preview=Preview(preview_server,stack_api);return s
 
 
 if __name__=='__main__':

@@ -118,3 +118,9 @@ The starter is `samples/011.PRT_template-ch.xml`, with an editable CSV at `sampl
 Saving requires a title. Suggested names are `title.csv`, `011.title-ch.xml` for Chain and `011.title-tr.xml` for Tree. Unsupported filename characters become `_`; Overwrite updates the selected file. A fixed-width `*` beside the title indicates unsaved changes and clears after a file save. Applying edits to the server does not clear this disk-save indicator. Save notifications disappear after about 3.5 seconds.
 
 The app generates `%_Num_Nodes` from checkpoint count, excluding Validation and correctness. Session URLs refer to in-memory work, not durable recovery. Save CSV or project ZIP before restarting the server.
+
+## 問題バンクから開いた場合 / Opened by qbank
+
+「保存して終了（問題バンクへ戻る）」またはXML保存で、編集を問題バンクへ返し、受理後にタブを閉じます。単独起動の保存はファイル出力です。競合時は編集を残し、XMLのローカル退避も可能です。問題バンク側の作業ZIPは別途保存してください。MCQで入力・PRTを変更して返却する場合は最新版のqbankが必要です。
+
+Save and close / XML Save returns edits only for qbank sessions, closing after acceptance. Standalone saving downloads a file. On conflicts the tab remains open and a local XML copy is available. Save the bank project ZIP separately. Update qbank to return MCQ structural edits.

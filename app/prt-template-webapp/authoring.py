@@ -1,4 +1,4 @@
-"""General STACK template compiler; no imported CAS code is evaluated here."""
+"""General STACK template compiler; imported CAS is never evaluated here."""
 import copy
 import json
 import re
@@ -31,6 +31,9 @@ def read_template(element):
 
 def compile_template(text):
     m = json.loads(text)
+    if isinstance(m, dict) and m.get('mode') == 'parsons':
+        from parsons import compile_parsons
+        return compile_parsons(m)
     if isinstance(m, dict) and m.get('version') == 2:
         from prt_nodes import compile_nodes
         return compile_nodes(m)
@@ -82,17 +85,28 @@ def compile_template(text):
 def apply_template(element, text, backup=False):
     sections = compile_template(text)
     model = json.loads(text)
-    if model.get('version') == 2 and not backup:
+    if model.get('mode')=='parsons' and not backup and (len(element.findall('input'))>1 or len(element.findall('prt'))>1):
+        raise ValueError('Parsons requires one input and one PRT; additional structures need manual review')
+    if model.get('version') in (2,3) and not backup:
         previous_inputs={i.findtext('name'):i for i in element.findall('input')}
         for inp in sections.findall('input'):
             previous=previous_inputs.get(inp.findtext('name'))
-            if previous is not None:inp.attrib.update(previous.attrib)
+            if previous is not None:
+                inp.attrib.update(previous.attrib)
+                known={c.tag for c in inp}
+                for child in previous:
+                    if child.tag not in known:inp.append(copy.deepcopy(child))
         old = element.find('prt'); new = sections.find('prt')
         if old is not None and new is not None:
             new.attrib.update(old.attrib)
             known = {c.tag for c in new}
             for child in old:
                 if child.tag not in known:new.append(copy.deepcopy(child))
+            if model.get('mode')=='parsons':
+                allowed={c.tag for c in new.find('node')}
+                for removed in old.findall('node')[len(new.findall('node')):]:
+                    if removed.attrib or any(c.tag not in allowed for c in removed):
+                        raise ValueError('Removed PRT node contains unsupported data; use general STACK editing')
             for previous, current in zip(old.findall('node'), new.findall('node')):
                 current.attrib.update(previous.attrib)
                 known_node = {c.tag for c in current}
@@ -152,6 +166,18 @@ def apply_template(element, text, backup=False):
         path = 'plugin_qtype_stack_question/stackoptions/questiontext' if backup else 'questiontext/text'
         target = element.find(path)
         if target is not None:target.text = layout_text(target.text or '', model)
+    if model.get('mode') == 'parsons':
+        from parsons import generated_variables, layout
+        parent = element.find('plugin_qtype_stack_question/stackoptions') if backup else element
+        for tag, content in [('questionvariables',generated_variables(parent.findtext('questionvariables' if backup else 'questionvariables/text',''), model)),('questiontext',layout(model))]+([('questionnote','{@map(first,proof_steps)@}')] if parent.findtext('questionnote' if backup else 'questionnote/text','') in ('','General STACK') else []):
+            target=parent.find(tag)
+            if target is None:target=E.SubElement(parent,tag)
+            if not backup:
+                if tag=='questiontext':target.set('format','html')
+                textnode=target.find('text')
+                if textnode is None:textnode=E.SubElement(target,'text')
+                target=textnode
+            target.text=content
     write_provenance(element, text, backup)
 
 
