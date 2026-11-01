@@ -273,7 +273,7 @@
     "正解選択肢数": "Number of correct options",
     "正解数をランダムにする": "Randomize the number of correct options",
     "候補": "Candidates",
-    "各パターンは正解・不正解1対以上を必須とする": "Require at least one correct/incorrect pair per pattern",
+    "正解・不正解を1対以上": "At least one C/I pair",
     "正解・不正解ごとにフィードバックを変える": "Use different feedback for correct and incorrect options",
     "追加時は正解・不正解別フィードバック": "Use separate correct/incorrect feedback for new patterns",
     "正解・不正解別": "Separate C/I",

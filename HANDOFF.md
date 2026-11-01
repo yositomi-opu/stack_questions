@@ -546,3 +546,11 @@ git diff --check
 - 実Moodle: MoodleSTACKSetupの検証専用ブランチcodex/parsons-authoring-check、commit 3b7316fa5d33b70190ef1ef444ee7fe4252f3f9e、[Actions run 41254066772](https://github.com/yositomi-opu/MoodleSTACKSetup/actions/runs/41254066772)でMoodle4.5/5.3のXMLインポートとSTACK PRT採点が両方成功。自作合成問題の正順・別正順・誤順・不足・余分・重複を各方式6ケースずつ確認し、解答依存CASTextの評価エラーもなし。学生の実画面ドラッグ/履歴保存を伴う小テスト受験は未実施。利用者の添付7問は静的認識のみで実採点していない。
 - 解答依存フィードバックの文字列は問題変数/modelに保持し、CASText評価はsa/saa/saprob定義後のPRTフィードバック変数で実行。MCQローカルXML退避ボタンのi18n observerループも修正し、最終ブラウザー3シナリオを再実行して成功。
 - 未検証: Mac/Windows実機の起動、外部AI翻訳プロバイダーへの実送信、利用者稼働サイトへの配備。本変更後はmoodle-qbankとstack_questions両方を更新・再起動する。返却後にqbankの作業ZIPを保存すること。
+
+
+## MCQ選択肢設定の配置（2026-11-02）
+
+- 形式を最小限の幅の縦2択とし、右に「正解・不正解を1対以上」、さらに右に選択肢数を配置。狭い幅では項目単位で折返す。Checkboxの採点方式は独立した後続行へ移動。英語は「At least one C/I pair」。要素ID・設定値・変換処理は維持。
+- ランダム正解数の候補欄を92pxから26ch（最小20ch）へ拡張。重み付き数値列を入力しやすくした。CSS/翻訳のキャッシュ識別子、README、CHANGELOG更新。既存の未コミット変更は保持。
+- 検証: `node --check app/mcq-webapp/i18n.js`、`node scripts/tests/test_variant_parameters.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、変更対象の`git diff --check`成功。既存XML/CSV往復・重み付き正解数・Radio/Checkbox切替を確認。
+- 実Chromiumによる表示検証は起動後にページ/contextが終了して完了できず、日英の実寸・狭幅での表示は未確認。Mac同期・Moodle確認は未実施。利用者のc-p依頼により今回のUI変更と記録をcommit/push対象とする。送信状態はGit履歴で確認。
