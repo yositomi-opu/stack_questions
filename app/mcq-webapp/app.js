@@ -2308,13 +2308,14 @@ function generatePairedVariableBlock(patterns, numOptions, counts, includePreamb
   const lines = [...baseVariableLines(numOptions, counts, includePreamble), "/* MCQ_CHOICES_BEGIN */"];
   lines.push(`%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`);
   lines.push("%__po:%__mcq_pattern_order;", "%__mcq_num_cpatterns:%_MCQ_NUM_COPTS;", "%__mcq_num_wpatterns:%_MCQ_NUM_OPTS-%_MCQ_NUM_COPTS;");
+  // Keep editable named definitions contiguous: all correct, then all incorrect.
+  const named = {};
   for (const truth of ["C", "W"]) {
-    const refs = [], messageRefs = [];
-    for (const pattern of patterns) {
-      const generated=appendNamedPattern(lines,pattern,truth,patternFeedbackSeparate(pattern.id)?truth:null);
-      refs.push(generated.option);
-      messageRefs.push(generated.message);
-    }
+    named[truth] = patterns.map(pattern => appendNamedPattern(lines, pattern, truth, patternFeedbackSeparate(pattern.id) ? truth : null));
+  }
+  for (const truth of ["C", "W"]) {
+    const refs = named[truth].map(item => item.option);
+    const messageRefs = named[truth].map(item => item.message);
     const count = `%__mcq_num_${truth.toLowerCase()}patterns`;
     const position = truth === "C" ? "k" : "k+%__mcq_num_cpatterns";
     lines.push(`%__mcq_${truth}source:[${refs.join(", ")}];`, `%__mcq_${truth}feedback:[${messageRefs.join(", ")}];`);
@@ -2382,8 +2383,16 @@ function generateFixedVariableBlock(patterns, numOptions, counts, includePreambl
     "/* MCQ_FIXED_CHOICES_BEGIN */",
     "",
   ];
-  correct.forEach((pattern, index) => appendFixedPattern(lines, "C", index + 1, pattern));
-  wrong.forEach((pattern, index) => appendFixedPattern(lines, "W", index + 1, pattern));
+  const named = {};
+  for (const [truth, group] of [["C", correct], ["W", wrong]]) {
+    named[truth] = group.map(pattern => appendNamedPattern(lines, pattern, truth));
+  }
+  for (const truth of ["C", "W"]) {
+    named[truth].forEach((generated, index) => {
+      const slot = index + 1;
+      lines.push(`%__${truth}optL${slot}:${generated.option};`, `%__${truth}msg${slot}:${generated.message};`);
+    });
+  }
   lines.push("/* MCQ_FIXED_CHOICES_END */");
   lines.push("/**************** End of generated variables ****************/");
   return lines.join("\n");

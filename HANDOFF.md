@@ -554,3 +554,11 @@ git diff --check
 - ランダム正解数の候補欄を92pxから26ch（最小20ch）へ拡張。重み付き数値列を入力しやすくした。CSS/翻訳のキャッシュ識別子、README、CHANGELOG更新。既存の未コミット変更は保持。
 - 検証: `node --check app/mcq-webapp/i18n.js`、`node scripts/tests/test_variant_parameters.cjs`、`node scripts/tests/test_csv_schema_v3.cjs`、変更対象の`git diff --check`成功。既存XML/CSV往復・重み付き正解数・Radio/Checkbox切替を確認。
 - 実Chromiumによる表示検証は起動後にページ/contextが終了して完了できず、日英の実寸・狭幅での表示は未確認。Mac同期・Moodle確認は未実施。利用者のc-p依頼により今回のUI変更と記録をcommit/push対象とする。送信状態はGit履歴で確認。
+
+
+## MCQ設定行全体の横並び・XML定義順（2026-11-02）
+
+- 前回の配置から修正。RB/CBを横2択にし、titleでRadio Button/Checkboxを表示。続けて「正解不正解を対」、選択肢数、正解選択肢数、「ランダム」、オン時の「分布」を一行に配置。分布欄は12ch（最小10ch）。特殊選択肢3項目も一行。狭い幅は行内横スクロールで折返しを避ける。短い設定名の日英とキャッシュ識別子を更新。
+- 一対・通常とも名前付きopt/msg定義をC全体→W全体とし、両者の間に出題用の参照や抽出処理を挟まない。出題用の参照設定は全定義の後。変数名・値・CSV形式を維持。
+- 検証: `node scripts/tests/test_csv_schema_v3.cjs`（新たにC/W定義順、間に参照設定を挟まないこと、パターン1/2/10の数値順を検証）、`test_variant_parameters.cjs`、`test_editor_metadata.cjs`、`test_legacy_xml_import.cjs`成功。app.js/i18n.js構文と対象差分検査成功。
+- 実ブラウザー表示、Mac同期、Moodle採点、今回の追補は利用者のc-p依頼でcommit/push対象。送信状態はGit履歴で確認。既存の並行作業を保持。

@@ -112,6 +112,22 @@ for (const paired of [false, true]) {
       [`feedback${n}C`,'string','ja',`correct feedback${n}`]])
  ]);
  context.applyRecords(input);
+ // XML keeps every editable C definition before W, with runtime wiring afterward.
+ const xmlOrder = (paired ? context.generatePairedVariableBlock : context.generateFixedVariableBlock)(context.groupPatterns(), 2, [1]);
+ const definitions = [...xmlOrder.matchAll(/^(opt\d+[CW](?:_\d+)?|msg\d+[CW]):/gm)].map(m => m[1]);
+ const correctDefinitions = definitions.filter(name => /C(?:_|$)/.test(name));
+ const wrongDefinitions = definitions.filter(name => /W(?:_|$)/.test(name));
+ assert.ok(correctDefinitions.length && wrongDefinitions.length);
+ assert.deepEqual(definitions, [...correctDefinitions, ...wrongDefinitions]);
+ for (const truth of ['C','W']) {
+  const names = definitions.filter(name => new RegExp(truth+'(?:_|$)').test(name));
+  assert.deepEqual(names.filter(name => name.startsWith('msg')), [1,2,10].map(n => `msg${n}${truth}`));
+ }
+ const firstW = xmlOrder.indexOf('opt1W:');
+ const lastC = xmlOrder.indexOf('msg10C:');
+ assert.ok(firstW > lastC);
+ assert.ok(!/%__/.test(xmlOrder.slice(xmlOrder.indexOf(';',lastC)+1,firstW)));
+ assert.ok(xmlOrder.indexOf(paired ? '%__mcq_Csource:' : '%__CoptL1:') > xmlOrder.indexOf('msg10W:'));
  const ordered = context.currentCsvRecords('ordered');
  const names = [...new Set(Array.from(ordered.filter(r=>/^(option|feedback)/.test(r[0])), r=>r[0]))];
  assert.deepEqual(names,[1,2,10].flatMap(n=>[

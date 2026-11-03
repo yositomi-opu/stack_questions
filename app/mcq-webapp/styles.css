@@ -731,9 +731,9 @@ h3 {
 
 .choice-settings-primary .mode-options {
   flex: 0 0 auto;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 }
 
 .choice-settings-primary > .check-row {
@@ -846,8 +846,8 @@ h3 {
 }
 
 .correct-counts input {
-  width: 26ch;
-  min-width: 20ch;
+  width: 12ch;
+  min-width: 10ch;
   max-width: 100%;
   padding: 5px 7px;
 }
@@ -1404,3 +1404,17 @@ td:nth-child(5) {
 .candidate-number { color:var(--muted); font-size:12px; }
 .candidate-add { padding:4px 7px; white-space:nowrap; }
 .candidate-help { flex:none; }
+
+/* Keep the complete choice controls together, including weighted counts. */
+.choice-settings-primary { flex-wrap: nowrap; gap: 8px; min-width: 0; overflow-x: auto; }
+.choice-settings-primary > * { flex-shrink: 0; }
+.choice-settings-primary .mode-options { padding: 5px 6px; }
+.choice-settings-primary .mode-options legend { display: none; }
+.choice-settings-primary .number-grid,
+.choice-settings-primary .random-correct-row { flex-wrap: nowrap; gap: 6px; }
+.choice-settings-primary .number-grid input[type="number"],
+.choice-settings-primary .option-count-field input { width: 42px; min-width: 42px; }
+.choice-settings-primary .check-row { white-space: nowrap; }
+.choice-settings .special-options-settings { flex-direction: row; flex-wrap: nowrap; gap: 10px; min-width: 0; overflow-x: auto; }
+.choice-settings .special-options-checks { flex-wrap: nowrap; gap: 10px; flex-shrink: 0; }
+.choice-settings .special-options-settings .check-row { flex-shrink: 0; white-space: nowrap; font-size: 12px; }
