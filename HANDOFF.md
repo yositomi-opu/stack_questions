@@ -562,3 +562,9 @@ git diff --check
 - 一対・通常とも名前付きopt/msg定義をC全体→W全体とし、両者の間に出題用の参照や抽出処理を挟まない。出題用の参照設定は全定義の後。変数名・値・CSV形式を維持。
 - 検証: `node scripts/tests/test_csv_schema_v3.cjs`（新たにC/W定義順、間に参照設定を挟まないこと、パターン1/2/10の数値順を検証）、`test_variant_parameters.cjs`、`test_editor_metadata.cjs`、`test_legacy_xml_import.cjs`成功。app.js/i18n.js構文と対象差分検査成功。
 - 実ブラウザー表示、Mac同期、Moodle採点、今回の追補は利用者のc-p依頼でcommit/push対象。送信状態はGit履歴で確認。既存の並行作業を保持。
+
+
+## 選択肢数ラベルの横並び修正（2026-11-03）
+
+- `.option-count-field` のdisplay:flexが後続の共通`.field-row`のdisplay:gridと同じ詳細度で上書きされ、選択肢数ラベルと数値欄が縦になっていた。`.choice-settings-primary .option-count-field`へ詳細度を上げ、flex-wrap:nowrapを明示。CSSキャッシュ識別子も更新。
+- 検証: Pythonで対象要素・優先されるflex指定・キャッシュURLを照合、対象の`git diff --check`成功。表示のみのためCSV/XML処理の変更なし。実Chromium確認は依存ライブラリlibcups.so.2不足で起動できず未完了。Mac同期は未実施。利用者のc-p依頼により本修正と記録をcommit/push対象とする。送信状態はGit履歴で確認。

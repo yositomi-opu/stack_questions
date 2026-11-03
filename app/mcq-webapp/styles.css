@@ -741,8 +741,9 @@ h3 {
   white-space: nowrap;
 }
 
-.option-count-field {
+.choice-settings-primary .option-count-field {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
 }
