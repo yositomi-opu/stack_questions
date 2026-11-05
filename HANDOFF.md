@@ -568,3 +568,9 @@ git diff --check
 
 - `.option-count-field` のdisplay:flexが後続の共通`.field-row`のdisplay:gridと同じ詳細度で上書きされ、選択肢数ラベルと数値欄が縦になっていた。`.choice-settings-primary .option-count-field`へ詳細度を上げ、flex-wrap:nowrapを明示。CSSキャッシュ識別子も更新。
 - 検証: Pythonで対象要素・優先されるflex指定・キャッシュURLを照合、対象の`git diff --check`成功。表示のみのためCSV/XML処理の変更なし。実Chromium確認は依存ライブラリlibcups.so.2不足で起動できず未完了。Mac同期は未実施。利用者のc-p依頼により本修正と記録をcommit/push対象とする。送信状態はGit履歴で確認。
+
+
+## 対応言語コードファイルの改名（2026-11-06 JST）
+
+- supported_lang_new.txtをsupported_lang_code.txtへ改名し、en/ja/fr/it/de/pt/zh/ko/ru/sv/esの11言語の空のlangブロックを指定順で1行に収録。
+- 指定文字列との完全一致、旧ファイルの削除、既存追跡ファイルに旧名への参照がないことを確認。アプリの生成処理は変更しない。利用者のc-p依頼により本変更と記録だけを最新mainへ公開対象とし、他の未コミット変更は保持。
