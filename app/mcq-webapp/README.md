@@ -600,3 +600,9 @@ On an interactive Mac terminal, one final prompt offers to open the index after 
 
 
 True/False作問は正誤別の主張追加削除、言語依存の指定、多言語展開、CSV/XML・作業ZIP保存に対応します。[TF利用案内](../tf-webapp/README.md)を参照してください。
+
+### 共通ライブラリーのBase URL / Shared library Base URL
+
+問題変数欄に `stack_include Base URL` を表示します。「変更」で新しいURLを入力し、必須・選択中のライブラリーの取得確認に成功した場合だけ保存します。キャンセルや確認失敗では設定を変更しません。問題変数を別ファイルへ保存するURLベースとは別の設定です。共通Base URLはCSVとXMLの編集情報に保存します。
+
+The question-variable section shows a read-only `stack_include Base URL`. Use Change to check the required and selected libraries before saving a new URL. Failed checks and cancellation preserve the setting. This is separate from the URL for external question-variable files. CSV and XML editing metadata preserve the shared Base URL.

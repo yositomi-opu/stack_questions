@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "mcq-webapp.ui-language";
   const translations = new Map(Object.entries({
+    "変更": "Change",
     "共通ライブラリ": "Shared libraries",
     "共通ライブラリについて": "About shared libraries",
     "ライブラリ設定が不正です": "Invalid library settings",

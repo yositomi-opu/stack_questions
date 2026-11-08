@@ -21,7 +21,7 @@ Python 3.10以降を使用します。追加のPythonパッケージは不要で
 1. 問題名と問題変数を入力します。問題変数では `AssertC1` 等の生成用変数を再定義しないでください。
 2. 正しい主張と正しくない主張を追加します。各欄は引用符やcastext()を付けず、CASText本文を入力します。`{@A@}` や数式も使えます。各側1件は残り、上限は各100件です。一対の対応はありません。
 3. 「言語依存」をオンにした主張には、選択した各言語の文章を入力します。オフの場合は共通CASTextとして全言語に使用し、翻訳JSONとAI翻訳の対象から除外します。切替前の翻訳データは保持します。
-4. 規定の出題指示を確認し、正解時の `msgT` と不正解時の `msgF` を言語ごとに編集します。これらは主張の真偽ではなく、学生の回答の正誤に対応します。True/Falseの表示ラベルも編集できます。
+4. 「問題文」を確認し、正解時と不正解時のフィードバックを言語ごとに編集します。これらは主張の真偽ではなく、学生の回答の正誤に対応します。True/Falseの表示ラベルも編集できます。
 5. 「出題する主張」はランダム／正しい主張のみ／正しくない主張のみを選択できます。XMLでは最初に `%_tf` を1（真）または2（偽）へ設定し、該当側から1つを選びます。`AssertC1, AssertC2, ...` と `AssertW1, AssertW2, ...` を定義し、`qtext:castext_concat(qtext0, ...);` で合成します。
 
 「わからない」は未対応です。CSVでは `template,,%_noidea,false` を保持し、生成コードにも `%_noidea:false;` を設定します。trueへの変更は未対応として拒否します。
@@ -30,7 +30,9 @@ Python 3.10以降を使用します。追加のPythonパッケージは不要で
 
 標準言語と展開する言語を選び、「編集する文章の言語」で切り替えます。解除した言語の文章も保持します。手動の翻訳JSON作成／反映と、MCQと同じ保存済みプロバイダー設定を使うAI展開があります。AI送信はボタンを押したときだけ行います。翻訳は数式・変数・CASTextプレースホルダーを保持しているか検査し、途中で元データが変わった場合は反映しません。
 
-MCQと同じ公開ライブラリーURLを `stack_include` に使用します。「ライブラリー」欄へ1行1URLで指定してください。初期値は `ky_linear_algebra.mac` と `multilang_library.mac` です。後者は必須です。作問中には取得・CAS実行せず、XMLに設定を保存します。Moodleから取得できる公開URLを使用してください。
+問題変数欄は常時表示します。`stack_include Base URL` は読取専用で、「変更」から必須・選択中のライブラリーを取得できることを確認して保存します。確認に失敗した場合やキャンセルした場合は元の設定を保持します。共通ライブラリーはMCQと同じチェック欄で選択し、問題変数より先に読み込みます。初期値は旧一括版と必須の多言語ライブラリーです。追加のURLを含む既存データは保持します。URL確認ではコードを実行しません。
+
+「問題文」とフィードバックの ? にCASText・HTML・`{@a@}`の説明を表示します。主張欄は番号のみ表示し、XMLの変数名はヘルプで確認できます。「評価」「評価結果」は問題変数とライブラリーをMCQの評価サービスで計算します。MCQとMaxima/STACKの評価環境が必要です。編集後は再評価してください。
 
 ## 保存・再開
 
@@ -57,6 +59,8 @@ TFの自動テスト、既存PRT/Parsons/MCQ回帰、実Chromiumでの追加削�
 Run `make start` and choose True/False from the common authoring page, or run `make tf-webapp` and open http://127.0.0.1:4178/. Custom managed ports use `TF_WEBAPP_PORT`. Preview requires the separate MCQ webapp and STACK API services.
 
 Maintain at least one true and one false assertion. Add/remove assertions independently. Each assertion can be multilingual or shared CASText; shared assertions are excluded from manual/AI translation. Use the text-language selector to edit the instruction, assertions, answer labels, and correct/incorrect-answer feedback (`msgT`/`msgF`). Random or fixed truth selection sets `%_tf` before selecting from the corresponding pool and combining the assertion with the instruction using `castext_concat`.
+
+Question variables remain expanded. Select shared libraries with MCQ-style checkboxes. The read-only stack_include Base URL can be changed only after an explicit availability check succeeds; failures and cancellation preserve the previous setting. No fetched code is executed during validation. Evaluate / Evaluation results use the MCQ evaluation service and require its Maxima/STACK setup. Help tooltips explain CASText, HTML, {@a@} and generated feedback variables. Assertion labels use numbers.
 
 Include URLs and AI provider settings follow MCQ conventions. AI sends text only on explicit action and validates mathematical/CASText tokens before applying translations. `%_noidea` is stored as false in CSV; this template does not offer an I-don’t-know answer.
 

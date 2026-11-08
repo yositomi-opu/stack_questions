@@ -9,9 +9,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.goto(base);await page.locator('#form:not([hidden])').waitFor();
  assert.equal(await page.locator('#correct .assertion').count(),1);assert.equal(await page.locator('#wrong .assertion').count(),1);
  assert(await page.locator('#correct button').isDisabled());assert(await page.locator('#wrong button').isDisabled());
- await page.locator('#name').fill('Synthetic TF');await page.locator('details').filter({has:page.locator('#variables')}).locator('summary').click();await page.locator('#variables').fill('A:42;');
+ await page.locator('#name').fill('Synthetic TF');await page.locator('#variables').fill('A:42;');
  await page.locator('#addCorrect').click();await page.locator('#correct textarea').nth(1).fill('\\(1+1=2\\)');
- await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'AssertC2 shared');
+ await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'正しい主張 2 shared');
  // Keep ja/en active; deselect other translations without deleting their text.
  for(const code of ['fr','it','de','pt','zh','ko','ru','sv'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
  await page.locator('#translationRequest').click();let source=JSON.parse(await page.locator('#translationJSON').inputValue());

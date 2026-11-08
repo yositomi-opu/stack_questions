@@ -36,6 +36,9 @@ _handoff_spec.loader.exec_module(qbank_handoff)
 _ai_spec = importlib.util.spec_from_file_location("mcq_ai_translation", WEB_ROOT / "ai_translation.py")
 ai_translation = importlib.util.module_from_spec(_ai_spec)
 _ai_spec.loader.exec_module(ai_translation)
+_settings_spec = importlib.util.spec_from_file_location('mcq_authoring_settings', WEB_ROOT / 'authoring_settings.py')
+authoring_settings = importlib.util.module_from_spec(_settings_spec)
+_settings_spec.loader.exec_module(authoring_settings)
 LOCAL_CONFIG = WEB_ROOT / ".local-config.json"
 LOCAL_DIR = WEB_ROOT / ".local"
 DOCKER_EVALUATION_DIR = LOCAL_DIR / "docker-evaluation"
@@ -1122,6 +1125,15 @@ class McqRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": str(exc)})
             except Exception:
                 self.send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"ok": False, "error": "AI operation failed / AI処理に失敗しました"})
+            return
+        if self.path == "/api/libraries/validate":
+            if not self.ai_local_request():
+                self.send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": "Open on localhost / localhostから利用してください"}); return
+            try:
+                length=int(self.headers.get('Content-Length','0'))
+                if not 0 < length <= 8192:raise ValueError('Invalid request size')
+                self.send_json(HTTPStatus.OK, authoring_settings.validate_base(json.loads(self.rfile.read(length)),mcq=True))
+            except (ValueError, OSError) as error:self.send_json(HTTPStatus.BAD_REQUEST, {"ok":False,"error":str(error)})
             return
         if self.path == "/api/server/shutdown":
             if self.client_address[0] not in {"127.0.0.1", "::1"}:

@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import threading
 import unittest
+from unittest.mock import patch
 import xml.etree.ElementTree as E
 from urllib.request import Request, build_opener, ProxyHandler
 from urllib.error import HTTPError
@@ -93,6 +94,19 @@ class HTTPTests(unittest.TestCase):
         h={'Origin':self.base,'X-Qbank-Request':'1','X-Editor-Session':self.sid};h.update(headers or {})
         body=None if data is None else data if raw else json.dumps(data).encode()
         return build_opener(ProxyHandler({})).open(Request(self.base+path,data=body,headers=h))
+    def test_variable_evaluation_uses_libraries_and_current_draft(self):
+        with self.call('/api/session',{}) as r:self.sid=json.load(r)['session']
+        with self.call('/api/state') as r:state=json.load(r)
+        fields=state['editFields'];fields['questionvariables']='a:42; b:[a];'
+        with patch.object(server.runtime.authoring_settings,'evaluate_via_mcq',return_value={'ok':True,'variables':[]}) as evaluate:
+            with self.call('/api/variables/evaluate',dict(revision=state['revision'],fields=fields)) as r:self.assertTrue(json.load(r)['ok'])
+            base,code,names=evaluate.call_args.args
+            self.assertEqual(base,'http://127.0.0.1:4173');self.assertEqual(names,['a','b'])
+            self.assertLess(code.index('stack_include('),code.index('a:42;'))
+            with self.assertRaises(HTTPError):self.call('/api/variables/evaluate',dict(revision='stale',fields=fields))
+            self.assertEqual(evaluate.call_count,1)
+        with self.call('/api/state') as r:self.assertEqual(json.load(r)['revision'],state['revision'])
+
     def test_session_export_open_and_origin(self):
         with self.call('/api/health') as r:self.assertEqual(json.load(r)['app'],'tf-webapp')
         with self.call('/api/session',{}) as r:self.sid=json.load(r)['session']
@@ -112,7 +126,7 @@ class HTTPTests(unittest.TestCase):
         with self.assertRaises(HTTPError):self.call('/api/export',dict(revision='stale',format='xml',fields=fields))
         with self.assertRaises(HTTPError):self.call('/api/session',{},headers={'Origin':'http://example.org'})
         with self.assertRaises(HTTPError):self.call('/api/session',{'callback':'https://example.org/api/editor-return'})
-        for asset in ('/','/editor.js','/preview.js','/vendor/mathjax-tex-svg-3.2.2.js'):
+        for asset in ('/','/authoring-settings.js','/editor.js','/preview.js','/vendor/mathjax-tex-svg-3.2.2.js'):
             with self.call(asset) as r:self.assertEqual(r.status,200)
 
 if __name__=='__main__':unittest.main()

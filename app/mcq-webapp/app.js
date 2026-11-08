@@ -29,6 +29,7 @@ const state = {
   questionTypes: Object.fromEntries(LANGS.map((lang) => [lang, "text"])),
   questionLanguageIndependent: false,
   libraryIncludes: {},
+  libraryBaseUrl: SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL,
   includeSource: null,
   includeFilename: "",
   xmlFilename: "",
@@ -119,6 +120,7 @@ const el = {
 if (!window.MCQ_HEADLESS) window.MCQ_WEBAPP_READY = init();
 
 async function init() {
+  initLibraryBaseControls();
   bindEvents();
   el.stackApiUrl.value = SERVER_CONFIG.stackApiUrl
     || localStorage.getItem(STACK_API_URL_STORAGE_KEY)
@@ -1751,7 +1753,7 @@ function libraryCatalog() {
 }
 
 function defaultLibraryUrl(id) {
-  return new URL(`${id}.mac`, normalizedIncludeBaseUrl(SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL)).href;
+  return new URL(`${id}.mac`, normalizedIncludeBaseUrl(state.libraryBaseUrl || SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL)).href;
 }
 
 function libraryIdFromUrl(value) {
@@ -1842,8 +1844,40 @@ function setLibraryIncluded(id, checked) {
   updateOutput();
 }
 
+function initLibraryBaseControls() {
+  const settings = window.AuthoringSettings;
+  const button = document.getElementById("changeLibraryBase");
+  if (!settings || !button) return;
+  try { state.libraryBaseUrl = settings.normalize(localStorage.getItem("mcq-webapp.library-base-url") || state.libraryBaseUrl); } catch {}
+  button.onclick = () => settings.chooseBase({
+    current: state.libraryBaseUrl,
+    language: () => window.mcqI18n?.language || INITIAL_LOCALE,
+    libraries: () => Object.keys(effectiveLibraryIncludes()),
+    request: async (payload) => {
+      const response = await fetch(webappUrl("/api/libraries/validate"), {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      const result = await response.json();
+      if (!response.ok) throw Error(result.error || "Validation failed");
+      return result;
+    },
+    onSave: (base) => {
+      state.libraryBaseUrl = base;
+      for (const id of Object.keys(state.libraryIncludes)) state.libraryIncludes[id] = new URL(`${id}.mac`, base).href;
+      for (const field of [el.parameters, el.qvars]) {
+        for (const item of libraryIncludeRanges(field.value).reverse()) {
+          const call = field.value.slice(item.start,item.end).replace(item.url,new URL(item.id+".mac",base).href);
+          field.value = field.value.slice(0,item.start) + call + field.value.slice(item.end);
+        }
+      }
+      try { localStorage.setItem("mcq-webapp.library-base-url",base); } catch {}
+      markCasEvaluationStale(); updateOutput();
+    }
+  });
+}
+
 function syncLibraryControls() {
   if (window.MCQ_HEADLESS || typeof document === "undefined" || typeof document.getElementById !== "function") return;
+  const baseField = document.getElementById("libraryBaseUrl");
+  if (baseField) baseField.value = state.libraryBaseUrl;
   const host = document.getElementById("libraryIncludes");
   if (!host) return;
   if (!host.children.length) {
@@ -2044,6 +2078,7 @@ function appStateSnapshot() {
   return {
     version: 1,
     libraryIncludes: effectiveLibraryIncludes(),
+    libraryBaseUrl: state.libraryBaseUrl,
     questionId: el.questionId.value,
     mode: state.mode,
     baseLanguage: baseLang(),
@@ -3140,7 +3175,7 @@ function publicIncludeUrl(path) {
 }
 
 function rewriteTemplateIncludeUrls(template) {
-  const baseUrl = normalizedIncludeBaseUrl(SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL);
+  const baseUrl = normalizedIncludeBaseUrl(state.libraryBaseUrl || SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL);
   return [
     "https://yositomi-opu.github.io/stack_questions/",
     "https://stack.mathedu.jp/sc/",
@@ -3295,6 +3330,8 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
   }
   // Executable XML/includes take precedence over editing metadata.
   state.libraryIncludes = Object.fromEntries(libraryIncludeRanges(variables + "\n" + (includeSource?.content || "")).map(item => [item.id, item.url]));
+  const importedBase = variables.match(/stack_include\(\s*"([^"\r\n]+\/(?:multilang_library|mcq_template_pre_cas)\.(?:mac|txt))"/);
+  if (importedBase) state.libraryBaseUrl = new URL("./", importedBase[1]).href;
   for (const item of manualLibraryIncludes()) delete state.libraryIncludes[item.id];
   // XML declarations are grouped by truth, but the paired editor needs each
   // pattern's C/W rows together. Sort only after restoring original pattern IDs.
@@ -3320,6 +3357,7 @@ function importXmlText(xmlText, filename = "", includeSource = null) {
 function applyAppStateSnapshot(snapshot) {
   if (!snapshot || snapshot.version !== 1 || !Array.isArray(snapshot.rows)) throw new Error("再編集用データが不正です");
   state.libraryIncludes = snapshot.libraryIncludes ? parseLibraryConfig(snapshot.libraryIncludes) : {};
+  if (snapshot.libraryBaseUrl) state.libraryBaseUrl = normalizedIncludeBaseUrl(snapshot.libraryBaseUrl);
   el.questionId.value = baseTitle(snapshot.questionId);
   setMode(snapshot.mode === "cb" ? "cb" : "rb");
   el.baseLanguage.value = normalizeLang(snapshot.baseLanguage);
@@ -4383,6 +4421,7 @@ function applyLegacyRecords(records) {
 }
 
 function applyConfig(key, value) {
+  if (key === "library_base_url") state.libraryBaseUrl = normalizedIncludeBaseUrl(value);
   if (key === "include_libraries") state.libraryIncludes = parseLibraryConfig(value);
   if (key === "xml_filename") state.xmlFilename = normalizedXmlFilename(value);
   if (key === "legacy_question_inputs") state.legacyQuestionInputs = value ? JSON.parse(value) : {};
@@ -4431,6 +4470,7 @@ function downloadSampleCsv() {
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
     ["config", "include_libraries", JSON.stringify(effectiveLibraryIncludes())],
+    ["config", "library_base_url", state.libraryBaseUrl || DEFAULT_INCLUDE_BASE_URL],
     ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],
@@ -4522,6 +4562,7 @@ function csvSettingsAndFeedbackRecords(title) {
     ["config", "noidea", el.noIdeaOption?.checked ? "true" : "false"],
     ["config", "include_filename", state.includeFilename || ""],
     ["config", "include_libraries", JSON.stringify(effectiveLibraryIncludes())],
+    ["config", "library_base_url", state.libraryBaseUrl || DEFAULT_INCLUDE_BASE_URL],
     ["config", "xml_filename", state.xmlFilename || ""],
     ["config", "castext_template", el.castextTemplate?.checked ? "true" : "false"],
     ["config", "scmethod", el.scoringMethod?.value || "1"],

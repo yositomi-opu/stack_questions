@@ -78,3 +78,17 @@ assert.ok(context.generateXml().includes('stack_include("https://example.org/tex
 assert.ok(!context.generateIncludeFileContent().includes('texput_W.mac'));
 assert.ok(context.previewQuestionSnapshot().questionDefinition || context.previewQuestionSnapshot());
 console.log('Passed: library selection, legacy defaults, CSV/XML roundtrip, authoritative XML, manual includes, reset, external variables and evaluation.');
+
+// The common root survives CSV/XML independently of external variable-file URLs.
+state.includeSource=null;
+context.applyRecords([...records,['config','library_base_url','https://new.example/libs/'],['config','include_libraries','{}']]);
+assert.equal(state.libraryBaseUrl,'https://new.example/libs/');
+context.setLibraryIncluded('trans_mat',true);
+assert.equal(state.libraryIncludes.trans_mat,'https://new.example/libs/trans_mat.mac');
+const customCsv=context.currentCsvRecords('v3');
+state.libraryBaseUrl='https://other.example/';context.applyRecords(customCsv);
+assert.equal(state.libraryBaseUrl,'https://new.example/libs/');
+const customXml=context.generateXml();assert.ok(customXml.includes('stack_include("https://new.example/libs/mcq_template_pre_cas.mac")'));
+state.libraryBaseUrl='https://other.example/';context.importXmlText(customXml,'custom.xml');
+assert.equal(state.libraryBaseUrl,'https://new.example/libs/');
+console.log('Passed: common library Base URL, CSV/XML persistence and selected module URLs.');

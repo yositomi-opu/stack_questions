@@ -21,6 +21,9 @@ from authoring import apply_template, read_template
 from preview import Preview, NoRedirect
 from prt_nodes import import_pattern, base_variables, compact_fields
 import csv_codec
+import importlib.util
+_settings_spec=importlib.util.spec_from_file_location('tf_authoring_settings',Path(__file__).resolve().parents[1]/'mcq-webapp/authoring_settings.py')
+authoring_settings=importlib.util.module_from_spec(_settings_spec);_settings_spec.loader.exec_module(authoring_settings)
 
 LIMIT = 8 * 1024 * 1024
 WEB = Path(__file__).parent / 'web'
@@ -146,9 +149,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(out.getvalue(),mime='application/zip',filename='stack-project.zip')
             if self.path=='/sample.csv':return self.reply((WEB.parent/'samples/BasisDimNullSpace.csv').read_bytes(),mime='text/csv; charset=utf-8')
             name='index.html' if self.path.split('?')[0]=='/' else self.path.lstrip('/').split('?')[0]
-            assets={'index.html','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
+            assets={'index.html','authoring-settings.js','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
             if name not in assets:return self.reply({'error':'Not found'},404)
             mime='text/html; charset=utf-8' if name.endswith('.html') else ('application/json; charset=utf-8' if name.endswith('.json') else ('text/css' if name.endswith('.css') else 'text/javascript'))
+            if name=='authoring-settings.js':return self.reply((WEB.parents[1]/'mcq-webapp'/name).read_bytes(),mime=mime)
             asset = self.server.web/name if self.server.web and (self.server.web/name).is_file() else WEB/name
             self.reply(asset.read_bytes(),mime=mime)
         except SessionExpired as e:self.reply({'error':str(e),'code':'session_expired'},410)
@@ -167,6 +171,19 @@ class Handler(BaseHTTPRequestHandler):
                 translation.validate(d['messages'],d['messages'])
                 result=translation.translate(d) if self.path=='/api/translation' else translation.validate(d['messages'],d['result'])
                 return self.reply({'result':result})
+            if self.server.truefalse and self.path in ('/api/libraries/validate','/api/variables/evaluate'):
+                session=self.session();d=json.loads(raw)
+                if self.path=='/api/libraries/validate':return self.reply(authoring_settings.validate_base(d))
+                if d.get('revision')!=session['revision']:raise ValueError('Editor view is outdated')
+                fields=d['fields'];validate_fields(fields)
+                from truefalse import validate as validate_tf
+                from prt_nodes import statements,defined,quote
+                model=validate_tf(json.loads(fields['template']),complete=False)
+                code=fields.get('questionvariables','')
+                import re
+                names=list(dict.fromkeys(defined(s) for s in statements(code) if defined(s) and re.fullmatch(r'[%A-Za-z_][%A-Za-z0-9_]*',defined(s))))
+                variables='\n'.join('stack_include('+quote(u)+');' for u in model['includes'])+'\n'+code
+                return self.reply(authoring_settings.evaluate_via_mcq(self.server.preview.base,variables,names))
             with self.server.lock:
                 if self.path=='/api/session':
                     d=json.loads(raw);callback=d.get('callback')

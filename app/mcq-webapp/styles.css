@@ -1419,3 +1419,5 @@ td:nth-child(5) {
 .choice-settings .special-options-settings { flex-direction: row; flex-wrap: nowrap; gap: 10px; min-width: 0; overflow-x: auto; }
 .choice-settings .special-options-checks { flex-wrap: nowrap; gap: 10px; flex-shrink: 0; }
 .choice-settings .special-options-settings .check-row { flex-shrink: 0; white-space: nowrap; font-size: 12px; }
+
+.common-library-base {display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}.common-library-base input {flex:1;min-width:200px;background:#f4f6f8}.library-base-dialog {max-width:650px;width:90%;border:1px solid #abb9c5;border-radius:10px;padding:1.5rem}.library-base-dialog input {display:block;width:100%;margin:.5rem 0}.library-base-dialog button {margin-right:.5rem}

@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>STACK MCQ XML Generator</title>
-    <link rel="stylesheet" href="./styles.css?v=20261103-count-inline">
+    <link rel="stylesheet" href="./styles.css?v=20261108-library-base">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20261102-compact-row"></script>
-    <script defer src="./app.js?v=20261102-definition-order"></script>
+    <script defer src="./i18n.js?v=20261108-library-base"></script>
+    <script defer src="./authoring-settings.js"></script>
+    <script defer src="./app.js?v=20261108-library-base"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
     <script defer src="./file-ui.js?v=20260928-candidates"></script>
     <script defer src="./preview.js?v=20261028-matrix"></script>
@@ -81,6 +82,7 @@
               <div class="row-actions">
               <button id="copyCasButton" type="button" class="ghost icon-copy" aria-label="問題変数をコピー" title="問題変数をコピー"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button></div>
             </div>
+            <div class="common-library-base"><label for="libraryBaseUrl">stack_include Base URL</label><input id="libraryBaseUrl" readonly><button id="changeLibraryBase" type="button">変更</button></div>
             <textarea id="qvars" spellcheck="false" placeholder="aa1:rand([1, 2, 3])"></textarea>
           </div>
 

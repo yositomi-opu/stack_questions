@@ -599,3 +599,13 @@ git diff --check
 - 利用者のc-p依頼により最新mainを基に今回のTF本体・連携・テスト・利用案内だけを公開する。練習サイト等の並行作業・既存HEAD/ステージ状態・実行中の編集セッションは保持。
 
 - Template原本は改行コードCRLFを含めて公開対象へ保持し、原本バイトとの一致を確認する。
+
+
+## TF・MCQの作問UI整理（2026-11-08）
+
+- TFの問題名を横並びに変更。「出題指示」を「問題文」へ変更し、? にCASText/HTML/変数参照の説明を表示。主張欄は番号表示、フィードバックの生成変数名はヘルプへ移動。問題変数欄は常時表示。
+- TFへMCQと同じ共通ライブラリー選択と「評価」「評価結果」を追加。評価は現在のinclude設定とユーザー変数をMCQ評価APIへ渡し、変更後は再評価を案内する。実CASは未検証。
+- TF/MCQで共通stack_include Base URLを読取専用表示。「変更」時だけ必須・選択中の.macをHTTP(S)で確認して保存し、失敗/キャンセルでは設定を保持。取得コードは実行しない。MCQの外部問題変数ファイル用URLとは別設定。MCQはCSV/編集情報/生成XMLに共通URLを保持。既存の追加include URLも保持。
+- 検証: TF unittest 11件、PRT 25件（PYTHONPATH=app/prt-template-webapp）、Parsons 4件成功。scripts/tests/test_authoring_settings.pyは4件で合成HTTPサーバーの取得成功・404・HTML・不正URL・必須ファイルを確認。Nodeのlibrary_includes、csv_schema_v3、csv_cli、editor_metadata成功。JS/Python構文・git diff --check成功。
+- 実Chromium: browser_tf.cjsでTFの追加削除/翻訳/CSV・XML保存往復/日英/狭幅/模擬プレビューを確認。browser_authoring_settings.cjsで両アプリの読取専用URL/確認失敗/保存成功/キャンセル/ライブラリー反映、TFのヘルプ/横並び/模擬評価・変更後再評価を確認。pageerrorなし。ネットワーク確認は合成HTTP、評価・STACK応答は模擬。実Maxima/STACK・Moodle・Mac/Windows実機・外部AIは未確認。
+- 利用者のc-p依頼により、今回のTF/MCQ UI・共通URL確認・評価連携・関連テストと文書だけを最新mainを基にコミット・公開対象とする。既存の並行作業・ステージ状態・HEADを保持する。公開完了はremoteのmainで確認する。
