@@ -609,3 +609,11 @@ git diff --check
 - 検証: TF unittest 11件、PRT 25件（PYTHONPATH=app/prt-template-webapp）、Parsons 4件成功。scripts/tests/test_authoring_settings.pyは4件で合成HTTPサーバーの取得成功・404・HTML・不正URL・必須ファイルを確認。Nodeのlibrary_includes、csv_schema_v3、csv_cli、editor_metadata成功。JS/Python構文・git diff --check成功。
 - 実Chromium: browser_tf.cjsでTFの追加削除/翻訳/CSV・XML保存往復/日英/狭幅/模擬プレビューを確認。browser_authoring_settings.cjsで両アプリの読取専用URL/確認失敗/保存成功/キャンセル/ライブラリー反映、TFのヘルプ/横並び/模擬評価・変更後再評価を確認。pageerrorなし。ネットワーク確認は合成HTTP、評価・STACK応答は模擬。実Maxima/STACK・Moodle・Mac/Windows実機・外部AIは未確認。
 - 利用者のc-p依頼により、今回のTF/MCQ UI・共通URL確認・評価連携・関連テストと文書だけを最新mainを基にコミット・公開対象とする。既存の並行作業・ステージ状態・HEADを保持する。公開完了はremoteのmainで確認する。
+
+
+## TF主張欄の整理（2026-11-08）
+
+- 正しい/正しくない主張を1つの見出しへ統合。各1件以上・出題側からのランダム選択・言語非依存の説明は?のhover/focusヘルプへ移動。
+- 日本語は正1/誤1、英語はT1/F1を表示。各行のX直下の+で同じ種類の主張をその行の直後へ挿入し、後続を採番し直す。各側1件の最小数と100件の上限を保持。挿入後は新しい入力欄へフォーカス。
+- 検証: node --checkとgit diff --check成功、TF unittest 11件成功。実Chromiumのbrowser_assertions.cjsで中間挿入/採番/言語共有データ保持/独立した削除/最小数/日英/狭幅/縦配置/ヘルプを確認。browser_tf.cjsで翻訳とCSV/XML保存再読込、模擬プレビューを確認。pageerrorなし。Moodle・実CAS・Mac/Windows実機の確認は未実施。
+- 前回のc-p指示に沿い、本件UIと関連テスト・利用説明・引き継ぎのみを公開対象とする。既存の並行変更・ステージ状態・HEADを保持。

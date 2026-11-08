@@ -19,7 +19,7 @@ Python 3.10以降を使用します。追加のPythonパッケージは不要で
 ## 作問
 
 1. 問題名と問題変数を入力します。問題変数では `AssertC1` 等の生成用変数を再定義しないでください。
-2. 正しい主張と正しくない主張を追加します。各欄は引用符やcastext()を付けず、CASText本文を入力します。`{@A@}` や数式も使えます。各側1件は残り、上限は各100件です。一対の対応はありません。
+2. 「正しい/正しくない主張」で各欄の X の下にある + を押すと、その直後に同じ種類の欄を追加します。正1・正2、誤1・誤2の順に番号を付け直します。説明は見出しの ? で表示します。各欄は引用符やcastext()を付けず、CASText本文を入力します。`{@A@}` や数式も使えます。各側1件は残り、上限は各100件です。一対の対応はありません。
 3. 「言語依存」をオンにした主張には、選択した各言語の文章を入力します。オフの場合は共通CASTextとして全言語に使用し、翻訳JSONとAI翻訳の対象から除外します。切替前の翻訳データは保持します。
 4. 「問題文」を確認し、正解時と不正解時のフィードバックを言語ごとに編集します。これらは主張の真偽ではなく、学生の回答の正誤に対応します。True/Falseの表示ラベルも編集できます。
 5. 「出題する主張」はランダム／正しい主張のみ／正しくない主張のみを選択できます。XMLでは最初に `%_tf` を1（真）または2（偽）へ設定し、該当側から1つを選びます。`AssertC1, AssertC2, ...` と `AssertW1, AssertW2, ...` を定義し、`qtext:castext_concat(qtext0, ...);` で合成します。
@@ -58,7 +58,7 @@ TFの自動テスト、既存PRT/Parsons/MCQ回帰、実Chromiumでの追加削�
 
 Run `make start` and choose True/False from the common authoring page, or run `make tf-webapp` and open http://127.0.0.1:4178/. Custom managed ports use `TF_WEBAPP_PORT`. Preview requires the separate MCQ webapp and STACK API services.
 
-Maintain at least one true and one false assertion. Add/remove assertions independently. Each assertion can be multilingual or shared CASText; shared assertions are excluded from manual/AI translation. Use the text-language selector to edit the instruction, assertions, answer labels, and correct/incorrect-answer feedback (`msgT`/`msgF`). Random or fixed truth selection sets `%_tf` before selecting from the corresponding pool and combining the assertion with the instruction using `castext_concat`.
+Maintain at least one true and one false assertion. Use + below each row’s X to insert immediately after it; X removes that row. Labels are T1, T2 and F1, F2 in English (正1 and 誤1 in Japanese). Hover or focus the combined heading’s ? for guidance. Each assertion can be multilingual or shared CASText; shared assertions are excluded from manual/AI translation. Use the text-language selector to edit the instruction, assertions, answer labels, and correct/incorrect-answer feedback (`msgT`/`msgF`). Random or fixed truth selection sets `%_tf` before selecting from the corresponding pool and combining the assertion with the instruction using `castext_concat`.
 
 Question variables remain expanded. Select shared libraries with MCQ-style checkboxes. The read-only stack_include Base URL can be changed only after an explicit availability check succeeds; failures and cancellation preserve the previous setting. No fetched code is executed during validation. Evaluate / Evaluation results use the MCQ evaluation service and require its Maxima/STACK setup. Help tooltips explain CASText, HTML, {@a@} and generated feedback variables. Assertion labels use numbers.
 

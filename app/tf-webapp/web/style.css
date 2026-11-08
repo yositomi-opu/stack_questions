@@ -9,3 +9,5 @@
 @media(max-width:700px){.assertion{grid-template-columns:1fr auto}.help-tip{left:auto;right:0}.library-base>span{flex-basis:100%}}
 
 .evaluation-dialog table{border-collapse:collapse;width:100%}.evaluation-dialog th,.evaluation-dialog td{padding:.5rem;text-align:left;border-bottom:1px solid #d6dfe5;white-space:pre-wrap;overflow-wrap:anywhere}.evaluation-dialog td:last-child{font-family:monospace}
+
+.assertions-heading{display:flex;align-items:center;gap:6px;margin-top:25px;border-bottom:1px solid #dae3e6}.assertions-heading h2{margin:0;border:0}.assertions-heading .help-wrap{margin-bottom:6px}.assertion-actions{display:flex;flex-direction:column;gap:5px}.assertion-actions button{min-width:34px}

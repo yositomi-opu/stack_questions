@@ -8,9 +8,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  try{
  await page.goto(base);await page.locator('#form:not([hidden])').waitFor();
  assert.equal(await page.locator('#correct .assertion').count(),1);assert.equal(await page.locator('#wrong .assertion').count(),1);
- assert(await page.locator('#correct button').isDisabled());assert(await page.locator('#wrong button').isDisabled());
+ assert(await page.locator('#correct .assertion-actions button:first-child').isDisabled());assert(await page.locator('#wrong .assertion-actions button:first-child').isDisabled());
  await page.locator('#name').fill('Synthetic TF');await page.locator('#variables').fill('A:42;');
- await page.locator('#addCorrect').click();await page.locator('#correct textarea').nth(1).fill('\\(1+1=2\\)');
+ await page.locator('#correct .assertion-actions button:last-child').first().click();await page.locator('#correct textarea').nth(1).fill('\\(1+1=2\\)');
  await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'正しい主張 2 shared');
  // Keep ja/en active; deselect other translations without deleting their text.
  for(const code of ['fr','it','de','pt','zh','ko','ru','sv'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
@@ -30,8 +30,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await second.route('**/api/stack/preview',route=>route.fulfill({json:{questionrender:'<p>TF synthetic</p><select name="mcqpreview_ans1"><option value="1">True</option><option value="2">False</option></select>',practiceToken:'synthetic-token'}}));
  await second.route('**/api/stack/grade',async route=>{const body=route.request().postDataJSON();assert.equal(body.token,'synthetic-token');assert.equal(body.answers.ans1,'2');await route.fulfill({json:{isgradable:true,score:0,specificfeedback:'Synthetic feedback'}});});
  await second.locator('#previewButton').click();await second.locator('[data-grade]:not([disabled])').waitFor();await second.frameLocator('iframe').locator('select').selectOption('2');await second.locator('[data-grade]').click();await second.frameLocator('iframe').getByText('Synthetic feedback').waitFor();await second.locator('[data-close]').click();
- await second.setViewportSize({width:390,height:844});assert(await second.locator('#addCorrect').isVisible());
- await second.locator('#correct button').nth(1).click();assert.equal(await second.locator('#correct textarea').count(),1);assert(await second.locator('#correct button').isDisabled());
+ await second.setViewportSize({width:390,height:844});assert(await second.locator('#correct .assertion-actions button:last-child').first().isVisible());
+ await second.locator('#correct .assertion-actions button:first-child').nth(1).click();assert.equal(await second.locator('#correct textarea').count(),1);assert(await second.locator('#correct .assertion-actions button:first-child').isDisabled());
  await second.screenshot({path:process.env.TF_SCREENSHOT||'/tmp/tf-authoring.png',fullPage:true});
  await second.close({runBeforeUnload:false});assert.deepEqual(errors,[]);
  console.log('PASS TF browser: pool minimum/add/remove, shared-language exclusion, manual translation, ja/en, real CSV/XML save/reload, user variables, mocked preview/grade transport, narrow layout; no page errors.');
