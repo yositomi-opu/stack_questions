@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>問題作成 / Question authoring</title>
+<style>
+body{font-family:system-ui,sans-serif;color:#19334a;background:#f4f7fa;margin:0}main{max-width:850px;margin:3rem auto;padding:0 1.2rem}h1{font-size:1.8rem}p{line-height:1.7}.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}article{background:white;border:1px solid #cfdae3;border-radius:12px;padding:1.2rem}h2{margin-top:0;font-size:1.15rem}a{color:#075f9a}input{width:6em;font:inherit;padding:.25rem}.open{display:inline-block;margin-bottom:.8rem;font-weight:600}.pending{color:#647684}footer{margin:2rem 0}code{overflow-wrap:anywhere}
+</style>
+</head>
+<body><main>
+<h1>問題作成 / Question authoring</h1>
+<p>作りたい問題の種類を選んでください。各画面は別タブで開きます。<br>Choose a question type. Each editor opens in a new tab.</p>
+<div class="apps">
+<article><h2>MCQ</h2><p>多肢選択（Radio / Checkbox）<br>Multiple-choice questions</p><a class="open" data-app="mcq" href="./" target="_blank" rel="noopener">開く / Open</a><br><label>Port <input data-port="mcq" type="number" required min="1024" max="65535" value="4173"></label></article>
+<article><h2>PRT Template (Tree / Chain)</h2><p>解答変数・判定ノードから作問<br>Answer variables and assessment nodes</p><a class="open" data-app="prt" href="http://127.0.0.1:4175/" target="_blank" rel="noopener">開く / Open</a><br><label>Port <input data-port="prt" type="number" required min="1024" max="65535" value="4175"></label></article>
+<article><h2>Parsons</h2><p>証明の手順を並べ替える問題<br>Arrange proof steps</p><a class="open" data-app="parsons" href="http://127.0.0.1:4177/" target="_blank" rel="noopener">開く / Open</a><br><label>Port <input data-port="parsons" type="number" required min="1024" max="65535" value="4177"></label></article>
+<article><h2>STACK Edit</h2><p>一般のSTACK XML編集<br>General STACK XML editing</p><a class="open" data-app="stack" href="http://127.0.0.1:4176/" target="_blank" rel="noopener">開く / Open</a><br><label>Port <input data-port="stack" type="number" required min="1024" max="65535" value="4176"></label></article>
+<article id="tfApp" hidden><h2>True / False</h2><p>主張の正誤を答える問題<br>Decide whether a statement is true</p><a class="open" data-app="tf" href="http://127.0.0.1:4178/" target="_blank" rel="noopener">開く / Open</a><br><label>Port <input data-port="tf" type="number" required min="1024" max="65535" value="4178"></label></article>
+</div>
+<footer><p>先にリポジトリのルートで <code>make start</code> を実行してください。このページはアプリを起動しません。<br>Run <code>make start</code> from the repository root first. This page does not start services.</p><p>ポートを変更している場合は上の値を合わせてください。設定後のURLをブックマークできます。<br>Adjust ports if you use custom settings, then bookmark this page's URL.</p><p>CLI手順 / CLI guide: <code>scripts/README.batch.md</code></p></footer>
+<script src="authoring.js"></script>
+</main></body></html>

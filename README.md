@@ -22,6 +22,7 @@ Setup starts all four apps:
 | PRT Template WebApp (Tree/Chain) | [http://localhost:4175/](http://localhost:4175/) |
 | Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
 | STACK Edit WebApp (general XML editor) | [http://localhost:4176/](http://localhost:4176/) |
+| Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
 
 Edit MCQs or PRT templates and save CSV/XML. STACK API runs on port 3080 for rendering and grading. Use “Evaluate question variables” in MCQ to check formulas and random variables.
 
@@ -99,3 +100,12 @@ Convert multiple MCQ CSV files without opening the WebApp, then combine XML file
 ## Parsons and qbank save-and-close
 
 The managed apps now include Parsons WebApp at localhost:4177 alongside MCQ:4173, PRT-TR-CH:4175 and general STACK Edit:4176. [Parsons guide](app/parsons-webapp/README.md) covers multilingual proof steps, teacher answers, alternative orders, dependencies and CSV/XML/project saving. When launched by the updated Moodle Qbank, Save and close (including XML Save) returns edits to the bank before closing. Standalone apps keep normal file saving. Conflicts leave the editor open; local XML copies and project/CSV backups remain available. Update both repositories.
+
+
+## Startup guidance
+
+`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit or Parsons there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT` and `PARSONS_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
+
+Terminal messages follow `LC_ALL`, then `LC_MESSAGES`, then `LANG`: Japanese for ja locales, English otherwise. If these are unset, the OS locale is used. This is independent of the saved editor UI language.
+
+On an interactive Mac terminal, one final prompt offers to open the index after all apps start successfully. `y`, `yes` or `はい` runs `open URL`; Enter or `n` leaves the browser closed. Noninteractive/redirected runs, status and stop do not prompt. A browser-open failure leaves the running apps available. Actual Mac operation remains unverified; prompt behavior has automated coverage.

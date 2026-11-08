@@ -2,9 +2,9 @@
 
 開発を再開する場合は、[開発引き継ぎ](../../HANDOFF.md)と[開発ルール](../../AGENTS.md)を確認してください。
 
-リポジトリルートの `make setup`・`make start`・`make restart` は、MCQ（4173）、PRT Template（4175）、STACK Edit（4176）をまとめて起動します。`make stop`・`make status` も3アプリを扱います。再起動前に各画面の作業を保存してください。
+リポジトリルートの `make setup`・`make start`・`make restart` は、MCQ（4173）、PRT Template（4175）、STACK Edit（4176）をまとめて起動します。`make stop`・`make status` も4アプリを扱います。再起動前に各画面の作業を保存してください。
 
-From the repository root, `make setup`, `make start` and `make restart` start MCQ (4173), PRT Template (4175) and STACK Edit (4176). Stop/status manage all three; save editor work before restarting.
+From the repository root, `make setup`, `make start` and `make restart` start MCQ (4173), PRT Template (4175) and STACK Edit (4176). Stop/status manage all four; save editor work before restarting.
 
 CASText版の `001.MCQ_cas-rb.xml` / `001.MCQ_cas-cb.xml` をもとに、CSV または XLSX から MCQ 用 XML を生成するローカル WebApp です。
 
@@ -579,3 +579,21 @@ WebAppを停止し、現在のcloneを共有するようSTACK API・Maximaコン
 「保存して終了（問題バンクへ戻る）」またはXML保存で、編集を問題バンクへ返し、受理後にタブを閉じます。単独起動の保存はファイル出力です。競合時は編集を残し、XMLのローカル退避も可能です。問題バンク側の作業ZIPは別途保存してください。MCQで入力・PRTを変更して返却する場合は最新版のqbankが必要です。
 
 Save and close / XML Save returns edits only for qbank sessions, closing after acceptance. Standalone saving downloads a file. On conflicts the tab remains open and a local XML copy is available. Save the bank project ZIP separately. Update qbank to return MCQ structural edits.
+
+
+## 起動時の案内
+
+`make setup`・`make start`・`make restart` は作問アプリを起動し、最後に共通の [作問アプリ一覧](http://127.0.0.1:4173/authoring.html) のURLを表示します。一覧からMCQ・PRT Tree/Chain・STACK Edit・Parsonsを選べます。`MCQ_WEBAPP_PORT`、`PRT_WEBAPP_PORT`、`STACK_EDIT_PORT`、`PARSONS_WEBAPP_PORT`を変更している場合は、表示されたURLに実際のポートを反映します。起動済みの設定を変更した場合は、各画面の作業を保存してから再起動してください。
+
+ターミナルのメッセージは `LC_ALL` → `LC_MESSAGES` → `LANG` の優先順で選び、日本語は日本語、それ以外は英語で表示します。環境変数が未設定ならOSのロケールを使います。保存済みのアプリ画面言語とは別です。
+
+Macの対話端末では、全アプリの起動成功後に一覧をブラウザーで開くか1回だけ確認します。`y` / `yes` / `はい` で `open URL` を実行し、Enterのみ・`n`では開きません。非対話実行・リダイレクト時、`make status`・`make stop`では確認しません。ブラウザーを開けなくても起動済みアプリはそのまま利用できます。Mac実機での確認は未実施です。
+
+
+## Startup guidance
+
+`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit or Parsons there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT` and `PARSONS_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
+
+Terminal messages follow `LC_ALL`, then `LC_MESSAGES`, then `LANG`: Japanese for ja locales, English otherwise. If these are unset, the OS locale is used. This is independent of the saved editor UI language.
+
+On an interactive Mac terminal, one final prompt offers to open the index after all apps start successfully. `y`, `yes` or `はい` runs `open URL`; Enter or `n` leaves the browser closed. Noninteractive/redirected runs, status and stop do not prompt. A browser-open failure leaves the running apps available. Actual Mac operation remains unverified; prompt behavior has automated coverage.

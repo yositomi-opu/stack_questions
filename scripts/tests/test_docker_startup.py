@@ -86,7 +86,7 @@ class DockerStartupTests(unittest.TestCase):
 
     def test_missing_desktop(self):
         with patch.object(manager, "docker_daemon_probe", return_value=result(1)), patch.object(manager.platform, "system", return_value="Darwin"), patch.object(manager, "macos_docker_desktop_installed", return_value=False), patch.object(manager, "start_macos_docker_desktop") as launch:
-            with self.assertRaisesRegex(manager.ManagerError, "本体が見つかりません"):
+            with self.assertRaisesRegex(manager.ManagerError, manager.console_text("本体が見つかりません", "Docker Desktop was not found")):
                 manager.require_docker_daemon(auto_start=True)
             launch.assert_not_called()
 
@@ -98,12 +98,12 @@ class DockerStartupTests(unittest.TestCase):
 
     def test_launch_failure(self):
         with patch.object(manager.subprocess, "run", return_value=result(1)):
-            with self.assertRaisesRegex(manager.ManagerError, "自動起動できません"):
+            with self.assertRaisesRegex(manager.ManagerError, manager.console_text("自動起動できません", "Could not start Docker Desktop")):
                 manager.start_macos_docker_desktop()
 
     def test_startup_deadline(self):
         with patch.object(manager.subprocess, "run", return_value=result()), patch.object(manager.time, "monotonic", side_effect=[0, 0, 121, 121]), patch.object(manager.time, "sleep"), patch.object(manager, "docker_daemon_probe", return_value=result(1)):
-            with self.assertRaisesRegex(manager.ManagerError, "120秒"):
+            with self.assertRaisesRegex(manager.ManagerError, manager.console_text("120秒", "120 seconds")):
                 manager.start_macos_docker_desktop()
 
     def test_hung_probe_returns_failure(self):
