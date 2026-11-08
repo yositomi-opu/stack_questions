@@ -1,4 +1,6 @@
 import copy
+import csv
+import io
 import importlib.util
 import json
 from pathlib import Path
@@ -32,9 +34,9 @@ class TFTests(unittest.TestCase):
         self.assertIn('%_tf:rand([1, 2]);',v);self.assertIn('%_noidea:false;',v)
         self.assertIn('qtext:castext_concat(qtext0, [rand([AssertC1]), rand([AssertW1])][%_tf]);',v)
         self.assertNotIn('castxt(',v);self.assertIn('castext("다음',v)
-        self.assertEqual(q.findtext('input/type'),'dropdown');self.assertEqual(q.findtext('prt/node/sans'),'[ans1]')
-        self.assertEqual(q.findtext('prt/node/tans'),'ta1');self.assertIn('{@msgT@}',q.findtext('prt/node/truefeedback/text'))
-        self.assertIn('{@msgF@}',q.findtext('prt/node/falsefeedback/text'))
+        self.assertEqual(q.findtext('input/type'),'dropdown');self.assertEqual(q.findall('prt/node')[-1].findtext('sans'),'[ans1]')
+        self.assertEqual(q.findall('prt/node')[-1].findtext('tans'),'ta1');self.assertIn('{@msgT@}',q.findall('prt/node')[-1].findtext('truefeedback/text'))
+        self.assertIn('{@msgF@}',q.findall('prt/node')[-1].findtext('falsefeedback/text'))
     def test_multiple_assertions_shared_and_truth_flags(self):
         m=self.model;m['correct'].append(dict(dependent=False,shared=r'\(1+1=2\)',messages={}))
         m['wrong'].append(copy.deepcopy(m['wrong'][0]))
@@ -63,22 +65,72 @@ class TFTests(unittest.TestCase):
         for value in ['/* TF_USER_BEGIN */\nA:42;','/* TF_GENERATED_BEGIN */\nA:42;\n/* TF_GENERATED_END */']:
             self.fields['questionvariables']=value
             with self.assertRaisesRegex(ValueError,'reserved'):self.generate()
-    def test_required_pools_and_noidea_unsupported(self):
+    def test_required_pools_and_boolean_noidea(self):
         for side in ('correct','wrong'):
             m=copy.deepcopy(self.model);m[side]=[]
             with self.assertRaises(ValueError):tf.validate(m)
-        m=copy.deepcopy(self.model);m['%_noidea']=True
+        m=copy.deepcopy(self.model);m['%_noidea']='true'
         with self.assertRaisesRegex(ValueError,'noidea'):tf.validate(m)
-    def test_noidea_true_csv_draft_roundtrip_and_xml_guard(self):
+    def test_noidea_true_csv_and_xml_roundtrip(self):
         self.model['%_noidea']=True
         self.fields['template']=json.dumps(self.model)
         encoded=csv_codec.dumps(self.source,self.fields)
         self.assertIn(b'%_noidea,true',encoded)
         source,fields=csv_codec.loads(encoded)
         self.assertTrue(json.loads(fields['template'])['%_noidea'])
-        with self.assertRaisesRegex(ValueError,'CSV'):server.runtime.edited(source,fields)
+        output=server.runtime.edited(source,fields)
+        restored=server.runtime.tf_fields(output)
+        self.assertTrue(json.loads(restored['template'])['%_noidea'])
         self.model['%_noidea']=False
         self.assertIn('%_noidea:false;',E.fromstring(self.generate()).findtext('question/questionvariables/text'))
+
+    def test_standard_unanswered_and_noidea_routes(self):
+        for enabled in (False,True):
+            m=copy.deepcopy(self.model);m['%_noidea']=enabled
+            q=E.fromstring(self.generate(m)).find('question');code=q.findtext('questionvariables/text')
+            self.assertIn('%_noidea:'+str(enabled).lower()+';',code)
+            self.assertIn('if k=0 then notanswered else k',code)
+            self.assertIn('if %_noidea then va1:append(va1, [[-1, false, %_noidea_msg]]);',code)
+            self.assertEqual(q.findtext('input/options'),'hideanswer')
+            noidea,grading=q.findall('prt/node')
+            self.assertEqual((noidea.findtext('sans'),noidea.findtext('tans')),('ans1','-1'))
+            self.assertEqual((noidea.findtext('truescore'),noidea.findtext('truenextnode')),('0','-1'))
+            self.assertEqual(noidea.findtext('falsenextnode'),'1')
+            self.assertEqual((grading.findtext('sans'),grading.findtext('tans')),('[ans1]','ta1'))
+            self.assertEqual((grading.findtext('truescore'),grading.findtext('falsescore')),('1','0'))
+    def test_updated_raw_template_import_and_labels(self):
+        model,variables=tf.import_model(E.fromstring(self.source).find('question'))
+        self.assertTrue(model['%_noidea']);self.assertEqual(model['noIdeaLabels']['ja'],'わからない')
+        self.assertNotIn('if %_noidea',variables);self.assertNotIn('%_noidea_msg',variables)
+        self.assertEqual(len(model['correct']),1)
+        model['noIdeaLabels']['ja']='不明 "保留"'
+        fields=dict(self.fields,template=json.dumps(model,ensure_ascii=False))
+        output=server.runtime.edited(self.source,fields)
+        _,loaded=csv_codec.loads(csv_codec.dumps(self.source,fields))
+        self.assertEqual(json.loads(loaded['template'])['noIdeaLabels']['ja'],'不明 "保留"')
+        self.assertEqual(json.loads(server.runtime.tf_fields(output)['template'])['noIdeaLabels']['ja'],'不明 "保留"')
+    def test_legacy_xml_csv_upgrade_preserves_original_and_node_extensions(self):
+        source=(APP/'tests/fixtures/template-legacy.xml').read_bytes()
+        q=E.fromstring(source).find('question');model,variables=tf.import_model(q)
+        self.assertFalse(model['%_noidea']);self.assertEqual(model['noIdeaLabels']['ja'],'わからない')
+        model.pop('noIdeaLabels');model['%_noidea']=True
+        fields=dict(self.fields,template=json.dumps(model),questionvariables=variables)
+        encoded=csv_codec.dumps(source,fields)
+        rows=list(csv.reader(io.StringIO(encoded.decode('utf-8-sig'))));out=io.StringIO(newline='');writer=csv.writer(out)
+        writer.writerows(row for row in rows if row[:3]!=['template','','noIdeaLabels'])
+        original,loaded=csv_codec.loads(out.getvalue().encode());self.assertEqual(original,source)
+        self.assertEqual(json.loads(loaded['template'])['noIdeaLabels']['en'],"I don't know")
+        q.find('prt/node').set('future_attribute','keep');E.SubElement(q.find('prt/node'),'future_field').text='grading extension'
+        output=server.runtime.edited(b'<quiz>'+E.tostring(q)+b'</quiz>',loaded)
+        nodes=E.fromstring(output).findall('question/prt/node')
+        self.assertIsNone(nodes[0].get('future_attribute'));self.assertEqual(nodes[1].get('future_attribute'),'keep')
+        self.assertEqual(nodes[1].findtext('future_field'),'grading extension')
+        self.assertEqual(E.fromstring(output).findtext('question/input/options'),'hideanswer')
+    def test_noidea_label_required_when_enabled_only(self):
+        self.model['noIdeaLabels']['ja']='';self.model['%_noidea']=True
+        with self.assertRaisesRegex(ValueError,'translation'):self.generate()
+        csv_codec.loads(csv_codec.dumps(self.source,dict(self.fields,template=json.dumps(self.model))))
+        self.model['%_noidea']=False;self.generate()
 
     def test_escaping_and_include_urls(self):
         m=self.model;m['correct'][0]['dependent']=False;m['correct'][0]['shared']='" </text> ]]> \\ <img onerror="bad()">'
@@ -137,6 +189,9 @@ class HTTPTests(unittest.TestCase):
         with self.assertRaises(HTTPError):self.call('/api/export',dict(revision='stale',format='xml',fields=fields))
         with self.assertRaises(HTTPError):self.call('/api/session',{},headers={'Origin':'http://example.org'})
         with self.assertRaises(HTTPError):self.call('/api/session',{'callback':'https://example.org/api/editor-return'})
+        with self.call('/api/open',tf.TEMPLATE.read_bytes(),raw=True) as r:updated=json.load(r)
+        self.assertTrue(json.loads(updated['editFields']['template'])['%_noidea'])
+        self.assertEqual(json.loads(updated['editFields']['template'])['noIdeaLabels']['ja'],'わからない')
         for asset in ('/','/authoring-settings.js','/editor.js','/preview.js','/vendor/mathjax-tex-svg-3.2.2.js'):
             with self.call(asset) as r:self.assertEqual(r.status,200)
 

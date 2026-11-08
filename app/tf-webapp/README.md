@@ -24,7 +24,7 @@ Python 3.10以降を使用します。追加のPythonパッケージは不要で
 4. 「問題文」を確認し、正解時と不正解時のフィードバックを言語ごとに編集します。これらは主張の真偽ではなく、学生の回答の正誤に対応します。True/Falseの表示ラベルも編集できます。
 5. 「正解」はランダム／正しい／正しくないを選択できます。XMLでは最初に `%_tf` を1（真）または2（偽）へ設定し、該当側から1つを選びます。`AssertC1, AssertC2, ...` と `AssertW1, AssertW2, ...` を定義し、`qtext:castext_concat(qtext0, ...);` で合成します。
 
-「正解」の右にある「「わからない」を使用」はOn/Offで設定し、CSVに `%_noidea` のtrue/falseとして保存できます（既定値Off）。現在のTemplateは採点未対応のため、OnはCSVの下書きとして保存・再読込し、XML出力・プレビュー時には理由を表示して停止します。Offでは従来どおり生成します。
+「正解」の右にある「「わからない」を使用」はOn/Offで設定します（新規作成時はOff）。CSV・XMLへ `%_noidea` のtrue/falseとして保存し、Onでは値 `-1` の「わからない」を追加します。表示文言は「回答ラベル」で言語ごとに編集でき、翻訳JSON・AI展開にも含まれます。「わからない」は専用PRT分岐で0点です。未回答の「-」はSTACK標準の `notanswered` として扱い、採点対象にしません。`nonotanswered` は使用しません。旧CSV・旧1段PRTのXMLも読み込め、再出力時に新しい構成へ更新します。
 
 ## 多言語とライブラリー
 
@@ -52,7 +52,7 @@ CSV/XMLメニューは読込・表示・保存・上書です。CSVには問題�
 make tf-check
 ```
 
-TFの自動テスト、既存PRT/Parsons/MCQ回帰、実Chromiumでの追加削除・翻訳JSON・CSV/XML保存再読込・日英・狭幅操作を確認しています。プレビュー画面の採点応答は模擬APIで検証しています。実CAS・実Moodleでのインポート／描画／採点、外部AIへの実送信、Mac/Windows実機は未確認です。公開前の追加検証で、原本の改行保持と問題変数中の生成マーカー文字列の往復保持も確認しました。
+TFの自動テスト、既存PRT/Parsons/MCQ回帰、実Chromiumでの追加削除・翻訳JSON・CSV/XML保存再読込・日英・狭幅操作を確認しています。模擬APIの画面試験に加え、一時環境のSTACK API 2026101500＋Maxima-sage 5.45.1でOn/Off・正誤・わからない・未回答を実採点しました。APIソースの検証用設定とlocale補助を使用しており、利用者のDockerイメージや実Moodleでの動作確認とは区別します。実Moodleでのインポート／受験、外部AIへの実送信、Mac/Windows実機は未確認です。公開前の追加検証で、原本の改行保持と問題変数中の生成マーカー文字列の往復保持も確認しました。
 
 ## English
 
@@ -62,8 +62,18 @@ Maintain at least one true and one false assertion. Use + below each row’s X t
 
 Question variables remain expanded. Select shared libraries with MCQ-style checkboxes. The read-only stack_include Base URL can be changed only after an explicit availability check succeeds; failures and cancellation preserve the previous setting. No fetched code is executed during validation. Evaluate / Evaluation results use the MCQ evaluation service and require its Maxima/STACK setup. Help tooltips explain CASText, HTML, {@a@} and generated feedback variables. Assertion labels use numbers.
 
-Include URLs and AI provider settings follow MCQ conventions. AI sends text only on explicit action and validates mathematical/CASText tokens before applying translations. The Use ‘I don’t know’ selector defaults to Off and stores `%_noidea` as true/false in CSV drafts. The current template does not support this answer: On drafts can be saved/reopened as CSV, but XML export and preview require Off until a compatible template is available.
+Include URLs and AI provider settings follow MCQ conventions. AI sends text only on explicit action and validates mathematical/CASText tokens before applying translations. Use ‘I don’t know’ defaults to Off for new questions. Both CSV and XML retain `%_noidea` as true/false; On adds value -1, graded by a dedicated zero-score PRT branch. Edit its localized text under Answer labels; manual/AI translation includes it. The “-” choice uses STACK’s standard notanswered value and remains ungraded; nonotanswered is removed. Legacy CSV and one-node TF XML remain readable and are upgraded when exported.
 
 Save incomplete translations as CSV drafts. XML/preview require complete selected-language assertions, prompts and labels. CSV preserves all language data, flags and original XML; the format is the PRT container with a dedicated TF model, not MCQ CSV. Project ZIP retains original/current XML. Sessions expire after two hours and are not autosaved. The updated Question Manager supports new TF questions and direct reopening via STACK-TF. Save and close, including XML Save, returns complete XML to the bank and closes only after acceptance. Conflicts leave the editor open; CSV/project backups remain available. Update/restart both repositories and save the bank project separately.
 
-Automated tests and real Chromium authoring/save/reload checks pass. Preview transport was checked with mocked STACK responses; actual CAS/Moodle import and grading, external AI calls and Mac/Windows operation remain unverified. The supplied template bytes are retained; generated output corrects its Korean `castxt` typo and uses the shared MCQ language helper. Existing GPL licensing applies.
+Automated tests and Chromium authoring/save/reload checks pass. Live checks with a disposable STACK API 2026101500 and Maxima-sage 5.45.1 confirm correct/incorrect/no-idea scoring and ungraded unanswered responses. The API source test setup uses local configuration and locale helpers; this does not verify the installed Docker image or Moodle. External AI calls and Mac/Windows operation remain unverified. The supplied template bytes are retained; generated output corrects its Korean `castxt` typo and uses the shared MCQ language helper. Existing GPL licensing applies.
+
+## Live API regression (optional)
+
+Use a disposable local STACK API and synthetic sample questions:
+
+```sh
+python3 app/tf-webapp/tests/check_stack_api.py --api-url http://127.0.0.1:3080
+```
+
+This opt-in check renders and grades On/Off questions in Japanese/English, covering correct, incorrect, no-idea and unanswered responses. It requires the local API/Maxima environment and does not install Moodle or prove Moodle/browser operation.

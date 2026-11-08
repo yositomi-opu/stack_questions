@@ -63,6 +63,13 @@ class StackPreviewTests(unittest.TestCase):
             self.assertEqual(args[2]['questionDefinition'], definition)
             self.assertEqual(args[2]['answers'], {'ans1_1': 'true'})
 
+    def test_unanswered_null_assets_remains_ungradable(self):
+        payload={'questionDefinition':question('a:1;'),'seed':1,'lang':'ja','url':server.ACTIVE_STACK_API_URL,'answers':{'ans1':''}}
+        with patch.object(server,'request_stack_api',return_value=(server.ACTIVE_STACK_API_URL,{'isgradable':False,'gradingassets':None})):
+            response=server.preview_stack_question(payload,True)
+        self.assertTrue(response['ok']);self.assertFalse(response['result']['isgradable'])
+        self.assertEqual(response['result']['previewassets'],{})
+
     def test_invalid_requests_fail_before_api_call(self):
         for extra in [{'seed': 0}, {'seed': True}, {'seed': 1.5}, {'lang': 'invalid'}, {'questionDefinition': '<bad'}]:
             with self.subTest(extra=extra), patch.object(server, 'request_stack_api') as api:

@@ -634,3 +634,15 @@ git diff --check
 - %_noideaはUIでbooleanへ設定しCSVでtrue/falseを保持（既定false）。Onの下書きもCSV保存・再読込可能。現Templateの未対応は維持し、OnでのXML出力・プレビュー・問題バンク返却では理由を表示して停止する。Offでは既存動作を維持。完全検証とCSV下書き検証を分離し、未対応の採点選択肢を生成しない。
 - TF unittestは12件成功（On下書きのCSV往復とXML拒否を追加）。実Chromium browser_toolbar.cjsでタイトル/操作群/空白縮小/日英/選択肢順/右側配置/OnのCSV保存再読込/新規時Off/Onプレビュー拒否/狭幅の横はみ出しなしを確認。browser_tf.cjsとbrowser_assertions.cjsも成功。スクリーンショットでデスクトップ配置を目視確認。JS/Python構文とgit diff --check成功。
 - 採点確認の追補: 実APIで正主張は正しい回答1点/正しくない回答0点、誤主張は逆の0点/1点を確認。原本と採点ロジックは維持。前節の色拡張と本節の上部UI・下書き設定・関連テスト/文書を合わせて今回のc-p対象とする。既存の並行作業を保持。
+
+
+## TF noidea対応Templateへの更新（2026-11-08 JST）
+
+- 新提供Templateを原本バイトのままtemplate.xmlへ保存（SHA-256: 9a9b58c30771c753494085d328a93f7c3543353e691d0e36c2eb679fa39d7479）。旧原本は回帰用fixturesへ保持。新規作成の既定Offは従来指定を維持し、原本XMLを直接開いた場合は原本のtrueを保持。
+- %_noideaのOn/OffをCSV/XML/プレビューに反映。未回答はnotanswered、noideaは-1、通常回答は1/2。input/optionsはhideanswerのみでnonotansweredを使わない。新Templateの2段PRT（noidea判定→通常正誤判定）を採用し、msgT/msgFを後段へ設定。
+- noIdeaLabelsを言語別に保存・回答ラベルで編集し、翻訳JSON/AI対象へ追加。旧モデル・CSVの欠けたラベルを互換補完。旧1段PRTのXML/CSVとOnの旧下書きを読込・更新できる。元XMLを保持し、旧採点ノードの未知フィールド/属性は新しい採点ノードへ対応させて保持する。
+- 実ブラウザーで未回答のAPI応答gradingassets:nullがMCQブリッジで.items例外を起こすことを再現し、空のアセット情報として扱う修正と回帰テストを追加。未回答は通常の採点対象外案内になる。
+- 検証: TF unittest16、PRT25、Parsons4、test_stack_preview.py8、test_preview_ui.cjs成功。Question Managerのtest_tf_bridge.py3件はSTACK_QUESTIONS_ROOTを今回の候補へ向け、合成バンクだけで新規/返却/再編集/undo/競合拒否/未知データ保持を確認。既存バンク・Moodle・コースは操作していない。
+- 実Chromiumのbrowser_tf.cjs/browser_toolbar.cjs/browser_assertions.cjs成功。OnのCSV/XML往復、ラベル編集・翻訳、狭幅、模擬プレビュー採点を確認。さらに使い捨てSTACK API2026101500（ソース1b4e42d、検証用設定/locale補助）＋Maxima-sage5.45.1/ECLでcheck_stack_api.pyを実行し、On正主張jaとOff誤主張enの正答1/誤答0/noidea0/未回答isgradable:falseを確認。実アプリ画面でもOnの未回答案内/noideaの専用prt1-1-T分岐0点/正答1点、pageerrorなしを確認。
+- Templateどおりnoidea分岐のpenalty欄は空欄。実APIは既定penalty0.1を返す。配点/penaltyの意味は独自変更しない。原本完全一致、Python/JS構文、git -c core.whitespace=cr-at-eol diff --check成功。提供原本のCRLFを保持するためcr-at-eolを指定。利用者Dockerイメージ・実Moodle受験・Mac/Windows実機・外部AI送信は未確認。
+- 前回までのc-p指定に沿い、今回のTF対応と未回答ブリッジ修正、関連テスト/原本/文書だけを公開対象とする。並行作業・ステージ状態・ローカルHEADは保持する。

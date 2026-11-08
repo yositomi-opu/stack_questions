@@ -13,6 +13,7 @@ END='/* TF_GENERATED_END */'
 USER_BEGIN='/* TF_USER_BEGIN */'
 USER_END='/* TF_USER_END */'
 LANGUAGES=['ja','en','fr','it','de','pt','zh','ko','ru','sv','es']
+NO_IDEA_LABELS={'en':"I don't know",'ja':'わからない','fr':'Je ne sais pas','it':'Non lo so','de':'Ich weiß es nicht','pt':'Não sei','zh':'不知道','ko':'모르겠습니다','ru':'Не знаю','sv':'Jag vet inte','es':'No lo sé'}
 
 
 def clean(s):
@@ -30,7 +31,10 @@ def validate(m,complete=True):
     langs=m.get('languages')
     if not isinstance(langs,list) or not 1<=len(langs)<=20 or any(not isinstance(x,str) or not re.fullmatch(r'[a-z]{2,3}(?:-[A-Za-z0-9]+)*',x) for x in langs) or len(set(langs))!=len(langs) or m.get('baseLanguage') not in langs:raise ValueError('Invalid languages / 言語の設定を確認してください。')
     if type(m.get('%_noidea')) is not bool:raise ValueError('%_noidea must be boolean')
-    if complete and m['%_noidea']:raise ValueError('This template does not support %_noidea:true; use Off for XML/preview or save a CSV draft / このTemplateは「わからない」に未対応です。XML出力・プレビューにはOffにするか、CSVの下書きで保存してください。')
+    if 'noIdeaLabels' not in m:m['noIdeaLabels']={k:NO_IDEA_LABELS.get(k,NO_IDEA_LABELS['en']) for k in dict.fromkeys(LANGUAGES+langs)}
+    noidea=m['noIdeaLabels']
+    textmap(noidea,langs,nonempty=complete and m['%_noidea'])
+    if any(len(v)>200 for v in noidea.values()):raise ValueError('No-idea label is too long / 「わからない」の表示は200文字以内です。')
     if m.get('truth') not in ('random','true','false'):raise ValueError('Invalid truth selection')
     for side in ('correct','wrong'):
         rows=m.get(side)
@@ -54,13 +58,18 @@ def validate(m,complete=True):
 
 def import_model(q):
     code=q.findtext('questionvariables/text','')
-    if len(q.findall('input'))!=1 or q.findtext('input/type')!='dropdown' or q.findtext('input/tans')!='va1' or len(q.findall('prt'))!=1 or len(q.findall('prt/node'))!=1 or q.findtext('prt/node/sans')!='[ans1]' or q.findtext('prt/node/tans')!='ta1' or q.findtext('prt/node/answertest')!='AlgEquiv':raise ValueError('Not a supported TF template / 対応するTF Templateではありません。')
+    nodes=q.findall('prt/node')
+    signatures=[(n.findtext('sans'),n.findtext('tans'),n.findtext('answertest')) for n in nodes]
+    legacy=[('[ans1]','ta1','AlgEquiv')]
+    modern=[('ans1','-1','AlgEquiv')]+legacy
+    if len(q.findall('input'))!=1 or q.findtext('input/type')!='dropdown' or q.findtext('input/tans')!='va1' or len(q.findall('prt'))!=1 or signatures not in (legacy,modern):raise ValueError('Not a supported TF template / 対応するTF Templateではありません。')
     defs={};includes=[];extra=[]
-    managed={'%_tf','%_tfmsgL','va1','qtext0','qtext','ta1','msgT','msgF','%_noidea'}
+    managed={'%_tf','%_tfmsgL','va1','qtext0','qtext','ta1','msgT','msgF','%_noidea','%_noidea_msg'}
     for raw in statements(code):
         s=clean(raw)
         inc=re.fullmatch(r'stack_include\(\s*("(?:\\.|[^"\\])*")\s*\)\s*[;$]',s)
         if inc:includes.append(as_string(inc[1]));continue
+        if re.sub(r'\s+','',s)=='if%_noideathenva1:append(va1,[[-1,false,%_noidea_msg]]);':continue
         name=defined(s)
         if name in managed or re.fullmatch(r'Assert[CW][1-9][0-9]*',name or ''):
             if name in defs:raise ValueError('Duplicate TF variable: '+name)
@@ -81,6 +90,12 @@ def import_model(q):
     if not expr.startswith('%__lang(') or not expr.endswith(')'):raise ValueError('Unsupported TF labels')
     for row in split_list(expr[len('%__lang('):-1]):
         key,value=split_list(row);model['labels'][as_string(key)]=[as_string(x) for x in split_list(value)]
+    if '%_noidea_msg' in defs:
+        expr=defs['%_noidea_msg']
+        if not expr.startswith('%__lang(') or not expr.endswith(')'):raise ValueError('Unsupported no-idea labels')
+        model['noIdeaLabels']={}
+        for row in split_list(expr[len('%__lang('):-1]):
+            key,value=split_list(row);model['noIdeaLabels'][as_string(key)]=as_string(value)
     for side,prefix in [('correct','AssertC'),('wrong','AssertW')]:
         names=sorted((n for n in defs if n.startswith(prefix)),key=lambda n:int(n[len(prefix):]))
         if names!=[prefix+str(i) for i in range(1,len(names)+1)]:raise ValueError('Assertion numbers must be contiguous')
@@ -99,7 +114,7 @@ def import_model(q):
 
 
 def sample():
-    root=E.fromstring(TEMPLATE.read_bytes());return import_model(root.find('question'))
+    root=E.fromstring(TEMPLATE.read_bytes());model,variables=import_model(root.find('question'));model['%_noidea']=False;return model,variables
 
 
 def base_variables(code):
@@ -127,13 +142,14 @@ def generated_variables(code,m):
         if not template_metadata(code):raise ValueError('TF generated markers are reserved / TF生成用コメントは予約されています。')
     base=base_variables(code)
     if any(base[a:b] in (BEGIN,END,USER_BEGIN,USER_END) for a,b in comment_spans(base)):raise ValueError('TF generated markers are reserved / TF生成用コメントは予約されています。')
-    reserved={'%_tf','%_tfmsgL','%_noidea','va1','qtext0','qtext','ta1','msgT','msgF','%__mcq_lang','%__prt_get'}
+    reserved={'%_tf','%_tfmsgL','%_noidea','va1','qtext0','qtext','ta1','msgT','msgF','%_noidea_msg','%__mcq_lang','%__prt_get'}
     if any(defined(s) in reserved or re.fullmatch(r'Assert[CW]\d+',defined(s) or '') for s in statements(base)):raise ValueError('TF variable name conflict / 問題変数にTF予約変数が重複しています。')
     lines=[BEGIN]+['stack_include('+quote(url)+');' for url in m['includes']]+[HELPERS]
-    lines+=['%_tf:'+{'random':'rand([1, 2])','true':'1','false':'2'}[m['truth']]+';', '%_noidea:false;']
+    lines+=['%_tf:'+{'random':'rand([1, 2])','true':'1','false':'2'}[m['truth']]+';', '%_noidea:'+str(m['%_noidea']).lower()+';']
     lines += [USER_BEGIN,base,USER_END]
     langs=m['languages'];labels={k:m['labels'][k] for k in langs}
-    lines+=['%_tfmsgL:%__mcq_lang(['+', '.join('['+quote(k)+', ['+', '.join(quote(t) for t in labels[k])+']]' for k in langs)+'], %_STACK_LANG);','va1:makelist([k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);']
+    lines+=['%_tfmsgL:%__mcq_lang(['+', '.join('['+quote(k)+', ['+', '.join(quote(t) for t in labels[k])+']]' for k in langs)+'], %_STACK_LANG);','va1:makelist([if k=0 then notanswered else k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);']
+    lines+=['%_noidea_msg:%__mcq_lang(['+', '.join('['+quote(k)+', '+quote(m['noIdeaLabels'].get(k,''))+']' for k in langs)+'], %_STACK_LANG);','if %_noidea then va1:append(va1, [[-1, false, %_noidea_msg]]);']
     for key in ('prompt',):lines.append('qtext0:'+msg_expr({k:m[key][k] for k in langs})+';')
     for side,prefix in [('correct','AssertC'),('wrong','AssertW')]:
         for i,row in enumerate(m[side],1):lines.append(prefix+str(i)+':'+(msg_expr({k:row['messages'][k] for k in langs}) if row['dependent'] else 'castext('+quote(row['shared'])+')')+';')
@@ -153,7 +169,7 @@ def layout(m):
 def compile_tf(m):
     validate(m);q=E.fromstring(TEMPLATE.read_bytes()).find('question');sections=E.Element('sections')
     for tag in ('input','prt'):sections.append(copy.deepcopy(q.find(tag)))
-    node=sections.find('prt/node')
+    node=sections.findall('prt/node')[-1]
     for key,var in [('truefeedback','msgT'),('falsefeedback','msgF')]:node.find(key+'/text').text='<p>{@'+var+'@}</p>'
     sections.append(E.Comment('qbank-template:'+json.dumps(m,ensure_ascii=True).replace('--','\\u002d\\u002d')))
     return sections

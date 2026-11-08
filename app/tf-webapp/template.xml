@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <quiz>
-<!-- question: 130747  -->
+<!-- question: 130755  -->
   <question type="stack">
     <name>
-      <text>002.TF_template</text>
+      <text>002.TF_template_noidea</text>
     </name>
     <questiontext format="moodle_auto_format">
       <text><![CDATA[<p>[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]<br></p>
@@ -24,13 +24,19 @@
       <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/ky_linear_algebra.mac");
 stack_include("https://yositomi-opu.github.io/stack_questions/multilang_library.mac");
 %_tf:rand([1, 2]);/* 1: true, 2:false */
+%_noidea:true; /* use no idea option */
 %_tfmsgL:%__lang([["en", ["True", "False"]], ["ja", ["正しい", "正しくない"]],
 ["fr", ["Vrai", "Faux"]], ["it", ["Vero", "Falso"]],
 ["de", ["Richtig", "Falsch"]], ["pt", ["Verdadeiro", "Falso"]],
 ["zh", ["正确", "错误"]], ["ko", ["옳다", "옳지 않다"]],
 ["ru", ["Верно", "Неверно"]], ["sv", ["Sant", "Falskt"]]]);
 
-va1:makelist([k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);
+%_noidea_msg:%__lang([["en", "I don't know"], ["ja", "わからない"], ["fr", "Je ne sais pas"],
+["it", "Non lo so"], ["de", "Ich weiß es nicht"], ["pt", "Não sei"],
+["zh", "不知道"], ["ko", "모르겠습니다"], ["ru", "Не знаю"], ["sv", "Jag vet inte"]]);
+
+va1:makelist([if k=0 then notanswered else k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);
+if %_noidea then va1:append(va1, [[-1, false, %_noidea_msg]]);
 
 qtext0:%__lang([["en", castext("Determine whether the following statement is true.<br>")],
  ["ja", castext("次の主張は正しいか, 答えよ.<br>")],
@@ -86,6 +92,7 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
 ["ru", castext("Неверно. Похоже, вы пока ещё не вполне понимаете определения линейной независимости и линейной зависимости. Давайте рассмотрим это на примере.")],
 ["sv", castext("Det är inte rätt. Det verkar som att du ännu inte riktigt har förstått definitionerna av linjärt oberoende och linjärt beroende. Låt oss tänka igenom det med hjälp av ett exempel.")]]);
 
+
 ]]></text>
     </questionvariables>
     <specificfeedback format="html">
@@ -101,19 +108,13 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
     <assumepositive>0</assumepositive>
     <assumereal>0</assumereal>
     <prtcorrect format="html">
-      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span> 
-<span lang="ja" class="multilang">よくできました。正解です！</span>
-<span lang="en" class="multilang">Well done! Spot on!</span>]]></text>
+      <text></text>
     </prtcorrect>
     <prtpartiallycorrect format="html">
-      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
-<span lang="ja" class="multilang">部分的に正解です。</span>
-<span lang="en" class="multilang">Partially correct!</span>]]></text>
+      <text></text>
     </prtpartiallycorrect>
     <prtincorrect format="html">
-      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
-<span lang="ja" class="multilang">間違いです。</span>
-<span lang="en" class="multilang">Incorrect!</span>]]></text>
+      <text></text>
     </prtincorrect>
     <decimals>.</decimals>
     <scientificnotation>*10</scientificnotation>
@@ -141,7 +142,7 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
       <checkanswertype>0</checkanswertype>
       <mustverify>0</mustverify>
       <showvalidation>0</showvalidation>
-      <options>nonotanswered,hideanswer</options>
+      <options>hideanswer</options>
     </input>
     <prt>
       <name>prt1</name>
@@ -153,6 +154,32 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
       </feedbackvariables>
       <node>
         <name>0</name>
+        <description>The no-idea option is chosen?</description>
+        <answertest>AlgEquiv</answertest>
+        <sans>ans1</sans>
+        <tans>-1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>+</truescoremode>
+        <truescore>0</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
+<p>The 'no idea' option is chosen.</p>]]></text>
+        </truefeedback>
+        <falsescoremode>-</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text></text>
+        </falsefeedback>
+      </node>
+      <node>
+        <name>1</name>
         <description></description>
         <answertest>AlgEquiv</answertest>
         <sans>[ans1]</sans>
@@ -163,7 +190,7 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
         <truescore>1</truescore>
         <truepenalty></truepenalty>
         <truenextnode>-1</truenextnode>
-        <trueanswernote>prt1-1-T</trueanswernote>
+        <trueanswernote>prt1-2-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
 <p>{@msgT@}</p>]]></text>
@@ -172,7 +199,7 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
         <falsescore>0</falsescore>
         <falsepenalty></falsepenalty>
         <falsenextnode>-1</falsenextnode>
-        <falseanswernote>prt1-1-F</falseanswernote>
+        <falseanswernote>prt1-2-F</falseanswernote>
         <falsefeedback format="html">
           <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
 <p>{@msgF@}</p>]]></text>

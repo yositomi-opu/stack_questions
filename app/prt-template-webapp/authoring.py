@@ -110,7 +110,13 @@ def apply_template(element, text, backup=False):
                 for removed in old.findall('node')[len(new.findall('node')):]:
                     if removed.attrib or any(c.tag not in allowed for c in removed):
                         raise ValueError('Removed PRT node contains unsupported data; use general STACK editing')
-            for previous, current in zip(old.findall('node'), new.findall('node')):
+            previous_nodes=old.findall('node')
+            pairs=zip(previous_nodes,new.findall('node'))
+            if model.get('mode')=='truefalse':
+                signature=lambda n:(n.findtext('sans'),n.findtext('tans'),n.findtext('answertest'))
+                by_signature={signature(n):n for n in previous_nodes}
+                pairs=((by_signature[signature(n)],n) for n in new.findall('node') if signature(n) in by_signature)
+            for previous, current in pairs:
                 current.attrib.update(previous.attrib)
                 known_node = {c.tag for c in current}
                 for child in previous:

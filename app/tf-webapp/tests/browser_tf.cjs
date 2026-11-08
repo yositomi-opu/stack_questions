@@ -18,8 +18,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.locator('#translationRequest').click();let source=JSON.parse(await page.locator('#translationJSON').inputValue());
  assert(source.messages['correct:0']);assert(!source.messages['correct:1']);assert(source.messages.msgT&&source.messages.msgF);
  source.translations={en:Object.fromEntries(Object.entries(source.messages).map(([k,v])=>[k,{true:v.true,false:''}]))};
- source.translations.en.msgT.true='Correct, synthetic.';await page.locator('#translationJSON').fill(JSON.stringify(source));await page.locator('#translationApply').click();
- await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
+ source.translations.en.noIdeaLabel.true='No idea, synthetic.';source.translations.en.msgT.true='Correct, synthetic.';await page.locator('#translationJSON').fill(JSON.stringify(source));await page.locator('#translationApply').click();
+ await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.');assert.equal(await page.locator('#labelNoIdea').inputValue(),'No idea, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
  // Export CSV via real UI, reimport into an independent editor page.
  await page.locator('#uiLanguage').selectOption('en');
  const csvMenu=page.locator('#menus details').filter({has:page.locator('summary', {hasText:'CSV'})});await csvMenu.locator('summary').click();

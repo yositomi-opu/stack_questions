@@ -920,7 +920,7 @@ def preview_stack_question(payload: dict[str, Any], grading: bool = False) -> di
         result["previewDefinition"] = definition
     # Bundle plots through the server, so remote workshop browsers never need
     # direct access to the Docker-only API port.
-    assets = result.get("gradingassets" if grading else "questionassets", {})
+    assets = result.get("gradingassets" if grading else "questionassets") or {}
     result["previewassets"] = {}
     asset_bytes = 0
     for name, filename in assets.items():

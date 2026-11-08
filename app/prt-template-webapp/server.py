@@ -130,6 +130,10 @@ class Handler(BaseHTTPRequestHandler):
         if not s or time.monotonic()-s['created']>7200:raise SessionExpired('Editor session expired; reopen from qbank or start a new sample / 編集セッションが失効しました。問題バンクから開き直すか、新規サンプルで開始してください。')
         return s
     def detail(self,s):
+        if self.server.truefalse and s['fields'].get('template'):
+            from truefalse import validate as validate_tf
+            model=validate_tf(json.loads(s['fields']['template']),complete=False)
+            s['fields']['template']=json.dumps(model,ensure_ascii=False)
         return dict(id='q:1',version=0,revision=s['revision'],editFields=s['fields'],name=s['fields'].get('name','New STACK'),callbackOrigin=s.get('callbackOrigin'),token=s.get('token'),editorMode='general' if self.server.general else 'template',report=s.get('report',[]))
     def do_GET(self):
         if not self.valid():return self.reply({'error':'Invalid host'},403)

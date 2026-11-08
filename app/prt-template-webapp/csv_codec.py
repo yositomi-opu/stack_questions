@@ -59,7 +59,7 @@ def loads(raw):
     if 'version' in model:model['version']=int(model['version'])
     if model.get('mode')=='truefalse':
         from truefalse import validate as validate_tf
-        for key in ('languages','correct','wrong','prompt','msgT','msgF','labels','includes'):
+        for key in ('languages','correct','wrong','prompt','msgT','msgF','labels','includes','noIdeaLabels'):
             if key in model:model[key]=json.loads(model[key])
         if model.get('%_noidea') not in ('true','false'):raise ValueError('Invalid %_noidea CSV flag')
         model['%_noidea']=model['%_noidea']=='true'
