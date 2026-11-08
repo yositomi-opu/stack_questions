@@ -149,7 +149,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(out.getvalue(),mime='application/zip',filename='stack-project.zip')
             if self.path=='/sample.csv':return self.reply((WEB.parent/'samples/BasisDimNullSpace.csv').read_bytes(),mime='text/csv; charset=utf-8')
             name='index.html' if self.path.split('?')[0]=='/' else self.path.lstrip('/').split('?')[0]
-            assets={'index.html','authoring-settings.js','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js'}
+            assets={'index.html','authoring-settings.js','host.js','editor.js','files.js','preview.js','style.css','skills.js','skills.json','vendor/mathjax-tex-svg-3.2.2.js','vendor/mathjax-boldsymbol-3.2.2.js','vendor/mathjax-color-3.2.2.js'}
             if name not in assets:return self.reply({'error':'Not found'},404)
             mime='text/html; charset=utf-8' if name.endswith('.html') else ('application/json; charset=utf-8' if name.endswith('.json') else ('text/css' if name.endswith('.css') else 'text/javascript'))
             if name=='authoring-settings.js':return self.reply((WEB.parents[1]/'mcq-webapp'/name).read_bytes(),mime=mime)

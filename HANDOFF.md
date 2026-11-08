@@ -617,3 +617,20 @@ git diff --check
 - 日本語は正1/誤1、英語はT1/F1を表示。各行のX直下の+で同じ種類の主張をその行の直後へ挿入し、後続を採番し直す。各側1件の最小数と100件の上限を保持。挿入後は新しい入力欄へフォーカス。
 - 検証: node --checkとgit diff --check成功、TF unittest 11件成功。実Chromiumのbrowser_assertions.cjsで中間挿入/採番/言語共有データ保持/独立した削除/最小数/日英/狭幅/縦配置/ヘルプを確認。browser_tf.cjsで翻訳とCSV/XML保存再読込、模擬プレビューを確認。pageerrorなし。Moodle・実CAS・Mac/Windows実機の確認は未実施。
 - 前回のc-p指示に沿い、本件UIと関連テスト・利用説明・引き継ぎのみを公開対象とする。既存の並行変更・ステージ状態・HEADを保持。
+
+
+## TFプレビュー確認とMathJax色表示（2026-11-08）
+
+- 正誤判定は元Templateと生成XMLの%_tf/va1/ta1/配点を比較し、同じ対応を確認。利用者から再確認では正常との報告あり。採点ロジック・提供Template原本は変更していない。
+- 実STACK APIソース2026101500（maths/moodle-qtype_stack 1b4e42d）とMaxima-sage 5.45.1/ECLを一時ディレクトリーで使用し、サンプルの誤主張に「正しくない」で100%、逆で0%をAPIとTF実ブラウザーで確認。正主張も固定指定で照合。システムへインストールせず、既存Moodle・問題データは操作していない。検証用API設定と日本語/英語のlocale関数補助を一時コピーで使用。利用者のDockerイメージでの試験やMoodle本体での試験とは区別する。
+- MathJaxのcolor拡張が未同梱で、採点フィードバックのcolor指定が存在しない自動読込先へ向かっていた。公式mathjax@3.2.2のcolor.jsをApache 2.0の既存ライセンスとともに同梱し、TF/PRT等の共有プレビューとMCQプレビューでローカル読込先を明示。共有HTTPサーバーの許可アセットに追加。TFの評価・プレビューを青いprimaryボタンへ変更。
+- 検証: TF11、PRT25、Parsons4、test_stack_preview.py 7件、test_preview_ui.cjs成功。実Chromium browser_tf.cjsで青色、color数式のSVG化・merrorなし・vendor 404なし、CSV/XML往復・模擬プレビュー採点、browser_assertions.cjsで主張編集を確認。実APIの誤答フィードバックも赤色/下線のSVGが1件、merror 0件。JS/Python構文・git diff --check成功。
+- 公開対象は色拡張・読込設定・TFボタン・対応テスト・出典案内・本メモのみ。前回までのc-p指定に従う。既存HEAD・ステージ状態・並行作業を保持。実Moodle、利用者のAPIイメージ、Mac/Windows実機は未確認。
+
+
+## TF上部UIと「わからない」の下書き設定（2026-11-08）
+
+- タイトルをTrue/False Question Editorへ変更し、新規→CSV→XML等を左の同じ操作グループへ配置。空のステータス欄を非表示にして問題名上の余白を縮小。編集言語・正解（ランダム/正しい/正しくない）へ短縮し、右に「わからない」を使用のOff/Onを配置。
+- %_noideaはUIでbooleanへ設定しCSVでtrue/falseを保持（既定false）。Onの下書きもCSV保存・再読込可能。現Templateの未対応は維持し、OnでのXML出力・プレビュー・問題バンク返却では理由を表示して停止する。Offでは既存動作を維持。完全検証とCSV下書き検証を分離し、未対応の採点選択肢を生成しない。
+- TF unittestは12件成功（On下書きのCSV往復とXML拒否を追加）。実Chromium browser_toolbar.cjsでタイトル/操作群/空白縮小/日英/選択肢順/右側配置/OnのCSV保存再読込/新規時Off/Onプレビュー拒否/狭幅の横はみ出しなしを確認。browser_tf.cjsとbrowser_assertions.cjsも成功。スクリーンショットでデスクトップ配置を目視確認。JS/Python構文とgit diff --check成功。
+- 採点確認の追補: 実APIで正主張は正しい回答1点/正しくない回答0点、誤主張は逆の0点/1点を確認。原本と採点ロジックは維持。前節の色拡張と本節の上部UI・下書き設定・関連テスト/文書を合わせて今回のc-p対象とする。既存の並行作業を保持。

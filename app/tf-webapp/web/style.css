@@ -11,3 +11,8 @@
 .evaluation-dialog table{border-collapse:collapse;width:100%}.evaluation-dialog th,.evaluation-dialog td{padding:.5rem;text-align:left;border-bottom:1px solid #d6dfe5;white-space:pre-wrap;overflow-wrap:anywhere}.evaluation-dialog td:last-child{font-family:monospace}
 
 .assertions-heading{display:flex;align-items:center;gap:6px;margin-top:25px;border-bottom:1px solid #dae3e6}.assertions-heading h2{margin:0;border:0}.assertions-heading .help-wrap{margin-bottom:6px}.assertion-actions{display:flex;flex-direction:column;gap:5px}.assertion-actions button{min-width:34px}
+
+.primary{background:#1a73e8;border-color:#1a73e8;color:#fff;font-weight:700}.primary:hover{background:#1558b0;border-color:#1558b0}
+
+header .header-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}header .header-actions nav{flex:none;gap:6px}main{margin-top:12px}#status:empty{display:none}.top-fields{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.top-fields>label{margin-top:0;margin-bottom:8px}.top-fields>.name-field{flex:1 1 280px}.top-fields>.compact-field{flex:0 0 auto}.compact-field>span{white-space:nowrap}.compact-field select{display:block}header>strong{white-space:nowrap}@media(max-width:700px){.top-fields>.name-field{flex-basis:100%}header .header-actions{order:2;flex-basis:100%}header .header-actions nav{flex-wrap:wrap}.top-fields>.compact-field{flex:0 1 auto}}
+.top-fields>.compact-field{display:flex;align-items:center;gap:6px}.compact-field>span{margin-bottom:0}

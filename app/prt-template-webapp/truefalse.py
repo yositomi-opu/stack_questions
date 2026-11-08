@@ -30,7 +30,7 @@ def validate(m,complete=True):
     langs=m.get('languages')
     if not isinstance(langs,list) or not 1<=len(langs)<=20 or any(not isinstance(x,str) or not re.fullmatch(r'[a-z]{2,3}(?:-[A-Za-z0-9]+)*',x) for x in langs) or len(set(langs))!=len(langs) or m.get('baseLanguage') not in langs:raise ValueError('Invalid languages / 言語の設定を確認してください。')
     if type(m.get('%_noidea')) is not bool:raise ValueError('%_noidea must be boolean')
-    if m['%_noidea']:raise ValueError('This template does not support %_noidea:true / このTemplateは「わからない」に未対応です。')
+    if complete and m['%_noidea']:raise ValueError('This template does not support %_noidea:true; use Off for XML/preview or save a CSV draft / このTemplateは「わからない」に未対応です。XML出力・プレビューにはOffにするか、CSVの下書きで保存してください。')
     if m.get('truth') not in ('random','true','false'):raise ValueError('Invalid truth selection')
     for side in ('correct','wrong'):
         rows=m.get(side)

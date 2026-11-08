@@ -22,9 +22,9 @@ Python 3.10以降を使用します。追加のPythonパッケージは不要で
 2. 「正しい/正しくない主張」で各欄の X の下にある + を押すと、その直後に同じ種類の欄を追加します。正1・正2、誤1・誤2の順に番号を付け直します。説明は見出しの ? で表示します。各欄は引用符やcastext()を付けず、CASText本文を入力します。`{@A@}` や数式も使えます。各側1件は残り、上限は各100件です。一対の対応はありません。
 3. 「言語依存」をオンにした主張には、選択した各言語の文章を入力します。オフの場合は共通CASTextとして全言語に使用し、翻訳JSONとAI翻訳の対象から除外します。切替前の翻訳データは保持します。
 4. 「問題文」を確認し、正解時と不正解時のフィードバックを言語ごとに編集します。これらは主張の真偽ではなく、学生の回答の正誤に対応します。True/Falseの表示ラベルも編集できます。
-5. 「出題する主張」はランダム／正しい主張のみ／正しくない主張のみを選択できます。XMLでは最初に `%_tf` を1（真）または2（偽）へ設定し、該当側から1つを選びます。`AssertC1, AssertC2, ...` と `AssertW1, AssertW2, ...` を定義し、`qtext:castext_concat(qtext0, ...);` で合成します。
+5. 「正解」はランダム／正しい／正しくないを選択できます。XMLでは最初に `%_tf` を1（真）または2（偽）へ設定し、該当側から1つを選びます。`AssertC1, AssertC2, ...` と `AssertW1, AssertW2, ...` を定義し、`qtext:castext_concat(qtext0, ...);` で合成します。
 
-「わからない」は未対応です。CSVでは `template,,%_noidea,false` を保持し、生成コードにも `%_noidea:false;` を設定します。trueへの変更は未対応として拒否します。
+「正解」の右にある「「わからない」を使用」はOn/Offで設定し、CSVに `%_noidea` のtrue/falseとして保存できます（既定値Off）。現在のTemplateは採点未対応のため、OnはCSVの下書きとして保存・再読込し、XML出力・プレビュー時には理由を表示して停止します。Offでは従来どおり生成します。
 
 ## 多言語とライブラリー
 
@@ -62,7 +62,7 @@ Maintain at least one true and one false assertion. Use + below each row’s X t
 
 Question variables remain expanded. Select shared libraries with MCQ-style checkboxes. The read-only stack_include Base URL can be changed only after an explicit availability check succeeds; failures and cancellation preserve the previous setting. No fetched code is executed during validation. Evaluate / Evaluation results use the MCQ evaluation service and require its Maxima/STACK setup. Help tooltips explain CASText, HTML, {@a@} and generated feedback variables. Assertion labels use numbers.
 
-Include URLs and AI provider settings follow MCQ conventions. AI sends text only on explicit action and validates mathematical/CASText tokens before applying translations. `%_noidea` is stored as false in CSV; this template does not offer an I-don’t-know answer.
+Include URLs and AI provider settings follow MCQ conventions. AI sends text only on explicit action and validates mathematical/CASText tokens before applying translations. The Use ‘I don’t know’ selector defaults to Off and stores `%_noidea` as true/false in CSV drafts. The current template does not support this answer: On drafts can be saved/reopened as CSV, but XML export and preview require Off until a compatible template is available.
 
 Save incomplete translations as CSV drafts. XML/preview require complete selected-language assertions, prompts and labels. CSV preserves all language data, flags and original XML; the format is the PRT container with a dedicated TF model, not MCQ CSV. Project ZIP retains original/current XML. Sessions expire after two hours and are not autosaved. The updated Question Manager supports new TF questions and direct reopening via STACK-TF. Save and close, including XML Save, returns complete XML to the bank and closes only after acceptance. Conflicts leave the editor open; CSV/project backups remain available. Update/restart both repositories and save the bank project separately.
 

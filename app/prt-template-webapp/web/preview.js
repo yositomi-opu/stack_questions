@@ -25,8 +25,8 @@
 
   function loadMath() {
     if (!mathReady) mathReady = new Promise((resolve, reject) => {
-      window.MathJax = {loader: {load: ["[tex]/boldsymbol"], source: {"[tex]/boldsymbol": "[mathjax]/mathjax-boldsymbol-3.2.2.js"}},
-        tex: {packages: {"[+]": ["boldsymbol"]}}, startup: {typeset: false}, svg: {fontCache: "none"},
+      window.MathJax = {loader: {load: ["[tex]/boldsymbol", "[tex]/color"], source: {"[tex]/boldsymbol": "[mathjax]/mathjax-boldsymbol-3.2.2.js", "[tex]/color": "[mathjax]/mathjax-color-3.2.2.js"}},
+        tex: {packages: {"[+]": ["boldsymbol", "color"]}}, startup: {typeset: false}, svg: {fontCache: "none"},
         options: {enableMenu: false}};
       const script = document.createElement("script");
       script.src = "./vendor/mathjax-tex-svg-3.2.2.js";

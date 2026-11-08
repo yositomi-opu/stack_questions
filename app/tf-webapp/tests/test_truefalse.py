@@ -69,6 +69,17 @@ class TFTests(unittest.TestCase):
             with self.assertRaises(ValueError):tf.validate(m)
         m=copy.deepcopy(self.model);m['%_noidea']=True
         with self.assertRaisesRegex(ValueError,'noidea'):tf.validate(m)
+    def test_noidea_true_csv_draft_roundtrip_and_xml_guard(self):
+        self.model['%_noidea']=True
+        self.fields['template']=json.dumps(self.model)
+        encoded=csv_codec.dumps(self.source,self.fields)
+        self.assertIn(b'%_noidea,true',encoded)
+        source,fields=csv_codec.loads(encoded)
+        self.assertTrue(json.loads(fields['template'])['%_noidea'])
+        with self.assertRaisesRegex(ValueError,'CSV'):server.runtime.edited(source,fields)
+        self.model['%_noidea']=False
+        self.assertIn('%_noidea:false;',E.fromstring(self.generate()).findtext('question/questionvariables/text'))
+
     def test_escaping_and_include_urls(self):
         m=self.model;m['correct'][0]['dependent']=False;m['correct'][0]['shared']='" </text> ]]> \\ <img onerror="bad()">'
         raw=self.generate(m);E.fromstring(raw)
