@@ -655,3 +655,10 @@ git diff --check
 - 検証: TF unittest17件成功（11言語のes全項目・CSV/XML往復を追加）。実Chromium browser_toolbar.cjs/browser_tf.cjs成功。単一行/右端/メニュー順/右詰めの配置、es初期チェック・本文/ラベル/フィードバック表示、CSV/XML、翻訳、noidea、狭幅の横はみ出しなしを確認。デスクトップ画像も目視確認。既存の2言語試験ではesも明示的に解除するよう更新。
 - 一時STACK API2026101500＋Maxima-sage5.45.1/ECLでesの実表示とnoidea採点を確認。選択肢は空キー「-」/Verdadero/Falso/No lo sé、noideaは0点、フィードバックはSe ha elegido «No lo sé».で英語本文が混在しない。APIは検証用設定とlocale補助を使用し、利用者のDockerイメージ/実Moodleの確認とは区別。既存Moodle・バンク・コースは操作していない。
 - JS構文およびgit -c core.whitespace=cr-at-eol diff --check成功。既存の改行コードと他の変数/配点/noidea構造を保持。Mac/Windows実機、実Moodle受験、外部AI送信は未確認。これまでのc-p指定に沿い、本件9ファイルだけを公開対象とし、並行作業・ステージ状態・ローカルHEADは保持する。
+
+
+## TFファイルメニューの自動閉じ（2026-11-08 JST）
+
+- MCQのfile-ui.jsに合わせ、TFのCSV/XMLメニューを操作項目選択後・外側クリック・Escで閉じる。他方を開く際も先のメニューを閉じる。エラー/保存先キャンセルを含め、非同期処理の成功待ちでメニューを開いたままにしない。ファイルピッカーの呼出経路・保存処理は維持。
+- 実Chromiumのbrowser_toolbar.cjsでCSV/XML保存後、表示後、問題名未入力エラー後、外側クリック、Esc、排他的展開を確認。英語UIの表示ダイアログも正常。browser_tf.cjsで実CSV/XML保存再読込と翻訳等の回帰を確認。両試験でpageerrorなし。node --checkとgit diff --check成功。
+- 既存の検証済み実装に合わせたUI修正のみ。今回のJS・キャッシュ版・ブラウザー回帰テスト・本メモ4ファイルをc-p対象とする。既存HEAD・ステージ状態・並行作業は保持。Mac/Windows実機・ネイティブ保存先ダイアログは未確認。
