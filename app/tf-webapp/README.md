@@ -46,7 +46,7 @@ CSV/XMLメニューは読込・表示・保存・上書です。CSVには問題�
 
 ## Templateと確認範囲
 
-`template.xml` は提供された `003.TF_multilang.xml` の原本バイトです。生成時は韓国語の出題指示の `castxt` を `castext` に補正し、言語選択にMCQ共通の `%__mcq_lang` を使用します。元のdropdown/AlgEquiv/正誤フィードバック構成を使用します。数式の意味や主張の真偽は作問者が確認してください。
+`template.xml` は提供された `003.TF_multilang.xml` を基に、スペイン語（es）の問題文・正誤の主張・回答ラベル・フィードバックを追加した11言語版です。新規サンプルではesも選択済みです。提供時の原本はGit履歴に保持しています。生成時は韓国語の出題指示の `castxt` を `castext` に補正し、言語選択にMCQ共通の `%__mcq_lang` を使用します。元のdropdown/AlgEquiv/正誤フィードバック構成を使用します。数式の意味や主張の真偽は作問者が確認してください。
 
 ```sh
 make tf-check
@@ -66,7 +66,7 @@ Include URLs and AI provider settings follow MCQ conventions. AI sends text only
 
 Save incomplete translations as CSV drafts. XML/preview require complete selected-language assertions, prompts and labels. CSV preserves all language data, flags and original XML; the format is the PRT container with a dedicated TF model, not MCQ CSV. Project ZIP retains original/current XML. Sessions expire after two hours and are not autosaved. The updated Question Manager supports new TF questions and direct reopening via STACK-TF. Save and close, including XML Save, returns complete XML to the bank and closes only after acceptance. Conflicts leave the editor open; CSV/project backups remain available. Update/restart both repositories and save the bank project separately.
 
-Automated tests and Chromium authoring/save/reload checks pass. Live checks with a disposable STACK API 2026101500 and Maxima-sage 5.45.1 confirm correct/incorrect/no-idea scoring and ungraded unanswered responses. The API source test setup uses local configuration and locale helpers; this does not verify the installed Docker image or Moodle. External AI calls and Mac/Windows operation remain unverified. The supplied template bytes are retained; generated output corrects its Korean `castxt` typo and uses the shared MCQ language helper. Existing GPL licensing applies.
+Automated tests and Chromium authoring/save/reload checks pass. Live checks with a disposable STACK API 2026101500 and Maxima-sage 5.45.1 confirm correct/incorrect/no-idea scoring and ungraded unanswered responses. The API source test setup uses local configuration and locale helpers; this does not verify the installed Docker image or Moodle. External AI calls and Mac/Windows operation remain unverified. The template extends the supplied source with complete Spanish question content, labels and feedback; new samples select all 11 languages. The original supplied version remains in Git history. Generated output corrects its Korean `castxt` typo and uses the shared MCQ language helper. Existing GPL licensing applies.
 
 ## Live API regression (optional)
 

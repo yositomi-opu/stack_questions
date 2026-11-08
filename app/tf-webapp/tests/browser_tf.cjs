@@ -14,7 +14,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.locator('#correct .assertion-actions button:last-child').first().click();await page.locator('#correct textarea').nth(1).fill('\\(1+1=2\\)');
  await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'正しい主張 2 shared');
  // Keep ja/en active; deselect other translations without deleting their text.
- for(const code of ['fr','it','de','pt','zh','ko','ru','sv'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
+ for(const code of ['fr','it','de','pt','zh','ko','ru','sv','es'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
  await page.locator('#translationRequest').click();let source=JSON.parse(await page.locator('#translationJSON').inputValue());
  assert(source.messages['correct:0']);assert(!source.messages['correct:1']);assert(source.messages.msgT&&source.messages.msgF);
  source.translations={en:Object.fromEntries(Object.entries(source.messages).map(([k,v])=>[k,{true:v.true,false:''}]))};

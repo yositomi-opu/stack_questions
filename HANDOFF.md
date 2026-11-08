@@ -646,3 +646,12 @@ git diff --check
 - 実Chromiumのbrowser_tf.cjs/browser_toolbar.cjs/browser_assertions.cjs成功。OnのCSV/XML往復、ラベル編集・翻訳、狭幅、模擬プレビュー採点を確認。さらに使い捨てSTACK API2026101500（ソース1b4e42d、検証用設定/locale補助）＋Maxima-sage5.45.1/ECLでcheck_stack_api.pyを実行し、On正主張jaとOff誤主張enの正答1/誤答0/noidea0/未回答isgradable:falseを確認。実アプリ画面でもOnの未回答案内/noideaの専用prt1-1-T分岐0点/正答1点、pageerrorなしを確認。
 - Templateどおりnoidea分岐のpenalty欄は空欄。実APIは既定penalty0.1を返す。配点/penaltyの意味は独自変更しない。原本完全一致、Python/JS構文、git -c core.whitespace=cr-at-eol diff --check成功。提供原本のCRLFを保持するためcr-at-eolを指定。利用者Dockerイメージ・実Moodle受験・Mac/Windows実機・外部AI送信は未確認。
 - 前回までのc-p指定に沿い、今回のTF対応と未回答ブリッジ修正、関連テスト/原本/文書だけを公開対象とする。並行作業・ステージ状態・ローカルHEADは保持する。
+
+
+## TF配置調整とスペイン語サンプル補完（2026-11-08 JST）
+
+- stack_include Base URL・変更ボタンを問題変数/評価/評価結果と同一行へ移動。デスクトップでは1行、狭幅では折り返してURL欄を操作可能にする。問題名行の編集言語を右端へ移動。タイトル横の操作群を右詰めにし、新規→CSV→XML→プレビュー→作業ZIP→原本の順。「多言語」を「多言語対応」へ変更（日英対応）。
+- 利用者の依頼でrepositoryのtemplate.xmlへesを追補。True/Falseラベル、noideaラベル、問題文、正/誤主張、正/誤フィードバック、noidea専用フィードバックをスペイン語対応。サンプルの全11言語にesが選択済み。既存10言語は維持し、noideaフィードバックはesだけ翻訳を表示し他言語は従来の文を保持。提供時原本はGit履歴5d1a6aeに保持。更新後Template SHA-256: cfeb02c5c19d78f09d7807e7b61a2775c2dbe1a1c6ba4ca45073a549bc525516。
+- 検証: TF unittest17件成功（11言語のes全項目・CSV/XML往復を追加）。実Chromium browser_toolbar.cjs/browser_tf.cjs成功。単一行/右端/メニュー順/右詰めの配置、es初期チェック・本文/ラベル/フィードバック表示、CSV/XML、翻訳、noidea、狭幅の横はみ出しなしを確認。デスクトップ画像も目視確認。既存の2言語試験ではesも明示的に解除するよう更新。
+- 一時STACK API2026101500＋Maxima-sage5.45.1/ECLでesの実表示とnoidea採点を確認。選択肢は空キー「-」/Verdadero/Falso/No lo sé、noideaは0点、フィードバックはSe ha elegido «No lo sé».で英語本文が混在しない。APIは検証用設定とlocale補助を使用し、利用者のDockerイメージ/実Moodleの確認とは区別。既存Moodle・バンク・コースは操作していない。
+- JS構文およびgit -c core.whitespace=cr-at-eol diff --check成功。既存の改行コードと他の変数/配点/noidea構造を保持。Mac/Windows実機、実Moodle受験、外部AI送信は未確認。これまでのc-p指定に沿い、本件9ファイルだけを公開対象とし、並行作業・ステージ状態・ローカルHEADは保持する。

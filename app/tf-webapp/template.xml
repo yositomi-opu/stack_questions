@@ -29,11 +29,12 @@ stack_include("https://yositomi-opu.github.io/stack_questions/multilang_library.
 ["fr", ["Vrai", "Faux"]], ["it", ["Vero", "Falso"]],
 ["de", ["Richtig", "Falsch"]], ["pt", ["Verdadeiro", "Falso"]],
 ["zh", ["正确", "错误"]], ["ko", ["옳다", "옳지 않다"]],
-["ru", ["Верно", "Неверно"]], ["sv", ["Sant", "Falskt"]]]);
+["ru", ["Верно", "Неверно"]], ["sv", ["Sant", "Falskt"]],
+["es", ["Verdadero", "Falso"]]]);
 
 %_noidea_msg:%__lang([["en", "I don't know"], ["ja", "わからない"], ["fr", "Je ne sais pas"],
 ["it", "Non lo so"], ["de", "Ich weiß es nicht"], ["pt", "Não sei"],
-["zh", "不知道"], ["ko", "모르겠습니다"], ["ru", "Не знаю"], ["sv", "Jag vet inte"]]);
+["zh", "不知道"], ["ko", "모르겠습니다"], ["ru", "Не знаю"], ["sv", "Jag vet inte"], ["es", "No lo sé"]]);
 
 va1:makelist([if k=0 then notanswered else k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);
 if %_noidea then va1:append(va1, [[-1, false, %_noidea_msg]]);
@@ -47,7 +48,8 @@ qtext0:%__lang([["en", castext("Determine whether the following statement is tru
  ["zh", castext("判断下列命题是否正确。<br>")],
  ["ko", castxt("다음 명제가 옳은지 판단하시오.<br>")],
  ["ru", castext("Определите, верно ли следующее утверждение.<br>")],
- ["sv", castext("Avgör om följande påstående är sant.<br>")]]);
+ ["sv", castext("Avgör om följande påstående är sant.<br>")],
+ ["es", castext("Determina si la siguiente afirmación es verdadera.<br>")]]);
 
 AssertC1:%__lang([["en", castext("A linearly independent set of vectors can be constructed by removing some vectors from a linearly dependent set.")],
  ["ja", castext("1次従属なベクトルの組からいくつかベクトルを除いて1次独立なベクトルの組を構成できる.")],
@@ -58,7 +60,8 @@ AssertC1:%__lang([["en", castext("A linearly independent set of vectors can be c
  ["zh", castext("从一个线性相关的向量组中去掉若干个向量，可以构成一个线性无关的向量组。")],
  ["ko", castext("일차종속인 벡터계에서 몇 개의 벡터를 제거하여 일차독립인 벡터계를 구성할 수 있다.")],
  ["ru", castext("Линейно независимую систему векторов можно получить, удалив несколько векторов из линейно зависимой системы.")],
- ["sv", castext("Ett linjärt oberoende vektorsystem kan konstrueras genom att ta bort några vektorer från ett linjärt beroende vektorsystem.")]]);
+ ["sv", castext("Ett linjärt oberoende vektorsystem kan konstrueras genom att ta bort några vektorer från ett linjärt beroende vektorsystem.")],
+ ["es", castext("Un sistema de vectores linealmente independiente se puede obtener eliminando algunos vectores de un sistema linealmente dependiente.")]]);
 
 AssertW1:%__lang([["en", castext("A linearly dependent system of vectors can be constructed by removing some vectors from a linearly independent set.")],
 ["ja", castext("1次独立なベクトルの組からいくつかベクトルを除いて1次従属なベクトルの系を構成できる.")],
@@ -69,7 +72,8 @@ AssertW1:%__lang([["en", castext("A linearly dependent system of vectors can be 
 ["zh", castext("从一个线性无关的向量组中去掉若干个向量，可以构成一个线性相关的向量组。")],
 ["ko", castext("일차독립인 벡터의 집합에서 몇 개의 벡터를 제거하여 일차종속인 벡터계를 구성할 수 있다.")],
 ["ru", castext("Линейно зависимую систему векторов можно получить, удалив несколько векторов из линейно независимого набора.")],
-["sv", castext("Ett linjärt beroende vektorsystem kan konstrueras genom att ta bort några vektorer från en linjärt oberoende mängd.")]]);
+["sv", castext("Ett linjärt beroende vektorsystem kan konstrueras genom att ta bort några vektorer från en linjärt oberoende mängd.")],
+["es", castext("Un sistema de vectores linealmente dependiente se puede obtener eliminando algunos vectores de un sistema linealmente independiente.")]]);
 /* AssertC1, AssertC2, ... Correct assert */
 /* AssertW1, AssertW2, ... Wrong assert */
 qtext:castext_concat(qtext0, [rand([AssertC1]), rand([AssertW1])][%_tf]);
@@ -79,7 +83,7 @@ msgT:%__lang([["en", castext("Correct.")], ["ja", castext("正解です.")],
 ["fr", castext("Correct.")], ["it", castext("Corretto.")], 
 ["de", castext("Richtig.")], ["pt", castext("Correto.")], 
 ["zh", castext("正确。")], ["ko", castext("정답입니다.")], 
-["ru", castext("Правильно.")], ["sv", castext("Rätt.")]]);
+["ru", castext("Правильно.")], ["sv", castext("Rätt.")], ["es", castext("Correcto.")]]);
 
 msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully understand the definitions of linear independence and dependence. Let us think about them using an example.")],
 ["ja", castext("違います. 1次独立・従属の定義がまだよく理解できていないようです. 例で考えてみましょう.")],
@@ -90,7 +94,8 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
 ["zh", castext("不对。看来你对线性无关和线性相关的定义还没有充分理解。我们通过一个例子来想一想。")],
 ["ko", castext("틀렸습니다. 아직 일차독립과 일차종속의 정의를 충분히 이해하지 못한 것 같습니다. 예를 통해 생각해 봅시다.")],
 ["ru", castext("Неверно. Похоже, вы пока ещё не вполне понимаете определения линейной независимости и линейной зависимости. Давайте рассмотрим это на примере.")],
-["sv", castext("Det är inte rätt. Det verkar som att du ännu inte riktigt har förstått definitionerna av linjärt oberoende och linjärt beroende. Låt oss tänka igenom det med hjälp av ett exempel.")]]);
+["sv", castext("Det är inte rätt. Det verkar som att du ännu inte riktigt har förstått definitionerna av linjärt oberoende och linjärt beroende. Låt oss tänka igenom det med hjälp av ett exempel.")],
+["es", castext("No es correcto. Parece que aún no comprendes bien las definiciones de independencia y dependencia lineal. Pensemos en ellas con un ejemplo.")]]);
 
 
 ]]></text>
@@ -167,7 +172,7 @@ msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully un
         <trueanswernote>prt1-1-T</trueanswernote>
         <truefeedback format="html">
           <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
-<p>The 'no idea' option is chosen.</p>]]></text>
+[[lang code='es']]<p>Se ha elegido «No lo sé».</p>[[/lang]][[lang code='en,ja,fr,it,de,pt,zh,ko,ru,sv,other']]<p>The 'no idea' option is chosen.</p>[[/lang]]]]></text>
         </truefeedback>
         <falsescoremode>-</falsescoremode>
         <falsescore>0</falsescore>

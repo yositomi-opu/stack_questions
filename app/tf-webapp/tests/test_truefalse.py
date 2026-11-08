@@ -29,7 +29,7 @@ class TFTests(unittest.TestCase):
     def test_template_import_and_compilation(self):
         m=self.model
         self.assertEqual(len(m['correct']),1);self.assertEqual(len(m['wrong']),1)
-        self.assertFalse(m['%_noidea']);self.assertEqual(len(m['languages']),10)
+        self.assertFalse(m['%_noidea']);self.assertEqual(len(m['languages']),11)
         raw=self.generate();q=E.fromstring(raw).find('question');v=q.findtext('questionvariables/text')
         self.assertIn('%_tf:rand([1, 2]);',v);self.assertIn('%_noidea:false;',v)
         self.assertIn('qtext:castext_concat(qtext0, [rand([AssertC1]), rand([AssertW1])][%_tf]);',v)
@@ -37,6 +37,18 @@ class TFTests(unittest.TestCase):
         self.assertEqual(q.findtext('input/type'),'dropdown');self.assertEqual(q.findall('prt/node')[-1].findtext('sans'),'[ans1]')
         self.assertEqual(q.findall('prt/node')[-1].findtext('tans'),'ta1');self.assertIn('{@msgT@}',q.findall('prt/node')[-1].findtext('truefeedback/text'))
         self.assertIn('{@msgF@}',q.findall('prt/node')[-1].findtext('falsefeedback/text'))
+    def test_sample_spanish_is_complete_and_roundtrips(self):
+        model=self.model;self.assertIn('es',model['languages'])
+        for key in ('prompt','msgT','msgF','noIdeaLabels'):self.assertTrue(model[key]['es'].strip(),key)
+        self.assertEqual(model['labels']['es'],['Verdadero','Falso'])
+        for side in ('correct','wrong'):
+            for row in model[side]:self.assertTrue(row['messages']['es'].strip())
+        output=self.generate();restored=json.loads(server.runtime.tf_fields(output)['template'])
+        self.assertEqual(restored,model)
+        _,fields=csv_codec.loads(csv_codec.dumps(self.source,self.fields))
+        self.assertIn('es',json.loads(fields['template'])['languages'])
+        self.assertIn('Se ha elegido «No lo sé».',E.fromstring(output).findtext('question/prt/node/truefeedback/text'))
+
     def test_multiple_assertions_shared_and_truth_flags(self):
         m=self.model;m['correct'].append(dict(dependent=False,shared=r'\(1+1=2\)',messages={}))
         m['wrong'].append(copy.deepcopy(m['wrong'][0]))
