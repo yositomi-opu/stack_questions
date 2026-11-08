@@ -14,7 +14,7 @@ Git、Python 3.10以降、Make、DockerとDocker Composeを用意します。mac
 make setup
 ```
 
-セットアップで次の4アプリが起動します。
+セットアップで次の5アプリが起動します。
 
 | アプリ | URL |
 | --- | --- |
@@ -22,10 +22,11 @@ make setup
 | PRT Template WebApp（Tree / Chain） | [http://localhost:4175/](http://localhost:4175/) |
 | STACK Edit WebApp（汎用XML編集） | [http://localhost:4176/](http://localhost:4176/) |
 | Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
+| [True/False WebApp](app/tf-webapp/README.md) | [http://localhost:4178/](http://localhost:4178/) |
 
 MCQやPRTを編集し、CSVで編集内容を保存するか、Moodle用XMLを出力します。プレビュー・採点に使うSTACK APIは3080で動作します。MCQの数式やランダム変数は「問題変数を評価」で確認できます。
 
-2回目以降は `make start`・`make stop`・`make restart`・`make status` で4アプリをまとめて操作します。`make check` はMCQ/STACK API環境の診断です。再起動前に各編集画面の作業を保存してください。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
+2回目以降は `make start`・`make stop`・`make restart`・`make status` で5アプリをまとめて操作します。`make check` はMCQ/STACK API環境の診断です。再起動前に各編集画面の作業を保存してください。macOSでは起動時にDocker Desktopも必要に応じて自動起動します。これらのコマンドは `sudo` を付けずに実行してください。
 
 問題変数を `stack_include` で別ファイルから読み込む場合は、そのファイルをMoodleから取得できる場所へ公開します。公開先の指定方法と、rankなどを変えるバリアントの作り方は [WebApp利用ガイド](app/mcq-webapp/README.md) にまとめています。
 
@@ -88,19 +89,22 @@ MCQ CSVをWebAppを開かずに一括変換し、複数XMLを指定カテゴリ�
 
 `make prt-template-webapp` で起動し、[http://127.0.0.1:4175/](http://127.0.0.1:4175/) を開きます。MCQ webappとは別アプリで、別ポートの問題バンクマネージャーからも起動できます。[PRT Template WebAppの利用方法](app/prt-template-webapp/README.md)を参照してください。
 
-`make setup`・`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も4アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。
+`make setup`・`make start` は MCQ WebApp（4173）、PRT Template WebApp（4175）、STACK Edit WebApp（4176）を起動します。`make stop`・`make restart`・`make status` も5アプリを扱います。従来の `make stack-editor` は `make prt-template-webapp` の別名として残しています。Qbankは問題変数の識別情報から編集アプリを選び、localhostのセッションでXML本文を受け渡します。
 
 ## Parsons WebAppと問題バンクへの返却
 
-`make start` はMCQ（4173）、PRT-TR-CH（4175）、一般STACK Edit（4176）、Parsons（4177）の4アプリを管理します。Parsonsは問題文・選択肢・正解例・別の正解順序・前後関係の制約・多言語フィードバックを編集し、CSV/XML/作業ZIPを保存できます。[Parsonsの説明](app/parsons-webapp/README.md)を参照してください。
+`make start` はMCQ（4173）、PRT-TR-CH（4175）、一般STACK Edit（4176）、Parsons（4177）の5アプリを管理します。Parsonsは問題文・選択肢・正解例・別の正解順序・前後関係の制約・多言語フィードバックを編集し、CSV/XML/作業ZIPを保存できます。[Parsonsの説明](app/parsons-webapp/README.md)を参照してください。
 
 最新版のMoodle Qbankから開いた場合、「保存して終了」で編集内容を問題バンクへ返します。XML保存も返却操作になります。単独利用時はファイル保存です。競合時は画面を閉じず、CSV/作業ZIPまたはXMLのローカルコピーを保管できます。問題バンク側も更新してください。
 
 
 ## 起動時の案内
 
-`make setup`・`make start`・`make restart` は作問アプリを起動し、最後に共通の [作問アプリ一覧](http://127.0.0.1:4173/authoring.html) のURLを表示します。一覧からMCQ・PRT Tree/Chain・STACK Edit・Parsonsを選べます。`MCQ_WEBAPP_PORT`、`PRT_WEBAPP_PORT`、`STACK_EDIT_PORT`、`PARSONS_WEBAPP_PORT`を変更している場合は、表示されたURLに実際のポートを反映します。起動済みの設定を変更した場合は、各画面の作業を保存してから再起動してください。
+`make setup`・`make start`・`make restart` は作問アプリを起動し、最後に共通の [作問アプリ一覧](http://127.0.0.1:4173/authoring.html) のURLを表示します。一覧からMCQ・PRT Tree/Chain・STACK Edit・Parsons・True/Falseを選べます。`MCQ_WEBAPP_PORT`、`PRT_WEBAPP_PORT`、`STACK_EDIT_PORT`、`PARSONS_WEBAPP_PORT`、`TF_WEBAPP_PORT`を変更している場合は、表示されたURLに実際のポートを反映します。起動済みの設定を変更した場合は、各画面の作業を保存してから再起動してください。
 
 ターミナルのメッセージは `LC_ALL` → `LC_MESSAGES` → `LANG` の優先順で選び、日本語は日本語、それ以外は英語で表示します。環境変数が未設定ならOSのロケールを使います。保存済みのアプリ画面言語とは別です。
 
 Macの対話端末では、全アプリの起動成功後に一覧をブラウザーで開くか1回だけ確認します。`y` / `yes` / `はい` で `open URL` を実行し、Enterのみ・`n`では開きません。非対話実行・リダイレクト時、`make status`・`make stop`では確認しません。ブラウザーを開けなくても起動済みアプリはそのまま利用できます。Mac実機での確認は未実施です。
+
+
+True/False作問は正誤別の主張追加削除、言語依存の指定、多言語展開、CSV/XML・作業ZIP保存に対応します。[TF利用案内](app/tf-webapp/README.md)を参照してください。

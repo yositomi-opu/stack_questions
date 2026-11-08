@@ -2,9 +2,9 @@
 
 開発を再開する場合は、[開発引き継ぎ](../../HANDOFF.md)と[開発ルール](../../AGENTS.md)を確認してください。
 
-リポジトリルートの `make setup`・`make start`・`make restart` は、MCQ（4173）、PRT Template（4175）、STACK Edit（4176）をまとめて起動します。`make stop`・`make status` も4アプリを扱います。再起動前に各画面の作業を保存してください。
+リポジトリルートの `make setup`・`make start`・`make restart` は、MCQ（4173）、PRT Template（4175）、STACK Edit（4176）、Parsons（4177）、TF（4178）をまとめて起動します。`make stop`・`make status` も5アプリを扱います。再起動前に各画面の作業を保存してください。
 
-From the repository root, `make setup`, `make start` and `make restart` start MCQ (4173), PRT Template (4175) and STACK Edit (4176). Stop/status manage all four; save editor work before restarting.
+From the repository root, `make setup`, `make start` and `make restart` start MCQ (4173), PRT Template (4175), STACK Edit (4176), Parsons (4177) and TF (4178). Stop/status manage all five; save editor work before restarting.
 
 CASText版の `001.MCQ_cas-rb.xml` / `001.MCQ_cas-cb.xml` をもとに、CSV または XLSX から MCQ 用 XML を生成するローカル WebApp です。
 
@@ -583,7 +583,7 @@ Save and close / XML Save returns edits only for qbank sessions, closing after a
 
 ## 起動時の案内
 
-`make setup`・`make start`・`make restart` は作問アプリを起動し、最後に共通の [作問アプリ一覧](http://127.0.0.1:4173/authoring.html) のURLを表示します。一覧からMCQ・PRT Tree/Chain・STACK Edit・Parsonsを選べます。`MCQ_WEBAPP_PORT`、`PRT_WEBAPP_PORT`、`STACK_EDIT_PORT`、`PARSONS_WEBAPP_PORT`を変更している場合は、表示されたURLに実際のポートを反映します。起動済みの設定を変更した場合は、各画面の作業を保存してから再起動してください。
+`make setup`・`make start`・`make restart` は作問アプリを起動し、最後に共通の [作問アプリ一覧](http://127.0.0.1:4173/authoring.html) のURLを表示します。一覧からMCQ・PRT Tree/Chain・STACK Edit・Parsons・True/Falseを選べます。`MCQ_WEBAPP_PORT`、`PRT_WEBAPP_PORT`、`STACK_EDIT_PORT`、`PARSONS_WEBAPP_PORT`、`TF_WEBAPP_PORT`を変更している場合は、表示されたURLに実際のポートを反映します。起動済みの設定を変更した場合は、各画面の作業を保存してから再起動してください。
 
 ターミナルのメッセージは `LC_ALL` → `LC_MESSAGES` → `LANG` の優先順で選び、日本語は日本語、それ以外は英語で表示します。環境変数が未設定ならOSのロケールを使います。保存済みのアプリ画面言語とは別です。
 
@@ -592,8 +592,11 @@ Macの対話端末では、全アプリの起動成功後に一覧をブラウ�
 
 ## Startup guidance
 
-`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit or Parsons there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT` and `PARSONS_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
+`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit, Parsons or True/False there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT`, `PARSONS_WEBAPP_PORT` and `TF_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
 
 Terminal messages follow `LC_ALL`, then `LC_MESSAGES`, then `LANG`: Japanese for ja locales, English otherwise. If these are unset, the OS locale is used. This is independent of the saved editor UI language.
 
 On an interactive Mac terminal, one final prompt offers to open the index after all apps start successfully. `y`, `yes` or `はい` runs `open URL`; Enter or `n` leaves the browser closed. Noninteractive/redirected runs, status and stop do not prompt. A browser-open failure leaves the running apps available. Actual Mac operation remains unverified; prompt behavior has automated coverage.
+
+
+True/False作問は正誤別の主張追加削除、言語依存の指定、多言語展開、CSV/XML・作業ZIP保存に対応します。[TF利用案内](../tf-webapp/README.md)を参照してください。

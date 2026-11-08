@@ -13,12 +13,16 @@ def dumps(source,fields):
     if 'template' not in fields:raise ValueError('Configure a template before saving CSV / CSV保存にはテンプレート設定が必要です。')
     model=json.loads(fields['template'])
     if model.get('version')==2:validate(model)
+    if model.get('mode')=='truefalse':
+        from truefalse import validate as validate_tf
+        validate_tf(model,complete=False)
     out=io.StringIO(newline='');w=csv.writer(out);w.writerow(HEADER)
     w.writerow(['format','','schema',SCHEMA]);w.writerow(['source','','sha256',hashlib.sha256(source).hexdigest()]);w.writerow(['source','','xml_base64',base64.b64encode(source).decode()])
     for key,value in fields.items():
         if key!='template':w.writerow(['question','',key,value])
     for key,value in model.items():
-        if key in ('inputs','checks'):
+        if model.get('mode')=='truefalse':w.writerow(['template','',key,json.dumps(value,ensure_ascii=False) if isinstance(value,(dict,list,bool)) else str(value)])
+        elif key in ('inputs','checks'):
             for i,row in enumerate(value,1):
                 for k,v in row.items():w.writerow([key,str(i),k,json.dumps(v,ensure_ascii=False) if isinstance(v,(dict,list)) else v])
         elif key in ('validation','correct'):
@@ -53,6 +57,14 @@ def loads(raw):
     if set(fields)!={'name','questionvariables','questiontext','generalfeedback'}:raise ValueError('Invalid question fields')
     model=single('template')
     if 'version' in model:model['version']=int(model['version'])
+    if model.get('mode')=='truefalse':
+        from truefalse import validate as validate_tf
+        for key in ('languages','correct','wrong','prompt','msgT','msgF','labels','includes'):
+            if key in model:model[key]=json.loads(model[key])
+        if model.get('%_noidea') not in ('true','false'):raise ValueError('Invalid %_noidea CSV flag')
+        model['%_noidea']=model['%_noidea']=='true'
+        validate_tf(model,complete=False);fields['template']=json.dumps(model,ensure_ascii=False)
+        return source,fields
     if model.get('mode')=='parsons':
         from parsons import validate as validate_parsons
         for key in ('languages','question','steps','answer','alternatives','constraints','feedback'):

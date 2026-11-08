@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+<!-- question: 130747  -->
+  <question type="stack">
+    <name>
+      <text>002.TF_template</text>
+    </name>
+    <questiontext format="moodle_auto_format">
+      <text><![CDATA[<p>[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]<br></p>
+<p>{@qtext@}</p>
+<p>[[input:ans1]] [[validation:ans1]]</p>]]></text>
+    </questiontext>
+    <generalfeedback format="moodle_auto_format">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1</defaultgrade>
+    <penalty>0.1</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <stackversion>
+      <text>2026062900</text>
+    </stackversion>
+    <questionvariables>
+      <text><![CDATA[stack_include("https://yositomi-opu.github.io/stack_questions/ky_linear_algebra.mac");
+stack_include("https://yositomi-opu.github.io/stack_questions/multilang_library.mac");
+%_tf:rand([1, 2]);/* 1: true, 2:false */
+%_tfmsgL:%__lang([["en", ["True", "False"]], ["ja", ["正しい", "正しくない"]],
+["fr", ["Vrai", "Faux"]], ["it", ["Vero", "Falso"]],
+["de", ["Richtig", "Falsch"]], ["pt", ["Verdadeiro", "Falso"]],
+["zh", ["正确", "错误"]], ["ko", ["옳다", "옳지 않다"]],
+["ru", ["Верно", "Неверно"]], ["sv", ["Sant", "Falskt"]]]);
+
+va1:makelist([k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);
+
+qtext0:%__lang([["en", castext("Determine whether the following statement is true.<br>")],
+ ["ja", castext("次の主張は正しいか, 答えよ.<br>")],
+ ["fr", castext("Déterminez si l’affirmation suivante est vraie.<br>")],
+ ["it", castext("Stabilire se la seguente affermazione è vera.<br>")],
+ ["de", castext("Entscheiden Sie, ob die folgende Aussage richtig ist.<br>")],
+ ["pt", castext("Determine se a afirmação seguinte é verdadeira.<br>")],
+ ["zh", castext("判断下列命题是否正确。<br>")],
+ ["ko", castxt("다음 명제가 옳은지 판단하시오.<br>")],
+ ["ru", castext("Определите, верно ли следующее утверждение.<br>")],
+ ["sv", castext("Avgör om följande påstående är sant.<br>")]]);
+
+AssertC1:%__lang([["en", castext("A linearly independent set of vectors can be constructed by removing some vectors from a linearly dependent set.")],
+ ["ja", castext("1次従属なベクトルの組からいくつかベクトルを除いて1次独立なベクトルの組を構成できる.")],
+ ["fr", castext("On peut construire un système de vecteurs linéairement indépendant en retirant certains vecteurs d’un système linéairement dépendant.")],
+ ["it", castext("È possibile costruire un sistema di vettori linearmente indipendente eliminando alcuni vettori da un sistema linearmente dipendente.")],
+ ["de", castext("Durch Entfernen einiger Vektoren aus einem linear abhängigen Vektorsystem kann man ein linear unabhängiges Vektorsystem konstruieren.")],
+ ["pt", castext("É possível construir um sistema de vetores linearmente independente removendo alguns vetores de um sistema linearmente dependente.")],
+ ["zh", castext("从一个线性相关的向量组中去掉若干个向量，可以构成一个线性无关的向量组。")],
+ ["ko", castext("일차종속인 벡터계에서 몇 개의 벡터를 제거하여 일차독립인 벡터계를 구성할 수 있다.")],
+ ["ru", castext("Линейно независимую систему векторов можно получить, удалив несколько векторов из линейно зависимой системы.")],
+ ["sv", castext("Ett linjärt oberoende vektorsystem kan konstrueras genom att ta bort några vektorer från ett linjärt beroende vektorsystem.")]]);
+
+AssertW1:%__lang([["en", castext("A linearly dependent system of vectors can be constructed by removing some vectors from a linearly independent set.")],
+["ja", castext("1次独立なベクトルの組からいくつかベクトルを除いて1次従属なベクトルの系を構成できる.")],
+["fr", castext("On peut construire un système de vecteurs linéairement dépendant en retirant certains vecteurs d’un ensemble linéairement indépendant.")],
+["it", castext("È possibile costruire un sistema di vettori linearmente dipendente eliminando alcuni vettori da un insieme linearmente indipendente.")],
+["de", castext("Durch Entfernen einiger Vektoren aus einer linear unabhängigen Vektormenge kann man ein linear abhängiges Vektorsystem konstruieren.")],
+["pt", castext("É possível construir um sistema de vetores linearmente dependente removendo alguns vetores de um conjunto linearmente independente.")],
+["zh", castext("从一个线性无关的向量组中去掉若干个向量，可以构成一个线性相关的向量组。")],
+["ko", castext("일차독립인 벡터의 집합에서 몇 개의 벡터를 제거하여 일차종속인 벡터계를 구성할 수 있다.")],
+["ru", castext("Линейно зависимую систему векторов можно получить, удалив несколько векторов из линейно независимого набора.")],
+["sv", castext("Ett linjärt beroende vektorsystem kan konstrueras genom att ta bort några vektorer från en linjärt oberoende mängd.")]]);
+/* AssertC1, AssertC2, ... Correct assert */
+/* AssertW1, AssertW2, ... Wrong assert */
+qtext:castext_concat(qtext0, [rand([AssertC1]), rand([AssertW1])][%_tf]);
+ta1:mcq_correct(va1);
+
+msgT:%__lang([["en", castext("Correct.")], ["ja", castext("正解です.")], 
+["fr", castext("Correct.")], ["it", castext("Corretto.")], 
+["de", castext("Richtig.")], ["pt", castext("Correto.")], 
+["zh", castext("正确。")], ["ko", castext("정답입니다.")], 
+["ru", castext("Правильно.")], ["sv", castext("Rätt.")]]);
+
+msgF:%__lang([["en", castext("Not quite. It seems that you still do not fully understand the definitions of linear independence and dependence. Let us think about them using an example.")],
+["ja", castext("違います. 1次独立・従属の定義がまだよく理解できていないようです. 例で考えてみましょう.")],
+["fr", castext("Ce n’est pas correct. Il semble que vous ne compreniez pas encore suffisamment les définitions de l’indépendance et de la dépendance linéaires. Réfléchissons à l’aide d’un exemple.")],
+["it", castext("Non è corretto. Sembra che tu non abbia ancora compreso bene le definizioni di indipendenza e dipendenza lineare. Proviamo a ragionare con un esempio.")],
+["de", castext("Das ist nicht richtig. Es scheint, dass Sie die Definitionen der linearen Unabhängigkeit und Abhängigkeit noch nicht vollständig verstanden haben. Betrachten wir ein Beispiel.")],
+["pt", castext("Não está correto. Parece que você ainda não compreendeu bem as definições de independência e dependência linear. Vamos pensar por meio de um exemplo.")],
+["zh", castext("不对。看来你对线性无关和线性相关的定义还没有充分理解。我们通过一个例子来想一想。")],
+["ko", castext("틀렸습니다. 아직 일차독립과 일차종속의 정의를 충분히 이해하지 못한 것 같습니다. 예를 통해 생각해 봅시다.")],
+["ru", castext("Неверно. Похоже, вы пока ещё не вполне понимаете определения линейной независимости и линейной зависимости. Давайте рассмотрим это на примере.")],
+["sv", castext("Det är inte rätt. Det verkar som att du ännu inte riktigt har förstått definitionerna av linjärt oberoende och linjärt beroende. Låt oss tänka igenom det med hjälp av ett exempel.")]]);
+
+]]></text>
+    </questionvariables>
+    <specificfeedback format="html">
+      <text>[[feedback:prt1]]</text>
+    </specificfeedback>
+    <questionnote format="html">
+      <text>{@%_tf@}, {@qtext@}</text>
+    </questionnote>
+    <questiondescription format="html">
+      <text></text>
+    </questiondescription>
+    <questionsimplify>1</questionsimplify>
+    <assumepositive>0</assumepositive>
+    <assumereal>0</assumereal>
+    <prtcorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:green;"><i class="fa fa-check"></i></span> 
+<span lang="ja" class="multilang">よくできました。正解です！</span>
+<span lang="en" class="multilang">Well done! Spot on!</span>]]></text>
+    </prtcorrect>
+    <prtpartiallycorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:orange;"><i class="fa fa-adjust"></i></span>
+<span lang="ja" class="multilang">部分的に正解です。</span>
+<span lang="en" class="multilang">Partially correct!</span>]]></text>
+    </prtpartiallycorrect>
+    <prtincorrect format="html">
+      <text><![CDATA[<span style="font-size: 1.5em; color:red;"><i class="fa fa-times"></i></span>
+<span lang="ja" class="multilang">間違いです。</span>
+<span lang="en" class="multilang">Incorrect!</span>]]></text>
+    </prtincorrect>
+    <decimals>.</decimals>
+    <scientificnotation>*10</scientificnotation>
+    <multiplicationsign>none</multiplicationsign>
+    <sqrtsign>1</sqrtsign>
+    <complexno>i</complexno>
+    <inversetrig>cos-1</inversetrig>
+    <logicsymbol>lang</logicsymbol>
+    <matrixparens>(</matrixparens>
+    <isbroken>0</isbroken>
+    <variantsselectionseed></variantsselectionseed>
+    <input>
+      <name>ans1</name>
+      <type>dropdown</type>
+      <tans>va1</tans>
+      <boxsize>10</boxsize>
+      <strictsyntax>1</strictsyntax>
+      <insertstars>1</insertstars>
+      <syntaxhint></syntaxhint>
+      <syntaxattribute>0</syntaxattribute>
+      <forbidwords></forbidwords>
+      <allowwords></allowwords>
+      <forbidfloat>1</forbidfloat>
+      <requirelowestterms>0</requirelowestterms>
+      <checkanswertype>0</checkanswertype>
+      <mustverify>0</mustverify>
+      <showvalidation>0</showvalidation>
+      <options>nonotanswered,hideanswer</options>
+    </input>
+    <prt>
+      <name>prt1</name>
+      <value>1.0000000</value>
+      <autosimplify>1</autosimplify>
+      <feedbackstyle>1</feedbackstyle>
+      <feedbackvariables>
+        <text></text>
+      </feedbackvariables>
+      <node>
+        <name>0</name>
+        <description></description>
+        <answertest>AlgEquiv</answertest>
+        <sans>[ans1]</sans>
+        <tans>ta1</tans>
+        <testoptions></testoptions>
+        <quiet>0</quiet>
+        <truescoremode>=</truescoremode>
+        <truescore>1</truescore>
+        <truepenalty></truepenalty>
+        <truenextnode>-1</truenextnode>
+        <trueanswernote>prt1-1-T</trueanswernote>
+        <truefeedback format="html">
+          <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
+<p>{@msgT@}</p>]]></text>
+        </truefeedback>
+        <falsescoremode>=</falsescoremode>
+        <falsescore>0</falsescore>
+        <falsepenalty></falsepenalty>
+        <falsenextnode>-1</falsenextnode>
+        <falseanswernote>prt1-1-F</falseanswernote>
+        <falsefeedback format="html">
+          <text><![CDATA[[[lang code='en']][[/lang]][[lang code='ja']][[/lang]][[lang code='fr']][[/lang]][[lang code='it']][[/lang]][[lang code='de']][[/lang]][[lang code='pt']][[/lang]][[lang code='zh']][[/lang]][[lang code='ko']][[/lang]][[lang code='ru']][[/lang]][[lang code='sv']][[/lang]][[lang code='es']][[/lang]]
+<p>{@msgF@}</p>]]></text>
+        </falsefeedback>
+      </node>
+    </prt>
+  </question>
+
+</quiz>

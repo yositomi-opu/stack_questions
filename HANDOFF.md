@@ -585,3 +585,15 @@ git diff --check
 - 検証: startup guidance13件、Docker startup11件、既存起動管理5件、評価診断4件、アセット参照3件成功（計36件）。Nodeで一覧の独自/標準ポート、不正/空ポート、localhost/IPv4/IPv6ホスト保持、任意TF表示、ブックマークURLを確認。Python3.10構文互換とgit diff --check成功。
 - 実Chromiumで使い捨てHTTP配信の4アプリ一覧・独自ポート・入力変更後のリンク更新・390px幅・pageerrorなしを確認。Macの確認/承諾/拒否とopen呼出しは模擬環境で確認。Mac実機、実Dockerでの全サービス起動・ブラウザー起動は未確認。既存サービスやMoodle・教材は変更していない。
 - 利用者のc-p依頼により、最新mainからの一時コピーで今回の起動案内・テスト・日英文書だけを公開対象とする。NASへは既存差分を照合したパッチだけを適用し、TF登録・並行作業・ローカルHEADを保持。
+
+
+## True/False本体とQuestion Manager連携の公開（2026-11-08 JST）
+
+- app/tf-webappと共有TF codecを正式な公開対象に追加。提供Templateを原本バイトで保持し、正誤各1～100主張・言語依存/共有CASText・多言語展開・msgT/msgF・include設定・CSV/XML/作業ZIPに対応。%_noideaはfalseを保持し、未対応のtrueは拒否。make tf-webapp/tf-check、まとめて起動、作問一覧から使用できる。
+- TF側の保存して終了とXML保存は完成XMLをQuestion Managerへ返却し、受理後だけ終了する。新規/再編集・原本/未知フィールド保持・undo/redo・バンクZIP往復・競合拒否を確認。Question Managerにも対応変更が必要なため両リポジトリを更新して再起動する。TFの生成処理はstack_questions側に集約し、バンク側は完成XMLを扱う。
+- 公開前補強: デフォルトTemplateのCRLFを原本取得/CSVへ保持。生成用コメントの文字列が問題変数に含まれても切り詰めない。実コメントの予約マーカーは理由付き拒否。XML再生成はユーザー変数・多言語・元XMLを保持し、未翻訳の下書きはCSVへ保存できる。
+- 検証: TF10、PRT25、Parsons4、起動管理5、起動案内13件（計57件）、MCQ CSV CLI/schema-v3、作問一覧のNode試験が成功。共有処理の最終変更後にTF/PRT/Parsonsを再確認。Python3.10構文と対象差分検査成功。
+- 実Chromiumで単独TFの追加削除/言語非依存の翻訳除外/翻訳JSON/日英/CSV・XML保存再読込/狭幅/プレビューの模擬応答を確認。使い捨て空Question Managerとの新規→再編集→XML保存終了→undo、英語UI、競合時にタブと編集が残りCSV退避できることも確認。pageerrorなし。
+- Question Manager側は全Python115件・JS7件・構文検査が省略なしで成功。テストは合成データだけを使う一時サーバーで実施。利用者のバンク/稼働Moodle/既存コース/教材を操作していない。
+- 未確認: 実STACK API/Maximaでの描画・採点、実Moodleインポート/受験、外部AI実送信、Mac/Windows実機、ネイティブ保存ダイアログ。NASにDocker/Maximaがないため実CAS試験は実施していない。これらの成功を自動テストや模擬APIから推定しない。
+- 利用者のc-p依頼により最新mainを基に今回のTF本体・連携・テスト・利用案内だけを公開する。練習サイト等の並行作業・既存HEAD/ステージ状態・実行中の編集セッションは保持。

@@ -106,3 +106,9 @@ stack-editor-check: prt-template-check
 .PHONY: stack-edit-webapp
 stack-edit-webapp:
 	$(PYTHON) app/stack-edit-webapp/server.py
+
+.PHONY: tf-webapp tf-check
+tf-webapp:
+	$(PYTHON) app/tf-webapp/server.py
+tf-check:
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s app/tf-webapp/tests -p 'test*.py'

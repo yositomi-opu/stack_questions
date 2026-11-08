@@ -14,19 +14,20 @@ Run the initial setup from the repository root:
 make setup
 ```
 
-Setup starts all four apps:
+Setup starts all five apps:
 
 | App | URL |
 | --- | --- |
 | MCQ WebApp | [http://localhost:4173/](http://localhost:4173/) |
 | PRT Template WebApp (Tree/Chain) | [http://localhost:4175/](http://localhost:4175/) |
 | Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
+| [True/False WebApp](app/tf-webapp/README.md) | [http://localhost:4178/](http://localhost:4178/) |
 | STACK Edit WebApp (general XML editor) | [http://localhost:4176/](http://localhost:4176/) |
 | Parsons WebApp | [http://localhost:4177/](http://localhost:4177/) |
 
 Edit MCQs or PRT templates and save CSV/XML. STACK API runs on port 3080 for rendering and grading. Use “Evaluate question variables” in MCQ to check formulas and random variables.
 
-For later sessions, use `make start`, `make stop`, `make restart` and `make status` to manage all four apps; use `make check` to diagnose the MCQ/STACK API environment. Save work in every editor before restarting. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
+For later sessions, use `make start`, `make stop`, `make restart` and `make status` to manage all five apps; use `make check` to diagnose the MCQ/STACK API environment. Save work in every editor before restarting. On macOS, startup also launches Docker Desktop when needed. Run these commands as your normal user without `sudo`.
 
 If evaluation fails with `/workspace/.../evaluate.mac not found` after moving or recreating a clone, run `make repair-docker` from the clone you intend to use. This recreates the containers with that clone mounted, restarts the WebApp, and verifies Maxima evaluation. Cached images and repository files are retained; container temporary state is reset. Save browser edits first. See the troubleshooting FAQ in the [WebApp guide](app/mcq-webapp/README.md).
 
@@ -104,8 +105,11 @@ The managed apps now include Parsons WebApp at localhost:4177 alongside MCQ:4173
 
 ## Startup guidance
 
-`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit or Parsons there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT` and `PARSONS_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
+`make setup`, `make start` and `make restart` start the authoring apps and print the common [authoring index](http://127.0.0.1:4173/authoring.html) URL after successful startup. Choose MCQ, PRT Tree/Chain, STACK Edit, Parsons or True/False there. Custom `MCQ_WEBAPP_PORT`, `PRT_WEBAPP_PORT`, `STACK_EDIT_PORT`, `PARSONS_WEBAPP_PORT` and `TF_WEBAPP_PORT` settings are included in the printed URL. Save editor work before restarting after changing running ports.
 
 Terminal messages follow `LC_ALL`, then `LC_MESSAGES`, then `LANG`: Japanese for ja locales, English otherwise. If these are unset, the OS locale is used. This is independent of the saved editor UI language.
 
 On an interactive Mac terminal, one final prompt offers to open the index after all apps start successfully. `y`, `yes` or `はい` runs `open URL`; Enter or `n` leaves the browser closed. Noninteractive/redirected runs, status and stop do not prompt. A browser-open failure leaves the running apps available. Actual Mac operation remains unverified; prompt behavior has automated coverage.
+
+
+True/False authoring supports independent true/false assertion pools, per-assertion language dependency, translation, CSV/XML and project saving. See the [TF guide](app/tf-webapp/README.md).

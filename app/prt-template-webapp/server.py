@@ -85,11 +85,24 @@ def xml_fields(raw):
         if model:
             fields['template']=json.dumps(model,ensure_ascii=False)
             fields['questionvariables']=base_variables(fields['questionvariables'])
+    if fields.get('template') and json.loads(fields['template']).get('mode')=='truefalse':
+        from truefalse import base_variables as tf_base
+        fields['questionvariables']=tf_base(fields['questionvariables'])
     if fields.get('template') and json.loads(fields['template']).get('mode')=='parsons':
         from parsons import base_variables as parsons_base
         fields['questionvariables']=parsons_base(fields['questionvariables'])
     if fields.get('template') and json.loads(fields['template']).get('version')==2:
         fields['questionvariables']=base_variables(fields['questionvariables'],keep_functions=json.loads(fields['template']).get('layout')=='compact')
+    return fields
+
+
+def tf_fields(raw):
+    fields=xml_fields(raw)
+    if not fields.get('template'):
+        from truefalse import import_model
+        model,variables=import_model(parse(raw)[1])
+        fields['template']=json.dumps(model,ensure_ascii=False);fields['questionvariables']=variables
+    if json.loads(fields['template']).get('mode')!='truefalse':raise ValueError('Open a TF question / TF問題を開いてください。')
     return fields
 
 
@@ -118,7 +131,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.valid():return self.reply({'error':'Invalid host'},403)
         try:
-            if self.path=='/api/health':return self.reply({'app':'parsons-webapp' if self.server.parsons else 'stack-edit-webapp' if self.server.general else 'prt-template-webapp','pid':os.getpid()})
+            if self.path=='/api/health':return self.reply({'app':'tf-webapp' if self.server.truefalse else 'parsons-webapp' if self.server.parsons else 'stack-edit-webapp' if self.server.general else 'prt-template-webapp','pid':os.getpid()})
             if self.path=='/api/state':return self.reply(self.detail(self.session()))
             if self.path=='/api/reference':return self.reply(self.session().get('reference') or self.session()['xml'],mime='application/xml')
             if self.path in ('/api/xml','/api/project','/api/original'):
@@ -163,6 +176,16 @@ class Handler(BaseHTTPRequestHandler):
                         for k in expired:del self.server.sessions[k]
                         if len(self.server.sessions)>=16:raise ValueError('Too many active sessions')
                     sid=uuid.uuid4().hex
+                    if self.server.truefalse:
+                        from truefalse import sample, TEMPLATE
+                        if not d.get('fields') and not d.get('xml'):
+                            model,variables=sample()
+                            d=dict(d,xml=TEMPLATE.read_bytes().decode("utf-8"),fields={'name':'','questionvariables':variables,'questiontext':'','generalfeedback':'','template':json.dumps(model,ensure_ascii=False)})
+                        elif d.get('xml') and not d.get('fields'):
+                            d=dict(d,fields=tf_fields(d['xml'].encode()))
+                        elif d.get('fields'):
+                            from truefalse import base_variables as tf_base
+                            d=dict(d,fields=dict(d['fields'],questionvariables=tf_base(d['fields'].get('questionvariables',''))))
                     if self.server.parsons and not d.get('fields') and not d.get('xml'):
                         from parsons import sample
                         d=dict(d,fields={'name':'','questionvariables':'','questiontext':'','generalfeedback':'','template':json.dumps(sample(),ensure_ascii=False)})
@@ -187,7 +210,10 @@ class Handler(BaseHTTPRequestHandler):
                             if len(z.infolist())!=3 or set(z.namelist())!={'source.xml','current.xml','project.json'} or sum(i.file_size for i in z.infolist())>2*LIMIT+65536:raise ValueError('Invalid editor project')
                             meta=json.loads(z.read('project.json'));original=z.read('source.xml');current=z.read('current.xml')
                             if meta.get('schema')!=1 or meta.get('source_sha256')!=hashlib.sha256(original).hexdigest() or meta.get('current_sha256')!=hashlib.sha256(current).hexdigest():raise ValueError('Invalid project hashes')
-                    fields=imported_fields or xml_fields(current);parse(original)
+                    fields=imported_fields or (tf_fields(current) if self.server.truefalse else xml_fields(current));parse(original)
+                    if self.server.truefalse:
+                        from truefalse import validate as validate_tf
+                        validate_tf(json.loads(fields.get('template','null')),complete=False)
                     if self.server.general:
                         fields.pop('template',None)
                         fields['questionvariables']=parse(current)[1].findtext('questionvariables/text','')
@@ -218,7 +244,7 @@ class Handler(BaseHTTPRequestHandler):
                 if self.path in ('/api/action','/api/create-stack'):
                     fields=d['fields'];edited(s['xml'],fields)
                     if s.get('callback'):
-                        callbackbody=json.dumps({'token':s['token'],'fields':fields}).encode()
+                        callbackbody=json.dumps({'token':s['token'],'xml':edited(s['xml'],fields).decode('utf-8')} if self.server.truefalse else {'token':s['token'],'fields':fields}).encode()
                         origin=s['callbackOrigin']
                         req=Request(s['callback'],data=callbackbody,headers={'Origin':origin,'X-Qbank-Request':'1','Content-Type':'application/json'})
                         try:
@@ -241,8 +267,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:self.reply({'error':str(e)},400)
 
 
-def create_server(port=4175,preview_server='http://127.0.0.1:4173',stack_api='http://127.0.0.1:3080',general=False,parsons=False,web=None):
-    s=ThreadingHTTPServer(('127.0.0.1',port),Handler);s.general=general;s.parsons=parsons;s.web=web;s.sessions={};s.lock=threading.RLock();s.preview=Preview(preview_server,stack_api);return s
+def create_server(port=4175,preview_server='http://127.0.0.1:4173',stack_api='http://127.0.0.1:3080',general=False,parsons=False,web=None,truefalse=False):
+    s=ThreadingHTTPServer(('127.0.0.1',port),Handler);s.general=general;s.parsons=parsons;s.truefalse=truefalse;s.web=web;s.sessions={};s.lock=threading.RLock();s.preview=Preview(preview_server,stack_api);return s
 
 
 if __name__=='__main__':

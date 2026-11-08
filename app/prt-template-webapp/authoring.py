@@ -31,6 +31,9 @@ def read_template(element):
 
 def compile_template(text):
     m = json.loads(text)
+    if isinstance(m, dict) and m.get('mode') == 'truefalse':
+        from truefalse import compile_tf
+        return compile_tf(m)
     if isinstance(m, dict) and m.get('mode') == 'parsons':
         from parsons import compile_parsons
         return compile_parsons(m)
@@ -85,9 +88,9 @@ def compile_template(text):
 def apply_template(element, text, backup=False):
     sections = compile_template(text)
     model = json.loads(text)
-    if model.get('mode')=='parsons' and not backup and (len(element.findall('input'))>1 or len(element.findall('prt'))>1):
-        raise ValueError('Parsons requires one input and one PRT; additional structures need manual review')
-    if model.get('version') in (2,3) and not backup:
+    if model.get('mode') in ('parsons','truefalse') and not backup and (len(element.findall('input'))>1 or len(element.findall('prt'))>1):
+        raise ValueError('This editor requires one input and one PRT; additional structures need manual review / 追加の解答欄・PRTは汎用エディターで確認してください。')
+    if model.get('version') in (2,3,4) and not backup:
         previous_inputs={i.findtext('name'):i for i in element.findall('input')}
         for inp in sections.findall('input'):
             previous=previous_inputs.get(inp.findtext('name'))
@@ -102,7 +105,7 @@ def apply_template(element, text, backup=False):
             known = {c.tag for c in new}
             for child in old:
                 if child.tag not in known:new.append(copy.deepcopy(child))
-            if model.get('mode')=='parsons':
+            if model.get('mode') in ('parsons','truefalse'):
                 allowed={c.tag for c in new.find('node')}
                 for removed in old.findall('node')[len(new.findall('node')):]:
                     if removed.attrib or any(c.tag not in allowed for c in removed):
@@ -178,6 +181,18 @@ def apply_template(element, text, backup=False):
                 if textnode is None:textnode=E.SubElement(target,'text')
                 target=textnode
             target.text=content
+    if model.get('mode') == 'truefalse':
+        from truefalse import generated_variables, layout
+        parent = element.find('plugin_qtype_stack_question/stackoptions') if backup else element
+        for tag, content in [('questionvariables', generated_variables(parent.findtext('questionvariables' if backup else 'questionvariables/text',''), model)), ('questiontext', layout(model))]:
+            target=parent.find(tag)
+            if target is None:target=E.SubElement(parent,tag)
+            if not backup:
+                if tag=='questiontext':target.set('format','html')
+                child=target.find('text')
+                if child is None:child=E.SubElement(target,'text')
+                target=child
+            target.text=content
     write_provenance(element, text, backup)
 
 
@@ -192,6 +207,6 @@ def write_provenance(element, text, backup=False):
     previous = template_metadata(variables)
     if previous and not variables[previous[0].end():].strip():
         variables = variables[:previous[0].start()]
-    metadata = {'schema':'prt-template-webapp-v1', 'version':1, 'application':'prt-template-webapp', 'template':json.loads(text)}
+    metadata = {'schema':'prt-template-webapp-v1', 'version':1, 'application':'tf-webapp' if json.loads(text).get('mode')=='truefalse' else 'prt-template-webapp', 'template':json.loads(text)}
     body = json.dumps(metadata, ensure_ascii=True).replace('/', '\\u002f').replace('>', '\\u003e')
     node.text = variables + ('' if variables.endswith('\n') else '\n') + '/* PRT_TEMPLATE_WEBAPP_V1\n' + body + '\n*/'
