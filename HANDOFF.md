@@ -662,3 +662,8 @@ git diff --check
 - MCQのfile-ui.jsに合わせ、TFのCSV/XMLメニューを操作項目選択後・外側クリック・Escで閉じる。他方を開く際も先のメニューを閉じる。エラー/保存先キャンセルを含め、非同期処理の成功待ちでメニューを開いたままにしない。ファイルピッカーの呼出経路・保存処理は維持。
 - 実Chromiumのbrowser_toolbar.cjsでCSV/XML保存後、表示後、問題名未入力エラー後、外側クリック、Esc、排他的展開を確認。英語UIの表示ダイアログも正常。browser_tf.cjsで実CSV/XML保存再読込と翻訳等の回帰を確認。両試験でpageerrorなし。node --checkとgit diff --check成功。
 - 既存の検証済み実装に合わせたUI修正のみ。今回のJS・キャッシュ版・ブラウザー回帰テスト・本メモ4ファイルをc-p対象とする。既存HEAD・ステージ状態・並行作業は保持。Mac/Windows実機・ネイティブ保存先ダイアログは未確認。
+
+## 2026-11-11 TFの手動翻訳指示と展開言語欄
+
+- 手動翻訳の指示文に標準言語・選択済みの翻訳先・保護するSTACK記法とJSONの返答形式を明記。既存の翻訳検証を経て反映する。標準言語と展開言語を横並びに配置し、狭幅では折り返す。MCQの既存の手動翻訳依頼は翻訳先と形式を指定していることを確認。
+- 検証: TFのPythonテスト17件、Chromiumの `browser_tf.cjs` と `browser_toolbar.cjs`、MCQの `node scripts/tests/test_translation_files.cjs`、JS構文と `git diff --check` 成功。翻訳の取り込みは合成応答で検証し、Geminiへの実送信は未実施。

@@ -15,9 +15,19 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'正しい主張 2 shared');
  // Keep ja/en active; deselect other translations without deleting their text.
  for(const code of ['fr','it','de','pt','zh','ko','ru','sv','es'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
- await page.locator('#translationRequest').click();let source=JSON.parse(await page.locator('#translationJSON').inputValue());
+ const baseLanguage=await page.locator('#baseLanguage').boundingBox();
+ const targetLanguage=await page.locator('#languages label').first().boundingBox();
+ assert(baseLanguage.x+baseLanguage.width<targetLanguage.x);
+ assert(Math.abs(baseLanguage.y+baseLanguage.height/2-targetLanguage.y-targetLanguage.height/2)<2);
+ await page.locator('#translationRequest').click();
+ const prompt=await page.locator('#translationJSON').inputValue();
+ assert.match(prompt,/ja から en に今すぐ翻訳してください/);
+ assert.match(prompt,/完成したJSONオブジェクトだけ/);
+ const source=JSON.parse(prompt.split('\n\n')[1]);
+ assert.deepEqual(Object.keys(source.translations),['en']);
+ assert.deepEqual(Object.keys(source.translations.en),Object.keys(source.messages));
  assert(source.messages['correct:0']);assert(!source.messages['correct:1']);assert(source.messages.msgT&&source.messages.msgF);
- source.translations={en:Object.fromEntries(Object.entries(source.messages).map(([k,v])=>[k,{true:v.true,false:''}]))};
+ for(const [key,value] of Object.entries(source.messages))source.translations.en[key].true=value.true;
  source.translations.en.noIdeaLabel.true='No idea, synthetic.';source.translations.en.msgT.true='Correct, synthetic.';await page.locator('#translationJSON').fill(JSON.stringify(source));await page.locator('#translationApply').click();
  await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.');assert.equal(await page.locator('#labelNoIdea').inputValue(),'No idea, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
  // Export CSV via real UI, reimport into an independent editor page.
