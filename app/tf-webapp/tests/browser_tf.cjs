@@ -13,22 +13,35 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.locator('#name').fill('Synthetic TF');await page.locator('#variables').fill('A:42;');
  await page.locator('#correct .assertion-actions button:last-child').first().click();await page.locator('#correct textarea').nth(1).fill('\\(1+1=2\\)');
  await page.locator('#correct input[type=checkbox]').nth(1).uncheck();assert.equal(await page.locator('#correct textarea').nth(1).getAttribute('aria-label'),'正しい主張 2 shared');
- // Keep ja/en active; deselect other translations without deleting their text.
- for(const code of ['fr','it','de','pt','zh','ko','ru','sv','es'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
+ // Keep ja/en/fr active; deselect other translations without deleting their text.
+ for(const code of ['it','de','pt','zh','ko','ru','sv','es'])await page.locator('#languages label').filter({hasText:new RegExp('^'+code+'$')}).locator('input').uncheck();
  const baseLanguage=await page.locator('#baseLanguage').boundingBox();
  const targetLanguage=await page.locator('#languages label').first().boundingBox();
  assert(baseLanguage.x+baseLanguage.width<targetLanguage.x);
  assert(Math.abs(baseLanguage.y+baseLanguage.height/2-targetLanguage.y-targetLanguage.height/2)<2);
  await page.locator('#translationRequest').click();
  const prompt=await page.locator('#translationJSON').inputValue();
- assert.match(prompt,/ja から en に今すぐ翻訳してください/);
+ assert.match(prompt,/ja から en, fr に今すぐ翻訳してください/);
  assert.match(prompt,/完成したJSONオブジェクトだけ/);
  const source=JSON.parse(prompt.split('\n\n')[1]);
- assert.deepEqual(Object.keys(source.translations),['en']);
+ assert.deepEqual(Object.keys(source.translations),['en','fr']);
  assert.deepEqual(Object.keys(source.translations.en),Object.keys(source.messages));
  assert(source.messages['correct:0']);assert(!source.messages['correct:1']);assert(source.messages.msgT&&source.messages.msgF);
- for(const [key,value] of Object.entries(source.messages))source.translations.en[key].true=value.true;
+ for(const result of Object.values(source.translations)){
+  for(const [key,value] of Object.entries(source.messages))result[key].true=value.true;
+ }
+ source.translations.fr.msgT.true='Bonne réponse, exemple.';
+ source.messages=Object.fromEntries(Object.entries(source.messages).reverse().map(([id,value])=>[id,{false:value.false,true:value.true}]));
+ const feedback=source.messages.msgT.true;
+ source.messages.msgT.true='Changed source';
+ await page.locator('#translationJSON').fill(JSON.stringify(source));
+ await page.locator('#translationApply').click();
+ await page.locator('#translationStatus').getByText(/翻訳元が変わっています/).waitFor();
+ source.messages.msgT.true=feedback;
  source.translations.en.noIdeaLabel.true='No idea, synthetic.';source.translations.en.msgT.true='Correct, synthetic.';await page.locator('#translationJSON').fill(JSON.stringify(source));await page.locator('#translationApply').click();
+ await page.locator('#translationStatus').getByText(/翻訳を反映しました（en, fr）/).waitFor();
+ await page.locator('#textLanguage').selectOption('fr');
+ assert.equal(await page.locator('#feedbackTrue').inputValue(),'Bonne réponse, exemple.');
  await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.');assert.equal(await page.locator('#labelNoIdea').inputValue(),'No idea, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
  // Export CSV via real UI, reimport into an independent editor page.
  await page.locator('#uiLanguage').selectOption('en');
@@ -36,7 +49,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  let waiting=page.waitForEvent('download');await csvMenu.getByRole('button',{name:'Save',exact:true}).click();let dl=await waiting;const csv=await fs.readFile(await dl.path());assert(csv.toString().includes('%_noidea,false'));
  const second=await browser.newPage();await second.addInitScript(()=>{window.showSaveFilePicker=undefined;});second.on('pageerror',e=>errors.push(String(e)));await second.goto(base+'/?lang=en');await second.locator('#form:not([hidden])').waitFor();await second.locator('#sourceFile').setInputFiles({name:'Synthetic.csv',mimeType:'text/csv',buffer:csv});await second.waitForFunction(()=>document.getElementById('name').value==='Synthetic TF');
  assert.equal(await second.locator('#correct textarea').count(),2);assert.equal(await second.locator('#variables').inputValue(),'A:42;');
- const xmlMenu=second.locator('#menus details').filter({has:second.locator('summary',{hasText:'XML'})});await xmlMenu.locator('summary').click();waiting=second.waitForEvent('download');await xmlMenu.getByRole('button',{name:'Save',exact:true}).click();dl=await waiting;const xml=(await fs.readFile(await dl.path())).toString();assert(xml.includes('AssertC2:castext('));assert(xml.includes('rand([AssertC1, AssertC2])'));assert(xml.includes('A:42;'));assert(xml.includes('Correct, synthetic.'));
+ const xmlMenu=second.locator('#menus details').filter({has:second.locator('summary',{hasText:'XML'})});await xmlMenu.locator('summary').click();waiting=second.waitForEvent('download');await xmlMenu.getByRole('button',{name:'Save',exact:true}).click();dl=await waiting;const xml=(await fs.readFile(await dl.path())).toString();assert(xml.includes('AssertC2:castext('));assert(xml.includes('rand([AssertC1, AssertC2])'));assert(xml.includes('A:42;'));assert(xml.includes('Correct, synthetic.'));assert(xml.includes('Bonne réponse, exemple.'));
  // Mock only the external STACK response: verify actual preview UI transport and isolation.
  await second.route('**/api/stack/preview',route=>route.fulfill({json:{questionrender:'<p>TF synthetic</p><select name="mcqpreview_ans1"><option value="1">True</option><option value="2">False</option></select>',practiceToken:'synthetic-token'}}));
  await second.route('**/api/stack/grade',async route=>{const body=route.request().postDataJSON();assert.equal(body.token,'synthetic-token');assert.equal(body.answers.ans1,'2');await route.fulfill({json:{isgradable:true,score:0,specificfeedback:'Synthetic feedback \\( {\\color{red}{\\underline{1}}} \\)' }});});
