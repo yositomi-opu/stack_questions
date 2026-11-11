@@ -135,6 +135,12 @@ def base_variables(code):
     return (code.strip()+'\n'+user).strip()
 
 
+def flag_definitions(model, *, random_expression='rand([1, 2])'):
+    truth = {'random': random_expression, 'true': '1', 'false': '2'}[model['truth']]
+    no_idea = str(model['%_noidea']).lower()
+    return [f'%_tf:{truth};', f'%_noidea:{no_idea};']
+
+
 def generated_variables(code,m):
     validate(m)
     if any(code[a:b] in (BEGIN,END,USER_BEGIN,USER_END) for a,b in comment_spans(code)):
@@ -145,7 +151,7 @@ def generated_variables(code,m):
     reserved={'%_tf','%_tfmsgL','%_noidea','va1','qtext0','qtext','ta1','msgT','msgF','%_noidea_msg','%__mcq_lang','%__prt_get'}
     if any(defined(s) in reserved or re.fullmatch(r'Assert[CW]\d+',defined(s) or '') for s in statements(base)):raise ValueError('TF variable name conflict / 問題変数にTF予約変数が重複しています。')
     lines=[BEGIN]+['stack_include('+quote(url)+');' for url in m['includes']]+[HELPERS]
-    lines+=['%_tf:'+{'random':'rand([1, 2])','true':'1','false':'2'}[m['truth']]+';', '%_noidea:'+str(m['%_noidea']).lower()+';']
+    lines += flag_definitions(m)
     lines += [USER_BEGIN,base,USER_END]
     langs=m['languages'];labels={k:m['labels'][k] for k in langs}
     lines+=['%_tfmsgL:%__mcq_lang(['+', '.join('['+quote(k)+', ['+', '.join(quote(t) for t in labels[k])+']]' for k in langs)+'], %_STACK_LANG);','va1:makelist([if k=0 then notanswered else k, if k=%_tf then true else false, if k=0 then "-" else %_tfmsgL[k]], k, 0, 2);']

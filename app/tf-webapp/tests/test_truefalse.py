@@ -172,14 +172,21 @@ class HTTPTests(unittest.TestCase):
     def test_variable_evaluation_uses_libraries_and_current_draft(self):
         with self.call('/api/session',{}) as r:self.sid=json.load(r)['session']
         with self.call('/api/state') as r:state=json.load(r)
-        fields=state['editFields'];fields['questionvariables']='a:42; b:[a];'
+        fields=state['editFields'];fields['questionvariables']='a:%_tf; b:%_noidea;'
         with patch.object(server.runtime.authoring_settings,'evaluate_via_mcq',return_value={'ok':True,'variables':[]}) as evaluate:
-            with self.call('/api/variables/evaluate',dict(revision=state['revision'],fields=fields)) as r:self.assertTrue(json.load(r)['ok'])
-            base,code,names=evaluate.call_args.args
-            self.assertEqual(base,'http://127.0.0.1:4173');self.assertEqual(names,['a','b'])
-            self.assertLess(code.index('stack_include('),code.index('a:42;'))
+            model=json.loads(fields['template'])
+            for truth,expression,no_idea in [('random','random(2)+1',False),('true','1',True),('false','2',False)]:
+                model.update({'truth':truth,'%_noidea':no_idea})
+                fields['template']=json.dumps(model)
+                with self.call('/api/variables/evaluate',dict(revision=state['revision'],fields=fields)) as r:
+                    self.assertTrue(json.load(r)['ok'])
+                base,code,names=evaluate.call_args.args
+                self.assertEqual(base,'http://127.0.0.1:4173')
+                self.assertEqual(names,['%_tf','%_noidea','a','b'])
+                self.assertLess(code.index('stack_include('),code.index('%_tf:'))
+                self.assertIn(f'%_tf:{expression};\n%_noidea:{str(no_idea).lower()};\na:%_tf; b:%_noidea;',code)
             with self.assertRaises(HTTPError):self.call('/api/variables/evaluate',dict(revision='stale',fields=fields))
-            self.assertEqual(evaluate.call_count,1)
+            self.assertEqual(evaluate.call_count,3)
         with self.call('/api/state') as r:self.assertEqual(json.load(r)['revision'],state['revision'])
 
     def test_session_export_open_and_origin(self):

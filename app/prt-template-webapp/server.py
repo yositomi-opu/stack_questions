@@ -180,14 +180,19 @@ class Handler(BaseHTTPRequestHandler):
                 if self.path=='/api/libraries/validate':return self.reply(authoring_settings.validate_base(d))
                 if d.get('revision')!=session['revision']:raise ValueError('Editor view is outdated')
                 fields=d['fields'];validate_fields(fields)
-                from truefalse import validate as validate_tf
+                from truefalse import flag_definitions, validate as validate_tf
                 from prt_nodes import statements,defined,quote
                 model=validate_tf(json.loads(fields['template']),complete=False)
                 code=fields.get('questionvariables','')
                 import re
                 names=list(dict.fromkeys(defined(s) for s in statements(code) if defined(s) and re.fullmatch(r'[%A-Za-z_][%A-Za-z0-9_]*',defined(s))))
-                variables='\n'.join('stack_include('+quote(u)+');' for u in model['includes'])+'\n'+code
-                return self.reply(authoring_settings.evaluate_via_mcq(self.server.preview.base,variables,names))
+                flags = ['%_tf', '%_noidea']
+                if any(name in flags for name in names):
+                    raise ValueError('TF variable name conflict / 問題変数にTF予約変数が重複しています。')
+                includes = ['stack_include('+quote(u)+');' for u in model['includes']]
+                # Use native Maxima randomness so evaluation also works without STACK's rand.
+                variables = '\n'.join([*includes, *flag_definitions(model, random_expression='random(2)+1'), code])
+                return self.reply(authoring_settings.evaluate_via_mcq(self.server.preview.base,variables,flags+names))
             with self.server.lock:
                 if self.path=='/api/session':
                     d=json.loads(raw);callback=d.get('callback')
