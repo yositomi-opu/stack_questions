@@ -25,3 +25,10 @@ header .header-actions{margin-left:auto;justify-content:flex-end;max-width:100%}
 .language-settings>label,.target-languages,#languages,#languages label{display:flex;align-items:center;gap:6px}
 .target-languages,#languages{flex-wrap:wrap}
 #languages{gap:4px 10px}
+
+.variables-heading>.help-wrap,.variables-heading>.help-wrap>.help{margin:0}
+@media(max-width:600px){
+ .variables-heading{position:relative}
+ .variables-heading>.help-wrap{position:static}
+ .variables-heading .help-tip{left:0;right:auto;top:30px;box-sizing:border-box;max-width:100%}
+}

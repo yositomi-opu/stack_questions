@@ -667,3 +667,8 @@ git diff --check
 
 - 手動翻訳の指示文に標準言語・選択済みの翻訳先・保護するSTACK記法とJSONの返答形式を明記。既存の翻訳検証を経て反映する。標準言語と展開言語を横並びに配置し、狭幅では折り返す。MCQの既存の手動翻訳依頼は翻訳先と形式を指定していることを確認。
 - 検証: TFのPythonテスト17件、Chromiumの `browser_tf.cjs` と `browser_toolbar.cjs`、MCQの `node scripts/tests/test_translation_files.cjs`、JS構文と `git diff --check` 成功。翻訳の取り込みは合成応答で検証し、Geminiへの実送信は未実施。
+
+## 2026-11-11 TF問題変数のヘルプ
+
+- 「問題変数」と「評価」の間に日英のヘルプを追加。問題変数で参照できる `%_tf`（1は「正しい」、2は「正しくない」）と `%_noidea`（「わからない」の使用設定）を説明。
+- 検証: `browser_toolbar.cjs`、Chromiumでの表示位置・日本語ホバー・英語キーボードフォーカス・320pxでの表示、`git diff --check` が成功。
