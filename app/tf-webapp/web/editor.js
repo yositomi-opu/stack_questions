@@ -30,12 +30,45 @@ async function load(next){state=next;model=JSON.parse(next.editFields.template||
 function download(blob,name){const a=node('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 async function apply(){nameRequired();const data=fields(),signature=JSON.stringify(data);state=await(await request('/api/action',{revision:state.revision,fields:data})).json();if(JSON.stringify(fields())!==signature){status(tr('保存中の追加編集が残っています。再度保存してください。','Further edits remain; save again.'));return;}saved();if(state.callbackOrigin&&window.opener)window.opener.postMessage({type:'qbank-editor-saved',token:state.token},state.callbackOrigin);status(tr('保存しました。','Saved.'));if(state.callbackOrigin)window.close();}
 $('saveClose').onclick=()=>apply().catch(e=>status(e.message));
-async function save(format,overwrite=false,view=false){nameRequired();if(format==='xml'&&!view&&state.callbackOrigin){await apply();return;}const data=fields(),signature=JSON.stringify(data);const picker=window.showSaveFilePicker;let handle=overwrite?handles[format]:null;const title=data.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_');const filename=(format==='xml'?'003.':'')+title+(format==='xml'?'-tf':'')+'.'+format;
- if(!view&&picker&&!handle)handle=await picker({suggestedName:filename});
- const response=await request('/api/export',{revision:state.revision,format,fields:data});const blob=await response.blob();
+function explainOverwrite(){
+ status(tr(
+  'このブラウザーでは保存済みファイルに直接上書きできません。保存先を毎回確認する設定にして、「保存」で同じファイルを選び、置き換えを確認してください。',
+  'This browser cannot overwrite a saved file directly. Enable asking where to save each download, then use Save, choose the same file, and confirm replacement.'
+ ));
+}
+async function save(format,overwrite=false,view=false){
+ if(overwrite && !handles[format] && !window.showSaveFilePicker && !(format==='xml' && state.callbackOrigin)){
+  explainOverwrite();
+  return;
+ }
+ nameRequired();
+ if(format==='xml'&&!view&&state.callbackOrigin){await apply();return;}
+ const data=fields(),signature=JSON.stringify(data);
+ const title=data.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_');
+ const filename=(format==='xml'?'003.':'')+title+(format==='xml'?'-tf':'')+'.'+format;
+ let handle=overwrite?handles[format]:null;
+ if(!view && !handle && window.showSaveFilePicker){
+  try{
+   const mime=format==='csv'?'text/csv':'application/xml';
+   handle=await window.showSaveFilePicker({suggestedName:filename,id:'tf-'+format,
+    types:[{description:format.toUpperCase(),accept:{[mime]:['.'+format]}}]});
+  }catch(error){
+   if(error.name==='AbortError')return;
+   if(error.name!=='SecurityError')throw error;
+   if(overwrite){explainOverwrite();return;}
+  }
+ }
+ const response=await request('/api/export',{revision:state.revision,format,fields:data});
+ const blob=await response.blob();
  if(view){const d=node('dialog'),pre=node('pre',await blob.text());d.append(pre);button(d,tr('閉じる','Close'),()=>d.remove());document.body.append(d);d.showModal();return;}
- if(handle){const w=await handle.createWritable();await w.write(blob);await w.close();handles[format]=handle;}else{if(overwrite)throw Error(tr('このブラウザーでは上書きできません。','Overwrite is unavailable in this browser.'));download(blob,filename);}
- if(JSON.stringify(fields())===signature)saved();status(tr('保存しました。','Saved.'));
+ if(handle){
+  const writable=await handle.createWritable();
+  try{await writable.write(blob);await writable.close();}
+  catch(error){await writable.abort().catch(()=>{});throw error;}
+  handles[format]=handle;
+ }else download(blob,filename);
+ if(JSON.stringify(fields())===signature)saved();
+ status(handle?tr('保存しました。','Saved.'):tr('ダウンロードを開始しました。','Download started.'));
 }
 function translationMaps(){return [['prompt',model.prompt],['noIdeaLabel',model.noIdeaLabels],['msgT',model.msgT],['msgF',model.msgF],['labelTrue',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[0]]))],['labelFalse',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[1]]))],...['correct','wrong'].flatMap(side=>model[side].flatMap((s,i)=>s.dependent?[[side+':'+i,s.messages]]:[]))];}
 function translationSource(code){return Object.fromEntries(translationMaps().map(([id,m])=>[id,{true:m[code]||'',false:''}]));}
@@ -51,7 +84,7 @@ const translationStatus=text=>$('translationStatus').textContent=text;
 async function applyTranslations(translations,source){if(!translations||typeof translations!=='object'||Array.isArray(translations)||!Object.keys(translations).length)throw Error(tr('翻訳がありません。','No translations supplied.'));const signature=JSON.stringify(model),staged={};for(const [code,result] of Object.entries(translations)){if(!model.languages.includes(code)||code===model.baseLanguage)throw Error('Unknown translation language');if(JSON.stringify(Object.keys(source).sort())!==JSON.stringify(Object.keys(result).sort()))throw Error('Translation keys differ');staged[code]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const batch=keys.slice(i,i+50),messages=Object.fromEntries(batch.map(k=>[k,source[k]])),subset=Object.fromEntries(batch.map(k=>[k,result[k]]));Object.assign(staged[code],(await(await request('/api/translation-validate',{messages,result:subset})).json()).result);}}current();if(JSON.stringify(model)!==signature)throw Error(tr('翻訳中に編集が変わったため反映しません。','Edits changed during translation.'));for(const [code,result] of Object.entries(staged)){for(const [key,map] of translationMaps()){if(key==='labelTrue')model.labels[code][0]=result[key].true;else if(key==='labelFalse')model.labels[code][1]=result[key].true;else map[code]=result[key].true;}}mark();render();}
 function closeFileMenus(except=null){for(const menu of $('menus').querySelectorAll('details'))if(menu!==except)menu.open=false;}
 function menus(){
- for(const format of ['csv','xml']){const details=node('details'),summary=node('summary',format.toUpperCase());const items=node('div');items.className='menu-items';details.append(summary,items);for(const [ja,en,fn] of [['読込','Open',()=>{if(state.callbackOrigin)throw Error(tr('別の単独画面で開いてください。','Open files in a standalone editor.'));$('sourceFile').click();}],['表示','View',()=>save(format,false,true)],['保存','Save',()=>save(format)],['上書','Overwrite',()=>save(format,true)]]){const b=button(items,tr(ja,en),fn);b.dataset.ja=ja;b.dataset.en=en;if(en==='Overwrite'&&!window.showSaveFilePicker)b.disabled=true;} $('menus').append(details);}
+ for(const format of ['csv','xml']){const details=node('details'),summary=node('summary',format.toUpperCase());const items=node('div');items.className='menu-items';details.append(summary,items);for(const [ja,en,fn] of [['読込','Open',()=>{if(state.callbackOrigin)throw Error(tr('別の単独画面で開いてください。','Open files in a standalone editor.'));$('sourceFile').click();}],['表示','View',()=>save(format,false,true)],['保存','Save',()=>save(format)],['上書','Overwrite',()=>save(format,true)]]){const b=button(items,tr(ja,en),fn);b.dataset.ja=ja;b.dataset.en=en;} $('menus').append(details);}
  $('menus').append($('previewButton'));
  const b=button($('menus'),tr('作業ZIP','Project ZIP'),async()=>{nameRequired();const data=fields(),signature=JSON.stringify(data);download(await(await request('/api/project-export',{revision:state.revision,fields:data})).blob(),'tf-project.zip');if(JSON.stringify(fields())===signature)saved();});b.dataset.ja='作業ZIP';b.dataset.en='Project ZIP';
  const original=button($('menus'),tr('原本','Original'),async()=>download(await(await request('/api/original')).blob(),'TF-original.xml'));original.dataset.ja='原本';original.dataset.en='Original';
