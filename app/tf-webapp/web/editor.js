@@ -5,7 +5,7 @@ let sid=params.get('session'),ui=params.get('lang')==='en'?'en':'ja',state,model
 const tr=(ja,en)=>ui==='ja'?ja:en;
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const status=text=>$('status').textContent=text;
-async function request(path,data,raw=false){const response=await fetch(path,{method:data===undefined?'GET':'POST',headers:{'X-Qbank-Request':'1','X-Editor-Session':sid||''},...(data===undefined?{}:{body:raw?data:JSON.stringify(data)})});if(!response.ok){const d=await response.json();throw Error(d.error);}return response;}
+async function request(path,data,raw=false){const response=await fetch(path,{method:data===undefined?'GET':'POST',headers:{'X-Qbank-Request':'1','X-Editor-Session':sid||''},...(data===undefined?{}:{body:raw?data:JSON.stringify(data)})});if(!response.ok){const d=await response.json();throw Object.assign(Error(d.error),{code:d.code});}return response;}
 function mark(){dirty=true;$('dirty').textContent='*';if(model)updateEvaluationStatus();}
 function saved(){dirty=false;$('dirty').textContent=' ';}
 function current(){if(!model)return;model.prompt[textLang]=$('question').value;model.msgT[textLang]=$('feedbackTrue').value;model.msgF[textLang]=$('feedbackFalse').value;model.labels[textLang]=[$('labelTrue').value,$('labelFalse').value];model.noIdeaLabels[textLang]=$('labelNoIdea').value;model.truth=$('truth').value;model['%_noidea']=$('noIdea').value==='true';}
@@ -67,7 +67,7 @@ for(const id of ['name','variables','question','generalfeedback','feedbackTrue',
 for(const id of ['truth','noIdea'])$(id).onchange=()=>{current();mark();};
 function insertAssertion(side,index){current();if(model[side].length>=100){status(tr('上限100件です。','Maximum 100 statements.'));return;}model[side].splice(index+1,0,{dependent:true,shared:'',messages:Object.fromEntries(model.languages.map(k=>[k,'']))});mark();render();$(side).children[index+1].querySelector('textarea').focus();}
 $('sourceFile').onchange=async()=>{const f=$('sourceFile').files[0];if(!f)return;try{if(state.callbackOrigin)throw Error('Open files in a standalone editor');if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;await load(await(await request('/api/open',await f.arrayBuffer(),true)).json());handles={};}catch(e){status(e.message);}finally{$('sourceFile').value='';}};
-$('newQuestion').onclick=async()=>{try{if(state.callbackOrigin)throw Error('Open a separate standalone editor');if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;sid=(await(await request('/api/session',{})).json()).session;const u=new URL(location.href);u.searchParams.set('session',sid);u.searchParams.set('standalone','1');history.replaceState(null,'',u);handles={};await load(await(await request('/api/state')).json());}catch(e){status(e.message);}};
+$('newQuestion').onclick=async()=>{try{if(state.callbackOrigin)throw Error('Open a separate standalone editor');if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;await openStandaloneSample();}catch(e){status(e.message);}};
 $('translationRequest').onclick=()=>{
  current();
  const sourceLanguage=model.baseLanguage,targets=model.languages.filter(code=>code!==sourceLanguage);
@@ -126,4 +126,27 @@ $('evaluateVariables').onclick=async()=>{if(evaluating)return;current();const si
 
 window.MCQ_PRACTICE={language:()=>textLang,languages:()=>[...model.languages],snapshot:()=>{nameRequired();return {revision:state.revision,fields:fields(),lang:textLang};},request:async(route,payload)=>{const result=await(await request('/api/stack/'+route,route==='grade'?{revision:state.revision,token:payload.token,answers:payload.answers}:payload)).json();return result;}};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
-(async()=>{try{menus();if(!sid){sid=(await(await request('/api/session',{})).json()).session;const u=new URL(location.href);u.searchParams.set('session',sid);u.searchParams.set('standalone','1');history.replaceState(null,'',u);}await load(await(await request('/api/state')).json());}catch(e){status(e.message);}})();
+async function loadSession(){
+ await load(await(await request('/api/state')).json());
+}
+async function openStandaloneSample(){
+ sid=(await(await request('/api/session',{})).json()).session;
+ await loadSession();
+ const url=new URL(location.href);
+ url.searchParams.set('session',sid);
+ url.searchParams.set('standalone','1');
+ history.replaceState(null,'',url);
+ handles={};
+}
+(async()=>{
+ try{
+  menus();
+  if(!sid){await openStandaloneSample();return;}
+  try{await loadSession();}
+  catch(error){
+   if(params.get('standalone')!=='1'||error.code!=='session_expired')throw error;
+   await openStandaloneSample();
+   status(tr('編集セッションが失効したため、新規サンプルを開きました。','The editing session expired. A new sample was opened.'));
+  }
+ }catch(error){status(error.message);}
+})();
