@@ -717,3 +717,8 @@ git diff --check
 
 - MCQのJSONファイル依頼にHTMLタグを文字どおり保持する例を追加。定型PRT・Parsonsは翻訳元、対象言語、保護対象、JSONコードブロックを指定する指示文を生成する。各アプリの対象取り込みで問題文末尾の <br> が空行化した場合に復元し、既存の検証を適用する。
 - 定型PRTのChromiumテスト、ParsonsのChromiumでのコードブロック貼付・タグ復元、MCQの test_translation_files.cjs、定型PRTのPythonテスト25件、Parsonsの4件、JS構文と差分チェック成功。実Gemini送信は未実施。
+
+## 2026-11-13 TF翻訳後の編集言語
+
+- 標準言語で編集中に手動翻訳を反映すると、反映した最初の言語を表示。翻訳欄にも同期する編集言語セレクターを置き、入力と変更の両イベントで切り替える。
+- Chromiumで browser_tf.cjs、browser_toolbar.cjs、合成応答の全10言語の反映と両セレクターの同期を確認。報告時のブラウザーでの再現は未確認。

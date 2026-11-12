@@ -14,7 +14,13 @@ function nameRequired(){if(!$('name').value.trim()){$('name').focus();throw Erro
 function button(parent,label,fn){const b=node('button',label);b.type='button';b.onclick=()=>{try{const result=fn();if(result?.catch)result.catch(e=>status(e.message));}catch(e){status(e.message);}};parent.append(b);return b;}
 function labels(){document.documentElement.lang=ui;$('uiLanguage').value=ui;document.querySelectorAll('[data-ja]').forEach(n=>n.textContent=n.dataset[ui]);$('saveClose').hidden=!state?.callbackOrigin;$('saveClose').textContent=tr('保存して終了（問題バンクへ戻る）','Save and close (return to bank)');$('newQuestion').disabled=!!state?.callbackOrigin;$('name').placeholder=tr('問題のタイトル','Question title');}
 function controls(){
- $('textLanguage').replaceChildren(...model.languages.map(x=>new Option(x,x)));$('textLanguage').value=textLang;
+ for(const id of ['textLanguage','translationLanguage']){
+  const select=$(id);
+  if(JSON.stringify([...select.options].map(option=>option.value))!==JSON.stringify(model.languages)){
+   select.replaceChildren(...model.languages.map(code=>new Option(code,code)));
+  }
+  select.value=textLang;
+ }
  $('baseLanguage').replaceChildren(...model.languages.map(x=>new Option(x,x)));$('baseLanguage').value=model.baseLanguage;
  const codes=[...new Set(['en','ja','fr','it','de','pt','zh','ko','ru','sv','es',...model.languages])];$('languages').replaceChildren();
  for(const code of codes){const label=node('label',code),check=node('input');check.type='checkbox';check.checked=model.languages.includes(code);check.onchange=()=>{current();if(check.checked){model.languages.push(code);for(const m of [model.prompt,model.msgT,model.msgF,model.noIdeaLabels,...model.correct.map(s=>s.messages),...model.wrong.map(s=>s.messages)])m[code]??='';model.labels[code]??=['',''];}else{if(code===model.baseLanguage){check.checked=true;status(tr('標準言語は解除できません。','The base language must remain selected.'));return;}model.languages=model.languages.filter(x=>x!==code);if(textLang===code)textLang=model.baseLanguage;}mark();render();};label.prepend(check);$('languages').append(label);}
@@ -115,7 +121,16 @@ function menus(){
  document.addEventListener('click',event=>{if(!event.target.closest('#menus details'))closeFileMenus();});
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFileMenus();});
 }
-$('uiLanguage').onchange=()=>{current();ui=$('uiLanguage').value;render();};$('textLanguage').onchange=()=>{current();textLang=$('textLanguage').value;render();};$('baseLanguage').onchange=()=>{current();model.baseLanguage=$('baseLanguage').value;mark();};
+$('uiLanguage').onchange=()=>{current();ui=$('uiLanguage').value;render();};$('baseLanguage').onchange=()=>{current();model.baseLanguage=$('baseLanguage').value;mark();};
+function switchEditingLanguage(code){
+ if(code===textLang || !model.languages.includes(code))return;
+ current();
+ textLang=code;
+ render();
+}
+for(const id of ['textLanguage','translationLanguage']){
+ for(const event of ['input','change'])$(id).addEventListener(event,e=>switchEditingLanguage(e.target.value));
+}
 for(const id of ['name','variables','question','generalfeedback','feedbackTrue','feedbackFalse','labelTrue','labelFalse','labelNoIdea'])$(id).addEventListener('input',mark);
 for(const id of ['truth','noIdea'])$(id).onchange=()=>{current();mark();};
 function insertAssertion(side,index){current();if(model[side].length>=100){status(tr('上限100件です。','Maximum 100 statements.'));return;}model[side].splice(index+1,0,{dependent:true,shared:'',messages:Object.fromEntries(model.languages.map(k=>[k,'']))});mark();render();$(side).children[index+1].querySelector('textarea').focus();}
@@ -194,8 +209,10 @@ $('translationApply').onclick=async()=>{
   }
   restorePromptBreak(data.translations,source);
   await applyTranslations(data.translations,source);
-  const languages=Object.keys(data.translations).join(', ');
-  translationStatus(tr(`翻訳を反映しました（${languages}）。上の「編集言語」を切り替えると確認できます。`,`Translations applied (${languages}). Select an editing language above to review them.`));
+  const translated=Object.keys(data.translations);
+  if(textLang===model.baseLanguage)switchEditingLanguage(translated[0]);
+  const languages=translated.join(', ');
+  translationStatus(tr(`翻訳を反映しました（${languages}）。「編集言語」で表示する翻訳を選べます。`,`Translations applied (${languages}). Use Editing language to review the translations.`));
  }catch(e){translationStatus(tr('反映できませんでした。','Could not apply translations.')+' '+e.message);}
  finally{button.disabled=false;}
 };
