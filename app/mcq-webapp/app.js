@@ -2843,6 +2843,7 @@ function prepareTranslationRequest() {
   el.translationJson.value = [
     uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
     uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
+    uiText("HTMLタグは文字どおり保持してください。例えば <br> は改行や空行に置き換えず、JSON文字列の中にそのまま残してください。"),
     uiText("CAS式は文字列内の文章だけを翻訳し、変数名・関数名・演算子・引用符を保持した式全体を返してください。nullの項目は翻訳不要です。"),
     uiText("数式の区切りと中身は一体として保持してください。括弧を外す、数式を分割する、数式内に訳文を入れることは禁止です。以下のJavaScript関数で原文と訳文の各項目を比較し、全言語で一致するまで修正してからファイルを保存してください。"),
     uiText("原文JSONは検証の基準です。最初にJSONとして解析して保持し、原文・候補ID・検査関数・期待値を変更したり、検査を省略したりしないでください。原文を手入力で再構成して検証に使わないでください。"),
@@ -2919,6 +2920,12 @@ function validateTranslationFile(result) {
   for (const [lang, translation] of Object.entries(result.translations)) {
     if (!LANGS.includes(lang) || lang === source.source_language) throw new Error(`${lang}: ${uiText("翻訳先の言語が不正です")}`);
     if (!translation || !Array.isArray(translation.rows)) throw new Error(`${lang}: ${uiText("翻訳行がありません")}`);
+    const sourceBreak = source.question_text?.match(/<br[ \t]*\/?>[ \t]*$/i)?.[0];
+    if (sourceBreak && typeof translation.question_text === "string"
+        && /(?:\r?\n[ \t]*)+$/.test(translation.question_text)
+        && !/<br\b[^>]*>\s*$/i.test(translation.question_text)) {
+      translation.question_text = translation.question_text.trimEnd() + sourceBreak;
+    }
     check(source.question_text, translation.question_text, `${lang} question_text`);
     const seen = new Set();
     for (const item of translation.rows) {

@@ -372,6 +372,7 @@
     "元のquestion_textとrowsは翻訳元として保持し、翻訳結果はtranslations内の各target_languagesのキーに入れてください。ptはポルトガル語です。": "Keep the original question_text and rows as source material. Put translated content under each target_languages key in translations. pt means Portuguese.",
     "説明文を付けず、入力と同じ構造に translations を追加した有効なJSONだけを返してください。": "Return only valid JSON with translations added to the same structure as the input, without explanatory text.",
     "translations は {\"en\":{\"question_text\":\"...\",\"rows\":[{\"id\":\"0\",\"choice\":\"...\",\"feedback\":\"...\"}]}} の形式にしてください。": "Use the format {\"en\":{\"question_text\":\"...\",\"rows\":[{\"id\":\"0\",\"choice\":\"...\",\"feedback\":\"...\"}]}} for translations.",
+    "HTMLタグは文字どおり保持してください。例えば <br> は改行や空行に置き換えず、JSON文字列の中にそのまま残してください。": "Preserve literal HTML tags in JSON strings. For example, keep <br> exactly as written instead of replacing it with a newline or blank line.",
     "翻訳依頼を作成しました。ChatGPTへ貼り付けてください。": "Translation request created. Paste it into ChatGPT.",
     "クリップボードへコピーしました": "Copied to clipboard",
     "欄を選択しました。コピー操作を行ってください。": "The field is selected. Copy it manually.",

@@ -1,4 +1,5 @@
 """Reuse MCQ's translation provider settings and math/CASText guards."""
+import re
 import importlib.util
 from pathlib import Path
 
@@ -12,7 +13,13 @@ def validate(source,result):
         if not isinstance(original,dict) or set(original)!={'true','false'} or not isinstance(result[key],dict) or set(result[key])!=set(original):raise ValueError('Invalid translation branches')
         for branch,text in original.items():
             if not isinstance(text,str):raise ValueError('Invalid source text')
-            shared.check_text(text,result[key][branch])
+            translated = result[key][branch]
+            if key in ('__question__', 'question') and isinstance(translated, str):
+                ending = re.search(r'<br[ \t]*/?>[ \t]*$', text, re.I)
+                if ending and re.search(r'(?:\r?\n[ \t]*)+\Z', translated) and not re.search(r'<br\b[^>]*>\s*\Z', translated, re.I):
+                    translated = translated.rstrip() + ending.group()
+            shared.check_text(text, translated)
+            result[key][branch] = translated
     return result
 
 def translate(payload):

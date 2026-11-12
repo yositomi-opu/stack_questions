@@ -44,9 +44,23 @@
   for(const code of [...new Set([...LANGS,...s.languages])]){const l=el('label',null,line);const cb=el('input',null,l);cb.type='checkbox';cb.dataset.language=code;cb.checked=s.languages.includes(code);cb.disabled=code===s.baseLanguage;el('span',code,l);cb.onchange=()=>{s.languages=cb.checked?[...s.languages,code]:s.languages.filter(x=>x!==code);render();};}
   const tools=el('div',null,box);tools.className='translation-tools';let prepared=null;
   const jsonDetails=el('details',null,box);jsonDetails.className='translations';el('summary',tr('手動翻訳JSON','Manual translation JSON'),jsonDetails);const area=el('textarea',null,jsonDetails);area.rows=6;area.id='translationJson';const status=el('p','',box);status.id='translationStatus';
-  button(tools,tr('翻訳依頼を作成','Prepare translation'),()=>{prepared=JSON.stringify(translationSource());area.value=JSON.stringify({sourceLanguage:s.baseLanguage,translations:Object.fromEntries(s.languages.filter(c=>c!==s.baseLanguage).map(c=>[c,translationSource()]))},null,2);jsonDetails.open=true;});
+  button(tools,tr('翻訳依頼を作成','Prepare translation'),()=>{
+   const targets=s.languages.filter(code=>code!==s.baseLanguage);
+   if(!targets.length){status.textContent=tr('展開先の言語を選択してください。','Select a target language.');return;}
+   const source=translationSource();
+   prepared=JSON.stringify(source);
+   const payload={sourceLanguage:s.baseLanguage,translations:Object.fromEntries(targets.map(code=>[code,source]))};
+   area.value=[
+   tr('以下のSTACK教材を '+s.baseLanguage+' から '+targets.join(', ')+' に翻訳してください。','Translate the STACK material below from '+s.baseLanguage+' into '+targets.join(', ')+'.'),
+   tr('translations の各言語で true と false の文章を翻訳し、空文字・キー・項目IDを保持してください。','Translate prose in the true and false fields for each language in translations. Preserve empty strings, keys and field IDs.'),
+   tr('数式、変数名、CASText、HTMLタグを保持してください。例えば <br> は改行に置き換えず、文字どおり残してください。','Preserve formulas, variable names, CASText and literal HTML tags. Keep <br> exactly as written instead of replacing it with a newline.'),
+   tr('引用符、バックスラッシュ、改行をJSONとしてエスケープし、json コードブロック1つで返してください。','Escape quotes, backslashes and line breaks for JSON. Reply with one fenced json code block.'),
+   '',JSON.stringify(payload,null,2)
+  ].join('\n');
+   jsonDetails.open=true;
+  });
   const apply=async(translations,signature)=>{const originalSource=translationSource();if(JSON.stringify(originalSource)!==signature)throw Error(tr('翻訳元が変更されました。依頼を作り直してください。','Source changed; prepare translation again.'));const staged={};for(const [code,result] of Object.entries(translations)){if(!s.languages.includes(code)||code===s.baseLanguage)throw Error('Unexpected target language / 翻訳先言語が不正です。');staged[code]=(await(await request('/api/translation-validate',{messages:originalSource,result})).json()).result;}if(JSON.stringify(translationSource())!==signature)throw Error('Source changed / 翻訳元が変更されました。');for(const [code,result] of Object.entries(staged)){s.questionMessages[code]=result.__question__.true;for(const row of model.checks){row.trueMessages[code]=result[row.id].true;row.falseMessages[code]=result[row.id].false;}}render();};
-  button(tools,tr('翻訳を反映','Apply translation'),async()=>{try{if(!prepared)throw Error(tr('先に翻訳依頼を作成してください。','Prepare the translation first.'));const data=JSON.parse(area.value);if(data.sourceLanguage!==s.baseLanguage)throw Error('Base language changed');await apply(data.translations,prepared);}catch(e){status.textContent=e.message;}});
+  button(tools,tr('翻訳を反映','Apply translation'),async()=>{try{if(!prepared)throw Error(tr('先に翻訳依頼を作成してください。','Prepare the translation first.'));const data=JSON.parse(area.value.trim().replace(/^\x60{3}(?:json)?\s*\n([\s\S]*?)\n\x60{3}$/i,'$1'));if(data.sourceLanguage!==s.baseLanguage)throw Error('Base language changed');await apply(data.translations,prepared);}catch(e){status.textContent=e.message;}});
   const ai=button(tools,tr('AIで展開（MCQ共通設定）','Translate with AI (MCQ settings)'),async()=>{if(translating)return;translating=true;ai.disabled=true;const signature=JSON.stringify(translationSource());const targets=s.languages.filter(c=>c!==s.baseLanguage);try{if(!targets.length)throw Error(tr('展開先の言語を選択してください。','Select a target language.'));const sourceLanguage=s.baseLanguage;for(const target of targets){status.textContent=tr('翻訳中: ','Translating: ')+target;const data=await(await request('/api/translation',{messages:JSON.parse(signature),sourceLanguage,target})).json();if(s.baseLanguage!==sourceLanguage||!s.languages.includes(target))throw Error('Language selection changed');await apply({[target]:data.result},signature);}}catch(e){$('translationStatus').textContent=e.message;}finally{translating=false;ai.disabled=false;}});
   help(tools,'AI設定はMCQ WebAppと共用します。このボタンを押したときだけ、問題文とフィードバックを設定済みサービスへ送信します。','AI settings are shared with MCQ WebApp. Only this button sends question prose and feedback to the configured provider.');
  }
