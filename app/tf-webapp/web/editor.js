@@ -122,6 +122,22 @@ $('translationRequest').onclick=()=>{
  $('translationJSON').value=[...instructions,'',JSON.stringify({sourceLanguage,messages,translations},null,2)].join('\n');
  translationStatus(tr('翻訳指示文全体をAIに渡し、返されたJSONでこの欄を置き換えてください。','Send the full prompt to your AI, then replace this field with the returned JSON.'));
 };
+function parseTranslationJSON(raw){
+ const json=raw.match(/^```(?:json)?\s*\n([\s\S]*?)\n```$/i)?.[1]??raw;
+ try{return JSON.parse(json);}
+ catch{
+  // Some pasted responses contain literal newlines and single-backslash TeX.
+  // Repair only string contents; the source and protected text are checked below.
+  const repaired=json.replace(/"(?:\\[\s\S]|[^"\\])*"/g,quoted=>quoted.replace(
+   /\\(?:u[0-9a-fA-F]{4}|[\s\S])|[\r\n\t]/g,part=>{
+    if(part[0]!=='\\')return JSON.stringify(part).slice(1,-1);
+    if(/^\\(?:u[0-9a-fA-F]{4}|["\\/bfnrt])$/.test(part))return part;
+    return '\\'+part;
+   }
+  ));
+  return JSON.parse(repaired);
+ }
+}
 $('translationApply').onclick=async()=>{
  const button=$('translationApply');
  button.disabled=true;
@@ -130,8 +146,8 @@ $('translationApply').onclick=async()=>{
   current();
   const raw=$('translationJSON').value.trim();
   let data;
-  try{data=JSON.parse(raw.match(/^```(?:json)?\s*\n([\s\S]*?)\n```$/i)?.[1]??raw);}
-  catch{throw Error(tr('この欄をAIが返した翻訳JSONに置き換えてください。','Replace this field with the translation JSON returned by your AI.'));}
+  try{data=parseTranslationJSON(raw);}
+  catch{throw Error(tr('翻訳JSONの形式を読み取れません。AIの返答からJSON全体をコピーしてください。','Could not read the translation JSON. Copy the entire JSON from your AI response.'));}
   const source=translationSource(model.baseLanguage);
   if(data?.sourceLanguage!==model.baseLanguage||!sameTranslationSource(data.messages,source))throw Error(tr('翻訳元が変わっています。翻訳指示文を作り直してください。','Translation source changed; prepare a new prompt.'));
   await applyTranslations(data.translations,source);

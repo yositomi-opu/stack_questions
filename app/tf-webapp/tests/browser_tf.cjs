@@ -31,6 +31,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  const targetLanguage=await page.locator('#languages label').first().boundingBox();
  assert(baseLanguage.x+baseLanguage.width<targetLanguage.x);
  assert(Math.abs(baseLanguage.y+baseLanguage.height/2-targetLanguage.y-targetLanguage.height/2)<2);
+ const feedbackSuffix='\n'+String.raw`\(x\)`;
+ await page.locator('#feedbackTrue').fill('正解。'+feedbackSuffix);
  await page.locator('#translationRequest').click();
  const prompt=await page.locator('#translationJSON').inputValue();
  assert.match(prompt,/ja から en, fr に今すぐ翻訳してください/);
@@ -42,7 +44,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  for(const result of Object.values(source.translations)){
   for(const [key,value] of Object.entries(source.messages))result[key].true=value.true;
  }
- source.translations.fr.msgT.true='Bonne réponse, exemple.';
+ source.translations.fr.msgT.true='Bonne réponse, exemple.'+feedbackSuffix;
  source.messages=Object.fromEntries(Object.entries(source.messages).reverse().map(([id,value])=>[id,{false:value.false,true:value.true}]));
  const feedback=source.messages.msgT.true;
  source.messages.msgT.true='Changed source';
@@ -50,11 +52,17 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  await page.locator('#translationApply').click();
  await page.locator('#translationStatus').getByText(/翻訳元が変わっています/).waitFor();
  source.messages.msgT.true=feedback;
- source.translations.en.noIdeaLabel.true='No idea, synthetic.';source.translations.en.msgT.true='Correct, synthetic.';await page.locator('#translationJSON').fill(JSON.stringify(source));await page.locator('#translationApply').click();
+ source.translations.en.noIdeaLabel.true='No idea, synthetic.';
+ source.translations.en.msgT.true='Correct, synthetic.'+feedbackSuffix;
+ const validJSON=JSON.stringify(source);
+ const brokenJSON=validJSON.replaceAll(JSON.stringify(feedbackSuffix).slice(1,-1),()=>feedbackSuffix);
+ assert.throws(()=>JSON.parse(brokenJSON),SyntaxError);
+ await page.locator('#translationJSON').fill(brokenJSON);
+ await page.locator('#translationApply').click();
  await page.locator('#translationStatus').getByText(/翻訳を反映しました（en, fr）/).waitFor();
  await page.locator('#textLanguage').selectOption('fr');
- assert.equal(await page.locator('#feedbackTrue').inputValue(),'Bonne réponse, exemple.');
- await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.');assert.equal(await page.locator('#labelNoIdea').inputValue(),'No idea, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
+ assert.equal(await page.locator('#feedbackTrue').inputValue(),'Bonne réponse, exemple.'+feedbackSuffix);
+ await page.locator('#textLanguage').selectOption('en');assert.equal(await page.locator('#feedbackTrue').inputValue(),'Correct, synthetic.'+feedbackSuffix);assert.equal(await page.locator('#labelNoIdea').inputValue(),'No idea, synthetic.');assert.equal(await page.locator('#correct textarea').nth(1).inputValue(),'\\(1+1=2\\)');
  // Export CSV via real UI, reimport into an independent editor page.
  await page.locator('#uiLanguage').selectOption('en');
  const csvMenu=page.locator('#menus details').filter({has:page.locator('summary', {hasText:'CSV'})});await csvMenu.locator('summary').click();
