@@ -14,13 +14,14 @@ function nameRequired(){if(!$('name').value.trim()){$('name').focus();throw Erro
 function button(parent,label,fn){const b=node('button',label);b.type='button';b.onclick=()=>{try{const result=fn();if(result?.catch)result.catch(e=>status(e.message));}catch(e){status(e.message);}};parent.append(b);return b;}
 function labels(){document.documentElement.lang=ui;$('uiLanguage').value=ui;document.querySelectorAll('[data-ja]').forEach(n=>n.textContent=n.dataset[ui]);$('saveClose').hidden=!state?.callbackOrigin;$('saveClose').textContent=tr('保存して終了（問題バンクへ戻る）','Save and close (return to bank)');$('newQuestion').disabled=!!state?.callbackOrigin;$('name').placeholder=tr('問題のタイトル','Question title');}
 function controls(){
+ const codes=[...new Set(['en','ja','fr','de','it','es','pt','zh','ko','ru','sv',...model.languages])];
+ const active=codes.filter(code=>model.languages.includes(code));
  const select=$('textLanguage');
- if(JSON.stringify([...select.options].map(option=>option.value))!==JSON.stringify(model.languages)){
-   select.replaceChildren(...model.languages.map(code=>new Option(code,code)));
+ if(JSON.stringify([...select.options].map(option=>option.value))!==JSON.stringify(active)){
+   select.replaceChildren(...active.map(code=>new Option(code,code)));
   }
  select.value=textLang;
- $('baseLanguage').replaceChildren(...model.languages.map(x=>new Option(x,x)));$('baseLanguage').value=model.baseLanguage;
- const codes=[...new Set(['en','ja','fr','it','de','pt','zh','ko','ru','sv','es',...model.languages])];$('languages').replaceChildren();
+ $('languages').replaceChildren();
  for(const code of codes){const label=node('label',code),check=node('input');check.type='checkbox';check.checked=model.languages.includes(code);check.disabled=code===model.baseLanguage;check.onchange=()=>{current();if(check.checked){model.languages.push(code);for(const m of [model.prompt,model.msgT,model.msgF,model.noIdeaLabels,...model.correct.map(s=>s.messages),...model.wrong.map(s=>s.messages)])m[code]??='';model.labels[code]??=['',''];}else{if(code===model.baseLanguage){check.checked=true;status(tr('標準言語は解除できません。','The base language must remain selected.'));return;}model.languages=model.languages.filter(x=>x!==code);if(textLang===code)textLang=model.baseLanguage;}mark();render();};label.prepend(check);$('languages').append(label);}
 }
 function render(){
@@ -119,7 +120,7 @@ function menus(){
  document.addEventListener('click',event=>{if(!event.target.closest('#menus details'))closeFileMenus();});
  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeFileMenus();});
 }
-$('uiLanguage').onchange=()=>{current();ui=$('uiLanguage').value;render();};$('baseLanguage').onchange=()=>{current();model.baseLanguage=$('baseLanguage').value;mark();controls();};
+$('uiLanguage').onchange=()=>{current();ui=$('uiLanguage').value;render();};
 function switchEditingLanguage(code){
  if(code===textLang || !model.languages.includes(code))return;
  current();

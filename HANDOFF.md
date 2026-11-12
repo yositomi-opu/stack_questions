@@ -727,3 +727,8 @@ git diff --check
 
 - 翻訳欄の重複セレクターを削除し、問題名の右端の「編集言語」を案内する。MCQと同様、現在の標準言語の展開チェックを解除不可にする。
 - Chromiumの browser_tf.cjs で標準言語変更時のチェックと翻訳反映後の言語切替を確認。JS構文・差分チェック成功。
+
+## 2026-11-13 TF展開言語の順序
+
+- 標準言語の選択欄を削除し、保存済みの翻訳元を維持する。展開チェックと編集言語を en, ja, fr, de, it, es, pt, zh, ko, ru, sv 順に表示する。
+- Chromiumの browser_tf.cjs、browser_toolbar.cjs、JS構文、差分チェック成功。
