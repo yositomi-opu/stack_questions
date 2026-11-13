@@ -39,7 +39,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  const prompt=await page.locator('#translationJSON').inputValue();
  assert.match(prompt,/ja から en, fr に今すぐ翻訳してください/);
  assert.match(prompt,/requestId と translations だけ/);
- assert.match(prompt,/<br> は改行文字に置き換えず/);
+ assert.match(prompt,/保持マーカー/);
  assert.match(prompt,/json コードブロック1つ/);
  assert.match(prompt,/以下のSTACK教材を/);
  assert.doesNotMatch(prompt,/"false"\s*:/);
@@ -52,7 +52,14 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  }
  source.translations.fr.msgT.true='Bonne réponse, exemple.'+feedbackSuffix;
  source.messages=Object.fromEntries(Object.entries(source.messages).reverse().map(([id,value])=>[id,{false:'',true:value.true}]));
- const feedback=source.messages.msgT.true;
+ const maskedPrompt=source.messages.prompt.true;
+ const original=await page.evaluate(()=>translationSource(model.baseLanguage));
+ const feedback=original.msgT.true;
+ for(const [id,entry] of Object.entries(source.messages))entry.true=original[id].true;
+ for(const result of Object.values(source.translations)){
+  for(const [id,entry] of Object.entries(result))entry.true=original[id].true;
+ }
+ source.translations.fr.msgT.true='Bonne réponse, exemple.'+feedbackSuffix;
  source.messages.msgT.true='Changed source';
  await page.locator('#translationJSON').fill(JSON.stringify(source));
  await page.locator('#translationApply').click();
@@ -74,9 +81,11 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  assert.equal(await language.inputValue(),'fr');
  assert.equal(await page.locator('#feedbackTrue').inputValue(),'Bonne réponse, exemple.'+feedbackSuffix);
  const reply={requestId:source.requestId,translations:source.translations};
- assert.match(source.messages.prompt.true,/<br>$/);
- reply.translations.fr.prompt.true='Indiquez si l’affirmation est vraie.\n\n';
- reply.translations.fr.msgT.true='C’est correct.'+feedbackSuffix;
+ assert.match(maskedPrompt,/\[STACKKEEP1\]$/);
+ reply.translations.fr.prompt.true='Indiquez si l’affirmation est vraie.[STACKKEEP1]';
+ reply.translations.en.prompt.true=maskedPrompt;
+ reply.translations.en.msgT.true='Correct, synthetic.\n[STACKKEEP1]';
+ reply.translations.fr.msgT.true='C’est correct.\n[STACKKEEP1]';
 
  await page.locator('#textLanguage').selectOption('ja');
  await page.locator('#feedbackTrue').fill('Changed after preparing the prompt');
