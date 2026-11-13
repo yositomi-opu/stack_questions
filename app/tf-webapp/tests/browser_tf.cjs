@@ -75,6 +75,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  assert.match(source.messages.prompt.true,/<br>$/);
  reply.translations.fr.prompt.true='Indiquez si l’affirmation est vraie.\n\n';
  reply.translations.fr.msgT.true='C’est correct.'+feedbackSuffix;
+ delete reply.translations.fr.msgT.false;
  await page.locator('#textLanguage').selectOption('ja');
  await page.locator('#feedbackTrue').fill('Changed after preparing the prompt');
  await page.locator('#translationJSON').fill(JSON.stringify(reply));
