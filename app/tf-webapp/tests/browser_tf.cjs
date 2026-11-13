@@ -41,6 +41,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  assert.match(prompt,/requestId と translations だけ/);
  assert.match(prompt,/<br> は改行文字に置き換えず/);
  assert.match(prompt,/json コードブロック1つ/);
+ assert.match(prompt,/以下のSTACK教材を/);
+ assert.doesNotMatch(prompt,/"false"\s*:/);
  const source=JSON.parse(prompt.split('\n\n')[1]);
  assert.deepEqual(Object.keys(source.translations),['en','fr']);
  assert.deepEqual(Object.keys(source.translations.en),Object.keys(source.messages));
@@ -49,7 +51,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
   for(const [key,value] of Object.entries(source.messages))result[key].true=value.true;
  }
  source.translations.fr.msgT.true='Bonne réponse, exemple.'+feedbackSuffix;
- source.messages=Object.fromEntries(Object.entries(source.messages).reverse().map(([id,value])=>[id,{false:value.false,true:value.true}]));
+ source.messages=Object.fromEntries(Object.entries(source.messages).reverse().map(([id,value])=>[id,{false:'',true:value.true}]));
  const feedback=source.messages.msgT.true;
  source.messages.msgT.true='Changed source';
  await page.locator('#translationJSON').fill(JSON.stringify(source));
@@ -75,7 +77,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  assert.match(source.messages.prompt.true,/<br>$/);
  reply.translations.fr.prompt.true='Indiquez si l’affirmation est vraie.\n\n';
  reply.translations.fr.msgT.true='C’est correct.'+feedbackSuffix;
- delete reply.translations.fr.msgT.false;
+
  await page.locator('#textLanguage').selectOption('ja');
  await page.locator('#feedbackTrue').fill('Changed after preparing the prompt');
  await page.locator('#translationJSON').fill(JSON.stringify(reply));
