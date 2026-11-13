@@ -737,3 +737,8 @@ git diff --check
 
 - Makefileの stop/restart が呼ぶ管理スクリプトで、macOSでDockerへ接続できないときはSTACK APIの停止を省略する。restartの起動段階では既存のDocker Desktop自動起動処理を使う。
 - Pythonの test_docker_startup.py 12件、test_local_apps.py 5件、差分チェック成功。macOS実機では未確認。
+
+## 2026-11-14 TFの読込形式と上書き先
+
+- CSV/XML読込を形式別に限定し、作業ZIPに専用の読込項目を設けた。対応ブラウザーでは読込時のファイル参照を保持し、上書時に書き込み許可を確認する。保存完了時はファイル名を表示する。
+- Chromiumの browser_tf.cjs、browser_toolbar.cjs、模擬ピッカーによるCSV/XML再読込・上書き内容・形式フィルターと別形式拒否、JS構文・差分チェック成功。OSのネイティブダイアログは未操作。

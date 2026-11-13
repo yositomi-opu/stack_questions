@@ -31,7 +31,7 @@ function render(){
   $(side).replaceChildren();model[side].forEach((item,index)=>{const row=node('div');row.className='assertion';const rowName=tr(side==='correct'?'正':'誤',side==='correct'?'T':'F')+(index+1);const label=node('label',rowName+' '),check=node('input');check.type='checkbox';check.checked=item.dependent;label.append(check,node('span',tr('言語依存','Language-dependent')));check.onchange=()=>{current();if(!check.checked&&!item.shared)item.shared=item.messages[textLang]||item.messages[model.baseLanguage]||'';item.dependent=check.checked;mark();render();};const text=node('textarea');text.rows=2;text.value=item.dependent?(item.messages[textLang]||''):item.shared;label.title=tr('XMLの変数: ','XML variable: ')+prefix+(index+1);text.setAttribute('aria-label',tr(side==='correct'?'正しい主張 ':'正しくない主張 ',side==='correct'?'True statement ':'False statement ')+(index+1)+' '+(item.dependent?textLang:'shared'));text.oninput=()=>{if(item.dependent)item.messages[textLang]=text.value;else item.shared=text.value;mark();};const actions=node('div');actions.className='assertion-actions';const remove=button(actions,'X',()=>{current();if(model[side].length===1)return;model[side].splice(index,1);mark();render();});remove.disabled=model[side].length===1;remove.setAttribute('aria-label',tr('削除 ','Remove ')+rowName);const add=button(actions,'+',()=>insertAssertion(side,index));add.setAttribute('aria-label',tr('直後に追加 ','Insert after ')+rowName);add.disabled=model[side].length>=100;row.append(label,text,actions);$(side).append(row);});
  }
 }
-async function load(next){manualTranslationRequest=null;state=next;model=JSON.parse(next.editFields.template||'null');textLang=model?.baseLanguage;$('name').value=next.editFields.name||'';$('variables').value=next.editFields.questionvariables||'';$('generalfeedback').value=next.editFields.generalfeedback||'';evaluation=null;evaluationSignature='';saved();render();status((next.report||[]).join('\n'));}
+async function load(next){handles={};manualTranslationRequest=null;state=next;model=JSON.parse(next.editFields.template||'null');textLang=model?.baseLanguage;$('name').value=next.editFields.name||'';$('variables').value=next.editFields.questionvariables||'';$('generalfeedback').value=next.editFields.generalfeedback||'';evaluation=null;evaluationSignature='';saved();render();status((next.report||[]).join('\n'));}
 function download(blob,name){const a=node('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 async function apply(){nameRequired();const data=fields(),signature=JSON.stringify(data);state=await(await request('/api/action',{revision:state.revision,fields:data})).json();if(JSON.stringify(fields())!==signature){status(tr('保存中の追加編集が残っています。再度保存してください。','Further edits remain; save again.'));return;}saved();if(state.callbackOrigin&&window.opener)window.opener.postMessage({type:'qbank-editor-saved',token:state.token},state.callbackOrigin);status(tr('保存しました。','Saved.'));if(state.callbackOrigin)window.close();}
 $('saveClose').onclick=()=>apply().catch(e=>status(e.message));
@@ -48,6 +48,7 @@ async function save(format,overwrite=false,view=false){
  }
  nameRequired();
  if(format==='xml'&&!view&&state.callbackOrigin){await apply();return;}
+ const revision=state.revision;
  const data=fields(),signature=JSON.stringify(data);
  const title=data.name.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_');
  const filename=(format==='xml'?'003.':'')+title+(format==='xml'?'-tf':'')+'.'+format;
@@ -56,24 +57,31 @@ async function save(format,overwrite=false,view=false){
   try{
    const mime=format==='csv'?'text/csv':'application/xml';
    handle=await window.showSaveFilePicker({suggestedName:filename,id:'tf-'+format,
-    types:[{description:format.toUpperCase(),accept:{[mime]:['.'+format]}}]});
+    excludeAcceptAllOption:true,types:[{description:format.toUpperCase(),accept:{[mime]:['.'+format]}}]});
   }catch(error){
    if(error.name==='AbortError')return;
    if(error.name!=='SecurityError')throw error;
    if(overwrite){explainOverwrite();return;}
   }
  }
- const response=await request('/api/export',{revision:state.revision,format,fields:data});
+ if(handle && !matchesFileFormat(handle,format))throw Error(fileFormatMessage(format));
+ if(overwrite && handles[format] && handle.requestPermission &&
+    await handle.requestPermission({mode:'readwrite'})!=='granted'){
+  throw Error(tr('上書き先への書き込みが許可されていません。','Write permission for the overwrite target was denied.'));
+ }
+ const response=await request('/api/export',{revision,format,fields:data});
  const blob=await response.blob();
  if(view){const d=node('dialog'),pre=node('pre',await blob.text());d.append(pre);button(d,tr('閉じる','Close'),()=>d.remove());document.body.append(d);d.showModal();return;}
  if(handle){
+  if(state.revision!==revision)throw Error(tr('編集中の問題が変わりました。','The open question changed.'));
   const writable=await handle.createWritable();
   try{await writable.write(blob);await writable.close();}
   catch(error){await writable.abort().catch(()=>{});throw error;}
-  handles[format]=handle;
+  if(state.revision===revision)handles[format]=handle;
  }else download(blob,filename);
+ if(state.revision!==revision)return;
  if(JSON.stringify(fields())===signature)saved();
- status(handle?tr('保存しました。','Saved.'):tr('ダウンロードを開始しました。','Download started.'));
+ status(handle?(overwrite?tr('上書き保存しました。','Overwritten.'):tr('保存しました。','Saved.'))+' '+handle.name:tr('ダウンロードを開始しました。','Download started.')+' '+filename);
 }
 function translationMaps(){return [['prompt',model.prompt],['noIdeaLabel',model.noIdeaLabels],['msgT',model.msgT],['msgF',model.msgF],['labelTrue',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[0]]))],['labelFalse',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[1]]))],...['correct','wrong'].flatMap(side=>model[side].flatMap((s,i)=>s.dependent?[[side+':'+i,s.messages]]:[]))];}
 function translationSource(code){return Object.fromEntries(translationMaps().map(([id,m])=>[id,{true:m[code]||'',false:''}]));}
@@ -107,9 +115,37 @@ function checkTranslationSource(actual,source){
 let manualTranslationRequest;
 const translationStatus=text=>$('translationStatus').textContent=text;
 async function applyTranslations(translations,source){if(!translations||typeof translations!=='object'||Array.isArray(translations)||!Object.keys(translations).length)throw Error(tr('翻訳がありません。','No translations supplied.'));const signature=JSON.stringify(model),staged={};for(const [code,result] of Object.entries(translations)){if(!model.languages.includes(code)||code===model.baseLanguage)throw Error('Unknown translation language');if(JSON.stringify(Object.keys(source).sort())!==JSON.stringify(Object.keys(result).sort()))throw Error('Translation keys differ');staged[code]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const batch=keys.slice(i,i+50),messages=Object.fromEntries(batch.map(k=>[k,source[k]])),subset=Object.fromEntries(batch.map(k=>[k,result[k]]));Object.assign(staged[code],(await(await request('/api/translation-validate',{messages,result:subset})).json()).result);}}current();if(JSON.stringify(model)!==signature)throw Error(tr('翻訳中に編集が変わったため反映しません。','Edits changed during translation.'));for(const [code,result] of Object.entries(staged)){for(const [key,map] of translationMaps()){if(key==='labelTrue')model.labels[code][0]=result[key].true;else if(key==='labelFalse')model.labels[code][1]=result[key].true;else map[code]=result[key].true;}}mark();render();}
+const fileTypes={csv:'text/csv',xml:'application/xml',zip:'application/zip'};
+function matchesFileFormat(file,format){return file.name.toLowerCase().endsWith('.'+format);}
+function fileFormatMessage(format){return tr('.'+format+' ファイルを選択してください。','Select a .'+format+' file.');}
+async function openFile(file,format,handle){
+ if(state.callbackOrigin)throw Error(tr('別の単独画面で開いてください。','Open files in a standalone editor.'));
+ if(!matchesFileFormat(file,format))throw Error(fileFormatMessage(format));
+ if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;
+ await load(await(await request('/api/open',await file.arrayBuffer(),true)).json());
+ if(handle && format!=='zip')handles[format]=handle;
+}
+async function pickFile(format){
+ if(state.callbackOrigin)throw Error(tr('別の単独画面で開いてください。','Open files in a standalone editor.'));
+ if(window.showOpenFilePicker){
+  let handle;
+  try{
+   [handle]=await window.showOpenFilePicker({id:'tf-'+format,multiple:false,excludeAcceptAllOption:true,
+    types:[{description:format.toUpperCase(),accept:{[fileTypes[format]]:['.'+format]}}]});
+  }catch(error){
+   if(error.name==='AbortError')return;
+   if(error.name!=='SecurityError')throw error;
+  }
+  if(handle){await openFile(await handle.getFile(),format,handle);return;}
+ }
+ const input=$('sourceFile');
+ input.accept='.'+format;
+ input.dataset.format=format;
+ input.click();
+}
 function closeFileMenus(except=null){for(const menu of $('menus').querySelectorAll('details'))if(menu!==except)menu.open=false;}
 function menus(){
- for(const format of ['csv','xml']){const details=node('details'),summary=node('summary',format.toUpperCase());const items=node('div');items.className='menu-items';details.append(summary,items);for(const [ja,en,fn] of [['読込','Open',()=>{if(state.callbackOrigin)throw Error(tr('別の単独画面で開いてください。','Open files in a standalone editor.'));$('sourceFile').click();}],['表示','View',()=>save(format,false,true)],['保存','Save',()=>save(format)],['上書','Overwrite',()=>save(format,true)]]){const b=button(items,tr(ja,en),fn);b.dataset.ja=ja;b.dataset.en=en;} $('menus').append(details);}
+ for(const format of ['csv','xml']){const details=node('details'),summary=node('summary',format.toUpperCase());const items=node('div');items.className='menu-items';details.append(summary,items);for(const [ja,en,fn] of [['読込','Open',()=>pickFile(format)],['表示','View',()=>save(format,false,true)],['保存','Save',()=>save(format)],['上書','Overwrite',()=>save(format,true)]]){const b=button(items,tr(ja,en),fn);b.dataset.ja=ja;b.dataset.en=en;} if(format==='csv'){const zip=button(items,tr('作業ZIPを読込','Open project ZIP'),()=>pickFile('zip'));zip.dataset.ja='作業ZIPを読込';zip.dataset.en='Open project ZIP';} $('menus').append(details);}
  $('menus').append($('previewButton'));
  const b=button($('menus'),tr('作業ZIP','Project ZIP'),async()=>{nameRequired();const data=fields(),signature=JSON.stringify(data);download(await(await request('/api/project-export',{revision:state.revision,fields:data})).blob(),'tf-project.zip');if(JSON.stringify(fields())===signature)saved();});b.dataset.ja='作業ZIP';b.dataset.en='Project ZIP';
  const original=button($('menus'),tr('原本','Original'),async()=>download(await(await request('/api/original')).blob(),'TF-original.xml'));original.dataset.ja='原本';original.dataset.en='Original';
@@ -131,7 +167,13 @@ for(const event of ['input','change'])$('textLanguage').addEventListener(event,e
 for(const id of ['name','variables','question','generalfeedback','feedbackTrue','feedbackFalse','labelTrue','labelFalse','labelNoIdea'])$(id).addEventListener('input',mark);
 for(const id of ['truth','noIdea'])$(id).onchange=()=>{current();mark();};
 function insertAssertion(side,index){current();if(model[side].length>=100){status(tr('上限100件です。','Maximum 100 statements.'));return;}model[side].splice(index+1,0,{dependent:true,shared:'',messages:Object.fromEntries(model.languages.map(k=>[k,'']))});mark();render();$(side).children[index+1].querySelector('textarea').focus();}
-$('sourceFile').onchange=async()=>{const f=$('sourceFile').files[0];if(!f)return;try{if(state.callbackOrigin)throw Error('Open files in a standalone editor');if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;await load(await(await request('/api/open',await f.arrayBuffer(),true)).json());handles={};}catch(e){status(e.message);}finally{$('sourceFile').value='';}};
+$('sourceFile').onchange=async()=>{
+ const input=$('sourceFile'),file=input.files[0];
+ if(!file)return;
+ try{await openFile(file,input.dataset.format);}
+ catch(error){status(error.message);}
+ finally{input.value='';}
+};
 $('newQuestion').onclick=async()=>{try{if(state.callbackOrigin)throw Error('Open a separate standalone editor');if(dirty&&!confirm(tr('未保存の編集を置き換えますか？','Replace unsaved edits?')))return;await openStandaloneSample();}catch(e){status(e.message);}};
 $('translationRequest').onclick=()=>{
  current();
