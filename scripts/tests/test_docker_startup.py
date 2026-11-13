@@ -64,6 +64,26 @@ class DockerStartupTests(unittest.TestCase):
             with self.assertRaisesRegex(manager.ManagerError, "failed"):
                 manager.repair_docker({})
 
+    def test_mac_stop_probes_docker_before_running_compose(self):
+        for code in (0, 1):
+            with self.subTest(probe_exit=code), ExitStack() as mocks:
+                mocks.enter_context(patch.object(manager.platform, "system", return_value="Darwin"))
+                mocks.enter_context(patch.object(manager.shutil, "which", return_value="/usr/bin/docker"))
+                mocks.enter_context(patch.object(manager, "docker_daemon_probe", return_value=result(code)))
+                stop_web = mocks.enter_context(patch.object(manager, "stop_web"))
+                launch = mocks.enter_context(patch.object(manager, "start_macos_docker_desktop"))
+                compose = mocks.enter_context(patch.object(manager, "compose_prefix", return_value=["docker", "compose"]))
+                run = mocks.enter_context(patch.object(manager, "run"))
+                config = {"stack_api_port": 3080}
+                manager.stop_services(config)
+                stop_web.assert_called_once_with(config)
+                launch.assert_not_called()
+                if code:
+                    compose.assert_not_called()
+                    run.assert_not_called()
+                else:
+                    self.assertEqual(run.call_args.args[0][-1], "stop")
+
     def test_running_docker_is_not_launched_again(self):
         with patch.object(manager, "docker_daemon_probe", return_value=result()), patch.object(manager, "start_macos_docker_desktop") as launch:
             manager.require_docker_daemon(auto_start=True)

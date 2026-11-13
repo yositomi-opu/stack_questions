@@ -794,6 +794,12 @@ def stop_services(config: dict[str, Any]) -> None:
     print_step(console_text("MCQ WebAppを停止", 'Stop MCQ WebApp'))
     stop_web(config)
     if shutil.which("docker"):
+        if platform.system() == "Darwin" and docker_daemon_probe().returncode:
+            print(console_text(
+                "Dockerに接続できないため、STACK APIの停止をスキップします。",
+                "Docker is unavailable. Skipping STACK API stop.",
+            ), flush=True)
+            return
         try:
             prefix = compose_prefix()
         except ManagerError:

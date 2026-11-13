@@ -732,3 +732,8 @@ git diff --check
 
 - 標準言語の選択欄を削除し、保存済みの翻訳元を維持する。展開チェックと編集言語を en, ja, fr, de, it, es, pt, zh, ko, ru, sv 順に表示する。
 - Chromiumの browser_tf.cjs、browser_toolbar.cjs、JS構文、差分チェック成功。
+
+## 2026-11-14 macOSでDocker停止中の再起動
+
+- Makefileの stop/restart が呼ぶ管理スクリプトで、macOSでDockerへ接続できないときはSTACK APIの停止を省略する。restartの起動段階では既存のDocker Desktop自動起動処理を使う。
+- Pythonの test_docker_startup.py 12件、test_local_apps.py 5件、差分チェック成功。macOS実機では未確認。
