@@ -94,6 +94,20 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises');
  let waiting=page.waitForEvent('download');await csvMenu.getByRole('button',{name:'Save',exact:true}).click();let dl=await waiting;const csv=await fs.readFile(await dl.path());assert(csv.toString().includes('%_noidea,false'));
  const second=await browser.newPage();await second.addInitScript(()=>{window.showSaveFilePicker=undefined;});second.on('pageerror',e=>errors.push(String(e)));await second.goto(base+'/?lang=en');await second.locator('#form:not([hidden])').waitFor();await second.locator('#sourceFile').setInputFiles({name:'Synthetic.csv',mimeType:'text/csv',buffer:csv});await second.waitForFunction(()=>document.getElementById('name').value==='Synthetic TF');
  assert.equal(await second.locator('#correct textarea').count(),2);assert.equal(await second.locator('#variables').inputValue(),'A:42;');
+ const warning=second.locator('#translationWarning');
+ assert(await warning.isHidden());
+ const baseFeedback=await second.locator('#feedbackTrue').inputValue();
+ await second.locator('#feedbackTrue').fill('Updated original feedback');
+ assert.match(await warning.innerText(),/Translate again.*en.*fr/);
+ await second.locator('#feedbackTrue').fill(baseFeedback);
+ assert(await warning.isHidden());
+ const assertion=second.locator('#correct textarea').first();
+ const originalAssertion=await assertion.inputValue();
+ await assertion.fill('Updated original assertion');
+ assert(await warning.isVisible());
+ await assertion.fill(originalAssertion);
+ assert(await warning.isHidden());
+
  const xmlMenu=second.locator('#menus details').filter({has:second.locator('summary',{hasText:'XML'})});await xmlMenu.locator('summary').click();waiting=second.waitForEvent('download');await xmlMenu.getByRole('button',{name:'Save',exact:true}).click();dl=await waiting;const xml=(await fs.readFile(await dl.path())).toString();assert(xml.includes('AssertC2:castext('));assert(xml.includes('rand([AssertC1, AssertC2])'));assert(xml.includes('A:42;'));assert(xml.includes('Correct, synthetic.'));assert(xml.includes('C’est correct.'));
  // Mock only the external STACK response: verify actual preview UI transport and isolation.
  await second.route('**/api/stack/preview',route=>route.fulfill({json:{questionrender:'<p>TF synthetic</p><select name="mcqpreview_ans1"><option value="1">True</option><option value="2">False</option></select>',practiceToken:'synthetic-token'}}));

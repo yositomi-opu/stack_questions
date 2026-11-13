@@ -6,7 +6,7 @@ const tr=(ja,en)=>ui==='ja'?ja:en;
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const status=text=>$('status').textContent=text;
 async function request(path,data,raw=false){const response=await fetch(path,{method:data===undefined?'GET':'POST',headers:{'X-Qbank-Request':'1','X-Editor-Session':sid||''},...(data===undefined?{}:{body:raw?data:JSON.stringify(data)})});if(!response.ok){const d=await response.json();throw Object.assign(Error(d.error),{code:d.code});}return response;}
-function mark(){dirty=true;$('dirty').textContent='*';if(model)updateEvaluationStatus();}
+function mark(){dirty=true;$('dirty').textContent='*';if(model){updateEvaluationStatus();updateTranslationWarning();}}
 function saved(){dirty=false;$('dirty').textContent=' ';}
 function current(){if(!model)return;model.prompt[textLang]=$('question').value;model.msgT[textLang]=$('feedbackTrue').value;model.msgF[textLang]=$('feedbackFalse').value;model.labels[textLang]=[$('labelTrue').value,$('labelFalse').value];model.noIdeaLabels[textLang]=$('labelNoIdea').value;model.truth=$('truth').value;model['%_noidea']=$('noIdea').value==='true';}
 function fields(){current();return {name:$('name').value.trim(),questionvariables:$('variables').value,questiontext:state.editFields.questiontext||'',generalfeedback:$('generalfeedback').value,template:JSON.stringify(model)};}
@@ -26,12 +26,16 @@ function controls(){
 }
 function render(){
  if(!model||model.mode!=='truefalse')throw Error(tr('対応するTF XMLを開いてください。','Open a supported TF XML.'));
- $('form').hidden=false;controls();labels();$('question').value=model.prompt[textLang]||'';$('feedbackTrue').value=model.msgT[textLang]||'';$('feedbackFalse').value=model.msgF[textLang]||'';$('labelTrue').value=model.labels[textLang]?.[0]||'';$('labelFalse').value=model.labels[textLang]?.[1]||'';$('labelNoIdea').value=model.noIdeaLabels[textLang]||'';$('truth').value=model.truth;$('noIdea').value=String(model['%_noidea']);renderLibraries();
+ $('form').hidden=false;controls();labels();$('question').value=model.prompt[textLang]||'';$('feedbackTrue').value=model.msgT[textLang]||'';$('feedbackFalse').value=model.msgF[textLang]||'';$('labelTrue').value=model.labels[textLang]?.[0]||'';$('labelFalse').value=model.labels[textLang]?.[1]||'';$('labelNoIdea').value=model.noIdeaLabels[textLang]||'';$('truth').value=model.truth;$('noIdea').value=String(model['%_noidea']);renderLibraries();updateTranslationWarning();
  for(const [side,prefix] of [['correct','AssertC'],['wrong','AssertW']]){
   $(side).replaceChildren();model[side].forEach((item,index)=>{const row=node('div');row.className='assertion';const rowName=tr(side==='correct'?'正':'誤',side==='correct'?'T':'F')+(index+1);const label=node('label',rowName+' '),check=node('input');check.type='checkbox';check.checked=item.dependent;label.append(check,node('span',tr('言語依存','Language-dependent')));check.onchange=()=>{current();if(!check.checked&&!item.shared)item.shared=item.messages[textLang]||item.messages[model.baseLanguage]||'';item.dependent=check.checked;mark();render();};const text=node('textarea');text.rows=2;text.value=item.dependent?(item.messages[textLang]||''):item.shared;label.title=tr('XMLの変数: ','XML variable: ')+prefix+(index+1);text.setAttribute('aria-label',tr(side==='correct'?'正しい主張 ':'正しくない主張 ',side==='correct'?'True statement ':'False statement ')+(index+1)+' '+(item.dependent?textLang:'shared'));text.oninput=()=>{if(item.dependent)item.messages[textLang]=text.value;else item.shared=text.value;mark();};const actions=node('div');actions.className='assertion-actions';const remove=button(actions,'X',()=>{current();if(model[side].length===1)return;model[side].splice(index,1);mark();render();});remove.disabled=model[side].length===1;remove.setAttribute('aria-label',tr('削除 ','Remove ')+rowName);const add=button(actions,'+',()=>insertAssertion(side,index));add.setAttribute('aria-label',tr('直後に追加 ','Insert after ')+rowName);add.disabled=model[side].length>=100;row.append(label,text,actions);$(side).append(row);});
  }
 }
-async function load(next){handles={};manualTranslationRequest=null;state=next;model=JSON.parse(next.editFields.template||'null');textLang=model?.baseLanguage;$('name').value=next.editFields.name||'';$('variables').value=next.editFields.questionvariables||'';$('generalfeedback').value=next.editFields.generalfeedback||'';evaluation=null;evaluationSignature='';saved();render();status((next.report||[]).join('\n'));}
+async function load(next){handles={};manualTranslationRequest=null;state=next;model=JSON.parse(next.editFields.template||'null');textLang=model?.baseLanguage;
+ const signature=translationSourceSignature();
+ translationBaselines=new Map(Object.keys(model.prompt).filter(code=>code!==model.baseLanguage &&
+  Object.values(translationSource(code)).some(entry=>entry.true.trim())).map(code=>[code,signature]));
+ $('name').value=next.editFields.name||'';$('variables').value=next.editFields.questionvariables||'';$('generalfeedback').value=next.editFields.generalfeedback||'';evaluation=null;evaluationSignature='';saved();render();status((next.report||[]).join('\n'));}
 function download(blob,name){const a=node('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 async function apply(){nameRequired();const data=fields(),signature=JSON.stringify(data);state=await(await request('/api/action',{revision:state.revision,fields:data})).json();if(JSON.stringify(fields())!==signature){status(tr('保存中の追加編集が残っています。再度保存してください。','Further edits remain; save again.'));return;}saved();if(state.callbackOrigin&&window.opener)window.opener.postMessage({type:'qbank-editor-saved',token:state.token},state.callbackOrigin);status(tr('保存しました。','Saved.'));if(state.callbackOrigin)window.close();}
 $('saveClose').onclick=()=>apply().catch(e=>status(e.message));
@@ -85,6 +89,20 @@ async function save(format,overwrite=false,view=false){
 }
 function translationMaps(){return [['prompt',model.prompt],['noIdeaLabel',model.noIdeaLabels],['msgT',model.msgT],['msgF',model.msgF],['labelTrue',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[0]]))],['labelFalse',Object.fromEntries(Object.entries(model.labels).map(([k,v])=>[k,v[1]]))],...['correct','wrong'].flatMap(side=>model[side].flatMap((s,i)=>s.dependent?[[side+':'+i,s.messages]]:[]))];}
 function translationSource(code){return Object.fromEntries(translationMaps().map(([id,m])=>[id,{true:m[code]||'',false:''}]));}
+let translationBaselines=new Map();
+function translationSourceSignature(){
+ return JSON.stringify(translationSource(model.baseLanguage));
+}
+function updateTranslationWarning(){
+ const signature=translationSourceSignature();
+ const stale=model.languages.filter(code=>translationBaselines.has(code)&&translationBaselines.get(code)!==signature);
+ const warning=$('translationWarning');
+ warning.hidden=!stale.length;
+ warning.textContent=stale.length?tr(
+  '翻訳元が変更されました。多言語展開をやり直してください（'+stale.join(', ')+'）。',
+  'The translation source has changed. Translate again ('+stale.join(', ')+').'
+ ):'';
+}
 function translationSourceDifferences(actual,expected){
  if(!actual || typeof actual!=='object' || Array.isArray(actual))return ['messages'];
  return [...new Set([...Object.keys(expected),...Object.keys(actual)])].filter(id=>{
@@ -114,7 +132,7 @@ function checkTranslationSource(actual,source){
 }
 let manualTranslationRequest;
 const translationStatus=text=>$('translationStatus').textContent=text;
-async function applyTranslations(translations,source){if(!translations||typeof translations!=='object'||Array.isArray(translations)||!Object.keys(translations).length)throw Error(tr('翻訳がありません。','No translations supplied.'));const signature=JSON.stringify(model),staged={};for(const [code,result] of Object.entries(translations)){if(!model.languages.includes(code)||code===model.baseLanguage)throw Error('Unknown translation language');if(JSON.stringify(Object.keys(source).sort())!==JSON.stringify(Object.keys(result).sort()))throw Error('Translation keys differ');staged[code]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const batch=keys.slice(i,i+50),messages=Object.fromEntries(batch.map(k=>[k,source[k]])),subset=Object.fromEntries(batch.map(k=>[k,result[k]]));Object.assign(staged[code],(await(await request('/api/translation-validate',{messages,result:subset})).json()).result);}}current();if(JSON.stringify(model)!==signature)throw Error(tr('翻訳中に編集が変わったため反映しません。','Edits changed during translation.'));for(const [code,result] of Object.entries(staged)){for(const [key,map] of translationMaps()){if(key==='labelTrue')model.labels[code][0]=result[key].true;else if(key==='labelFalse')model.labels[code][1]=result[key].true;else map[code]=result[key].true;}}mark();render();}
+async function applyTranslations(translations,source){if(!translations||typeof translations!=='object'||Array.isArray(translations)||!Object.keys(translations).length)throw Error(tr('翻訳がありません。','No translations supplied.'));const signature=JSON.stringify(model),staged={};for(const [code,result] of Object.entries(translations)){if(!model.languages.includes(code)||code===model.baseLanguage)throw Error('Unknown translation language');if(JSON.stringify(Object.keys(source).sort())!==JSON.stringify(Object.keys(result).sort()))throw Error('Translation keys differ');staged[code]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const batch=keys.slice(i,i+50),messages=Object.fromEntries(batch.map(k=>[k,source[k]])),subset=Object.fromEntries(batch.map(k=>[k,result[k]]));Object.assign(staged[code],(await(await request('/api/translation-validate',{messages,result:subset})).json()).result);}}current();if(JSON.stringify(model)!==signature)throw Error(tr('翻訳中に編集が変わったため反映しません。','Edits changed during translation.'));for(const [code,result] of Object.entries(staged)){for(const [key,map] of translationMaps()){if(key==='labelTrue')model.labels[code][0]=result[key].true;else if(key==='labelFalse')model.labels[code][1]=result[key].true;else map[code]=result[key].true;}translationBaselines.set(code,translationSourceSignature());}mark();render();}
 const fileTypes={csv:'text/csv',xml:'application/xml',zip:'application/zip'};
 function matchesFileFormat(file,format){return file.name.toLowerCase().endsWith('.'+format);}
 function fileFormatMessage(format){return tr('.'+format+' ファイルを選択してください。','Select a .'+format+' file.');}
@@ -164,7 +182,10 @@ function switchEditingLanguage(code){
  render();
 }
 for(const event of ['input','change'])$('textLanguage').addEventListener(event,e=>switchEditingLanguage(e.target.value));
-for(const id of ['name','variables','question','generalfeedback','feedbackTrue','feedbackFalse','labelTrue','labelFalse','labelNoIdea'])$(id).addEventListener('input',mark);
+for(const id of ['name','variables','generalfeedback'])$(id).addEventListener('input',mark);
+for(const id of ['question','feedbackTrue','feedbackFalse','labelTrue','labelFalse','labelNoIdea']){
+ $(id).addEventListener('input',()=>{current();mark();});
+}
 for(const id of ['truth','noIdea'])$(id).onchange=()=>{current();mark();};
 function insertAssertion(side,index){current();if(model[side].length>=100){status(tr('上限100件です。','Maximum 100 statements.'));return;}model[side].splice(index+1,0,{dependent:true,shared:'',messages:Object.fromEntries(model.languages.map(k=>[k,'']))});mark();render();$(side).children[index+1].querySelector('textarea').focus();}
 $('sourceFile').onchange=async()=>{
