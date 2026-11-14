@@ -767,3 +767,8 @@ git diff --check
 
 - 手動翻訳指示に含める数式、HTML、CASTextを項目ごとの短いマーカーに置換する。取り込み時に欠落・重複・変更を検査し、元の文字列を復元して既存の検証に通す。
 - 添付の依頼ID相違と記法差分を確認。Chromiumの browser_tf.cjs、JS構文、差分チェック成功。変更後のGemini実行は未確認。
+
+## 2026-11-15 翻訳指示のコピー・ダウンロードとJSON読込
+
+- TF・定型PRTにワンクリックの指示生成とコピー、テキストのダウンロード、翻訳JSONのアップロードと即時反映を追加。貼り付けによる反映も利用できる。コピー許可がない場合は指示文を選択する。MCQは既存の操作を同じ名称に揃え、重複する依頼作成ボタンを整理した。
+- Chromiumの browser_tf.cjs、定型PRTの browser_compact.cjs、MCQ画面で合成JSONを使って検証。クリップボードAPIは模擬し、指示ファイルの内容とJSON反映を確認。MCQの test_translation_files.cjs、JS構文、差分チェック成功。実Geminiへの送信は未実施。

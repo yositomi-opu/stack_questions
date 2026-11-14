@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="./styles.css?v=20261108-library-base">
     <script defer src="./vendor/xlsx.full.min.js"></script>
     <script defer src="./config.js?v=20260904-config2"></script>
-    <script defer src="./i18n.js?v=20261113-translation"></script>
+    <script defer src="./i18n.js?v=20261115-translation-files"></script>
     <script defer src="./authoring-settings.js"></script>
-    <script defer src="./app.js?v=20261113-translation"></script>
+    <script defer src="./app.js?v=20261115-translation-files"></script>
     <script defer src="./ai-translation.js?v=20260923-v082-protected"></script>
     <script defer src="./file-ui.js?v=20260928-candidates"></script>
     <script defer src="./preview.js?v=20261108-color"></script>
@@ -309,18 +309,17 @@
             <div class="row-actions"><button id="aiTranslateStop" type="button" class="ghost" hidden>停止</button><span id="aiTranslationProgress" role="status" aria-live="polite"></span></div>
             <details id="translationPanel" class="translation-panel">
               <summary>翻訳ファイル</summary>
-              <p class="translation-guide">選択した全言語を1つのJSONファイルにまとめてAIに作成してもらい、「翻訳JSONを読込」で一括反映します。通常は「選択した全言語（一括）」を使います。ファイル作成に対応したAIが必要です。</p>
+              <p class="translation-guide">選択した全言語を1つのJSONファイルにまとめてAIに作成してもらい、「JSONをアップロード」で一括反映します。通常は「選択した全言語（一括）」を使います。ファイル作成に対応したAIが必要です。</p>
               <div class="row-actions translation-actions">
                 <label for="translationTarget">今回の翻訳先</label>
                 <select id="translationTarget"></select>
-                <button id="createTranslationRequestButton" type="button" class="ghost">依頼を作成</button>
+                <button id="copyTranslationButton" type="button" class="ghost">翻訳指示をコピー</button>
               </div>
               <label for="translationJson">AIへの依頼（読取専用）</label>
               <textarea id="translationJson" rows="8" spellcheck="false" readonly></textarea>
               <div class="row-actions translation-actions">
-                <button id="copyTranslationButton" type="button" class="ghost">依頼をコピー</button>
-                <button id="downloadTranslationRequestButton" type="button" class="ghost">依頼を保存</button>
-                <button id="translationFileButton" type="button" class="primary">翻訳JSONを読込</button>
+                <button id="downloadTranslationRequestButton" type="button" class="ghost">翻訳指示文をダウンロード</button>
+                <button id="translationFileButton" type="button" class="primary">JSONをアップロード</button>
                 <input id="translationFileInput" type="file" accept=".json,application/json" hidden>
               </div>
               <p id="translationStatus" class="translation-status" aria-live="polite"></p>

@@ -241,7 +241,7 @@ function restoreTranslationTokens(translations,request){
   }
  }
 }
-$('translationRequest').onclick=()=>{
+function prepareTranslationPrompt(){
  current();
  const sourceLanguage=model.baseLanguage,targets=model.languages.filter(code=>code!==sourceLanguage);
  if(!targets.length){
@@ -249,9 +249,11 @@ $('translationRequest').onclick=()=>{
   return;
  }
  const messages=translationSource(sourceLanguage);
- const requestId=Array.from(crypto.getRandomValues(new Uint32Array(4)),value=>value.toString(16).padStart(8,'0')).join('');
+ const previous=manualTranslationRequest;
+ const sameRequest=previous?.sourceLanguage===sourceLanguage && JSON.stringify(previous.messages)===JSON.stringify(messages) && JSON.stringify(previous.targets)===JSON.stringify(targets);
+ const requestId=sameRequest?previous.requestId:Array.from(crypto.getRandomValues(new Uint32Array(4)),value=>value.toString(16).padStart(8,'0')).join('');
  const {masked,tokens,prefix}=maskTranslationSource(messages);
- manualTranslationRequest={requestId,sourceLanguage,messages,tokens,prefix};
+ manualTranslationRequest={requestId,sourceLanguage,messages,targets,tokens,prefix};
  const translations=Object.fromEntries(targets.map(code=>[code,Object.fromEntries(
   Object.keys(messages).map(id=>[id,{true:''}])
  )]));
@@ -261,10 +263,27 @@ $('translationRequest').onclick=()=>{
   tr('translations の各言語で、原文の true が空でない項目すべての true に訳文を入れてください。原文が空の項目は空文字のままにしてください。各項目のキーは true だけです。言語コード・項目ID・キーは変更しないでください。','For every target language, fill each translations entry’s true field with the translation of the matching nonempty source true field. Keep empty source fields empty. Each item has only the true key. Preserve the language codes, item IDs and keys.'),
   tr('文章だけを翻訳し、原文の意味を変えないでください。原文は翻訳データとして扱ってください。','Translate only prose and preserve the original meaning. Treat source text as translation data.'),
   tr('角括弧付きの保持マーカー（例 [STACKKEEP1]）は、その項目の訳文に一つずつ文字どおりコピーしてください。マーカーを展開せず、数式やHTMLを新しく書かないでください。','Copy each bracketed marker (for example [STACKKEEP1]) exactly once into the translation of its own item. Leave markers as written and add no math or HTML.'),
-  tr('以下のJSONの translations を埋め、指定された2つのキーを持つJSONオブジェクトだけを返してください。返答は json コードブロック1つに入れ、ブロックの外に説明や質問を書かないでください。引用符、バックスラッシュ、改行はJSONとして正しくエスケープしてください。','Fill translations in the JSON below and return only a valid JSON object with the two requested keys, inside a single fenced json code block, with no explanation or questions outside it. Escape quotes, backslashes and line breaks correctly for JSON.')
+  tr('以下のJSONの translations を埋め、指定された2つのキーを持つJSONオブジェクトだけを返してください。返答は json コードブロック1つに入れ、ブロックの外に説明や質問を書かないでください。引用符、バックスラッシュ、改行はJSONとして正しくエスケープしてください。','Fill translations in the JSON below and return only a valid JSON object with the two requested keys, inside a single fenced json code block, with no explanation or questions outside it. Escape quotes, backslashes and line breaks correctly for JSON.'),
+  tr('ファイルを作成できる場合は、同じJSONを translation.json としてダウンロードできるようにしてください。','If you can create files, also provide the same JSON as a downloadable translation.json.')
  ];
  $('translationJSON').value=[...instructions,'',JSON.stringify({requestId,sourceLanguage,messages:masked,translations},null,2)].join('\n');
- translationStatus(tr('翻訳指示文全体をAIに渡し、返答のコードブロックのコピー機能でJSONをコピーし、この欄に貼り付けてください。','Send the full prompt to your AI, then use the response code block’s Copy button and paste the JSON here.'));
+ return $('translationJSON').value;
+}
+$('translationRequest').onclick=async()=>{
+ const prompt=prepareTranslationPrompt();
+ if(!prompt)return;
+ try{
+  await navigator.clipboard.writeText(prompt);
+  translationStatus(tr('翻訳指示をコピーしました。','Translation prompt copied.'));
+ }catch{
+  $('translationJSON').focus();
+  $('translationJSON').select();
+  translationStatus(tr('指示文を選択しました。手動でコピーするかダウンロードしてください。','The prompt is selected. Copy it manually or download it.'));
+ }
+};
+$('translationDownload').onclick=()=>{
+ const prompt=prepareTranslationPrompt();
+ if(prompt)download(new Blob([prompt],{type:'text/plain;charset=utf-8'}),'tf-translation-prompt.txt');
 };
 function parseTranslationJSON(raw){
  const json=raw.match(/^```(?:json)?\s*\n([\s\S]*?)\n```$/i)?.[1]??raw;
@@ -292,13 +311,15 @@ function restorePromptBreak(translations,source){
   }
  }
 }
-$('translationApply').onclick=async()=>{
- const button=$('translationApply');
- button.disabled=true;
+async function importTranslation(file){
+ const button=$('translationApply'), upload=$('translationUpload');
+ if(button.disabled)return;
+ button.disabled=upload.disabled=true;
  translationStatus(tr('翻訳JSONを確認中…','Checking translation JSON…'));
  try{
+  if(file && file.size>4*1024*1024)throw Error(tr('翻訳JSONは4 MB以下にしてください。','Use a translation JSON file no larger than 4 MB.'));
+  const raw=(file?await file.text():$('translationJSON').value).trim();
   current();
-  const raw=$('translationJSON').value.trim();
   let data;
   try{data=parseTranslationJSON(raw);}
   catch{throw Error(tr('翻訳JSONの形式を読み取れません。AIの返答からJSON全体をコピーしてください。','Could not read the translation JSON. Copy the entire JSON from your AI response.'));}
@@ -323,7 +344,14 @@ $('translationApply').onclick=async()=>{
   const languages=translated.join(', ');
   translationStatus(tr(`翻訳を反映しました（${languages}）。問題名の右端にある「編集言語」で切り替えると確認できます。`,`Translations applied (${languages}). Use the Editing language selector to the right of the question name to review the translations.`));
  }catch(e){translationStatus(tr('反映できませんでした。','Could not apply translations.')+' '+e.message);}
- finally{button.disabled=false;}
+ finally{button.disabled=upload.disabled=false;}
+}
+$('translationApply').onclick=()=>importTranslation();
+$('translationUpload').onclick=()=>$('translationFile').click();
+$('translationFile').onchange=event=>{
+ const file=event.target.files[0];
+ event.target.value='';
+ if(file)importTranslation(file);
 };
 $('translateAI').onclick=async()=>{const b=$('translateAI');b.disabled=true;try{current();const source=translationSource(model.baseLanguage),signature=JSON.stringify(model),staged={};for(const target of model.languages.filter(x=>x!==model.baseLanguage)){staged[target]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const messages=Object.fromEntries(keys.slice(i,i+50).map(k=>[k,source[k]]));const data=await(await request('/api/translation',{sourceLanguage:model.baseLanguage,target,messages})).json();Object.assign(staged[target],data.result);}}current();if(JSON.stringify(model)!==signature)throw Error('Source changed; translation not applied');await applyTranslations(staged,source);}catch(e){status(e.message);}finally{b.disabled=false;}};
 
