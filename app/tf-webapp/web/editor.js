@@ -14,7 +14,8 @@ function nameRequired(){if(!$('name').value.trim()){$('name').focus();throw Erro
 function button(parent,label,fn){const b=node('button',label);b.type='button';b.onclick=()=>{try{const result=fn();if(result?.catch)result.catch(e=>status(e.message));}catch(e){status(e.message);}};parent.append(b);return b;}
 function labels(){document.documentElement.lang=ui;$('uiLanguage').value=ui;document.querySelectorAll('[data-ja]').forEach(n=>n.textContent=n.dataset[ui]);$('saveClose').hidden=!state?.callbackOrigin;$('saveClose').textContent=tr('保存して終了（問題バンクへ戻る）','Save and close (return to bank)');$('newQuestion').disabled=!!state?.callbackOrigin;$('name').placeholder=tr('問題のタイトル','Question title');}
 function controls(){
- const codes=[...new Set(['en','ja','fr','de','it','es','pt','zh','ko','ru','sv',...model.languages])];
+ const codes=languageCodes();
+ $('selectAllLanguagesButton').title=tr('全言語を選択／解除（標準言語は常に選択）','Select or clear all languages (base language stays selected)');
  const active=codes.filter(code=>model.languages.includes(code));
  const select=$('textLanguage');
  if(JSON.stringify([...select.options].map(option=>option.value))!==JSON.stringify(active)){
@@ -22,8 +23,32 @@ function controls(){
   }
  select.value=textLang;
  $('languages').replaceChildren();
- for(const code of codes){const label=node('label',code),check=node('input');check.type='checkbox';check.checked=model.languages.includes(code);check.disabled=code===model.baseLanguage;check.onchange=()=>{current();if(check.checked){model.languages.push(code);for(const m of [model.prompt,model.msgT,model.msgF,model.noIdeaLabels,...model.correct.map(s=>s.messages),...model.wrong.map(s=>s.messages)])m[code]??='';model.labels[code]??=['',''];}else{if(code===model.baseLanguage){check.checked=true;status(tr('標準言語は解除できません。','The base language must remain selected.'));return;}model.languages=model.languages.filter(x=>x!==code);if(textLang===code)textLang=model.baseLanguage;}mark();render();};label.prepend(check);$('languages').append(label);}
+ for(const code of codes){
+  const label=node('label',code),check=node('input');
+  check.type='checkbox';
+  check.checked=model.languages.includes(code);
+  check.disabled=code===model.baseLanguage;
+  check.onchange=()=>setTargetLanguages(check.checked?[...model.languages,code]:model.languages.filter(lang=>lang!==code));
+  label.prepend(check);
+  $('languages').append(label);
+ }
 }
+function languageCodes(){
+ return [...new Set(['en','ja','fr','de','it','es','pt','zh','ko','ru','sv',...model.languages])];
+}
+function setTargetLanguages(codes){
+ current();
+ model.languages=[...new Set([...codes,model.baseLanguage])];
+ for(const code of model.languages)model.labels[code]??=['',''];
+ if(!model.languages.includes(textLang))textLang=model.baseLanguage;
+ mark();
+ render();
+}
+$('selectAllLanguagesButton').onclick=()=>{
+ const codes=languageCodes();
+ setTargetLanguages(codes.every(code=>model.languages.includes(code))?[model.baseLanguage]:codes);
+};
+
 function render(){
  if(!model||model.mode!=='truefalse')throw Error(tr('対応するTF XMLを開いてください。','Open a supported TF XML.'));
  $('form').hidden=false;controls();labels();$('question').value=model.prompt[textLang]||'';$('feedbackTrue').value=model.msgT[textLang]||'';$('feedbackFalse').value=model.msgF[textLang]||'';$('labelTrue').value=model.labels[textLang]?.[0]||'';$('labelFalse').value=model.labels[textLang]?.[1]||'';$('labelNoIdea').value=model.noIdeaLabels[textLang]||'';$('truth').value=model.truth;$('noIdea').value=String(model['%_noidea']);renderLibraries();updateTranslationWarning();
@@ -98,10 +123,7 @@ function updateTranslationWarning(){
  const stale=model.languages.filter(code=>translationBaselines.has(code)&&translationBaselines.get(code)!==signature);
  const warning=$('translationWarning');
  warning.hidden=!stale.length;
- warning.textContent=stale.length?tr(
-  '翻訳元が変更されました。多言語展開をやり直してください（'+stale.join(', ')+'）。',
-  'The translation source has changed. Translate again ('+stale.join(', ')+').'
- ):'';
+ warning.textContent=stale.length?tr('再翻訳が必要','Translation needed')+'（'+stale.join(', ')+'）':'';
 }
 function translationSourceDifferences(actual,expected){
  if(!actual || typeof actual!=='object' || Array.isArray(actual))return ['messages'];
@@ -340,7 +362,7 @@ async function importTranslation(file){
   restorePromptBreak(data.translations,source);
   await applyTranslations(data.translations,source);
   const translated=Object.keys(data.translations);
-  if(textLang===model.baseLanguage)switchEditingLanguage(translated[0]);
+  $('translationJSON').value='';
   const languages=translated.join(', ');
   translationStatus(tr(`翻訳を反映しました（${languages}）。問題名の右端にある「編集言語」で切り替えると確認できます。`,`Translations applied (${languages}). Use the Editing language selector to the right of the question name to review the translations.`));
  }catch(e){translationStatus(tr('反映できませんでした。','Could not apply translations.')+' '+e.message);}
@@ -353,7 +375,7 @@ $('translationFile').onchange=event=>{
  event.target.value='';
  if(file)importTranslation(file);
 };
-$('translateAI').onclick=async()=>{const b=$('translateAI');b.disabled=true;try{current();const source=translationSource(model.baseLanguage),signature=JSON.stringify(model),staged={};for(const target of model.languages.filter(x=>x!==model.baseLanguage)){staged[target]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const messages=Object.fromEntries(keys.slice(i,i+50).map(k=>[k,source[k]]));const data=await(await request('/api/translation',{sourceLanguage:model.baseLanguage,target,messages})).json();Object.assign(staged[target],data.result);}}current();if(JSON.stringify(model)!==signature)throw Error('Source changed; translation not applied');await applyTranslations(staged,source);}catch(e){status(e.message);}finally{b.disabled=false;}};
+$('translateAI').onclick=async()=>{const b=$('translateAI');b.disabled=true;try{current();const source=translationSource(model.baseLanguage),signature=JSON.stringify(model),staged={};for(const target of model.languages.filter(x=>x!==model.baseLanguage)){staged[target]={};const keys=Object.keys(source);for(let i=0;i<keys.length;i+=50){const messages=Object.fromEntries(keys.slice(i,i+50).map(k=>[k,source[k]]));const data=await(await request('/api/translation',{sourceLanguage:model.baseLanguage,target,messages})).json();Object.assign(staged[target],data.result);}}current();if(JSON.stringify(model)!==signature)throw Error('Source changed; translation not applied');await applyTranslations(staged,source);$('translationJSON').value='';}catch(e){status(e.message);}finally{b.disabled=false;}};
 
 const settings=window.AuthoringSettings;
 let evaluation=null,evaluationSignature='',evaluating=false;
