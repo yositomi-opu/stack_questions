@@ -1087,7 +1087,1918 @@ function casExpressionToEditorText(expression) {
   });
   const call = code.match(/^(sconcat|tex1|tex2|tex2L|stack_disp)\s*\(([\s\S]*)\)$/);
   if (!call || !casttextKnownWrapper(call[1])) return null;
-  try { casttextExpressionParts(call[2]);…24122 tokens truncated…ror(uiText("翻訳JSONが複数あります。適用する回答を1つだけ貼り付けてください。"));
+  try { casttextExpressionParts(call[2]); } catch { return null; }
+  return legacyQuestionCasttext(code, true);
+}
+
+// Convert the whole group first, so a failure never leaves half-converted rows.
+function changeRowValueType(rows, field, lang, type) {
+  const converted = [];
+  for (const row of rows) {
+    let value = row[`${field}_${lang}`] || "";
+    if (type === "text" && row[`${field}_type_${lang}`] === "cas" && value.trim()) {
+      value = row[`${field}_list_expr_${lang}`] ? null : casExpressionToEditorText(value);
+      if (value === null) {
+        window.mcqNotice?.(uiText("この式は文字列へ安全に変換できません。元の式と入力形式を保持しました。"));
+        return false;
+      }
+      converted.push([row, value]);
+    }
+  }
+  converted.forEach(([row, value]) => { row[`${field}_${lang}`] = value; });
+  rows.forEach(row => {
+    row[`${field}_verbatim`] = type !== "text";
+    if(type!=="text") {
+      const variants=activeLangs().filter(other=>other!==lang).map(other=>String(row[`${field}_${other}`]||"").trim()).filter(Boolean);
+      if(!variants.length || variants.every(value=>value===String(row[`${field}_${lang}`]||"").trim()))row[`${field}_language_independent`]=true;
+      else window.mcqNotice?.(uiText("旧CAS式の言語情報を保持しました。自動翻訳の対象外です"));
+    }
+    row[`${field}_type_${lang}`] = type === "text" ? "text" : "cas";
+    if (field === "choice") row[`choice_list_expr_${lang}`] = type === "cas_list"
+      || (type === "cas" && el.castextTemplate.checked && (knownChoiceList(row[`choice_${lang}`])
+        || (row[`choice_list_expr_${lang}`] && literalChoiceElements(row[`choice_${lang}`]) === null)));
+  });
+  if (converted.length && !el.castextTemplate.checked) {
+    el.castextTemplate.checked = true;
+    window.mcqNotice?.(uiText("CASText版を有効にしました。フィードバックも確認し、必要に応じてCASText形式に変換してください。"));
+  }
+  return true;
+}
+
+function fixedChoicesTextarea(group) {
+  const typeKey = `choice_type_${baseLang()}`;
+  const editor = document.createElement("div");
+  editor.className = "typed-editor";
+  const sourceRow = group.rows.find((row) => row[typeKey]) || group.rows[0];
+  const mode = valueTypeSelect(choiceValueType(sourceRow, baseLang()), true);
+  const textarea = document.createElement("textarea");
+  const badge = casEvaluationBadge(
+    group.rows.map((row) => choiceEvaluationId(state.rows.indexOf(row))),
+    mode.value !== "text"
+  );
+  const independent = languageIndependentToggle(group.rows, () => {
+    copyLanguageIndependentChoices(group.rows);
+    markTranslationsStale("選択肢の言語依存設定が変更されました");
+    updateOutput();
+  });
+  textarea.rows = Math.max(3, group.rows.length);
+  textarea.value = group.rows.map((row) => row[`choice_${baseLang()}`] || "").join("\n");
+  textarea.addEventListener("input", () => {
+    setFixedGroupChoices(group, textarea.value.split(/\r?\n/));
+    badge.dataset.evalIds = group.rows.map((row) => choiceEvaluationId(state.rows.indexOf(row))).join(",");
+    markCasEvaluationStale();
+    updateOptionLimit();
+    updateOutput();
+  });
+  mode.addEventListener("change", () => {
+    if (!changeRowValueType(group.rows, "choice", baseLang(), mode.value)) { mode.value = choiceValueType(sourceRow, baseLang()); return; }
+    textarea.value = group.rows.map(row => row[`choice_${baseLang()}`] || "").join("\n");
+    editor.classList.toggle("cas", mode.value !== "text");
+    badge.hidden = mode.value === "text";
+    markCasEvaluationStale();
+    markTranslationsStale("選択肢の入力形式が変更されました");
+    updateOutput();
+    renderRows();
+  });
+  editor.classList.toggle("cas", mode.value !== "text");
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  controls.append(independent, badge, mode);
+  editor.append(controls, textarea);
+  return editor;
+}
+
+function languageIndependentToggle(rows, onChange, field = "choice") {
+  const property = `${field}_language_independent`;
+  const label = document.createElement("label");
+  label.className = "language-independent-toggle";
+  if (field === "feedback") label.title = "このチェックをオンにすると多言語展開されません";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = rows.length > 0 && rows.every((row) => row[property]);
+  input.addEventListener("change", () => {
+    rows.forEach((row) => { row[property] = input.checked; });
+    onChange?.(input.checked);
+  });
+  label.append(input, document.createTextNode("言語非依存"));
+  return label;
+}
+
+function copyLanguageIndependentChoices(rows) {
+  const source = baseLang();
+  activeLangs().filter((lang) => lang !== source).forEach((lang) => {
+    rows.forEach((row) => {
+      row[`choice_${lang}`] = row[`choice_${source}`] || "";
+      row[`choice_type_${lang}`] = row[`choice_type_${source}`] || "text";
+      row[`choice_list_expr_${lang}`] = Boolean(row[`choice_list_expr_${source}`]);
+    });
+  });
+}
+
+function copyLanguageIndependentFeedback(rows) {
+  const source = baseLang();
+  activeLangs().filter((lang) => lang !== source).forEach((lang) => {
+    rows.forEach((row) => {
+      row[`feedback_${lang}`] = row[`feedback_${source}`] || "";
+      row[`feedback_type_${lang}`] = row[`feedback_type_${source}`] || "text";
+    });
+  });
+}
+
+function setFixedGroupChoices(group, values) {
+  const choiceKey = `choice_${baseLang()}`;
+  const choiceTypeKey = `choice_type_${baseLang()}`;
+  const feedbackKey = `feedback_${baseLang()}`;
+  const feedbackTypeKey = `feedback_type_${baseLang()}`;
+  const feedback = group.rows.find((row) => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
+  const choiceType = group.rows.find((row) => row[choiceTypeKey])?.[choiceTypeKey] || "text";
+  const choiceListExpression = group.rows.some((row) => row[`choice_list_expr_${baseLang()}`]);
+  const feedbackType = group.rows.find((row) => row[feedbackTypeKey])?.[feedbackTypeKey] || "text";
+  values.forEach((value, index) => {
+    if (!group.rows[index]) {
+      const row = {
+        pattern: group.pattern,
+        truth: group.truth,
+        choice_language_independent: group.rows.every((item) => item.choice_language_independent),
+        [choiceKey]: "",
+        [choiceTypeKey]: choiceType,
+        [`choice_list_expr_${baseLang()}`]: choiceListExpression,
+      };
+      state.rows.push(row);
+      group.rows.push(row);
+    }
+    group.rows[index][choiceKey] = value;
+  });
+  group.rows.slice(values.length).forEach((row) => {
+    state.rows.splice(state.rows.indexOf(row), 1);
+  });
+  group.rows.length = values.length;
+  group.rows.forEach((row) => {
+    row[feedbackKey] = "";
+  });
+  if (group.rows[0]) group.rows[0][feedbackKey] = feedback;
+  group.rows.forEach((row) => { row[feedbackTypeKey] = feedbackType; });
+  if (group.rows.every((row) => row.choice_language_independent)) copyLanguageIndependentChoices(group.rows);
+  markTranslationsStale("基本言語の選択肢が変更されました");
+}
+
+// Literal candidate lists have an editable text form. Opaque list expressions
+// retain their source and internal list marker, independently of the UI label.
+function literalChoiceElements(expression) {
+  const code = String(expression || "").trim().replace(/[;$]\s*$/, "");
+  if (!code.startsWith("[") || !code.endsWith("]")) return null;
+  try {
+    const items = casttextExpressionParts(code.slice(1, -1));
+    return items.length === 1 && !items[0] ? [] : items;
+  } catch { return null; }
+}
+
+function knownChoiceList(expression, seen = new Set()) {
+  const code = String(expression || "").trim().replace(/[;$]\s*$/, "");
+  if (literalChoiceElements(code) !== null || /^makelist\s*\(/.test(code)) return true;
+  if (!/^[%A-Za-z_][%A-Za-z0-9_]*$/.test(code) || seen.has(code)) return false;
+  seen.add(code);
+  const definition = splitMaximaStatements(stripMaximaComments(el.qvars.value || ""))
+    .map(parseMaximaAssignment).filter(item => item?.name === code).at(-1);
+  return definition ? knownChoiceList(definition.expression, seen) : false;
+}
+
+// Only constant builder bodies are rewritten: moving loop variables into
+// CASText compilation can change their evaluation scope.
+function constantChoiceText(expression) {
+  const text = casttextSourceString(expression.trim());
+  if (text !== null) return text;
+  const call = expression.match(/^sconcat\s*\(([\s\S]*)\)$/);
+  if (!call) return null;
+  try {
+    const values = casttextExpressionParts(call[1]).map(constantChoiceText);
+    return values.every(value => value !== null) ? values.join("") : null;
+  } catch { return null; }
+}
+
+function convertConstantChoiceBuilder(expression) {
+  const call = String(expression).trim().match(/^makelist\s*\(([\s\S]*)\)[;$]?$/);
+  if (!call) return expression;
+  try {
+    const args = casttextExpressionParts(call[1]);
+    if (args.length < 2) return expression;
+    const text = constantChoiceText(args[0]);
+    if (text === null) return expression;
+    return `makelist(${casttextLiteral(text)}, ${args.slice(1).join(", ")})`;
+  } catch { return expression; }
+}
+
+function normalizeChoiceCasttext(rows = state.rows) {
+  if (!el.castextTemplate.checked) return;
+  for (const row of rows) for (const lang of LANGS) {
+    if (row.choice_verbatim || row[`choice_type_${lang}`] !== "cas") continue;
+    const value = row[`choice_${lang}`] || "";
+    const items = literalChoiceElements(value);
+    if (items !== null) {
+      // An arbitrary mathematical element becomes a single CASText insertion.
+      // Dynamic castext calls cannot be unwrapped, so retain the complete list.
+      const texts = items.map(item => casExpressionToEditorText(item)
+        ?? (/^castext\s*\(/.test(item) ? null : `{@${item}@}`));
+      if (texts.every(text => text !== null)) row[`choice_${lang}`] = `[${texts.map(maximaString).join(", ")}]`;
+      row[`choice_list_expr_${lang}`] = true;
+      continue;
+    }
+    const text = casExpressionToEditorText(value);
+    if (text !== null && value.trim()) {
+      row[`choice_${lang}`] = text;
+      row[`choice_type_${lang}`] = "text";
+      row[`choice_list_expr_${lang}`] = false;
+    } else if (knownChoiceList(value)) {
+      row[`choice_${lang}`] = convertConstantChoiceBuilder(value);
+      row[`choice_list_expr_${lang}`] = true;
+    }
+  }
+}
+
+function compileLiteralChoiceList(expression) {
+  const items = literalChoiceElements(expression);
+  if (items === null || !items.some(item => casttextSourceString(item) !== null)) return expression;
+  return `[${items.map(item => {
+    const text = casttextSourceString(item);
+    return text === null ? item : casttextLiteral(text);
+  }).join(", ")}]`;
+}
+
+// Static CASText feedback is edited as its source text; dynamic CAS stays CAS.
+function normalizeFeedbackCasttext(rows = state.rows) {
+  if (!el.castextTemplate.checked) return;
+  for (const row of rows) for (const lang of LANGS) {
+    if (row.feedback_verbatim || row[`feedback_type_${lang}`] !== "cas") continue;
+    const code = String(row[`feedback_${lang}`] || "").trim().replace(/[;$]\s*$/, "");
+    const text = casExpressionToEditorText(code);
+    if (text === null) continue;
+    row[`feedback_${lang}`] = text;
+    row[`feedback_type_${lang}`] = "text";
+  }
+}
+
+function feedbackValueTypeSelect(value) {
+  return valueTypeSelect(value);
+}
+
+function fixedFeedbackTextarea(group) {
+  const feedbackKey = `feedback_${baseLang()}`;
+  const typeKey = `feedback_type_${baseLang()}`;
+  const editor = document.createElement("div");
+  editor.className = "typed-editor";
+  const sourceRow = group.rows.find(row => String(row[feedbackKey] || "").trim()) || group.rows[0];
+  const mode = feedbackValueTypeSelect(sourceRow?.[typeKey] || "text");
+  const textarea = document.createElement("textarea");
+  textarea.rows = 3;
+  textarea.value = group.rows.find((row) => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
+  textarea.addEventListener("input", () => {
+    group.rows.forEach((row) => {
+      row[feedbackKey] = "";
+    });
+    if (group.rows[0]) group.rows[0][feedbackKey] = textarea.value;
+    markTranslationsStale("基本言語のフィードバックが変更されました");
+    updateOutput();
+  });
+  mode.addEventListener("change", () => {
+    if (!changeRowValueType(group.rows, "feedback", baseLang(), mode.value)) { mode.value = sourceRow?.[typeKey] || "text"; return; }
+    textarea.value = group.rows.find(row => String(row[feedbackKey] || "").trim())?.[feedbackKey] || "";
+    editor.classList.toggle("cas", mode.value === "cas");
+    markTranslationsStale("フィードバックの入力形式が変更されました");
+    updateOutput();
+    renderRows();
+  });
+  editor.classList.toggle("cas", mode.value === "cas");
+  const independent = languageIndependentToggle(group.rows, () => {
+    copyLanguageIndependentFeedback(group.rows);
+    markTranslationsStale("フィードバックの言語依存設定が変更されました");
+    updateOutput();
+  }, "feedback");
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  controls.append(independent, mode);
+  editor.append(controls, textarea);
+  return editor;
+}
+
+function removeFixedGroupButton(group) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "remove-row";
+  button.textContent = "×";
+  button.title = "パターンを削除";
+  button.addEventListener("click", () => {
+    state.rows = state.rows.filter((row) => !group.rows.includes(row));
+    markCasEvaluationStale();
+    markTranslationsStale("選択肢パターンが削除されました");
+    renderRows();
+    updateOutput();
+  });
+  return button;
+}
+
+function addFixedPattern(truth) {
+  const pattern = nextPattern(truth);
+  if (!pattern) return;
+  state.rows.push({
+    pattern,
+    truth,
+    feedback_by_truth: true,
+    [`choice_${baseLang()}`]: "",
+    [`feedback_${baseLang()}`]: "",
+  });
+  markCasEvaluationStale();
+  markTranslationsStale("選択肢パターンが追加されました");
+  renderRows();
+  updateOutput();
+}
+
+function cell(child) {
+  const td = document.createElement("td");
+  td.append(child);
+  return td;
+}
+
+function truthSelect(row, index) {
+  const select = document.createElement("select");
+  select.innerHTML = '<option value="C">正解</option><option value="W">不正解</option>';
+  select.value = normalizeTruth(row.truth);
+  select.addEventListener("change", () => {
+    state.rows[index].truth = select.value;
+    markTranslationsStale("選択肢の正解・不正解が変更されました");
+    renderRows();
+    updateOutput();
+  });
+  return select;
+}
+
+function textInput(row, index, key, fallback = "") {
+  const input = document.createElement("input");
+  input.value = row[key] ?? fallback;
+  input.addEventListener("input", () => {
+    state.rows[index][key] = input.value;
+    if (key === "pattern") updateOptionLimit();
+    updateOutput();
+  });
+  if (key === "pattern") input.addEventListener("blur", renderRows);
+  return input;
+}
+
+function textareaInput(row, index, key) {
+  const textarea = document.createElement("textarea");
+  textarea.rows = 2;
+  textarea.value = row[key] ?? "";
+  textarea.addEventListener("input", () => {
+    state.rows[index][key] = textarea.value;
+    if (key.startsWith("choice_")) {
+      markCasEvaluationStale();
+      updateOptionLimit();
+    }
+    markTranslationsStale("基本言語の選択肢が変更されました");
+    updateOutput();
+  });
+  return textarea;
+}
+
+function typedTextareaInput(row, index, field) {
+  const lang = baseLang();
+  const editor = document.createElement("div");
+  editor.className = "typed-editor";
+  const modeKey = `${field}_type_${lang}`;
+  const mode = valueTypeSelect(choiceValueType(row, lang), true);
+  const textarea = textareaInput(row, index, `${field}_${lang}`);
+  const badge = casEvaluationBadge([choiceEvaluationId(index, lang)], mode.value !== "text");
+  mode.addEventListener("change", () => {
+    if (!changeRowValueType([state.rows[index]], field, lang, mode.value)) { mode.value = choiceValueType(row, lang); return; }
+    textarea.value = state.rows[index][`${field}_${lang}`] || "";
+    editor.classList.toggle("cas", mode.value !== "text");
+    badge.hidden = mode.value === "text";
+    markCasEvaluationStale();
+    markTranslationsStale("選択肢の入力形式が変更されました");
+    updateOutput();
+    renderRows();
+  });
+  editor.classList.toggle("cas", mode.value !== "text");
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls";
+  if (field === "choice") {
+    const groupRows = state.rows.filter((candidate) =>
+      String(candidate.pattern || "").trim() === String(row.pattern || "").trim()
+      && normalizeTruth(candidate.truth) === normalizeTruth(row.truth)
+    );
+    controls.append(languageIndependentToggle(groupRows, () => {
+      copyLanguageIndependentChoices(groupRows);
+      markTranslationsStale("選択肢の言語依存設定が変更されました");
+      renderRows();
+      updateOutput();
+    }));
+  }
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "ghost candidate-add";
+  add.textContent = uiText("枝番追加");
+  add.addEventListener("click", () => addPatternCandidate(row));
+  controls.append(badge, add, candidateHelp("多言語化する候補は枝番追加で個別に入力します。各枝番は同じパターンのリスト要素です。問題変数で作ったリストも指定できますが、その中身は自動翻訳できないため、言語依存の選択肢には非推奨です。"), mode,
+    candidateHelp("文字列：STACKのCASText本文を入力します。CAS式：互換用の式を入力します。リスト：問題変数で定義したリスト変数やリスト式を指定します。各要素はCASTextとし、必要な言語処理は問題変数側で行ってください。"));
+  editor.append(controls, textarea);
+  return editor;
+}
+
+function feedbackTextarea(row, index) {
+  const feedbackKey = `feedback_${baseLang()}`;
+  const typeKey = `feedback_type_${baseLang()}`;
+  const editor = document.createElement("div");
+  editor.className = "typed-editor";
+  const textarea = document.createElement("textarea");
+  const key = feedbackGroupKey(row);
+  const firstIndex = state.rows.findIndex((candidate) => feedbackGroupKey(candidate) === key);
+  const groupRows = state.rows.filter((candidate) => feedbackGroupKey(candidate) === key);
+  textarea.rows = 2;
+  textarea.value = groupRows.find((candidate) => String(candidate[feedbackKey] || "").trim())?.[feedbackKey] || "";
+  textarea.dataset.feedbackGroup = key;
+  textarea.disabled = false;
+  textarea.title = uiText("同じパターンのフィードバックに反映します。");
+  textarea.addEventListener("input", () => {
+    groupRows.forEach((candidate) => {
+      candidate[feedbackKey] = textarea.value;
+    });
+    mirrorFeedbackEditors(key, textarea.value);
+    markTranslationsStale("基本言語のフィードバックが変更されました");
+    updateOutput();
+  });
+  const sourceWithType = groupRows.find(candidate => String(candidate[feedbackKey] || "").trim()) || groupRows[0];
+  const mode = feedbackValueTypeSelect(sourceWithType?.[typeKey] || "text");
+  mode.dataset.feedbackGroup = key;
+  mode.disabled = textarea.disabled;
+  mode.addEventListener("change", () => {
+    if (!changeRowValueType(groupRows, "feedback", baseLang(), mode.value)) { mode.value = sourceWithType?.[typeKey] || "text"; return; }
+    textarea.value = groupRows.find(candidate => String(candidate[feedbackKey] || "").trim())?.[feedbackKey] || "";
+    mirrorFeedbackEditors(key, textarea.value, mode.value);
+    editor.classList.toggle("cas", mode.value === "cas");
+    markTranslationsStale("フィードバックの入力形式が変更されました");
+    updateOutput();
+    renderRows();
+  });
+  editor.classList.toggle("cas", mode.value === "cas");
+  const patternToggle = feedbackModeToggle(row, index);
+  const controls = document.createElement("div");
+  controls.className = "choice-type-controls feedback-controls";
+  if (index === firstIndex) {
+    controls.append(languageIndependentToggle(groupRows, () => {
+      copyLanguageIndependentFeedback(groupRows);
+      markTranslationsStale("フィードバックの言語依存設定が変更されました");
+      updateOutput();
+    }, "feedback"));
+  }
+  if (patternToggle) controls.append(patternToggle);
+  controls.append(mode);
+  editor.append(controls, textarea);
+  return editor;
+}
+
+function feedbackGroupKey(row) {
+  const pattern = String(row.pattern || "").trim() || "01";
+  return el.requirePairs.checked && !patternFeedbackSeparate(row)
+    ? pattern
+    : `${pattern}:${normalizeTruth(row.truth)}`;
+}
+
+function feedbackLanguageIndependent(row) {
+  const key = feedbackGroupKey(row);
+  return state.rows.some((candidate) =>
+    feedbackGroupKey(candidate) === key && candidate.feedback_language_independent === true
+  );
+}
+
+function patternRowsFor(rowOrPattern) {
+  const pattern = String(typeof rowOrPattern === "object" ? rowOrPattern.pattern : rowOrPattern).trim() || "01";
+  return state.rows.filter((row) => (String(row.pattern || "").trim() || "01") === pattern);
+}
+
+function patternFeedbackSeparate(rowOrPattern) {
+  if (!el.requirePairs.checked) return true;
+  return patternRowsFor(rowOrPattern).some((row) => row.feedback_by_truth === true);
+}
+
+function feedbackModeToggle(row, index) {
+  if (!el.requirePairs.checked) return null;
+  const patternRows = patternRowsFor(row);
+  const firstIndex = Math.min(...patternRows.map((candidate) => state.rows.indexOf(candidate)));
+  if (index !== firstIndex) return null;
+  const label = document.createElement("label");
+  label.className = "feedback-mode-toggle";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = patternFeedbackSeparate(row);
+  input.addEventListener("change", () => {
+    if (!setPatternFeedbackMode(row.pattern, input.checked)) {
+      input.checked = true;
+      return;
+    }
+    markTranslationsStale("フィードバックの共有設定が変更されました");
+    renderRows();
+    updateOutput();
+  });
+  label.title = "このチェックをオンにすると正解・不正解個別にフィードバックを設定できます";
+  label.append(input, document.createTextNode("正解・不正解別"));
+  return label;
+}
+
+function setPatternFeedbackMode(pattern, separate) {
+  const rows = patternRowsFor(pattern);
+  if (!rows.length) return true;
+  if (!separate) {
+    for (const lang of LANGS) {
+      const valueKey = `feedback_${lang}`;
+      const typeKey = `feedback_type_${lang}`;
+      const sourceFor = (truth) => rows.find((row) =>
+        normalizeTruth(row.truth) === truth && String(row[valueKey] || "").trim()
+      );
+      const correct = sourceFor("C");
+      const wrong = sourceFor("W");
+      if (correct && wrong && (
+        String(correct[valueKey]) !== String(wrong[valueKey])
+        || (correct[typeKey] || "text") !== (wrong[typeKey] || "text")
+        || Boolean(correct.feedback_language_independent) !== Boolean(wrong.feedback_language_independent)
+      )) {
+        setStatus(`パターン ${pattern} のCとWでフィードバックが異なるため、共通化できません`, false, true);
+        return false;
+      }
+    }
+  }
+  rows.forEach((row) => { row.feedback_by_truth = separate; });
+  if (!separate) synchronizeSharedFeedback([String(pattern)]);
+  return true;
+}
+
+function mirrorFeedbackEditors(groupKey, value, type) {
+  el.rowsBody.querySelectorAll("textarea[data-feedback-group]").forEach((node) => {
+    if (node.dataset.feedbackGroup === groupKey && value !== undefined) node.value = value;
+  });
+  el.rowsBody.querySelectorAll("select[data-feedback-group]").forEach((node) => {
+    if (node.dataset.feedbackGroup !== groupKey || type === undefined) return;
+    node.value = type;
+    node.closest(".typed-editor")?.classList.toggle("cas", type === "cas");
+  });
+}
+
+function synchronizeSharedFeedback(patternFilter = null) {
+  const selected = patternFilter ? new Set(patternFilter.map(String)) : null;
+  const groups = new Map();
+  state.rows.forEach((row) => {
+    const pattern = String(row.pattern || "").trim() || "01";
+    if ((selected && !selected.has(pattern)) || patternFeedbackSeparate(pattern)) return;
+    if (!groups.has(pattern)) groups.set(pattern, []);
+    groups.get(pattern).push(row);
+  });
+  groups.forEach((rows) => {
+    LANGS.forEach((lang) => {
+      const valueKey = `feedback_${lang}`;
+      const typeKey = `feedback_type_${lang}`;
+      const source = rows.find((row) => String(row[valueKey] || "").trim()) || rows[0];
+      const value = String(source?.[valueKey] || "");
+      const type = source?.[typeKey] || "text";
+      const independent = Boolean(source?.feedback_language_independent);
+      rows.forEach((row) => {
+        row[valueKey] = value;
+        row[typeKey] = type;
+        row.feedback_language_independent = independent;
+      });
+    });
+  });
+}
+
+function feedbackModeConfigValue() {
+  const patterns = [...new Set(state.rows.map((row) => String(row.pattern || "").trim() || "01"))];
+  if (!patterns.length) return el.feedbackByTruth.checked ? "true" : "false";
+  const separateCount = patterns.filter((pattern) => patternFeedbackSeparate(pattern)).length;
+  if (separateCount === 0) return "false";
+  if (separateCount === patterns.length) return "true";
+  return "mixed";
+}
+
+function hasTruthSpecificFeedback(rows = state.rows) {
+  const patterns = new Map();
+  rows.forEach((row) => {
+    const pattern = String(row.pattern || "").trim() || "01";
+    if (!patterns.has(pattern)) patterns.set(pattern, { C: [], W: [] });
+    patterns.get(pattern)[normalizeTruth(row.truth)].push(row);
+  });
+  return [...patterns.values()].some((pattern) => patternHasTruthSpecificFeedback(pattern));
+}
+
+function patternHasTruthSpecificFeedback(pattern) {
+  return LANGS.some((lang) => {
+    const valueKey = `feedback_${lang}`;
+    const typeKey = `feedback_type_${lang}`;
+    const typedValue = (truth) => {
+      const source = pattern[truth].find((row) => String(row[valueKey] || "").trim());
+      return {
+        value: String(source?.[valueKey] || ""),
+        type: source?.[typeKey] || "text",
+      };
+    };
+    const correct = typedValue("C");
+    const wrong = typedValue("W");
+    return (correct.value || wrong.value)
+      && (correct.value !== wrong.value || correct.type !== wrong.type);
+  });
+}
+
+function assignFeedbackModesFromValues(rows = state.rows) {
+  const patterns = new Map();
+  rows.forEach((row) => {
+    const pattern = String(row.pattern || "").trim() || "01";
+    if (!patterns.has(pattern)) patterns.set(pattern, { C: [], W: [] });
+    patterns.get(pattern)[normalizeTruth(row.truth)].push(row);
+  });
+  patterns.forEach((group) => {
+    const separate = patternHasTruthSpecificFeedback(group);
+    [...group.C, ...group.W].forEach((row) => { row.feedback_by_truth = separate; });
+  });
+}
+
+function removeButton(index) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "remove-row";
+  button.textContent = "×";
+  button.title = "削除";
+  button.addEventListener("click", () => {
+    if (el.requirePairs.checked) {
+      const group = patternRowsFor(state.rows[index]);
+      state.rows = state.rows.filter(row => !group.includes(row));
+    } else {
+      state.rows.splice(index, 1);
+    }
+    markCasEvaluationStale();
+    markTranslationsStale("選択肢行が削除されました");
+    renderRows();
+    updateOutput();
+  });
+  return button;
+}
+
+// Shared library selections are authoring settings, not Maxima conditionals.
+function libraryCatalog() {
+  return [
+    ["genmatrix_lib", "行列生成", "指定した行列式を持つ行列や正則行列の生成、行列比較。random_matrix_det_list、random_invertible_matrix、distMatなど。"],
+    ["trans_mat", "基本変形", "基本行列と掃き出し操作。elementary_matrix_rowadd・swap・mult、sweepout、SweepCijなど。"],
+    ["rref_lib", "階段行列・核", "階段行列の生成・判定と簡約化、核の基底。randechelon、echelonp、redeche、nullspace2など。"],
+    ["polynomial_disp", "多項式表示", "多項式の昇順・降順表示、変数順を指定した一次式や行列成分の表示。display_polynomialなど。"],
+    ["texput_W", "太字・数集合", "Wa〜Wz（Wlを除く）とWzrの太字表示、WR・WC・WQ・WZ・WN・WK・WHの黒板太字表示を設定します。"],
+    ["linalg_misc", "その他", "基底の判定、整数ベクトル化、外積、転倒数など。check_basis_colspace、integer_vector、cross_product、inversion_numberなど。"],
+    ["ky_linear_algebra", "旧一括版", "互換用に6つのライブラリをまとめて読み込みます。通常は必要な分割版だけを選んでください。"],
+  ];
+}
+
+function defaultLibraryUrl(id) {
+  return new URL(`${id}.mac`, normalizedIncludeBaseUrl(state.libraryBaseUrl || SERVER_CONFIG.includeBaseUrl || DEFAULT_INCLUDE_BASE_URL)).href;
+}
+
+function libraryIdFromUrl(value) {
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol)) return "";
+    const file = decodeURIComponent(url.pathname.split("/").pop());
+    return libraryCatalog().find(([id]) => file === `${id}.mac` || file === `${id}.txt`)?.[0] || "";
+  } catch { return ""; }
+}
+
+function parseLibraryConfig(value) {
+  const data = typeof value === "string" ? JSON.parse(value) : value;
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error(uiText("ライブラリ設定が不正です"));
+  const result = {};
+  for (const [id, url] of Object.entries(data)) {
+    if (typeof url !== "string" || libraryIdFromUrl(url) !== id || /["\\\r\n]/.test(url)) throw new Error(uiText("ライブラリ設定が不正です"));
+    result[id] = url;
+  }
+  return result;
+}
+
+// Match whole top-level calls only; comments, strings and conditional calls stay intact.
+function libraryIncludeRanges(code) {
+  const result = [];
+  for (let start = 0; start < code.length;) {
+    const end = scanMaximaStatementEnd(code, start);
+    const statement = code.slice(start, end);
+    const match = stripMaximaComments(statement).trim().match(/^stack_include\s*\(\s*"([^"\\\r\n]+)"\s*\)\s*[;$]?$/);
+    const id = match && libraryIdFromUrl(match[1]);
+    if (id) {
+      const offset = maskMaximaCommentsAndStrings(statement).indexOf("stack_include");
+      result.push({id, url:match[1], start:start+offset, end});
+    }
+    start = end;
+  }
+  return result;
+}
+
+function manualLibraryIncludes() {
+  return [...libraryIncludeRanges(el.parameters.value || ""), ...libraryIncludeRanges(el.qvars.value || "")];
+}
+
+function effectiveLibraryIncludes() {
+  return {...(state.libraryIncludes || {}), ...Object.fromEntries(manualLibraryIncludes().map(item => [item.id, item.url]))};
+}
+
+function libraryIncludeLines() {
+  const manual = new Set(manualLibraryIncludes().map(item => item.id));
+  return libraryCatalog().filter(([id]) => state.libraryIncludes?.[id] && !manual.has(id))
+    .map(([id]) => `stack_include("${state.libraryIncludes[id]}");`);
+}
+
+function removeLibraryCalls(code, id = null) {
+  for (const item of libraryIncludeRanges(code).reverse()) {
+    if (!id || item.id === id) code = code.slice(0,item.start) + code.slice(item.end);
+  }
+  return code;
+}
+
+function templateWithLibraryIncludes(template) {
+  return template.replace(/(<questionvariables>\s*<text><!\[CDATA\[)([\s\S]*?)(\]\]><\/text>)/,
+    (_all, open, code, close) => open + libraryIncludeLines().join("\n") + "\n" + removeLibraryCalls(code) + close);
+}
+
+function setLibraryIncluded(id, checked) {
+  if (!libraryCatalog().some(item => item[0] === id)) return;
+  state.libraryIncludes ||= {};
+  if (checked) {
+    // Selecting individual modules replaces the legacy bundle, and vice versa.
+    const replaced = libraryCatalog().map(item => item[0]).filter(other => other !== id && (id === "ky_linear_algebra" || other === "ky_linear_algebra"));
+    for (const other of replaced) {
+      delete state.libraryIncludes[other];
+      el.qvars.value = removeLibraryCalls(el.qvars.value, other).trim();
+      el.parameters.value = removeLibraryCalls(el.parameters.value, other).trim();
+    }
+    state.qvars = [el.qvars.value];
+    if (manualLibraryIncludes().some(item => item.id === id)) delete state.libraryIncludes[id];
+    else state.libraryIncludes[id] = state.libraryIncludes[id] || defaultLibraryUrl(id);
+  }
+  else {
+    delete state.libraryIncludes[id];
+    el.qvars.value = removeLibraryCalls(el.qvars.value, id).trim();
+    el.parameters.value = removeLibraryCalls(el.parameters.value, id).trim();
+    state.qvars = [el.qvars.value];
+  }
+  markCasEvaluationStale();
+  updateOutput();
+}
+
+function initLibraryBaseControls() {
+  const settings = window.AuthoringSettings;
+  const button = document.getElementById("changeLibraryBase");
+  if (!settings || !button) return;
+  try { state.libraryBaseUrl = settings.normalize(localStorage.getItem("mcq-webapp.library-base-url") || state.libraryBaseUrl); } catch {}
+  button.onclick = () => settings.chooseBase({
+    current: state.libraryBaseUrl,
+    language: () => window.mcqI18n?.language || INITIAL_LOCALE,
+    libraries: () => Object.keys(effectiveLibraryIncludes()),
+    request: async (payload) => {
+      const response = await fetch(webappUrl("/api/libraries/validate"), {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      const result = await response.json();
+      if (!response.ok) throw Error(result.error || "Validation failed");
+      return result;
+    },
+    onSave: (base) => {
+      state.libraryBaseUrl = base;
+      for (const id of Object.keys(state.libraryIncludes)) state.libraryIncludes[id] = new URL(`${id}.mac`, base).href;
+      for (const field of [el.parameters, el.qvars]) {
+        for (const item of libraryIncludeRanges(field.value).reverse()) {
+          const call = field.value.slice(item.start,item.end).replace(item.url,new URL(item.id+".mac",base).href);
+          field.value = field.value.slice(0,item.start) + call + field.value.slice(item.end);
+        }
+      }
+      try { localStorage.setItem("mcq-webapp.library-base-url",base); } catch {}
+      markCasEvaluationStale(); updateOutput();
+    }
+  });
+}
+
+function syncLibraryControls() {
+  if (window.MCQ_HEADLESS || typeof document === "undefined" || typeof document.getElementById !== "function") return;
+  const baseField = document.getElementById("libraryBaseUrl");
+  if (baseField) baseField.value = state.libraryBaseUrl;
+  const host = document.getElementById("libraryIncludes");
+  if (!host) return;
+  if (!host.children.length) {
+    for (const [id, name, description] of libraryCatalog()) {
+      const label = document.createElement("label");
+      label.className = "check-row library-check";
+      const tooltip = document.createElement("span");
+      tooltip.className = "question-text-tooltip library-tooltip";
+      tooltip.setAttribute("role", "tooltip");
+      tooltip.id = `libraryTooltip-${id}`;
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.dataset.library = id;
+      input.setAttribute("aria-describedby", tooltip.id);
+      input.addEventListener("change", () => setLibraryIncluded(id, input.checked));
+      const span = document.createElement("span");
+      span.textContent = name;
+      const filename = document.createElement("small");
+      filename.textContent = `${id}.mac`;
+      const explanation = document.createElement("span");
+      explanation.textContent = description;
+      tooltip.append(filename, explanation);
+      label.append(input, span, tooltip);
+      host.append(label);
+    }
+    window.mcqI18n?.translateTree();
+  }
+  const selected = effectiveLibraryIncludes();
+  host.querySelectorAll("input").forEach(input => {input.checked = Boolean(selected[input.dataset.library]);});
+}
+
+function updateOutput() {
+  if (window.MCQ_HEADLESS) return;
+  if (state.aiTranslationRunning) {
+    el.xmlOutput.value = "";
+    return; // Partial language results must not trigger repeated XML warnings.
+  }
+  syncLibraryControls();
+  syncXmlFilename();
+  syncCastextQuestionInputs();
+  syncIncludeFilename();
+  if (!state.rows.length) {
+    el.xmlOutput.value = "";
+    setStatus("選択肢を入力してください");
+    return;
+  }
+  try {
+    const xml = generateXml();
+    el.xmlOutput.value = xml;
+    const patterns = groupPatterns();
+    setStatus(`${patterns.length}パターン・${state.rows.length}選択肢から生成`);
+  } catch (error) {
+    el.xmlOutput.value = `<!-- XMLを生成できませんでした: ${error.message} -->`;
+    setStatus(error.message, true);
+  }
+}
+
+function generateXml() {
+  const sourceTemplate = state.templates[el.castextTemplate?.checked ? `${state.mode}Cas` : state.mode];
+  if (!sourceTemplate) throw new Error("テンプレート読込待ち");
+  const template = templateWithLibraryIncludes(rewriteTemplateIncludeUrls(sourceTemplate));
+  refreshGeneratedIncludeSource();
+  const id = xmlFileStem(baseTitle(el.questionId.value));
+  const generatedVariables = generateVariableBlock();
+  const metadataComment = editorMetadataComment();
+  const variableBlock = state.includeSource
+    ? [...parameterPreamble(), `stack_include("${state.includeSource.url}");`].join("\n")
+    : generatedVariables;
+  return template
+    .replace(/\{@__mcq_noidea_checked@\}/g, "{@%__mcq_noidea_checked@}")
+    .replace(/<(questiontext|specificfeedback|generalfeedback|truefeedback|falsefeedback)\b[^>]*>[\s\S]*?<\/\1>/g,
+      (field, tag) => inlineLanguageDeclarations(field, tag === "questiontext" && el.castextTemplate?.checked))
+    .replace(/<name>\s*<text>[\s\S]*?<\/text>\s*<\/name>/, `<name>\n      <text>${escapeXml(id)}</text>\n    </name>`)
+    .replace(/%__mcq_rb_cb\s*:\s*"(?:rb2?|cb)"\s*;/, `%__mcq_rb_cb:"${state.mode === "cb" ? "cb" : el.radioMultiplePrompt?.checked ? "rb2" : "rb"}";`)
+    .replace(
+      /(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/\s*)[\s\S]*?(\s*\/\*+\s*END OF MAIN QUESTION VARIABLES\s*\*+\/)/,
+      `$1\n${variableBlock}\n$2`
+    )
+    .replace(
+      /\n\s*(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/)/,
+      `\n${metadataComment}\n\n$1`
+    )
+    .replace(/(\]\]><\/text>\s*<\/questionvariables>)/, (end) => el.castextTemplate?.checked
+      ? `\n%__mcq_langcode:${casttextLiteral(languageBlocks())};\n${end}` : end);
+}
+
+function inlineLanguageDeclarations(field, required = false) {
+  // STACK discovers languages before CAS evaluation, including in PRT feedback.
+  // Replace only empty declarations and our marker, never translated content.
+  return field.replace(/(<text\b[^>]*>)([\s\S]*?)(<\/text>)/, (_match, open, content, close) => {
+    const cdata = content.startsWith("<![CDATA[") && content.endsWith("]]>");
+    let body = cdata ? content.slice(9, -3) : content;
+    let found = false;
+    body = body.replace(/\{@\s*%__mcq_langcode\s*@\}|\[\[lang\s+code=["'][^"']+["']\]\]\s*\[\[\/lang\]\]/g, () => {
+      found = true;
+      return "";
+    });
+    if (found || required) body = languageBlocks() + body;
+    return open + (cdata ? "<![CDATA[" + body + "]]>" : body) + close;
+  });
+}
+
+// Preview takes a separate snapshot; saved XML and shared include files are unchanged.
+function previewQuestionSnapshot() {
+  let xml = generateXml();
+  if (state.includeSource) {
+    const main = [...parameterPreamble(), generateIncludeFileContent()].join("\n");
+    xml = xml.replace(
+      /(\/\*+\s*MAIN QUESTION VARIABLES\s*\*+\/\s*)[\s\S]*?(\s*\/\*+\s*END OF MAIN QUESTION VARIABLES\s*\*+\/)/,
+      (_match, start, end) => `${start}\n${main}\n${end}`
+    );
+  }
+  return {questionDefinition: xml, url: el.stackApiUrl.value.trim(), lang: el.baseLanguage.value};
+}
+
+function generateVariableBlock(includePreamble = true) {
+  ensureCandidateIds();
+  if (state.rows.some(row => !Number.isInteger(Number(row.pattern)) || Number(row.pattern) < 1 || Number(row.pattern) > patternLimit(normalizeTruth(row.truth)))) {
+    throw new Error(uiText("パターン番号がテンプレートの上限を超えています。"));
+  }
+  validateTranslationCoverage();
+  const numOptions = positiveInt(el.numOptions.value, "選択肢数");
+  const counts = correctCountChoices(numOptions);
+  const patterns = groupPatterns();
+  if (!patterns.length) throw new Error("選択肢がありません。選択肢を追加してください");
+  if (el.requirePairs.checked) {
+    return generatePairedVariableBlock(patterns, numOptions, counts, includePreamble);
+  }
+  return generateFixedVariableBlock(patterns, numOptions, counts, includePreamble);
+}
+
+function correctCountChoices(numOptions) {
+  if (!el.randomCorrect.checked) {
+    const value = nonNegativeInt(el.numCorrect.value, "正解数");
+    if (value > numOptions) throw new Error("正解数が選択肢数を超えています");
+    return [value];
+  }
+  const values = el.correctCounts.value
+    .split(/[,、\s]+/)
+    .filter(Boolean)
+    .map((value) => Number.parseInt(value, 10));
+  if (!values.length || values.some((value) => !Number.isInteger(value) || value < 0 || value > numOptions)) {
+    throw new Error(`正解数の候補は0〜${numOptions}の整数をカンマ区切りで入力してください`);
+  }
+  return values; // Repeated entries intentionally weight rand([...]).
+}
+
+function cleanParameterStatements(value) {
+  const source = String(value || "");
+  const parts = [];
+  let start = 0;
+  while (start < source.length) {
+    const end = scanMaximaStatementEnd(source, start);
+    const statement = source.slice(start, end);
+    // Remove only empty top-level statements; preserve comments and literals.
+    parts.push(/^[;$]$/.test(stripMaximaComments(statement).trim())
+      ? statement.slice(0, -1) : statement);
+    start = end;
+  }
+  return parts.join("").trim();
+}
+
+function parameterPreamble() {
+  const numOptions = positiveInt(el.numOptions.value, "選択肢数");
+  const counts = correctCountChoices(numOptions);
+  const expression = counts.length === 1 ? String(counts[0]) : `rand([${counts.join(", ")}])`;
+  const parameters = cleanParameterStatements(el.parameters.value);
+  const code = stripMaximaComments(parameters).trim();
+  return [
+    `%_MCQ_NUM_OPTS:${numOptions};`,
+    `%_MCQ_NUM_COPTS:${expression};`,
+    `%__mcq_nocorrectopt:${Boolean(el.noCorrectOption?.checked)};`,
+    `%__mcq_noidea:${Boolean(el.noIdeaOption?.checked)};`,
+    `%__mcq_scmethod:${state.mode === "cb" ? el.scoringMethod?.value || "1" : "1"};`,
+    ...(el.noCorrectOption?.checked ? ["%__mcq_nocorrecttrue:is(%_MCQ_NUM_COPTS=0);", "%__mcq_nocoptS:%__mcq_lang(%__mcq_nocoptSL, %_STACK_LANG);"] : []),
+    ...(el.noIdeaOption?.checked ? ["%__mcq_noidS:%__mcq_lang(%__mcq_noidSL, %_STACK_LANG);"] : []),
+    ...(parameters ? [!code || /[;$]$/.test(code) ? parameters : `${parameters};`] : []),
+  ];
+}
+
+function evaluationVariableCode() {
+  return [...libraryIncludeLines(), ...parameterPreamble(), el.qvars.value].join("\n");
+}
+
+function baseVariableLines(numOptions, counts, includePreamble = true) {
+  return [
+    ...(includePreamble ? parameterPreamble() : []),
+    "",
+    "/**************** Generated by mcq-webapp ****************/",
+    ...normalizedQvars(),
+    ...(normalizedQvars().length ? [""] : []),
+    `%__mcq_qtextL:${langAssocFromFields()};`,
+    "",
+  ];
+}
+
+function appStateSnapshot() {
+  return {
+    version: 1,
+    libraryIncludes: effectiveLibraryIncludes(),
+    libraryBaseUrl: state.libraryBaseUrl,
+    questionId: el.questionId.value,
+    mode: state.mode,
+    baseLanguage: baseLang(),
+    activeLanguages: activeLangs(),
+    questionLanguageIndependent: state.questionLanguageIndependent,
+    questions: Object.fromEntries(LANGS.map((lang) => [lang, {
+      value: el.questions[lang].value,
+      type: state.questionTypes[lang] || "text",
+    }])),
+    rows: state.rows,
+    qvars: el.qvars.value,
+    parameters: cleanParameterStatements(el.parameters.value),
+    settings: {
+      noCorrectOption: Boolean(el.noCorrectOption?.checked),
+      noIdeaOption: Boolean(el.noIdeaOption?.checked),
+      radioMultiplePrompt: Boolean(el.radioMultiplePrompt?.checked),
+      castextTemplate: Boolean(el.castextTemplate?.checked),
+      scoringMethod: el.scoringMethod?.value || "1",
+      numOptions: el.numOptions.value,
+      numCorrect: el.numCorrect.value,
+      randomCorrect: el.randomCorrect.checked,
+      correctCounts: el.correctCounts.value,
+      requirePairs: el.requirePairs.checked,
+      feedbackByTruth: el.feedbackByTruth.checked,
+      feedbackMode: feedbackModeConfigValue(),
+    },
+    legacyQuestionInputs: state.legacyQuestionInputs || {},
+    xmlFilename: state.xmlFilename || "",
+    includeFilename: state.includeFilename || "",
+    includeSource: state.includeSource ? {
+      url: state.includeSource.url,
+      path: state.includeSource.path,
+      filename: state.includeSource.filename,
+      generated: Boolean(state.includeSource.generated),
+      autoUrl: Boolean(state.includeSource.autoUrl),
+    } : null,
+  };
+}
+
+// Only editing hints belong here. Executable text is read from the XML/include.
+function editorMetadataComment() {
+  const snapshot = appStateSnapshot();
+  const patterns = groupPatterns();
+  const options = {};
+  for (const truth of ["C", "W"]) {
+    const groups = el.requirePairs.checked ? patterns : patterns.filter(pattern => pattern[truth].length);
+    groups.forEach((pattern, index) => {
+      options[`option${index + 1}${truth}`] = pattern[truth].map(row => ({
+        pattern: row.pattern,
+        candidate_id: row.candidate_id || "",
+        choice_verbatim: Boolean(row.choice_verbatim),
+        feedback_verbatim: Boolean(row.feedback_verbatim),
+        choice_language_independent: Boolean(row.choice_language_independent),
+        feedback_language_independent: Boolean(row.feedback_language_independent),
+        feedback_by_truth: Boolean(row.feedback_by_truth),
+        languages: Object.fromEntries(activeLangs().map(lang => [lang, {
+          input_type: csvValueType(row[`choice_type_${lang}`], row[`choice_list_expr_${lang}`]),
+          feedback_type: csvValueType(row[`feedback_type_${lang}`]),
+        }])),
+      }));
+    });
+  }
+  delete snapshot.rows;
+  delete snapshot.qvars;
+  delete snapshot.legacyQuestionInputs;
+  snapshot.questions = Object.fromEntries(activeLangs().map(lang => [lang, { type: state.questionTypes[lang] || "text" }]));
+  const data = { schema: "mcq-webapp-editor-v1", ...snapshot, options };
+  // Prevent Maxima nested comments and XML CDATA terminators inside JSON strings.
+  const json = JSON.stringify(data, null, 2).replace(/\//g, "\\u002f").replace(/>/g, "\\u003e");
+  return `/* MCQ_WEBAPP_EDITOR_V1\n${json}\n*/`;
+}
+
+function readEditorMetadata(variables) {
+  const readable = variables.match(/\/\*\s*MCQ_WEBAPP_EDITOR_V1\s+([\s\S]*?)\*\//);
+  if (readable) {
+    const data = JSON.parse(readable[1]);
+    if (data.schema !== "mcq-webapp-editor-v1" || data.version !== 1 || !data.options || typeof data.options !== "object") {
+      throw new Error("Invalid MCQ_WEBAPP_EDITOR_V1 metadata");
+    }
+    return { ...data, rows: [], qvars: "", legacyQuestionInputs: {} };
+  }
+  const legacy = variables.match(/MCQ_WEBAPP_DATA_BASE64:([A-Za-z0-9+/=]+)/)?.[1];
+  return legacy ? decodeAppMetadata(legacy) : null;
+}
+
+function restoreEditorLiteral(value) {
+  const literal = casttextSourceString(String(value).trim());
+  if (literal !== null) return literal;
+  const call = String(value).trim().match(/^castext\s*\(([\s\S]*)\)$/);
+  return call ? casttextSourceString(call[1].trim()) : null;
+}
+
+function restoreEditorFormats(metadata, variables = "") {
+  state.rows=state.rows.flatMap(row=>{
+    const hints=metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    if(!Array.isArray(hints)||hints.length<2)return [row];
+    const values=Object.fromEntries(activeLangs().map(lang=>[lang,literalChoiceElements(row[`choice_${lang}`])]));
+    if(!Object.values(values).every(items=>items?.length===hints.length))return [row];
+    return hints.map((hint,index)=>{
+      const copy={...row,_editorHint:hint};
+      for(const lang of activeLangs()) copy[`choice_${lang}`]=hint.languages?.[lang]?.input_type==="cas_list"?values[lang][index]:`[${values[lang][index]}]`;
+      return copy;
+    });
+  });
+  let fallback = false;
+  for (const row of state.rows) {
+    const hints = row._editorHint ? [row._editorHint] : metadata.options[`option${Number(row.pattern)}${row.truth}`];
+    delete row._editorHint;
+    // A single CSV source can be restored without guessing how a concatenation
+    // was divided between several editor rows. Keep complex sources intact.
+    if (!Array.isArray(hints) || hints.length !== 1) { fallback = true; continue; }
+    const hint = hints[0];
+    row.candidate_id = hint.candidate_id || "";
+    row.choice_verbatim = Boolean(hint.choice_verbatim);
+    row.feedback_verbatim = Boolean(hint.feedback_verbatim);
+    for (const lang of activeLangs()) {
+      const types = hint.languages?.[lang];
+      if (!types) continue;
+      const value = row[`choice_${lang}`];
+      if (!value) continue;
+      if (types.input_type !== "cas_list") {
+        const parsed = parseMaximaValue(value, 0);
+        const list = parsed?.node;
+        if (list?.kind === "list" && parsed.index === value.length && list.items.length === 1) {
+          const item = list.items[0];
+          const text = item.kind === "string" ? item.value : restoreEditorLiteral(item.value);
+          if (types.input_type === "string" && text !== null) {
+            row[`choice_${lang}`] = text;
+            row[`choice_type_${lang}`] = "text";
+            row[`choice_list_expr_${lang}`] = false;
+          } else if (types.input_type === "cas") {
+            row[`choice_${lang}`] = item.kind === "string" ? maximaString(item.value) : item.value;
+            row[`choice_type_${lang}`] = "cas";
+            row[`choice_list_expr_${lang}`] = false;
+          } else { fallback = true; }
+        } else { fallback = true; }
+      }
+      if (types.feedback_type === "string" && row[`feedback_type_${lang}`] === "cas") {
+        const text = restoreEditorLiteral(row[`feedback_${lang}`]);
+        if (text !== null) {
+          row[`feedback_${lang}`] = text;
+          row[`feedback_type_${lang}`] = "text";
+        } else { fallback = true; }
+      }
+    }
+    for (const field of ["choice", "feedback"]) {
+      const values = activeLangs().map(lang => row[`${field}_${lang}`]).filter(value => value);
+      row[`${field}_language_independent`] = Boolean(hint[`${field}_language_independent`]) && new Set(values).size <= 1;
+    }
+  }
+  // Keep explicit separate feedback, even when both messages happen to match.
+  for (const row of state.rows) {
+    const hint = metadata.options[`option${Number(row.pattern)}${row.truth}`]?.[0];
+    if (hint?.feedback_by_truth) row.feedback_by_truth = true;
+  }
+  for (const row of state.rows) {
+    const hint = metadata.options[`option${Number(row.pattern)}${row.truth}`]?.[0];
+    if (/^\d+$/.test(String(hint?.pattern || "")) && Number(hint.pattern) >= 1 && Number(hint.pattern) <= patternLimit(row.truth)) row.pattern = String(hint.pattern).padStart(2, "0");
+  }
+  const qdefinition = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(item => item?.name === "%__mcq_qtextL").at(-1);
+  const qvalues = qdefinition && extractLanguageAssociation(qdefinition.expression);
+  for (const lang of activeLangs()) {
+    const hint = metadata.questions?.[lang]?.type;
+    if (hint === "cas" && qvalues?.get(lang)?.kind === "raw") {
+      el.questions[lang].value = qvalues.get(lang).value;
+      state.questionTypes[lang] = "cas";
+      el.questionModes[lang].value = "cas";
+    }
+    if ((hint === "text" || hint === "castext") && state.questionTypes[lang] === "castext") {
+      el.questions[lang].value = el.questions[lang].value.replace(/\{@%__SELPROMPT@\}/g, "__SELPROMPT__").replace(/\{@%__SELTYPE@\}/g, "__SELTYPE__");
+      state.questionTypes[lang] = hint;
+      el.questionModes[lang].value = hint;
+    }
+    if (hint && hint !== state.questionTypes[lang]) fallback = true;
+  }
+  if (metadata.questionLanguageIndependent) {
+    state.questionLanguageIndependent = new Set(activeLangs().map(lang => el.questions[lang].value)).size <= 1;
+  }
+  el.feedbackByTruth.checked = el.requirePairs.checked && state.rows.every(row => row.feedback_by_truth);
+  return fallback;
+}
+
+function encodeAppMetadata() {
+  const bytes = new TextEncoder().encode(JSON.stringify(appStateSnapshot()));
+  let binary = "";
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return btoa(binary);
+}
+
+function decodeAppMetadata(value) {
+  const binary = atob(value);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function appendNamedPattern(lines, pattern, truth, feedbackTruth = truth) {
+  const rows = pattern[truth], name=`opt${Number(pattern.id)}${truth}`, message=`msg${Number(pattern.id)}${truth}`;
+  const refs=[];
+  for(const [index,row] of rows.entries()) {
+    const variable=rows.length===1?name:`${name}_${row.candidate_id || index+1}`;
+    const langs=row.choice_language_independent?[baseLang()]:activeLangs();
+    const isList=langs.some(lang=>row[`choice_list_expr_${lang}`]);
+    const valueFor=lang=>{
+      const item=localizedTyped(row,"choice",lang);
+      return item.type==="cas"?maximaTypedValue(item):el.castextTemplate.checked?casttextLiteral(item.value):maximaString(item.value);
+    };
+    const value=row.choice_language_independent?valueFor(baseLang()):`%__mcq_lang(${maximaAssociation(langs.map(lang=>`["${lang}", ${valueFor(lang)}]`))}, %_STACK_LANG)`;
+    lines.push(`${variable}:${value};`);
+    refs.push(isList?variable:`[${variable}]`);
+  }
+  const scalar=rows.length===1 && !activeLangs().some(lang=>rows[0][`choice_list_expr_${lang}`]);
+  if(rows.length>1)lines.push(`${name}:${refs.every(ref=>/^\[[^\]]+\]$/.test(ref))?`[${refs.map(ref=>ref.slice(1,-1)).join(", ")}]`:`append(${refs.join(", ")})`};`);
+  const messages=maximaAssociation(activeLangs().map(lang=>`["${lang}", ${maximaTypedValue(localizedFeedbackTyped(pattern,lang,feedbackTruth))}]`));
+  lines.push(`${message}:%__mcq_lang(${messages}, %_STACK_LANG);`);
+  return {option:scalar?`[${name}]`:name,message};
+}
+
+function resolveGeneratedChoice(expression, sources, lang, seen = new Set()) {
+  const code=String(expression||"").trim();
+  if(/^(?:opt|msg)(?:[CW]\d+|\d+[CW])(?:_\d+)?$/.test(code) && sources.has(code)) {
+    if(seen.has(code))throw new Error(uiText("選択肢の変数参照が循環しています"));
+    return resolveGeneratedChoice(sources.get(code),sources,lang,new Set([...seen,code]));
+  }
+  if(/^%__mcq_lang\s*\(/.test(code)) {
+    const assoc=extractLanguageAssociation(code);
+    const node=assoc?.get(lang)||assoc?.get("en")||assoc?.values().next().value;
+    if(!node)throw new Error(uiText("選択肢の多言語連想配列を解析できません"));
+    return node.kind==="string"?maximaString(node.value):resolveGeneratedChoice(node.value,sources,lang,seen);
+  }
+  if(!/(?:opt|msg)(?:[CW]\d+|\d+[CW])(?:_\d+)?/.test(code))return code;
+  const items=literalChoiceElements(code);
+  if(items)return `[${items.map(item=>resolveGeneratedChoice(item,sources,lang,seen)).join(", ")}]`;
+  if(/^append\s*\(/.test(code)) {
+    const parts=casttextExpressionParts(code.slice(code.indexOf("(")+1,-1)).map(part=>resolveGeneratedChoice(part,sources,lang,seen));
+    const lists=parts.map(literalChoiceElements);
+    return lists.every(Boolean)?`[${lists.flat().join(", ")}]`:`append(${parts.join(", ")})`;
+  }
+  return code;
+}
+
+function generatedChoiceLanguages(sources) {
+  const langs=new Set();
+  for(const [name,value] of sources)if(/^(opt|msg)/.test(name) && /^%__mcq_lang\s*\(/.test(value))for(const lang of extractLanguageAssociation(value)?.keys()||[])langs.add(lang);
+  return langs.size?[...langs]:[baseLang()];
+}
+
+function generatePairedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
+  if (numOptions > patterns.length) throw new Error(
+    uiText("一対モードの選択肢数はパターン数以下にしてください。") + " "
+    + uiText("選択肢数") + ": " + numOptions + "; "
+    + uiText("内容のあるパターン数") + ": " + patterns.length
+    + " (" + patterns.map(pattern => Number(pattern.id)).join(", ") + ")"
+  );
+  patterns.forEach(pattern => {
+    if (!pattern.C.length || !pattern.W.length) throw new Error(`パターン ${pattern.id} には C と W の両方が必要です`);
+    if (!patternChoiceCapacity(pattern, "C") || !patternChoiceCapacity(pattern, "W")) throw new Error(uiText("各パターンの正解・不正解に少なくとも1候補が必要です。"));
+  });
+  const generatedNames = new Set(patterns.flatMap(pattern => ["C", "W"].flatMap(truth =>
+    [`opt${Number(pattern.id)}${truth}`, `msg${Number(pattern.id)}${truth}`, ...pattern[truth].map((row,index)=>`opt${Number(pattern.id)}${truth}_${row.candidate_id || index+1}`)])));
+  const declarations = splitMaximaStatements(stripMaximaComments(`${el.qvars.value}\n${el.parameters.value}`)).map(parseMaximaAssignment).filter(Boolean);
+  if (declarations.some(item => generatedNames.has(item.name))) throw new Error(uiText("問題変数または補助パラメータに、生成するoptC・optW・msgC・msgWの変数名と重複する定義があります。名前を変更してください。"));
+  const lines = [...baseVariableLines(numOptions, counts, includePreamble), "/* MCQ_CHOICES_BEGIN */"];
+  lines.push(`%__mcq_pattern_order:random_permutation(makelist(k, k, 1, ${patterns.length}));`);
+  lines.push("%__po:%__mcq_pattern_order;", "%__mcq_num_cpatterns:%_MCQ_NUM_COPTS;", "%__mcq_num_wpatterns:%_MCQ_NUM_OPTS-%_MCQ_NUM_COPTS;");
+  // Keep editable named definitions contiguous: all correct, then all incorrect.
+  const named = {};
+  for (const truth of ["C", "W"]) {
+    named[truth] = patterns.map(pattern => appendNamedPattern(lines, pattern, truth, patternFeedbackSeparate(pattern.id) ? truth : null));
+  }
+  for (const truth of ["C", "W"]) {
+    const refs = named[truth].map(item => item.option);
+    const messageRefs = named[truth].map(item => item.message);
+    const count = `%__mcq_num_${truth.toLowerCase()}patterns`;
+    const position = truth === "C" ? "k" : "k+%__mcq_num_cpatterns";
+    lines.push(`%__mcq_${truth}source:[${refs.join(", ")}];`, `%__mcq_${truth}feedback:[${messageRefs.join(", ")}];`);
+    lines.push(`%__mcq_${truth}patterns:makelist(%__mcq_${truth}source[%__po[${position}]], k, 1, ${count});`, `%__mcq_${truth}messages:makelist(%__mcq_${truth}feedback[%__po[${position}]], k, 1, ${count});`);
+    for (let slot = 1; slot <= templatePatternLimits()[truth]; slot++) {
+      lines.push(`%__${truth}optL${slot}:if ${slot}<=${count} then %__mcq_${truth}patterns[${slot}] else false;`);
+      lines.push(`%__${truth}msg${slot}:if ${slot}<=${count} then %__mcq_${truth}messages[${slot}] else false;`);
+    }
+  }
+  lines.push("/* MCQ_CHOICES_END */", "/**************** End of generated variables ****************/");
+  return lines.join("\n");
+}
+
+// Resolve only generated option/message references, never evaluate Maxima or
+// substitute user variables inside an option expression.
+function namedChoiceAssociation(sources, truth, kind) {
+  const refs = literalChoiceElements(sources.get(`%__mcq_${truth}${kind}`));
+  if (!refs) return null;
+  return new Map(generatedChoiceLanguages(sources).map(lang=>[lang,{kind:"raw",value:`[${refs.map(ref=>resolveGeneratedChoice(ref,sources,lang)).join(", ")}]`}]));
+}
+
+// Adapt compact source tables to the legacy importer without evaluating Maxima.
+// The source text is used only for reading; saved XML retains the compact form.
+function expandCompactChoices(variables) {
+  const assignments = splitMaximaStatements(stripMaximaComments(variables)).map(parseMaximaAssignment).filter(Boolean);
+  const sources = new Map(assignments.map(item => [item.name, item.expression]));
+  if(variables.includes("/* MCQ_FIXED_CHOICES_BEGIN */")) {
+    const lines=[];
+    for(const [name,value] of sources)if(/^%__[CW](optL|msg)\d+$/.test(name)) {
+      const assoc=maximaAssociation(generatedChoiceLanguages(sources).map(lang=>`["${lang}", ${resolveGeneratedChoice(value,sources,lang)}]`));
+      lines.push(`${name}L:${assoc};`);
+    }
+    return variables.replace(/\/\* MCQ_FIXED_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_FIXED_CHOICES_END \*\//,lines.join("\n"));
+  }
+  const named = ["C", "W"].every(truth => literalChoiceElements(sources.get(`%__mcq_${truth}source`)) !== null);
+  if (!named && (!sources.has("%__mcq_CsourceL") || !sources.has("%__mcq_WsourceL"))) return variables;
+  const lines = [];
+  for (const truth of ["C", "W"]) {
+    for (const [kind, name] of [["optL1L", "sourceL"], ["msg1L", "feedbackL"]]) {
+      const assoc = named
+        ? namedChoiceAssociation(sources, truth, name === "sourceL" ? "source" : "feedback")
+        : extractLanguageAssociation(sources.get(`%__mcq_${truth}${name}`) || "");
+      if (!assoc) throw new Error(uiText("選択肢の多言語連想配列を解析できません"));
+      lines.push(`%__${truth}${kind}:` + maximaAssociation([...assoc].map(([lang, node]) => `["${lang}", ${node.value}[%__mcq_pattern_order[1]]]`)) + ";");
+    }
+  }
+  return variables.replace(/\/\* MCQ_CHOICES_BEGIN \*\/[\s\S]*?\/\* MCQ_CHOICES_END \*\//, lines.join("\n"));
+}
+
+
+
+function generateFixedVariableBlock(patterns, numOptions, counts, includePreamble = true) {
+  const correct = patterns.filter((pattern) => pattern.C.length);
+  const wrong = patterns.filter((pattern) => pattern.W.length);
+  const maxCorrect = Math.max(...counts);
+  const maxWrong = numOptions - Math.min(...counts);
+  const correctCapacity = correct.reduce((sum, pattern) => sum + patternChoiceCapacity(pattern, "C"), 0);
+  const wrongCapacity = wrong.reduce((sum, pattern) => sum + patternChoiceCapacity(pattern, "W"), 0);
+  if (maxCorrect > correctCapacity) throw new Error("正解数の候補に対して正解選択肢が不足しています");
+  if (maxWrong > wrongCapacity) throw new Error("正解数の候補に対して誤答選択肢が不足しています");
+
+  const lines = [
+    ...baseVariableLines(numOptions, counts, includePreamble),
+    "/* Fixed true/false patterns (pair requirement disabled). */",
+    "/* MCQ_FIXED_CHOICES_BEGIN */",
+    "",
+  ];
+  const named = {};
+  for (const [truth, group] of [["C", correct], ["W", wrong]]) {
+    named[truth] = group.map(pattern => appendNamedPattern(lines, pattern, truth));
+  }
+  for (const truth of ["C", "W"]) {
+    named[truth].forEach((generated, index) => {
+      const slot = index + 1;
+      lines.push(`%__${truth}optL${slot}:${generated.option};`, `%__${truth}msg${slot}:${generated.message};`);
+    });
+  }
+  lines.push("/* MCQ_FIXED_CHOICES_END */");
+  lines.push("/**************** End of generated variables ****************/");
+  return lines.join("\n");
+}
+
+function appendFixedPattern(lines, truth, slot, pattern) {
+  const generated=appendNamedPattern(lines,pattern,truth);
+  lines.push(`%__${truth}optL${slot}:${generated.option};`, `%__${truth}msg${slot}:${generated.message};`);
+}
+
+function independentChoicesValue(rows) {
+  const items = rows.map((row) => localizedTyped(row, "choice", baseLang())).filter((item) => item.value);
+  return maximaChoiceList(items);
+}
+
+function choicesLangAssoc(rows) {
+  return maximaAssoc(
+    activeLangs().map((lang) => [lang, rows.map((row) => localizedTyped(row, "choice", lang)).filter((item) => item.value)]),
+    "list"
+  );
+}
+
+function fixedFeedbackAssoc(rows) {
+  const independent = rows.some((row) => row.feedback_language_independent);
+  return maximaAssoc(
+    activeLangs().map((lang) => {
+      const sourceLang = independent ? baseLang() : lang;
+      const exact = rows.find((row) => String(row[`feedback_${sourceLang}`] || "").trim());
+      return [lang, feedbackOutputValue({
+        value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
+        type: exact?.[`feedback_type_${sourceLang}`] || "text",
+    verbatim: Boolean(exact?.feedback_verbatim),
+      })];
+    }),
+    "string"
+  );
+}
+
+
+
+
+
+function availableLangs(rows) {
+  return activeLangs().filter((lang) => rows.some((row) => localized(row, "choice", lang)));
+}
+
+function localized(row, field, lang) {
+  return String(row[`${field}_${lang}`] || "").trim();
+}
+
+function localizedTyped(row, field, lang) {
+  return {
+    value: localized(row, field, lang),
+    type: row[`${field}_type_${lang}`] || "text",
+    listExpression: Boolean(row[`${field}_list_expr_${lang}`]),
+    verbatim: Boolean(row[`${field}_verbatim`]),
+  };
+}
+
+function localizedFeedback(pattern, lang, truth = null) {
+  const rows = truth ? pattern[truth] : [...pattern.C, ...pattern.W];
+  const sourceLang = rows.some((row) => row.feedback_language_independent) ? baseLang() : lang;
+  const exact = rows.find((row) => String(row[`feedback_${sourceLang}`] || "").trim());
+  return String(exact?.[`feedback_${sourceLang}`] || "").trim();
+}
+
+function localizedFeedbackTyped(pattern, lang, truth = null) {
+  const rows = truth ? pattern[truth] : [...pattern.C, ...pattern.W];
+  const sourceLang = rows.some((row) => row.feedback_language_independent) ? baseLang() : lang;
+  const exact = rows.find((row) => String(row[`feedback_${sourceLang}`] || "").trim());
+  return feedbackOutputValue({
+    value: String(exact?.[`feedback_${sourceLang}`] || "").trim(),
+    type: exact?.[`feedback_type_${sourceLang}`] || "text",
+    verbatim: Boolean(exact?.feedback_verbatim),
+  });
+}
+
+function groupPatterns() {
+  const groups = new Map();
+  state.rows.forEach((row) => {
+    const choice = activeLangs().some((lang) => String(row[`choice_${lang}`] || "").trim());
+    if (!choice) return;
+    const id = String(row.pattern || "").trim() || "01";
+    if (!groups.has(id)) groups.set(id, { id, C: [], W: [] });
+    groups.get(id)[normalizeTruth(row.truth)].push(row);
+  });
+  return [...groups.values()].sort((a, b) => Number(a.id) - Number(b.id) || a.id.localeCompare(b.id));
+}
+
+// CASText must be compiled from a literal, preserving newlines for block syntax.
+function casttextLiteral(text) {
+  return `castext("${String(text).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}")`;
+}
+
+// Split only structural commas: quoted strings and nested expressions stay intact.
+function casttextExpressionParts(source) {
+  const masked = maskMaximaCommentsAndStrings(source);
+  const stack = [], parts = [];
+  let start = 0;
+  for (let i = 0; i < masked.length; i++) {
+    const ch = masked[i];
+    if ("([{".includes(ch)) stack.push(ch);
+    else if (")]}".includes(ch)) {
+      if (stack.pop() !== { ")": "(", "]": "[", "}": "{" }[ch]) throw new Error("Unbalanced expression");
+    } else if (ch === "," && !stack.length) { parts.push(source.slice(start, i).trim()); start = i + 1; }
+  }
+  if (stack.length) throw new Error("Unbalanced expression");
+  parts.push(source.slice(start).trim());
+  return parts;
+}
+
+function casttextSourceString(source) {
+  // Maxima escapes the following character; this is not JSON's \n decoder.
+  if (!/^"(?:[^"\\]|\\[\s\S])*"$/.test(source)) return null;
+  return source.slice(1, -1).replace(/\\([\s\S])/g, "$1");
+}
+
+// Local overrides must match the conventional wrapper before removing it.
+function casttextKnownWrapper(name) {
+  if (!["tex2", "tex2L"].includes(name)) return true;
+  const source = typeof el === "undefined" ? "" : el.qvars?.value || "";
+  const definitions = splitMaximaStatements(stripMaximaComments(source)).filter(line => new RegExp(`^\\s*${name}\\s*\\(`).test(line) && line.includes(":="));
+  return definitions.every(line => {
+    const match = line.match(/^\s*\w+\s*\(\s*(\w+)\s*\)\s*:=([\s\S]*?)[;$]?\s*$/);
+    if (!match) return false;
+    const [, arg, body] = match;
+    const compact = value => value.replace(/\s/g, "");
+    const expected = name === "tex2"
+      ? `sconcat("\\\\(",tex1(${arg}),"\\\\)")`
+      : `block([s:"\\\\(",k],for k:1 thru length(${arg}) do s:sconcat(s,if stringp(${arg}[k]) then ${arg}[k] else tex1(${arg}[k])," "),s:sconcat(s,"\\\\)"),return(s))`;
+    return compact(body) === compact(expected);
+  });
+}
+
+function legacyQuestionCasttext(expression, convertBareTex1 = false) {
+  const code = String(expression).trim().replace(/[;$]\s*$/, "");
+  if (!code) return "";
+  const embed = value => `{@ssubst(%__SELPROMPT, "__SELPROMPT__", ssubst(%__SELTYPE, "__SELTYPE__", sconcat(${value})))@}`;
+  let result = "";
+  const inMath = () => {
+    const delimiters = result.match(/\\[()[\]]/g) || [];
+    return ["\\(", "\\["].includes(delimiters.at(-1));
+  };
+  const append = (value, depth = 0) => {
+    if (depth > 100) throw new Error("Expression nesting limit");
+    const literal = restoreEditorLiteral(value);
+    if (literal !== null) { result += literal; return; }
+    if (["__SELTYPE__", "__SELPROMPT__"].includes(value)) { result += value; return; }
+    const call = value.match(/^(sconcat|tex2|tex1|tex2L|stack_disp)\s*\(([\s\S]*)\)$/);
+    if (call && casttextKnownWrapper(call[1])) {
+      const args = casttextExpressionParts(call[2]);
+      if (call[1] === "sconcat") { args.filter(Boolean).forEach(arg => append(arg, depth + 1)); return; }
+      if (call[1] === "tex2" && args.length === 1 || call[1] === "tex1" && args.length === 1 && (inMath() || convertBareTex1)
+          || call[1] === "stack_disp" && args.length === 2 && ["i", ""].includes(casttextSourceString(args[1])) && (casttextSourceString(args[1]) === "i" || inMath())) {
+        result += `{@${args[0]}@}`; return;
+      }
+      if (call[1] === "tex2L" && args.length === 1 && args[0].startsWith("[") && args[0].endsWith("]")) {
+        const items = casttextExpressionParts(args[0].slice(1, -1));
+        result += "\\(";
+        result += items.filter(Boolean).map(item => casttextSourceString(item) ?? `{@${item}@}`).join(" ");
+        result += "\\)"; return;
+      }
+    }
+    // Preserve sconcat's string coercion, custom rendering and prompt replacement
+    // for just this part, rather than retaining the whole question expression.
+    result += embed(value);
+  };
+  try { append(code); return result; }
+  catch { return embed(code); }
+}
+
+function replaceCasttextPrompts(source) {
+  let result = "", start = 0;
+  const replace = text => text.replace(/__SELPROMPT__/g, "{@%__SELPROMPT@}").replace(/__SELTYPE__/g, "{@%__SELTYPE@}");
+  while (start < source.length) {
+    const open = source.indexOf("{@", start);
+    if (open < 0) return result + replace(source.slice(start));
+    result += replace(source.slice(start, open));
+    const end = maskMaximaCommentsAndStrings(source.slice(open + 2)).indexOf("@}");
+    if (end < 0) throw new Error("{@ と @} の対応を確認してください");
+    const next = open + 2 + end + 2;
+    result += source.slice(open, next);
+    start = next;
+  }
+  return result;
+}
+
+function syncCastextQuestionInputs() {
+  state.legacyQuestionInputs ||= {};
+  const enabled = Boolean(el.castextTemplate?.checked);
+  LANGS.forEach(lang => {
+    const saved = state.legacyQuestionInputs[lang];
+    if (enabled && saved && el.questions[lang].value === saved.converted) {
+      saved.converted = legacyQuestionCasttext(saved.original);
+      el.questions[lang].value = saved.converted;
+    }
+    if (!enabled && saved && el.questions[lang].value === saved.converted) {
+      el.questions[lang].value = saved.original;
+      state.questionTypes[lang] = "cas";
+      el.questionModes[lang].value = "cas";
+      el.questions[lang].closest(".question-language-field")?.classList.add("cas");
+      delete state.legacyQuestionInputs[lang];
+    }
+    if (enabled && state.questionTypes[lang] === "cas") {
+      const original = el.questions[lang].value;
+      el.questions[lang].value = legacyQuestionCasttext(original);
+      state.legacyQuestionInputs[lang] = { original, converted: el.questions[lang].value };
+      state.questionTypes[lang] = "text";
+      el.questionModes[lang].value = "text";
+      el.questions[lang].closest(".question-language-field")?.classList.remove("cas");
+    }
+    const options = el.questionModes[lang]?.options;
+    if (options) {
+      options[0].textContent = enabled ? "CASText" : uiText("文字列");
+      options[1].disabled = enabled;
+      options[1].hidden = enabled;
+      options[0].hidden = enabled && state.questionTypes[lang] === "castext";
+      if (options[2]) options[2].hidden = enabled && state.questionTypes[lang] !== "castext";
+      el.questionModes[lang].disabled = enabled;
+    }
+  });
+  const convert = document.querySelector?.("#convertQuestionButton");
+  if (convert) convert.disabled = enabled || state.questionTypes[baseLang()] === "castext";
+}
+
+function changeQuestionValueType(lang, type) {
+  if (state.questionTypes[lang] === "cas" && type !== "cas") {
+    const converted = casExpressionToEditorText(el.questions[lang].value);
+    if (converted === null) {
+      el.questionModes[lang].value = "cas";
+      window.mcqNotice?.(uiText("この式は文字列へ安全に変換できません。元の式と入力形式を保持しました。"));
+      return;
+    }
+    el.questions[lang].value = converted;
+    type = "castext";
+    el.questionModes[lang].value = type;
+  }
+  state.questionTypes[lang] = type;
+  delete state.legacyQuestionInputs?.[lang];
+  el.questions[lang].closest(".question-language-field")?.classList.toggle("cas", type === "cas");
+  const enableCasttext = type === "castext" && !el.castextTemplate.checked;
+  if (enableCasttext) el.castextTemplate.checked = true;
+  markTranslationsStale("問題文の入力形式が変更されました");
+  updateOutput();
+  if (enableCasttext) {
+    renderRows();
+    window.mcqNotice?.(uiText("CASText版を有効にしました。フィードバックも確認し、必要に応じてCASText形式に変換してください。"));
+  }
+}
+
+function feedbackOutputValue(item) {
+  if (item.verbatim) return item;
+  if (!el.castextTemplate?.checked) return item;
+  if (item.type !== "cas") return { value: casttextLiteral(item.value), type: "cas" };
+  // Convert known legacy text builders; arbitrary CAS and existing castext()
+  // remain expressions so that CASText objects are not coerced into strings.
+  if (/^\s*(sconcat|tex2|tex2L|tex1|stack_disp)\s*\(/.test(item.value)) {
+    return { value: casttextLiteral(replaceCasttextPrompts(legacyQuestionCasttext(item.value))), type: "cas" };
+  }
+  return item;
+}
+
+function langAssocFromFields() {
+  return maximaAssoc(
+    activeLangs().map((lang) => {
+      const source = state.questionLanguageIndependent ? baseLang() : lang;
+      const value = el.questions[source].value.trim();
+      const type = state.questionTypes[source] || "text";
+      if (el.castextTemplate?.checked) {
+        const text = type === "cas" ? legacyQuestionCasttext(value) : value;
+        return [lang, { value: casttextLiteral(replaceCasttextPrompts(text)), type: "cas" }];
+      }
+      if (type === "castext") throw new Error(uiText("CASTextの問題文を使用するには「castext 版を使用する」をオンにしてください。編集内容はCSVに保存できます。"));
+      // Compile only for output; retain the original editable text and metadata.
+      if (type === "text" && (value.includes("{@") || value.includes("@}"))) {
+        return [lang, { value: questionTextToCas(value), type: "cas" }];
+      }
+      return [lang, { value, type }];
+    }),
+    "string"
+  );
+}
+
+function maximaAssoc(entries, type) {
+  const normalized = entries.filter(([, value]) => Array.isArray(value) ? value.length : String(value?.value ?? "").trim());
+  return maximaAssociation(normalized.map(([lang, value]) => {
+    const rendered = type === "list"
+      ? maximaChoiceList(value)
+      : maximaTypedValue(value);
+    return `["${lang}", ${rendered}]`;
+  }));
+}
+
+function maximaChoiceList(items) {
+  if (el.castextTemplate?.checked) items = items.map(item => {
+    if (item.type !== "cas") return { ...item, value: casttextLiteral(item.value), type: "cas" };
+    return item.listExpression && !item.verbatim ? { ...item, value: compileLiteralChoiceList(item.value) } : item;
+  });
+  if (!items.some(item => item.listExpression)) return `[${items.map(maximaTypedValue).join(", ")}]`;
+  // Join only the option-list layer. CASText objects (and list-valued choices)
+  // must remain single labels, not be recursively flattened into their contents.
+  const lists = items.map(item => item.listExpression ? maximaTypedValue(item) : `[${maximaTypedValue(item)}]`);
+  return lists.length === 1 ? lists[0] : `append(${lists.join(", ")})`;
+}
+
+function maximaAssociation(entries) {
+  return `[${entries.join(",\n ")}]`;
+}
+
+function maximaTypedValue(item) {
+  const value = String(item?.value ?? "").trim();
+  return item?.type === "cas" ? value.replace(/[;$]\s*$/, "") : maximaString(value);
+}
+
+function languageBlocks() {
+  return activeLangs().map((lang) => `[[lang code="${lang}"]][[/lang]]`).join("");
+}
+
+function maximaString(value) {
+  return `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "<br>")}"`;
+}
+
+function normalizedQvars() {
+  return state.qvars
+    .map((expression) => String(expression).trim())
+    .filter(Boolean)
+    .map((expression) => {
+      const code = stripMaximaComments(expression).trim();
+      return !code || /[;$]\s*$/.test(code) ? expression : `${expression};`;
+    });
+}
+
+function validateTranslationCoverage() {
+  for(const row of state.rows) {
+    if(row.choice_language_independent || !row.candidate_id)continue;
+    if(!activeLangs().some(lang=>String(row[`choice_${lang}`]||"").trim()))continue;
+    for(const lang of activeLangs())if(!String(row[`choice_${lang}`]||"").trim())throw new Error(uiText("候補の翻訳が不足しています")+`: option${Number(row.pattern)}${row.truth} / ${lang}_${String(row.candidate_id).padStart(2,"0")}`);
+  }
+  const source = baseLang();
+  const targets = translationTargets();
+  if (!targets.length) return;
+  if (state.translationsStale) throw new Error("多言語展開を更新してください");
+  targets.forEach((lang) => {
+    if (!state.questionLanguageIndependent && !el.questions[lang].value.trim()) {
+      throw new Error(`${lang} の問題文翻訳がありません`);
+    }
+    state.rows.forEach((row, index) => {
+      if (!row.choice_language_independent
+          && String(row[`choice_${source}`] || "").trim()
+          && !String(row[`choice_${lang}`] || "").trim()) {
+        throw new Error(`${lang} の選択肢翻訳がありません（行 ${index + 1}）`);
+      }
+      if (!feedbackLanguageIndependent(row)
+          && String(row[`feedback_${source}`] || "").trim()
+          && !String(row[`feedback_${lang}`] || "").trim()) {
+        throw new Error(`${lang} のフィードバック翻訳がありません（行 ${index + 1}）`);
+      }
+    });
+  });
+}
+
+function translationTargets() {
+  return activeLangs().filter((lang) => lang !== baseLang());
+}
+
+function translationPayload() {
+  ensureCandidateIds();
+  const source = baseLang();
+  const questionType = state.questionTypes[source] || "text";
+  return {
+    schema: "stack-mcq-translations-v1",
+    source_language: source,
+    target_languages: translationTargets(),
+    preserve_exactly: ["__SELPROMPT__", "__SELTYPE__", "Maxima syntax and identifiers (translate only human-readable text inside string literals)", "LaTeX", "STACK {@...@} blocks", "HTML tags"],
+    question_type: questionType,
+    question_text: !state.questionLanguageIndependent ? el.questions[source].value : null,
+    rows: state.rows.map((row, index) => ({
+      id: `option${Number(row.pattern)}${normalizeTruth(row.truth)}_${row.candidate_id || "0"}`,
+      candidate_id: row.candidate_id || "",
+      pattern: String(row.pattern || ""),
+      truth: normalizeTruth(row.truth),
+      choice_type: row[`choice_type_${source}`] || "text",
+      choice: !row.choice_verbatim && !row.choice_language_independent
+        ? String(row[`choice_${source}`] || "")
+        : null,
+      feedback_type: row[`feedback_type_${source}`] || "text",
+      feedback: !row.feedback_verbatim && !feedbackLanguageIndependent(row)
+        ? String(row[`feedback_${source}`] || "")
+        : null,
+    })),
+  };
+}
+
+function syncTranslationTarget() {
+  const targets = translationTargets();
+  if (!el.translationTarget) return targets.length ? "all" : "";
+  const selected = el.translationTarget.value;
+  el.translationTarget.innerHTML = (targets.length ? `<option value="all">${uiText("選択した全言語（一括）")}</option>` : "") + targets.map(lang => `<option value="${lang}">${lang}</option>`).join("");
+  el.translationTarget.value = targets.includes(selected) ? selected : targets.length ? "all" : "";
+  el.translationTarget.disabled = !targets.length;
+  return el.translationTarget.value;
+}
+
+function prepareTranslationRequest() {
+  if (!translationTargets().length) {
+    setTranslationStatus("基本言語以外の展開先言語を1つ以上選択してください", "error");
+    return;
+  }
+  copyLanguageIndependentValuesToTargets();
+  const target = syncTranslationTarget();
+  const payload = translationPayload();
+  payload.target_languages = target === "all" ? translationTargets() : [target];
+  el.translationJson.value = [
+    uiText("次のSTACK MCQ教材を target_languages に翻訳してください。"),
+    uiText("数式、変数、__SELPROMPT__、__SELTYPE__、{@...@}、HTMLタグは変更しないでください。"),
+    uiText("HTMLタグは文字どおり保持してください。例えば <br> は改行や空行に置き換えず、JSON文字列の中にそのまま残してください。"),
+    uiText("CAS式は文字列内の文章だけを翻訳し、変数名・関数名・演算子・引用符を保持した式全体を返してください。nullの項目は翻訳不要です。"),
+    uiText("数式の区切りと中身は一体として保持してください。括弧を外す、数式を分割する、数式内に訳文を入れることは禁止です。以下のJavaScript関数で原文と訳文の各項目を比較し、全言語で一致するまで修正してからファイルを保存してください。"),
+    uiText("原文JSONは検証の基準です。最初にJSONとして解析して保持し、原文・候補ID・検査関数・期待値を変更したり、検査を省略したりしないでください。原文を手入力で再構成して検証に使わないでください。"),
+    uiText("不一致が出たら、直すのは訳文だけです。数式やSTACK記法が冗長・不自然に見えても、原文側を訂正・簡略化しないでください。教材には意図的に誤った主張も含まれます。主張の真偽も変更しないでください。"),
+    uiText("最終JSONをファイルへ保存した後、そのファイルを読み直し、保持した原文JSONに対して全言語・全候補の数式等の保持と翻訳の充足を再検査してください。ファイルを修正したら必ず全検査をやり直してください。検査失敗や検査未実施のファイルを完成品として返さないでください。"),
+    `const protectedParts = ${translationProtectedParts.toString()};`,
+    "// For each question_text, choice and feedback (match rows by id):",
+    "// JSON.stringify(protectedParts(source)) === JSON.stringify(protectedParts(translated))",
+    uiText("翻訳結果は画面上のコードブロックではなく、ダウンロード可能なUTF-8のJSONファイルとして作成してください。文字列内の引用符・バックスラッシュ・改行をJSONとしてエスケープし、プレースホルダーを変更しないでください。"),
+    `Filename: mcq-translations-${target}.json`,
+    uiText("ファイルを保存する前にJSONとして解析できることと、すべての候補IDと翻訳がそろっていることを検証してください。返答はファイルへのリンクだけにしてください。"),
+    uiText("量が多い場合は、作業環境内で言語・候補ごとに分割して翻訳し、最後に1つのファイルへ結合してください。全対象言語と全候補がそろうまでは完成とせず、未完成の場合はその旨を伝えてください。"),
+    uiText("CAS式をJSON文字列にする例:"),
+    JSON.stringify({question_text: 'sconcat("...", tex2(%_rk), " __SELTYPE__")'}),
+    uiText("target_languagesの全言語を翻訳し、1つのJSONファイルにまとめてください。返答の最上位キーはtranslationsだけにし、その中に各言語のquestion_textとrowsを入れてください。ptはポルトガル語です。"),
+    uiText("原文・schema・設定は返答に再掲しないでください。rowsには元のidと翻訳したchoice・feedbackだけを含め、最後の括弧まで閉じた完全なJSONを返してください。説明文は不要です。"),
+    uiText("translations は次の言語キーと形式で返してください:"),
+    JSON.stringify(Object.fromEntries(payload.target_languages.map((lang) => [lang, {
+      question_text: "...", rows: [{id: payload.rows[0]?.id || "option1C_0", choice: "...", feedback: "..."}],
+    }]))),
+    "",
+    JSON.stringify(payload, null, 2),
+  ].join("\n");
+  el.translationPanel.open = true;
+  setTranslationStatus(`${payload.target_languages.join(", ")}: ${uiText("翻訳依頼を作成しました。ChatGPTへ貼り付けてください。")}`, "");
+  return true;
+}
+
+async function copyTranslationRequest() {
+  if (!prepareTranslationRequest()) return;
+  try {
+    await navigator.clipboard.writeText(el.translationJson.value);
+    setTranslationStatus("クリップボードへコピーしました", "");
+  } catch {
+    el.translationJson.focus();
+    el.translationJson.select();
+    setTranslationStatus("欄を選択しました。コピー操作を行ってください。", "");
+  }
+}
+
+function downloadTranslationRequest() {
+  if (!prepareTranslationRequest()) return;
+  downloadText(`mcq-translation-request-${syncTranslationTarget()}.txt`, el.translationJson.value, "text/plain;charset=utf-8");
+}
+
+function translationSourceSignature() {
+  const payload = translationPayload();
+  return JSON.stringify({ title: el.questionId?.value || "", source_language: payload.source_language,
+    question_type: payload.question_type, question_text: payload.question_text, rows: payload.rows });
+}
+
+function translationProtectedParts(text) {
+  return (String(text).match(/\{@[\s\S]*?@\}|\[\[[\s\S]*?\]\]|__[A-Z][A-Z0-9_]*__|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]|<[^>]+>|\\[A-Za-z]+/g) || []).sort();
+}
+
+function validateTranslationFile(result) {
+  const source = translationPayload();
+  if (!result?.translations || typeof result.translations !== "object" || Array.isArray(result.translations)
+      || !Object.keys(result.translations).length) throw new Error(uiText("翻訳データがありません"));
+  if (result.source_language && result.source_language !== source.source_language) throw new Error(uiText("翻訳元の言語が一致しません"));
+  const expected = new Map(source.rows.map((row, index) => [row.id, {row, index}]));
+  const check = (original, translated, label) => {
+    if (original === null) {
+      if (translated != null) throw new Error(`${label}: ${uiText("言語非依存の項目が変更されています")}`);
+      return;
+    }
+    if (typeof translated !== "string" || (original.trim() && !translated.trim())) {
+      throw new Error(`${label}: ${uiText("翻訳が不足しています")}`);
+    }
+    if (JSON.stringify(translationProtectedParts(original)) !== JSON.stringify(translationProtectedParts(translated))) {
+      throw new Error(`${label}: ${uiText("数式・プレースホルダー・タグが変更されています")}`);
+    }
+  };
+  for (const [lang, translation] of Object.entries(result.translations)) {
+    if (!LANGS.includes(lang) || lang === source.source_language) throw new Error(`${lang}: ${uiText("翻訳先の言語が不正です")}`);
+    if (!translation || !Array.isArray(translation.rows)) throw new Error(`${lang}: ${uiText("翻訳行がありません")}`);
+    const sourceBreak = source.question_text?.match(/<br[ \t]*\/?>[ \t]*$/i)?.[0];
+    if (sourceBreak && typeof translation.question_text === "string"
+        && /(?:\r?\n[ \t]*)+$/.test(translation.question_text)
+        && !/<br\b[^>]*>\s*$/i.test(translation.question_text)) {
+      translation.question_text = translation.question_text.trimEnd() + sourceBreak;
+    }
+    check(source.question_text, translation.question_text, `${lang} question_text`);
+    const seen = new Set();
+    for (const item of translation.rows) {
+      if (!item || !["string", "number"].includes(typeof item.id)) throw new Error(uiText("候補IDが不正です"));
+      const id = String(item.id);
+      // Accept old numeric IDs for files created by earlier versions.
+      const entry = expected.get(id) || (/^\d+$/.test(id) && source.rows[Number(id)] ? {row: source.rows[Number(id)]} : null);
+      if (!entry || seen.has(entry.row.id)) throw new Error(`${lang} ${id}: ${uiText("候補IDが不正または重複しています")}`);
+      seen.add(entry.row.id);
+      for (const field of ["choice", "feedback"]) check(entry.row[field], item[field], `${lang} ${id} ${field}`);
+    }
+    for (const row of source.rows) {
+      if ((row.choice !== null || row.feedback !== null) && !seen.has(row.id)) throw new Error(`${lang} ${row.id}: ${uiText("翻訳候補が不足しています")}`);
+    }
+  }
+  return result;
+}
+
+async function readTranslationFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const signature = translationSourceSignature();
+  try {
+    if (file.size > 4 * 1024 * 1024) throw new Error(uiText("翻訳ファイルは4MB以下にしてください"));
+    const text = await file.text();
+    if (translationSourceSignature() !== signature) throw new Error(uiText("読込中に原文が変更されました。もう一度読み込んでください。"));
+    let result;
+    try { result = JSON.parse(text.replace(/^\uFEFF/, "")); }
+    catch { throw new Error(uiText("JSONファイルが未完成または不正です。AIに完全なJSONファイルを作り直してもらってください。")); }
+    validateTranslationFile(result); // Validate every language before modifying any editor value.
+    const previous = state.fileTranslationProgress;
+    const progress = previous?.signature === signature ? previous
+      : {signature, languages: [], needsRefresh: state.translationsStale};
+    if (applyTranslationResult(result)) {
+      progress.languages = [...new Set([...progress.languages, ...Object.keys(result.translations)])];
+      state.fileTranslationProgress = progress;
+      state.translationsStale = progress.needsRefresh && translationTargets().some(lang => !progress.languages.includes(lang));
+      updateOutput();
+      const missing = translationTargets().filter(lang => !progress.languages.includes(lang));
+      if (missing.length) setTranslationStatus(`${uiText("翻訳ファイルに未収録の言語があります")}: ${missing.join(", ")}. ${uiText("AIに残りの言語を追加したJSONファイルを作成してもらってください。")}`, "stale");
+    }
+  } catch (error) {
+    setTranslationStatus(`${uiText("翻訳ファイルを反映できません")}: ${error.message}`, "error");
+  } finally { event.target.value = ""; }
+}
+
+function parseTranslationResponse(input) {
+  const text = String(input).trim().replace(/^\uFEFF/, "");
+  const candidates = [];
+  let depth = 0, start = -1, quoted = false, escaped = false;
+  // Extract complete JSON objects without modifying any string contents.
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (!depth) {
+      if (ch === "{") { start = i; depth = 1; quoted = false; escaped = false; }
+      continue;
+    }
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') quoted = false;
+      continue;
+    }
+    if (ch === '"') quoted = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}" && --depth === 0) {
+      try {
+        const value = JSON.parse(text.slice(start, i + 1));
+        if (value && typeof value === "object" && value.translations && typeof value.translations === "object" && !Array.isArray(value.translations)) candidates.push(value);
+      } catch { /* Reject malformed JSON; never guess quotes or backslashes. */ }
+    }
+  }
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1) throw new Error(uiText("翻訳JSONが複数あります。適用する回答を1つだけ貼り付けてください。"));
   if (text.startsWith(uiText("次のSTACK MCQ教材を target_languages に翻訳してください。")) && !/"translations"\s*:/.test(text)) {
     throw new Error(uiText("翻訳依頼文が残っています。この欄をChatGPTから返された翻訳JSONに置き換えてから「結果を反映」を押してください。"));
   }
