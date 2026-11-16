@@ -787,3 +787,8 @@ git diff --check
 
 - 公開コミットで欠落した app.js を正常版から復元し、翻訳UIのイベント変更を再適用した。キャッシュ識別子を更新。
 - ChromiumでMCQ起動とCSV/XMLのファイル選択・読込を確認。読込後のMaxima応答は模擬。JS構文・翻訳JSONテスト・差分チェック成功。
+
+## 2026-11-16 TFのCSV→XML CLI
+
+- scripts/tf_csv2xml.py を追加。TFエディターのCSV読込とXML生成を再利用する。
+- TF CSVの出力がエディターの生成関数とバイト一致すること、既存出力とMCQ CSVを拒否することを確認。差分チェック成功。
